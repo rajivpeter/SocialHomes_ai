@@ -1,0 +1,481 @@
+# DOCUMENT 1 OF 2: BASE APPLICATION SPECIFICATION
+# SocialHomes.Ai — AI-Native Housing Operating System by Yantra.Works
+
+## INSTRUCTION TO AI
+
+You are building **SocialHomes.Ai**, a comprehensive, open-source, AI-native housing management system for UK social housing providers (housing associations and local authorities) managing 5,000–20,000 units. Created by **Yantra.Works**.
+
+Build a complete, multi-page React application. This is NOT a legacy housing system with a fresh coat of paint. This must look and feel like nothing the social housing sector has ever seen — think Bloomberg Terminal meets Figma, not a government form. The sector is dominated by ugly, slow, form-heavy systems (Civica Cx, NEC/Northgate, Aareon). SocialHomes.Ai is the opposite: dark, fast, visually stunning, animated, intelligent.
+
+There is a companion document (Document 2) that specifies all AI-native features, dynamic buttons/fields, personas, admin system, and prediction models. Build the base application first using this document, then apply Document 2's features.
+
+---
+
+## TECHNICAL STACK
+
+- **React 19** with functional components, hooks, Suspense
+- **React Router v7** for client-side routing with nested routes
+- **Tailwind CSS v4** via CDN — Yantra.Works dark-mode-first brand language
+- **Three.js (r128)** via `https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js` — for 3D building visualisations in the drill-down
+- **Leaflet 1.9** with OpenStreetMap tiles — for 2D map views (free, no API key)
+- **Recharts** for dashboards and charts
+- **D3.js** for advanced visualisations (Sankey diagrams, heatmaps)
+- **Lucide React** for iconography
+- **Animations**: CSS transitions and keyframe animations throughout — every page load has staggered reveals, every panel slides, every card fades in, status changes animate. The UI must feel ALIVE, not static.
+- **State management**: React Context + useReducer
+- Do NOT use localStorage or sessionStorage
+
+---
+
+## BRANDING
+
+### Logo
+The product logo is the Yantra.Works geometric mark in teal. Embed this SVG inline:
+
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 751 772" width="36" height="37">
+  <path fill="#058995" d="M745.51,390.8l-95.41-91.94-41.32,42.88,48.94,47.16-250.45,254.19-1.31-194.04,12.47-12.74-.31-.3,143.2-143.64.08.08,42.88-42.58-.29-.29,1-1-41.76-41.63-.79.79L377.89,21.94l-1.41,1.4-.43-.44L10.05,385.9l.67.67-2.57,2.54,325.25,328.97-.16.16,12.35,12.17,30.65,31,.41-.4,2.02,1.99,324.99-329.84.55.53,41.32-42.88ZM345.09,452.5l1.28,189.95-251.12-253.99,92.74-91.98,144.76,141.66-1.03,1.03,13.37,13.33ZM375.98,394.78l-144.51-141.42,146.65-145.45,141.65,142.63-143.79,144.23Z"/>
+</svg>
+```
+
+- Header: Logo mark (36px) + **"SocialHomes.Ai"** (`--brand-teal`, with ".Ai" in `--status-ai` purple) + **"by Yantra.Works"** (smaller, `--brand-soft`)
+- Tagline: "AI-native. Human-assured."
+- Footer: "SocialHomes.Ai is an open-source project by Yantra.Works — www.socialhomes.ai"
+
+### Colour Palette — Yantra.Works Official Brand
+
+```css
+/* Brand palette */
+--brand-peach: #EFAC92;     /* Headings & Accents */
+--brand-garnet: #BE3358;    /* Action & Signature — CTAs, critical alerts */
+--brand-teal: #058995;      /* Logo & Labels — primary identity, links */
+--brand-blue: #5BA4AA;      /* Atmospheric UI — charts, secondary highlights */
+--brand-soft: #ACC0B5;      /* Metadata Text — secondary text, labels */
+--brand-deep: #1A5A5E;      /* Core Surfaces — dark panels, sidebars */
+
+/* Dark theme surfaces */
+--surface-dark: #0D1117;    /* Page background */
+--surface-card: #151B23;    /* Card/panel backgrounds */
+--surface-elevated: #1C2333;/* Modals, dropdowns, elevated panels */
+--surface-hover: #222D3D;   /* Hover states */
+
+/* Text */
+--text-primary: #E6EDF3;    /* Primary text */
+--text-secondary: #ACC0B5;  /* Secondary text (= brand-soft) */
+--text-muted: #6B7B8D;      /* Timestamps, IDs, low-priority text */
+
+/* Borders */
+--border-default: #2A3545;
+--border-focus: #EFAC92;    /* Focus ring — peach for visibility on dark */
+
+/* Semantic statuses */
+--status-compliant: #2EA043;  /* Green */
+--status-warning: #EFAC92;    /* Peach/amber */
+--status-critical: #BE3358;   /* Garnet */
+--status-info: #5BA4AA;       /* Blue */
+--status-ai: #A371F7;         /* Purple — AI features */
+--status-void: #6B7B8D;       /* Grey */
+```
+
+### Typography
+- Headings: `"Space Grotesk", sans-serif` — bold, technical
+- Body: `"Inter", Arial, sans-serif` — clean, readable
+- Monospace: `"JetBrains Mono", monospace` — references, codes
+- Body size: 15px. Line height: 1.6 body, 1.2 headings
+- Headings in `--brand-peach` on dark backgrounds
+- Section labels: `--brand-teal`, uppercase, letter-spaced
+
+### Design Principles
+- **Dark mode is default** — `--surface-dark` background with warm accent colours
+- Max content width: 1400px (except full-bleed map views)
+- Cards: `--surface-card` background, 4px left colour border for RAG, 8px rounded corners, subtle shadow
+- Status tags: pill-shaped, semi-transparent background
+- Countdown timers: large monospace digits, colour transitions green→peach→garnet→pulsing garnet
+- Tables: `--surface-card` background, `--surface-hover` on hover, sortable columns
+- Buttons: `--brand-teal` primary, `--surface-elevated` secondary, `--brand-garnet` destructive, `--status-ai` purple for AI actions
+- Charts: teal primary, blue secondary, peach highlights, garnet alerts
+- Subtle background grid/dot pattern at 3% opacity for texture
+- UK date format DD/MM/YYYY, British English, GBP £
+
+---
+
+## APPLICATION SHELL
+
+### Navigation Structure
+
+**Persistent left sidebar** (280px, collapsible to 64px icons-only):
+- Background: `--surface-card`
+- Active item: `--brand-teal` left border + tinted background
+- Sections with dividers:
+  - NAVIGATE: Explore (map icon), Dashboard
+  - MANAGE: Tenancies, Properties, Repairs, Rent & Income, Compliance, Complaints, Allocations, ASB
+  - COMMUNICATE: Communications
+  - ANALYSE: Reports, AI Centre
+  - SYSTEM: Admin, Settings
+- Notification badges on items with outstanding actions (garnet dot)
+
+**Top header bar** (`--surface-dark`):
+- Left: Yantra.Works logo + "SocialHomes.Ai" branding
+- Centre: Global search bar (dark input, magnifying glass icon, `--border-default` border, placeholder: "Search tenants, properties, cases...")
+- Right: Notification bell (garnet badge count), AI Assist button (Yantra mark with pulsing purple ring), User avatar + "Sarah Mitchell" dropdown with persona switcher
+
+**Breadcrumbs**: On every page, `--text-muted` with `--brand-teal` links, reflecting hierarchy path
+
+**Phase banner**: `--brand-garnet` "BETA" tag
+
+---
+
+## ROUTE STRUCTURE
+
+```
+/ → /briefing (AI morning briefing — full-screen personalised)
+/dashboard — Operational nerve centre
+/explore — Visual drill-down hierarchy (Part 1)
+  /explore/country
+  /explore/region/:id
+  /explore/region/:id/la/:id
+  /explore/region/:id/la/:id/estate/:id
+  /explore/region/:id/la/:id/estate/:id/block/:id
+  /explore/region/:id/la/:id/estate/:id/block/:id/core/:id
+  /explore/region/:id/la/:id/estate/:id/block/:id/unit/:id
+  /explore/region/:id/la/:id/estate/:id/block/:id/unit/:id/tenant/:id
+/search — Global search results
+/tenancies — List (search, filter, sort)
+/tenancies/:id — Tenancy detail (tabbed)
+/tenancies/new — Create tenancy
+/properties — Property list (map/list toggle)
+/properties/:uprn — Property detail (tabbed)
+/repairs — List with kanban toggle
+/repairs/:id — Repair detail with timeline
+/repairs/new — AI-assisted repair intake
+/repairs/schedule — Workforce calendar
+/rent — Arrears dashboard
+/rent/accounts — Rent account list
+/rent/accounts/:id — Individual rent account (statement)
+/rent/arrears — AI-prioritised worklist
+/compliance — Big 6 dashboard
+/compliance/gas — Gas safety certificates
+/compliance/electrical — EICRs
+/compliance/fire — Fire risk assessments
+/compliance/asbestos — Asbestos register
+/compliance/legionella — Water safety
+/compliance/lifts — Lift safety
+/compliance/awaabs-law — Damp & mould tracker with AI risk
+/complaints — Dashboard with Ombudsman KPIs
+/complaints/:id — Complaint detail (two-stage timeline)
+/complaints/new — AI-categorised complaint intake
+/allocations — Housing register & lettings
+/allocations/voids — Void management pipeline (kanban)
+/allocations/lettings — Available properties
+/asb — ASB case list
+/asb/:id — ASB case detail
+/communications — Unified inbox
+/communications/templates — GOV.UK Notify template manager
+/reports — Report hub
+/reports/tsm — Tenant Satisfaction Measures (22 indicators)
+/reports/core — CORE lettings/sales returns
+/reports/regulatory — Consumer Standards compliance
+/reports/ombudsman — Complaint Handling Code self-assessment
+/reports/performance — Operational performance
+/reports/financial — Financial reports
+/reports/stock-condition — Stock condition & investment
+/ai — AI command centre
+/ai/insights — Cross-module AI insight feed
+/ai/predictions — Active prediction models
+/ai/assistant — Conversational AI chat
+/admin — Full administration system (see Document 2)
+/admin/organisation
+/admin/users
+/admin/teams
+/admin/workflows
+/admin/integrations
+/admin/audit
+/admin/system
+/tenant-portal — Separate tenant-facing self-service (distinct, warmer UI)
+/tenant-portal/repairs
+/tenant-portal/rent
+/tenant-portal/documents
+/tenant-portal/contact
+```
+
+---
+
+## PART 1: VISUAL DRILL-DOWN HIERARCHY
+
+The PRIMARY navigation experience. Users visually navigate from Country → Region → LA → Estate → Block → Core → Unit → Tenant → Cases. At every level, the right panel shows that level's attributes, KPIs, compliance, and AI insights.
+
+### Layout
+
+```
+┌──────────────────────────────────────────────────────────────────┐
+│ Header: SocialHomes.Ai | Search | Notifications | AI | User     │
+├──────────────────────────────────────────────────────────────────┤
+│ Breadcrumb: Country > Region > LA > Estate > Block > Unit > ... │
+├────────────────────────────────┬─────────────────────────────────┤
+│                                │  CONTEXT PANEL (scrollable)     │
+│      MAP / 3D VIEW             │  - Entity name & summary        │
+│      (60% width)               │  - Attribute cards               │
+│                                │  - Compliance status             │
+│      Interactive Leaflet map   │  - KPI metrics                   │
+│      OR Three.js 3D building   │  - AI insights (purple section)  │
+│      depending on zoom level   │  - AI dynamic actions (Doc 2)    │
+│                                │  - Children list (next level)    │
+│                                │  - Quick actions                  │
+├────────────────────────────────┴─────────────────────────────────┤
+│ Bottom bar: Level summary stats | Toggle: Map/List/3D view       │
+└──────────────────────────────────────────────────────────────────┘
+```
+
+### LEVEL 0: Country (`/explore/country`)
+- Map: England centred (~52.5°N, 1.5°W, zoom 6). 3 operational regions shown with property count badges.
+- Panel: Organisation portfolio summary — total units, occupancy rate, overall compliance %, total arrears, collection rate, TSM headlines. Regional breakdown table. Regulatory status (G1/V1). Stock by tenure type (pie chart).
+
+### LEVEL 1: Region (`/explore/region/:id`)
+- Map: Zooms to region (e.g., London, zoom 10). LA areas shown as markers sized by stock count, coloured by compliance.
+- Panel: Region KPIs — compliance, arrears, voids, repairs backlog. LA breakdown table. Stock profile. Average EPC distribution.
+
+### LEVEL 2: Local Authority (`/explore/region/:id/la/:id`)
+- Map: Zoom 13. Estates as clusters/polygons with mini-donut compliance indicators.
+- Panel: Properties in LA, tenancies, voids. Compliance by Big 6. Estates list with click-through. LA context (housing market, LHA rates, nomination agreements).
+
+### LEVEL 3: Estate / Scheme (`/explore/.../estate/:id`)
+- Map: Zoom 16-17. Individual buildings as footprints, colour-coded (green=compliant, amber=issues, red=critical).
+- Panel: Estate name, postcode, construction era, total units. KPIs: occupancy, compliance, repairs, arrears, ASB, damp cases. Buildings list. Estate management (officer, contractors, inspection score). Communal areas condition. External areas. Scheme type (general needs/sheltered/extra care/supported). Estate budget chart.
+
+### LEVEL 4: Block / Building (`/explore/.../block/:id`)
+- **Transition to 3D view**: Map transitions to a Three.js 3D building visualisation (procedurally generated: extruded rectangle, floors shown as stacked layers, windows as grid pattern). Can toggle back to 2D map. Rotate, zoom, pan with OrbitControls.
+- Panel: Building name, address, UPRN, construction details (type, year, storeys), higher-risk building flag (≥18m/≥7 storeys).
+- **BUILDING-LEVEL ATTRIBUTES** (these attach to the building, NOT individual units):
+  - Fire Risk Assessment: date, risk level, action plan items status
+  - Building Safety Case (if higher-risk): accountable person, BSR registration, safety case status
+  - Communal fire systems: detection type/zones/service date, emergency lighting, means of escape, compartmentation, fire doors
+  - Asbestos management plan: building-level register, ACM count by location
+  - Legionella risk assessment: water system, cold water tanks, TMVs, dead legs
+  - Structural surveys, roof condition, communal boiler/heating, lifts (LOLER), entry systems, insurance
+- Units list: number, floor, bedrooms, tenure, occupancy, tenant name, compliance RAG, rent RAG
+
+### LEVEL 4a: Core / Entrance (`/explore/.../core/:id`)
+- For buildings with multiple cores (e.g., tower blocks with separate stairwells)
+- Visual: schematic floor plan showing units per floor for this core
+- Panel: Core ID, floors served, units, stairwell condition, lift, fire escape
+
+### LEVEL 5: Unit (`/explore/.../unit/:id`)
+- 3D: Highlighted unit within the building model. Context map showing position.
+- Panel (tabbed):
+  - **Overview**: address, UPRN, type, bedrooms, floor area, heating, tenure, current tenancy or void status, photos, accessibility features
+  - **Compliance** — UNIT-LEVEL ATTRIBUTES:
+    - Gas Safety (CP12): annual, per-appliance breakdown with combustion readings, access history
+    - EICR: 5-yearly, per-circuit observations with C1/C2/C3/FI classifications
+    - EPC: rating band display, SAP score, costs, CO2, recommendations
+    - Smoke & CO alarms: per-alarm type/location/test dates
+    - Unit-specific asbestos: per-ACM records
+    - Boiler: make/model/age/service history/efficiency
+    - Decent Homes assessment: 5 criteria (A-E including new damp/mould)
+  - **Stock Condition**: component lifecycle table (roof, windows, kitchen, bathroom, boiler, electrics, etc. with type, install year, condition 1-5, remaining life, replacement cost)
+  - **Damp & Mould / Awaab's Law**: AI risk score 0-100, active cases with countdown timers, IoT sensor data (simulated)
+  - **Works History**: all repairs/works with costs, annual spend trend
+  - **Documents**: certificates, reports, photos
+
+### LEVEL 6: Tenant (`/explore/.../tenant/:id`)
+- Panel (tabbed):
+  - **Overview**: name, DOB, contact, household members table, emergency contact, assigned officers, vulnerability flags (with sensitivity controls), key dates, tenancy type/status
+  - **Cases** — UNIFIED CASE TIMELINE (filterable by type):
+    | Type | Format | Colour |
+    |------|--------|--------|
+    | Complaint | CMP-YYYY-XXXXX | Orange |
+    | Repair | REP-YYYY-XXXXX | Blue |
+    | ASB | ASB-YYYY-XXXXX | Red |
+    | Enquiry | ENQ-YYYY-XXXXX | Grey |
+    | Financial | FIN-YYYY-XXXXX | Amber |
+    | Safeguarding | SAF-YYYY-XXXXX | Purple |
+    | Damp/Mould | DAM-YYYY-XXXXX | Teal |
+    Each card: type icon, reference, date, subject, status tag, handler, days open, SLA countdown, click to expand or navigate to full detail
+  - **Activities**: chronological log — calls, visits, letters, emails, SMS, system events. Each linked to a case.
+  - **Tasks**: outstanding/completed tasks — description, due date, priority, status, linked case
+  - **Statement (Rent Account)**:
+    - Balance (large, colour-coded), weekly charge, payment method, UC/HB status
+    - Rent breakdown: base rent + itemised service charges
+    - Transaction ledger: date, week, type, description, debit, credit, running balance
+    - 52-week statement view (standard UK housing format)
+    - Balance trend chart (12 months)
+    - Payment arrangement: terms, compliance tracker
+  - **Orders** — Financial/contractual instruments:
+    | Order | Key Fields |
+    |-------|-----------|
+    | Rent Order | Amount, effective date, formula rent calculation, increase history, cap check |
+    | Tenure Type | Secure/Assured/AST/Starter/Fixed Term/Flexible/Licence/Shared Ownership (equity %) |
+    | Service Charge | Per-service: description, budget, apportionment, weekly amount, S20 status |
+    | Garage/Parking | Location, charge, licence terms |
+    | Rechargeable Repair | Repair ref, cost, payment plan, recovery status |
+    | Court Order | Type, court, date, terms, compliance, review date |
+    | Leaseholder | Equity %, staircasing history, ground rent, insurance share |
+
+### LEVEL 7: Case Detail
+All cases share a common layout:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ Case Header: Reference | Type Tag | Status Tag | Priority   │
+│ Property: [link] | Tenant: [link] | Handler: name           │
+├─────────────────────────────────────────────────────────────┤
+│  STAGE TIMELINE (horizontal stepper with dates/countdowns)  │
+├──────────────────────────┬──────────────────────────────────┤
+│ Case Details (55%)       │ Activity Feed (45%, scrollable)  │
+│ Description, category,   │ Chronological log of actions,    │
+│ attachments, AI analysis │ notes, letters, status changes   │
+├──────────────────────────┴──────────────────────────────────┤
+│ Actions: [Assign] [Update] [Escalate] [Close] [AI Actions]  │
+└─────────────────────────────────────────────────────────────┘
+```
+
+**Complaint**: Two-stage timeline with countdown timers (Stage 1: ack 5WD, respond 10WD; Stage 2: ack 5WD, respond 20WD). Category, findings (upheld/partial/not), remedy, learning log, Ombudsman escalation.
+
+**Repair**: Priority-based SLA timer. SOR code, trade, appointment, risk assessment, operative notes, photos before/during/after, materials, satisfaction survey, first-time fix, Awaab's Law compliance (if damp/mould).
+
+**ASB**: Category/severity (Cat 1-3). Evidence log. Escalation pipeline: Warning → ABC → CPW → CPN → Injunction → Possession → Closure. Multi-agency panel. Risk assessment. Community Trigger check.
+
+**Financial**: Arrears reason, payment arrangement, escalation stage (pre-action → NOSP → court → possession), Pre-Action Protocol checklist.
+
+**Damp/Mould (Awaab's Law)**: Hazard classification. **Countdown timers**: Emergency (24hrs all actions), Significant (investigate 10WD → summary 3WD → safety works 5WD → repairs begun 12 weeks). Cause assessment. Environmental data. Linked repairs.
+
+---
+
+## PART 2: TRADITIONAL NAVIGATION MODULES
+
+### Dashboard (`/dashboard`)
+**8 KPI cards** (top row): Properties (12,847), Tenancies (12,103), Active Repairs (487), Rent Collected (£1.84M/£1.92M = 95.8%), Arrears (£847,293), Compliance (98.7%), Open Complaints (34), AI Alerts (12).
+
+**Charts row**: Rent collection 12-month trend vs 97% target | Repairs monthly volume by priority with avg days line
+
+**Three panels**: Big 6 compliance heatmap (6 tiles, % + RAG) | Awaab's Law active cases with countdown timers | AI insights scrolling feed
+
+**Activity timeline**: Real-time system event feed with avatars, timestamps, entity links
+
+### Repairs (`/repairs`)
+- List/Kanban toggle. Columns: ref, date, property, SOR category, priority, status, operative, target date, days elapsed
+- Kanban: status columns, cards with priority colour borders
+- New repair wizard: property lookup → free-text description → AI auto-suggests SOR code/priority/trade/Awaab's Law flags → appointment booking → risk assessment → confirm
+- Schedule: weekly calendar, operative schedules, capacity indicators
+
+### Rent & Income (`/rent`)
+- Arrears dashboard: total, by band (chart), collection rate gauge, payment method breakdown
+- AI-prioritised worklist: each case with tenant details, arrears amount, 12-week sparkline, AI score (1-100), risk factors, recommended action, action buttons
+
+### Compliance (`/compliance`)
+- Dashboard: 6 Big 6 cards with %, counts, trends, RAG
+- Awaab's Law: active cases with timers, risk register (all properties with AI scores), proactive inspection programme
+- Each area page: certificate list, filters, no-access tracker, contractor performance
+
+### Complaints (`/complaints`)
+- Dashboard: Stage 1/2 counts, response % vs timescale, TSM CH01/CH02, categories pie, findings breakdown, learning tracker
+- New: tenant selection → free-text → AI categorises/assigns severity/checks history → handler assignment → auto-acknowledgement
+- Detail: two-stage timeline with countdowns
+
+### Allocations (`/allocations`)
+- Housing register: applicants by band (A-D), bedroom need, medical priority
+- Void kanban: Notice → Keys → Inspection → Works → Quality → Ready → Offer → Let. Cards with days void (RAG: green <14, amber 14-28, red >28), void rent loss
+
+### ASB (`/asb`)
+- Case list: ref, location, category, severity, status, handler, days open
+- Detail: escalation pipeline visual tracker, evidence log, multi-agency panel
+
+### Communications (`/communications`)
+- Unified inbox: all channels linked to tenant/property/case. AI triage: auto-categorise, priority, sentiment, suggested response.
+
+### AI Centre (`/ai`)
+- Insights feed: predictions, alerts, recommendations, analytics — with confidence %, affected entities, action buttons
+- Predictions: Arrears (scatter + top 50 + feature importance), Damp/Mould (heatmap + inspection list), Vulnerability (silent tenant detection)
+- Assistant: chat panel with natural language queries
+
+### Tenant Portal (`/tenant-portal`)
+- **Visually distinct**: lighter/warmer theme option, simpler layout, larger text, no jargon, large touch targets
+- Dashboard: welcome, quick actions (report repair, check balance, make payment, contact), active repairs, rent balance, appointments
+- Report repair: conversational wizard — room → problem category tiles → sub-category → photo → appointment → confirm. AI urgency detection.
+- Rent: clear balance, simple transactions, payment button
+
+---
+
+## PART 3: BASELINE REPORTING
+
+### Regulatory Returns
+- TSM Annual Return (22 measures with actuals, targets, sector medians, quartiles)
+- CORE Lettings/Sales Logs (field validation, CSV export)
+- Consumer Standards Self-Assessment (4 standards, evidence mapping)
+- Complaint Handling Code Self-Assessment (per-section compliance scoring)
+- Building Safety Act Returns (higher-risk buildings)
+- Statistical Data Return (SDR) for RSH
+
+### Operational Performance
+- Repairs: volume, SLA %, first-time fix, satisfaction, spend, top costliest properties
+- Voids: average relet days, rent loss, by stage, contractor performance
+- Arrears: collection rate, band movement, payment methods, UC performance, court pipeline
+- Complaints: volume, response %, findings, compensation, root causes, learning actions
+- ASB: cases opened/closed, resolution days, enforcement actions
+- Contact Centre: call volumes, wait times, channel usage, first contact resolution
+
+### Compliance Reports
+- Big 6 dashboard (daily/weekly per area)
+- Per-area: gas programme, electrical, fire, asbestos, legionella, lifts
+- Awaab's Law compliance (weekly)
+- Decent Homes (quarterly)
+- Stock Condition (quarterly/annual)
+- EPC / Energy (quarterly)
+
+### Financial Reports
+- Rent setting summary, service charge report, repairs expenditure, bad debt provision, void loss
+
+### Governance
+- Board performance pack (monthly/quarterly executive dashboard)
+- Risk register, regulatory compliance summary, H&S summary
+
+### Tenant-Facing
+- Annual report to tenants (TSM results, repairs, complaints, improvements)
+- Estate reports (quarterly per-estate)
+
+### Report Features
+Every report supports: date range, property group, tenure type, comparison period, CSV/PDF export, drill-down from aggregates, benchmarking vs targets/previous/sector, AI-generated narrative summary, scheduled email distribution.
+
+---
+
+## SIMULATED DATA
+
+**Organisation**: Riverside Crescent Housing Association (RCHA), RP 4567, G1/V1, HQ Southwark. Stock across Southwark, Lewisham, Lambeth.
+
+**5 Estates:**
+1. Oak Park Estate (SE15) — 3 blocks, 96 flats, 1960s concrete panel, known damp issues
+2. Riverside Crescent (SE1) — 2 blocks, 48 flats, 2005 new build, higher-risk building
+3. Elm Gardens (SE13) — street properties, 35 houses/maisonettes, 1930s terraces
+4. Birch Court (SE6) — 1 block 24 flats + 8 bungalows, 1970s sheltered scheme
+5. Maple Lane (SE24) — 1 block 20 flats + 12 houses, mixed 1980s-90s
+
+**50 properties, 45 active tenancies, 5 voids.** Realistic SE London postcodes, 12-digit UPRNs, diverse tenant names reflecting London demographics.
+
+Rents: social £95-140/week, affordable £140-200/week. Service charges £5-35/week.
+Payment: DD 35%, UC 30%, SO 15%, Card 10%, Cash 5%, HB 5%.
+Arrears: 60% nil, 20% <£250, 10% £250-500, 5% £500-1k, 5% >£1k.
+
+**200 repairs** (5% emergency, 15% urgent, 70% routine, 10% planned). 95% emergency <24hrs, 88% urgent <5 days, 82% routine <28 days. FTF: 78%. Satisfaction: mean 3.8/5.
+
+**34 open complaints** (28 Stage 1, 6 Stage 2). Response within timescale: 91%.
+**12 ASB cases.** **8 damp/mould cases** (3 emergency, 5 significant). **25 financial cases.** **5 voids** at various stages.
+
+Compliance: Gas 99.4%, Electrical 97.8%, Fire 99.1%, Asbestos 98.5%, Legionella 99.0%, Lifts 100%.
+
+---
+
+## IMPLEMENTATION REQUIREMENTS
+
+1. **Every page fully functional** — no "coming soon" placeholders
+2. **Visual drill-down is the flagship** — smooth map-to-3D transitions, each level shows correct attributes
+3. **Data relationships consistent** — navigating hierarchy = same data as direct search
+4. **Countdown timers prominent** — Awaab's Law and complaints deadlines with colour-coded urgency
+5. **Dark mode default** — Yantra.Works brand palette throughout
+6. **Attributes at correct level** — building-level (FRA, building safety) vs unit-level (gas, EICR, EPC)
+7. **Tenant portal visually distinct** — simpler, warmer
+8. **UK conventions** — DD/MM/YYYY, British English, GBP, "flat" not "apartment"
+9. **Accessibility** — WCAG 2.2 AA contrast, keyboard navigation, aria-labels, visible focus states
+10. **Animations throughout** — staggered reveals, sliding panels, smooth transitions, pulsing alerts. The UI must feel alive.
+11. **Leave clear integration points** for Document 2's AI features: empty `<div id="ai-assist-panel">` on every page, empty `<div id="ai-dynamic-actions">` in every entity detail page, persona context in global state
+12. **Build as single self-contained file** using CDN imports
+
+Now build the complete SocialHomes.Ai base application.

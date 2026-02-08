@@ -1,0 +1,404 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+@import "tailwindcss";
+
+@theme {
+  --color-brand-peach: #EFAC92;
+  --color-brand-garnet: #BE3358;
+  --color-brand-teal: #058995;
+  --color-brand-blue: #5BA4AA;
+  --color-brand-soft: #ACC0B5;
+  --color-brand-deep: #1A5A5E;
+
+  --color-surface-dark: #0D1117;
+  --color-surface-card: #111820;
+  --color-surface-elevated: #161D28;
+  --color-surface-hover: #1C2535;
+  --color-surface-glass: rgba(17, 24, 32, 0.75);
+
+  --color-text-primary: #E6EDF3;
+  --color-text-secondary: #ACC0B5;
+  --color-text-muted: #5E7082;
+
+  --color-border-default: #1E2A38;
+  --color-border-subtle: #162030;
+  --color-border-focus: #EFAC92;
+  --color-border-glow: rgba(5, 137, 149, 0.25);
+
+  --color-status-compliant: #2EA043;
+  --color-status-warning: #EFAC92;
+  --color-status-critical: #BE3358;
+  --color-status-info: #5BA4AA;
+  --color-status-ai: #A371F7;
+  --color-status-void: #5E7082;
+
+  --font-heading: 'Space Grotesk', sans-serif;
+  --font-body: 'Inter', Arial, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
+@layer base {
+  *,
+  *::before,
+  *::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+}
+
+@layer base {
+  html {
+    font-size: 15px;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    font-family: var(--font-body);
+    background-color: var(--color-surface-dark);
+    color: var(--color-text-primary);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
+    line-height: 1.2;
+    color: var(--color-brand-peach);
+  }
+
+  code, pre, .mono {
+    font-family: var(--font-mono);
+  }
+}
+
+@layer base {
+  /* ---- Scrollbar ---- */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-border-default);
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--color-text-muted);
+  }
+}
+
+/* ---- Background pattern ---- */
+.bg-pattern {
+  background-image:
+    radial-gradient(circle at 1px 1px, rgba(5, 137, 149, 0.04) 1px, transparent 0);
+  background-size: 32px 32px;
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ---- Glassmorphism card ---- */
+.glass-card {
+  background: linear-gradient(
+    135deg,
+    rgba(17, 24, 32, 0.85),
+    rgba(22, 29, 40, 0.65)
+  );
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--color-border-default);
+}
+
+.glass-card-elevated {
+  background: linear-gradient(
+    135deg,
+    rgba(22, 29, 40, 0.9),
+    rgba(28, 37, 53, 0.7)
+  );
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(30, 42, 56, 0.8);
+}
+
+/* ---- Gradient borders ---- */
+.border-gradient-teal {
+  border-image: linear-gradient(135deg, var(--color-brand-teal), var(--color-brand-blue)) 1;
+}
+
+.border-gradient-ai {
+  border-image: linear-gradient(135deg, var(--color-status-ai), var(--color-brand-teal)) 1;
+}
+
+/* ---- Glow effects ---- */
+.glow-teal {
+  box-shadow: 0 0 20px rgba(5, 137, 149, 0.15), 0 0 40px rgba(5, 137, 149, 0.05);
+}
+
+.glow-peach {
+  box-shadow: 0 0 20px rgba(239, 172, 146, 0.12), 0 0 40px rgba(239, 172, 146, 0.04);
+}
+
+.glow-ai {
+  box-shadow: 0 0 20px rgba(163, 113, 247, 0.15), 0 0 40px rgba(163, 113, 247, 0.05);
+}
+
+.glow-garnet {
+  box-shadow: 0 0 20px rgba(190, 51, 88, 0.15), 0 0 40px rgba(190, 51, 88, 0.05);
+}
+
+/* ---- Hover card lift ---- */
+.card-hover {
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+.card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(5, 137, 149, 0.1);
+}
+
+/* ---- Gradient text ---- */
+.text-gradient-brand {
+  background: linear-gradient(135deg, var(--color-brand-peach), var(--color-brand-garnet));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.text-gradient-teal {
+  background: linear-gradient(135deg, var(--color-brand-teal), var(--color-brand-blue));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.text-gradient-ai {
+  background: linear-gradient(135deg, var(--color-status-ai), #c084fc);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ---- Animated gradient line ---- */
+.gradient-line {
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--color-brand-teal),
+    var(--color-brand-peach),
+    transparent
+  );
+  opacity: 0.4;
+}
+
+/* ---- Input focus ring ---- */
+.focus-ring {
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.focus-ring:focus {
+  border-color: var(--color-brand-teal);
+  box-shadow: 0 0 0 3px rgba(5, 137, 149, 0.15);
+  outline: none;
+}
+
+/* ---- Animations ---- */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes slideInDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 5px var(--color-status-ai), 0 0 10px transparent; }
+  50% { box-shadow: 0 0 12px var(--color-status-ai), 0 0 24px rgba(163, 113, 247, 0.2); }
+}
+@keyframes pulse-critical {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+@keyframes countUp {
+  from { opacity: 0; transform: scale(0.5); }
+  to { opacity: 1; transform: scale(1); }
+}
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+@keyframes gradient-shift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+.animate-fade-in-up { animation: fadeInUp 0.5s ease-out forwards; }
+.animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
+.animate-slide-in-left { animation: slideInLeft 0.4s ease-out forwards; }
+.animate-slide-in-right { animation: slideInRight 0.4s ease-out forwards; }
+.animate-slide-in-down { animation: slideInDown 0.3s ease-out forwards; }
+.animate-pulse-glow { animation: pulse-glow 2s ease-in-out infinite; }
+.animate-pulse-critical { animation: pulse-critical 1s ease-in-out infinite; }
+.animate-count-up { animation: countUp 0.6s ease-out forwards; }
+.animate-spin-slow { animation: spin-slow 3s linear infinite; }
+.animate-shimmer {
+  background: linear-gradient(
+    90deg,
+    transparent 25%,
+    rgba(5, 137, 149, 0.06) 50%,
+    transparent 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 3s ease-in-out infinite;
+}
+.animate-float { animation: float 3s ease-in-out infinite; }
+
+.stagger-1 { animation-delay: 0.05s; }
+.stagger-2 { animation-delay: 0.1s; }
+.stagger-3 { animation-delay: 0.15s; }
+.stagger-4 { animation-delay: 0.2s; }
+.stagger-5 { animation-delay: 0.25s; }
+.stagger-6 { animation-delay: 0.3s; }
+.stagger-7 { animation-delay: 0.35s; }
+.stagger-8 { animation-delay: 0.4s; }
+
+/* ---- Leaflet fixes for dark mode ---- */
+.leaflet-container {
+  background: var(--color-surface-dark) !important;
+}
+.leaflet-tile-pane {
+  filter: brightness(0.7) contrast(1.1) saturate(0.8) hue-rotate(180deg) invert(1);
+}
+.leaflet-control-zoom a {
+  background: var(--color-surface-card) !important;
+  color: var(--color-text-primary) !important;
+  border-color: var(--color-border-default) !important;
+}
+
+/* ---- Status pill styles ---- */
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 10px;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.025em;
+  backdrop-filter: blur(4px);
+}
+
+/* ---- Section divider ---- */
+.section-divider {
+  position: relative;
+  height: 1px;
+  background: var(--color-border-default);
+}
+.section-divider::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 60px;
+  height: 1px;
+  background: linear-gradient(90deg, var(--color-brand-teal), transparent);
+}
+
+/* ---- Active nav indicator ---- */
+.nav-active-indicator {
+  position: relative;
+}
+.nav-active-indicator::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 60%;
+  background: linear-gradient(180deg, var(--color-brand-teal), var(--color-brand-blue));
+  border-radius: 0 2px 2px 0;
+}
+
+@layer base {
+  /* ---- Global form element upgrades ---- */
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="search"],
+  input[type="number"],
+  input[type="date"],
+  textarea,
+  select {
+    border-radius: 0.75rem;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  input[type="text"]:focus,
+  input[type="email"]:focus,
+  input[type="password"]:focus,
+  input[type="search"]:focus,
+  input[type="number"]:focus,
+  input[type="date"]:focus,
+  textarea:focus,
+  select:focus {
+    border-color: var(--color-brand-teal);
+    box-shadow: 0 0 0 3px rgba(5, 137, 149, 0.12);
+    outline: none;
+  }
+
+  /* ---- Global table enhancements ---- */
+  table {
+    border-collapse: separate;
+    border-spacing: 0;
+  }
+
+  thead th {
+    font-size: 0.68rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+
+  tbody tr {
+    transition: background-color 0.15s ease;
+  }
+
+  /* ---- Button base enhancements ---- */
+  button {
+    transition: all 0.2s ease;
+  }
+}
+
+/* ---- Recharts global dark theme ---- */
+.recharts-legend-item-text {
+  color: var(--color-text-muted) !important;
+  font-size: 0.75rem !important;
+}
+
+.recharts-cartesian-grid-horizontal line,
+.recharts-cartesian-grid-vertical line {
+  stroke: var(--color-border-default) !important;
+}

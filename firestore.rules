@@ -1,0 +1,153 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ---- Helper Functions ----
+
+    // Check if the user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Check if user has a specific persona level
+    function hasPersona(persona) {
+      return request.auth != null && request.auth.token.persona == persona;
+    }
+
+    // Check if user is at least manager level
+    function isManager() {
+      return request.auth != null &&
+        (request.auth.token.persona == 'coo' ||
+         request.auth.token.persona == 'head-of-service' ||
+         request.auth.token.persona == 'manager');
+    }
+
+    // Check if user is admin (COO or Head of Service)
+    function isAdmin() {
+      return request.auth != null &&
+        (request.auth.token.persona == 'coo' ||
+         request.auth.token.persona == 'head-of-service');
+    }
+
+    // ---- Organisation ----
+    match /organisations/{orgId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    // ---- Geography: Regions, Local Authorities, Estates, Blocks ----
+    match /regions/{regionId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    match /localAuthorities/{laId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    match /estates/{estateId} {
+      allow read: if isAuthenticated();
+      allow write: if isManager();
+    }
+
+    match /blocks/{blockId} {
+      allow read: if isAuthenticated();
+      allow write: if isManager();
+    }
+
+    // ---- Properties ----
+    match /properties/{propertyId} {
+      allow read: if isAuthenticated();
+      allow create: if isManager();
+      allow update: if isAuthenticated();
+      allow delete: if isAdmin();
+    }
+
+    // ---- Tenants ----
+    match /tenants/{tenantId} {
+      allow read: if isAuthenticated();
+      allow create: if isManager();
+      allow update: if isAuthenticated();
+      allow delete: if isAdmin();
+    }
+
+    // ---- Cases (repairs, complaints, ASB, damp, financial) ----
+    match /cases/{caseId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated();
+      allow update: if isAuthenticated();
+      allow delete: if isAdmin();
+    }
+
+    // ---- Activities ----
+    match /activities/{activityId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated();
+      allow update: if isAuthenticated();
+      allow delete: if isAdmin();
+    }
+
+    // ---- Communications ----
+    match /communications/{commId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated();
+      allow update: if isAuthenticated();
+      allow delete: if isManager();
+    }
+
+    // ---- Rent Transactions ----
+    match /rentTransactions/{txId} {
+      allow read: if isAuthenticated();
+      allow write: if isManager();
+    }
+
+    // ---- Users ----
+    match /users/{userId} {
+      allow read: if isAuthenticated();
+      allow create: if isAdmin();
+      allow update: if isAdmin() || request.auth.uid == userId;
+      allow delete: if isAdmin();
+    }
+
+    // ---- Audit Log (read-only for non-system) ----
+    match /auditLog/{logId} {
+      allow read: if isManager();
+      allow create: if isAuthenticated();
+      allow update, delete: if false;
+    }
+
+    // ---- HACT Code Lists (reference data) ----
+    match /hactCodes/{codeId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    // ---- Notifications ----
+    match /notifications/{notifId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated();
+      allow update: if isAuthenticated();
+      allow delete: if isManager();
+    }
+
+    // ---- Void Properties ----
+    match /voidProperties/{voidId} {
+      allow read: if isAuthenticated();
+      allow write: if isManager();
+    }
+
+    // ---- Applicants ----
+    match /applicants/{applicantId} {
+      allow read: if isAuthenticated();
+      allow write: if isManager();
+    }
+
+    // ---- TSM Measures ----
+    match /tsmMeasures/{measureId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+  }
+}

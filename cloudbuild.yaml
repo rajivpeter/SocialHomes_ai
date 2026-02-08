@@ -1,0 +1,55 @@
+steps:
+  # Build Docker image
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '-t'
+      - 'europe-west2-docker.pkg.dev/$PROJECT_ID/socialhomes/app:$COMMIT_SHA'
+      - '-t'
+      - 'europe-west2-docker.pkg.dev/$PROJECT_ID/socialhomes/app:latest'
+      - '.'
+
+  # Push Docker image
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'push'
+      - 'europe-west2-docker.pkg.dev/$PROJECT_ID/socialhomes/app:$COMMIT_SHA'
+
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'push'
+      - 'europe-west2-docker.pkg.dev/$PROJECT_ID/socialhomes/app:latest'
+
+  # Deploy to Cloud Run
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    args:
+      - 'gcloud'
+      - 'run'
+      - 'deploy'
+      - 'socialhomes'
+      - '--image'
+      - 'europe-west2-docker.pkg.dev/$PROJECT_ID/socialhomes/app:$COMMIT_SHA'
+      - '--region'
+      - 'europe-west2'
+      - '--platform'
+      - 'managed'
+      - '--allow-unauthenticated'
+      - '--memory'
+      - '1Gi'
+      - '--cpu'
+      - '1'
+      - '--min-instances'
+      - '0'
+      - '--max-instances'
+      - '10'
+      - '--port'
+      - '8080'
+      - '--set-env-vars'
+      - 'NODE_ENV=production'
+
+images:
+  - 'europe-west2-docker.pkg.dev/$PROJECT_ID/socialhomes/app:$COMMIT_SHA'
+  - 'europe-west2-docker.pkg.dev/$PROJECT_ID/socialhomes/app:latest'
+
+options:
+  logging: CLOUD_LOGGING_ONLY

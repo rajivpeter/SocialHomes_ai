@@ -1,0 +1,73 @@
+import type { Region, LocalAuthority } from '@/types';
+
+export const regions: Region[] = [
+  {
+    id: 'london',
+    name: 'London',
+    lat: 51.509,
+    lng: -0.08,
+    localAuthorities: ['southwark', 'lewisham', 'lambeth'],
+    totalUnits: 11500,
+    compliance: 98.9,
+    arrears: 720000,
+    voids: 38,
+  },
+  {
+    id: 'south-east',
+    name: 'South East',
+    lat: 51.3,
+    lng: 0.5,
+    localAuthorities: ['kent-coastal'],
+    totalUnits: 847,
+    compliance: 97.8,
+    arrears: 89000,
+    voids: 7,
+  },
+  {
+    id: 'east-midlands',
+    name: 'East Midlands',
+    lat: 52.63,
+    lng: -1.13,
+    localAuthorities: ['leicester'],
+    totalUnits: 500,
+    compliance: 98.2,
+    arrears: 38293,
+    voids: 5,
+  },
+];
+
+export const localAuthorities: LocalAuthority[] = [
+  {
+    id: 'southwark',
+    name: 'London Borough of Southwark',
+    regionId: 'london',
+    lat: 51.473,
+    lng: -0.078,
+    estates: ['oak-park', 'riverside-crescent'],
+    totalUnits: 5200,
+    compliance: 99.1,
+    lhaRates: { '1bed': 302.33, '2bed': 362.25, '3bed': 423.29, '4bed': 517.50 },
+  },
+  {
+    id: 'lewisham',
+    name: 'London Borough of Lewisham',
+    regionId: 'london',
+    lat: 51.441,
+    lng: -0.012,
+    estates: ['elm-gardens', 'birch-court'],
+    totalUnits: 3800,
+    compliance: 98.7,
+    lhaRates: { '1bed': 276.16, '2bed': 333.49, '3bed': 389.31, '4bed': 482.56 },
+  },
+  {
+    id: 'lambeth',
+    name: 'London Borough of Lambeth',
+    regionId: 'london',
+    lat: 51.457,
+    lng: -0.106,
+    estates: ['maple-lane'],
+    totalUnits: 2500,
+    compliance: 98.8,
+    lhaRates: { '1bed': 302.33, '2bed': 362.25, '3bed': 423.29, '4bed': 517.50 },
+  },
+];

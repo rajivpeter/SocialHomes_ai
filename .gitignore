@@ -1,0 +1,47 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Build output
+dist/
+build/
+server/dist/
+
+# Environment
+.env
+.env.local
+.env.*.local
+*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# Testing
+tests/screenshots*/
+tests/test_results*.json
+
+# Large data files (HACT reference - not needed in repo)
+UK Housing Data Standard Version 3.5/
+
+# Screenshots and test artifacts
+page-screenshots/
+tests/screenshots*/
+tests/test_results*.json
+
+# Misc
+*.tsbuildinfo
+.cursor/

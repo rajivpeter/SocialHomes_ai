@@ -1,0 +1,470 @@
+# DOCUMENT 2 OF 2: AI-NATIVE FEATURE REQUIREMENTS
+# SocialHomes.Ai — AI-Native Housing Operating System by Yantra.Works
+
+## INSTRUCTION TO AI
+
+This is the companion document to the Base Specification (Document 1). It defines what makes SocialHomes.Ai genuinely AI-NATIVE — not AI-bolted-on.
+
+**What "AI-native" means in SocialHomes.Ai:**
+The AI doesn't just sit in a sidebar showing information. It dynamically reshapes the interface itself. Every page has standard fields, buttons, and layouts from Document 1 — but ALSO has **dynamic AI-generated buttons, fields, cards, and action prompts** that appear contextually based on the entity being viewed, the data about that entity, the user's persona, external factors, and predictive models. These dynamic elements don't exist in a static system — they are created by intelligence.
+
+Apply all features in this document to the base application built from Document 1.
+
+---
+
+## CORE PRINCIPLE: DYNAMIC AI INTERFACE ELEMENTS
+
+### How It Works
+
+Every entity page (tenant, property, building, case, etc.) has TWO zones:
+
+1. **Standard zone**: The fixed fields, tabs, buttons defined in Document 1 — always present, always in the same place
+2. **AI Dynamic zone**: A clearly-marked section (subtle purple-tinted `--status-ai` left border, `--surface-elevated` background) that contains AI-generated elements that change based on context
+
+The AI Dynamic zone appears at the top of the right-side context panel (in drill-down view) or as a prominent card section at the top of entity detail pages (in traditional view). It contains:
+
+- **Dynamic action buttons** — actions that only appear when AI determines they're relevant
+- **Dynamic info cards** — contextual information the system thinks the user needs NOW
+- **Dynamic prompts** — questions the AI asks the user, where answering triggers automated workflows
+- **Dynamic warnings** — alerts about this specific entity that require attention
+
+### Examples of Dynamic AI Elements by Entity Type
+
+**When viewing a TENANT who has been waiting 47 days for a repair:**
+
+```
+┌─ AI ACTIONS ─────────────────────────────────────────────────┐
+│ ✦ Yantra has identified 3 actions for this tenant            │
+│                                                               │
+│ [📧 Send Holding Update]  [📞 Log Apology Call]              │
+│  "Mrs Chen has waited 47      "AI has drafted a call         │
+│   days for REP-2024-4521.      script acknowledging the      │
+│   AI has drafted an update     delay with explanation and     │
+│   email explaining the delay   compensation offer."           │
+│   and new expected date."                                     │
+│                                                               │
+│ [⚠️ Escalate to Manager]                                     │
+│  "This repair has exceeded 2x the routine target.             │
+│   Escalation recommended to prevent complaint."               │
+│                                                               │
+│ 🔮 PREDICTION: 72% probability this tenant will raise a      │
+│    complaint within 14 days if repair not completed.          │
+│    Estimated compensation liability: £150-£300.               │
+└──────────────────────────────────────────────────────────────┘
+```
+
+When the officer clicks **[Send Holding Update]**:
+1. AI shows a pre-drafted email using the tenant's preferred communication method, referencing the specific repair, the delay reason (from contractor notes), and the new expected completion date (from schedule)
+2. The officer can edit the draft or approve it
+3. On sending, AI asks: **"Would you like to create a follow-up task?"** — Yes/No
+4. If Yes: **"When should the follow-up be?"** — offers "Day after expected completion", "3 working days", "1 week", or custom date
+5. AI auto-creates the task, assigns it to the officer, links it to the repair case, and sets a reminder
+6. If the repair is STILL not done by the follow-up date, AI automatically escalates the priority and notifies the manager
+
+**When viewing a TENANT with arrears who just started a UC claim:**
+
+```
+┌─ AI ACTIONS ─────────────────────────────────────────────────┐
+│ ✦ Context: UC claim started 3 weeks ago. First payment       │
+│   expected in ~2 weeks. Current arrears: £487.                │
+│                                                               │
+│ [💬 Supportive Call Script]  [📋 Request APA]                 │
+│  "AI has drafted a call        "Alternative Payment           │
+│   script that acknowledges     Arrangement application        │
+│   the UC transition, offers    pre-filled and ready to        │
+│   reassurance, and checks      submit to DWP."                │
+│   for income maximisation                                     │
+│   opportunities."                                             │
+│                                                               │
+│ [🏦 Income Maximisation Check]  [📝 Create Payment Plan]     │
+│  "Run benefits entitlement      "AI suggests: £15/week        │
+│   estimate for this household   toward arrears based on       │
+│   based on known composition    household income estimate     │
+│   and tenure type."             and other commitments."       │
+│                                                               │
+│ ℹ️ DO NOT escalate to formal action — UC transition is a     │
+│    recognised temporary cause. Pre-Action Protocol requires   │
+│    verification of UC claim before any legal action.          │
+└──────────────────────────────────────────────────────────────┘
+```
+
+**When viewing a BUILDING with expiring compliance:**
+
+```
+┌─ AI ACTIONS ─────────────────────────────────────────────────┐
+│ ✦ 3 compliance items need attention for this building        │
+│                                                               │
+│ [🔧 Book Contractor Visit]                                    │
+│  "2 EICRs expired (Unit 12, Unit 18). AI has checked          │
+│   contractor availability — next slot: Thursday 10am.         │
+│   Pre-filled job ticket attached."                            │
+│                                                               │
+│ [📋 Generate FRA Action Report]                               │
+│  "Fire risk assessment is due for review in 45 days.          │
+│   2 outstanding action items. AI has generated a status       │
+│   report for the building safety lead."                       │
+│                                                               │
+│ [📧 Send Access Letters]                                      │
+│  "Unit 12 — Mrs Williams has refused access twice.            │
+│   AI suggests: accompanied visit with support worker          │
+│   (vulnerability flag: hoarding). Letter 3 template ready."  │
+│                                                               │
+│ 🔮 Based on contractor workload, if EICRs are not booked     │
+│    this week, they won't be completed before TSM reporting    │
+│    deadline. Impact: BS03 drops from 97.8% to 97.6%.         │
+└──────────────────────────────────────────────────────────────┘
+```
+
+**When viewing an ASB CASE where evidence is building:**
+
+```
+┌─ AI ACTIONS ─────────────────────────────────────────────────┐
+│ ✦ Case analysis for ASB-2024-00034                            │
+│                                                               │
+│ [📋 Generate Evidence Bundle]                                 │
+│  "AI has compiled: 14 diary entries, 3 witness statements,    │
+│   noise recordings (4), photos (7). Formatted for court       │
+│   if injunction is pursued."                                  │
+│                                                               │
+│ [🤝 Refer to Mediation]                                      │
+│  "Before legal escalation, mediation has 65% success rate     │
+│   for noise cases in this category. Local mediation service   │
+│   has availability next Tuesday."                             │
+│                                                               │
+│ [📞 Multi-Agency Referral]                                    │
+│  "Perpetrator profile suggests mental health involvement.     │
+│   AI has pre-filled referral forms for Community Mental        │
+│   Health Team and Safer Neighbourhood Team."                  │
+│                                                               │
+│ 🔮 PREDICTION: Based on case pattern, 60% probability this   │
+│    will require CPN within 8 weeks. Evidence quality is       │
+│    currently GOOD for legal threshold.                        │
+└──────────────────────────────────────────────────────────────┘
+```
+
+**When viewing a REPAIR CASE that has been completed:**
+
+Even on CLOSED cases, AI adds value:
+
+```
+┌─ AI ACTIONS ─────────────────────────────────────────────────┐
+│ ✦ Post-completion analysis for REP-2024-03211                │
+│                                                               │
+│ [📊 Root Cause Analysis]                                      │
+│  "This is the 4th plumbing repair at this property in 12      │
+│   months. Pattern: corroded supply pipe. Proactive            │
+│   replacement cost: £800. Continued responsive cost:          │
+│   projected £2,400/year."                                     │
+│                                                               │
+│ [📋 Create Capital Works Request]                             │
+│  "One click to create a planned works request for supply      │
+│   pipe replacement, pre-filled with cost justification        │
+│   from repair history analysis."                              │
+│                                                               │
+│ [📧 Send Satisfaction Follow-Up]                              │
+│  "Tenant rated this repair 2/5. AI has drafted a follow-up   │
+│   message acknowledging the poor experience and explaining    │
+│   what's being done to prevent recurrence."                   │
+└──────────────────────────────────────────────────────────────┘
+```
+
+### The AI Action Flow Pattern
+
+Every AI dynamic button follows this pattern:
+
+1. **PRESENT**: AI shows the button with a brief explanation of WHY it's suggesting this action
+2. **PREVIEW**: Clicking the button shows a preview of what will happen — the drafted email, the pre-filled form, the suggested schedule
+3. **EDIT**: The user can edit anything in the preview
+4. **CONFIRM**: User approves the action
+5. **FOLLOW-UP**: AI asks if the user wants to create follow-up tasks, linked cases, or notifications
+6. **AUTO-CREATE**: If user says yes, AI asks only for genuinely missing information (not anything it already knows), then auto-creates everything — tasks, cases, calendar entries, reminders
+7. **LEARN**: The system records whether the user accepted/modified/rejected the AI suggestion, feeding back into the model
+
+### Dynamic Fields
+
+In addition to dynamic buttons, AI also adds dynamic INFORMATION FIELDS that don't exist in the standard layout:
+
+- On a tenant page: "Estimated household income: £24,000/year" (derived from tenure type + bedroom size + UC status + employment indicators — used for affordability assessment)
+- On a property page: "Carbon emission estimate: 4.2 tonnes/year" (derived from EPC + heating type + floor area — not stored, calculated live)
+- On a repair page: "Similar repair average cost: £385" (from historical data — helps identify outlier costs)
+- On a complaint page: "Ombudsman determination risk: HIGH" (based on category, delay, and comparison to published Ombudsman decisions)
+- On a building page: "Estimated retrofit cost to EPC C: £8,200/unit" (derived from current EPC data + standard improvement measures)
+
+These appear as subtle cards with a `--status-ai` purple left border and a small "✦ AI estimate" label.
+
+---
+
+## YANTRA ASSIST — CONTEXTUAL AI PANEL
+
+### Appearance
+- **Trigger**: Fixed button, bottom-left corner — Yantra.Works diamond mark at 32px with pulsing `--status-ai` purple glow when insights are available. Badge count for actionable items.
+- **Panel**: Slides in from left (400px wide), overlaying sidebar. `--surface-elevated` background, `--status-ai` purple top border. Close button and pin button.
+- **Content changes completely** based on (a) current page/entity and (b) user persona.
+
+### Panel Structure (every page)
+
+```
+┌──────────────────────────────────────┐
+│ ✦ Yantra Assist                      │
+│ [Persona] • [Current page context]   │
+├──────────────────────────────────────┤
+│ 🔴 URGENT                            │
+│ Items needing immediate action        │
+│                                       │
+│ 🟠 ATTENTION                          │
+│ Items approaching deadlines           │
+│                                       │
+│ 💡 INSIGHTS                           │
+│ AI predictions & recommendations      │
+│                                       │
+│ 📊 BRIEFING                           │
+│ Contextual summary & key stats        │
+│                                       │
+│ 🌤️ EXTERNAL FACTORS                   │
+│ Weather, UC changes, local context    │
+├──────────────────────────────────────┤
+│ [Ask Yantra...] chat input            │
+└──────────────────────────────────────┘
+```
+
+Each item is clickable — navigates to the relevant entity.
+
+### External Data Sources (simulated)
+- Met Office weather: rain/temperature forecasts affecting damp risk and outdoor works
+- DWP/UC: benefit changes, managed migration, impact on tenant income
+- Regulator of Social Housing: inspection programme updates, sector benchmarks
+- Housing Ombudsman: recent determinations, Code updates
+- Energy prices: fuel poverty risk, tenant heating behaviour predictions
+- Local authority: planning, roadworks, school terms (ASB patterns)
+
+### Chat Interface
+At panel bottom — natural language queries:
+- "Which tenants haven't been contacted in 6 months?"
+- "Total repair costs for 23 Maple Lane this year?"
+- "Draft an arrears letter for Mrs Patel"
+- "What if we don't complete the 12 overdue EICRs this month?"
+
+---
+
+## PERSONA SYSTEM
+
+5 personas determine what Yantra Assist shows and which AI dynamic actions appear. User selects at login or switches via the user menu.
+
+### Persona 1: Chief Operating Officer / Director
+- **Dashboard scope**: Entire organisation
+- **Yantra Assist focus**: Strategic — regulatory risk, portfolio compliance trends, financial performance, TSM trajectory, Regulator inspection readiness
+- **AI dynamic actions**: "Generate board report", "Model rent increase scenarios", "Benchmark against sector", "Prepare regulatory self-assessment"
+- **Example insight**: "AI predicts 15% increase in damp reports next month — weather + construction profile. Recommend: activate proactive inspection programme. Cost: £12K. Estimated saving in responsive repairs: £45K."
+
+### Persona 2: Head of Housing / Head of Service
+- **Dashboard scope**: Their service area
+- **Yantra Assist focus**: Operational — SLA performance, team capacity, complaint trends, void turnaround, allocations throughput
+- **AI dynamic actions**: "Rebalance team caseloads", "Generate team performance review", "Identify training needs from complaint patterns"
+- **Example insight**: "8 'silent tenants' identified — no contact in 12+ months. Recommend: welfare check visits this week."
+
+### Persona 3: Team Manager / Patch Manager
+- **Dashboard scope**: Their patch/team
+- **Yantra Assist focus**: Team management — individual officer workload, case overdue list, skill gaps, cover arrangements
+- **AI dynamic actions**: "Reassign cases for officer on leave", "Generate patch briefing", "Schedule team catch-up based on workload gaps"
+- **Example insight**: "Sarah has 47 open cases (average: 32). 3 cases are >30 days overdue. Rebalance recommended."
+
+### Persona 4: Housing Officer / Colleague (frontline) ← THE MOST IMPORTANT
+- **Dashboard scope**: Their personal caseload/patch
+- **Yantra Assist shows**: What to do TODAY — appointments, calls, tasks, cases needing action
+- **AI dynamic actions**: The richest set — every tenant page has holding reply buttons, follow-up task creators, referral generators, communication drafters. Every property has booking buttons for contractor visits. Every case has escalation and resolution aids.
+- **Morning briefing**: "You have 3 urgent items, 12 tasks due, 2 tenancies predicted to enter arrears. Heavy rain Thursday — 4 properties at damp risk."
+- **Example on a tenant page**: "Mrs Chen called 3 times last week. Repair 47 days outstanding. AI suggests: [Send Holding Email] [Escalate Repair] [Log Compensation Offer]. Prediction: 72% complaint risk within 14 days."
+
+### Persona 5: Repairs Operative / Contractor
+- **View**: Simplified mobile-optimised layout
+- **Yantra Assist shows**: Today's jobs, access codes, risk alerts, vulnerability flags, previous repair history
+- **AI dynamic actions**: "Mark complete + take photo", "Order follow-on materials", "Flag as requiring follow-up inspection"
+- **No access to**: financial data, personal tenant details beyond what's needed for the job
+
+---
+
+## AI MORNING BRIEFING (`/briefing`)
+
+Full-screen, personalised briefing on login. Animated intro with Yantra mark, then:
+
+- Weather and environmental context for the day
+- **URGENT**: Items needing immediate action (with countdown timers where applicable)
+- **TODAY'S TASKS**: Appointments, calls, letters, case reviews — with count
+- **AI PREDICTIONS**: What the model expects this week for the user's scope
+- **PATCH/PORTFOLIO SNAPSHOT**: Key numbers with trend arrows
+- **[Start my day →]** button → navigates to dashboard
+- **[Skip briefing]** option (can be disabled in settings)
+
+Each item in the briefing is clickable, navigating directly to the relevant entity.
+
+---
+
+## AI-AUGMENTED WORKFLOWS
+
+### Logging a Repair (AI-augmented)
+1. Tenant/operative describes issue (text or simulated voice input)
+2. AI INSTANTLY: categorises (SOR code), assigns priority, identifies trade, checks asbestos register, checks vulnerability flags, checks for recurring pattern, estimates cost, suggests appointment, drafts access instructions, flags Awaab's Law if applicable
+3. AI shows: "Similar repair done 3 months ago at this property. Recurring issue? [Yes — create investigation case] [No — proceed as new]"
+4. On completion, AI asks: "Create follow-up satisfaction call task in 48 hours? [Yes] [No]"
+
+### Handling Inbound Contact (AI-augmented)
+1. Officer receives email/call from tenant
+2. AI reads/summarises the contact, categorises it:
+   - Repair request → "Create repair case? [Yes]" (pre-filled from description)
+   - Complaint → "This sounds like a complaint. Create Stage 1 complaint? [Yes]" (pre-categorised)
+   - Arrears query → Shows rent account summary, suggests response
+   - General enquiry → Suggests response from knowledge base
+3. After handling, AI asks: "Create follow-up task? What's the follow-up action?"
+4. If user says "Call back in 3 days to check", AI creates task, links it, sets reminder
+
+### Sending Any Communication (AI-augmented)
+1. User triggers "Send letter/email/SMS" on any entity
+2. AI generates draft using: correct template, tenant's name and details, plain English at appropriate reading level, legally required wording (for notices), correct dates and amounts
+3. Tone options: [Supportive] [Formal] [Urgent] [Legally required] — AI adjusts language
+4. After sending: "Create follow-up task? [Yes — when?]" and "Link to an existing case? [Select case / Create new]"
+
+### Reviewing Compliance (AI-augmented)
+1. Officer views compliance page
+2. AI doesn't just show expired certs — it shows:
+   - What WILL expire (with timeline)
+   - Impact on TSM scores if not resolved
+   - Pre-drafted contractor instruction for each overdue item
+   - Pre-booked appointment slot (from contractor availability)
+   - No-access risk prediction per property (based on history)
+3. One click: "Send all appointment letters for gas safety programme this month" → AI generates personalised letters for each property, queues via Notify
+
+---
+
+## PREDICTIVE INTELLIGENCE ENGINE
+
+8 prediction models, each with real-time scoring:
+
+| Model | Predicts | Inputs | Output | Action |
+|-------|---------|--------|--------|--------|
+| Arrears Risk | Tenancy enters arrears in 30/60/90 days | Payment history, UC status, seasonal patterns, life events | Risk score 0-100 per tenancy | Prioritised worklist + recommended intervention |
+| Damp & Mould | Property develops damp/mould | Construction, orientation, EPC, weather, heating, historical repairs, sensors | Risk score 0-100 per property | Proactive inspection programme |
+| Complaint Escalation | Complaint reaches Stage 2 or Ombudsman | Response time, category, tenant history, handler workload | Escalation probability % | Manager alert + resource reallocation |
+| Void Duration | How long a void will take | Property age, condition survey, previous voids, works backlog | Estimated days | Realistic timeline + contractor pre-booking |
+| Repair Recurrence | Repair will recur; root cause | Repair history, component age, weather, contractor quality | Recurrence probability + cause | Capital investment recommendation |
+| Vulnerability | Tenant may be vulnerable but unidentified | Contact frequency, repair patterns, payment changes, household | Risk flags + evidence | Welfare check recommendation |
+| ASB Escalation | Case requires legal action | Category, perpetrator history, evidence quality, location | Legal action probability | Evidence gathering checklist |
+| Compliance Failure | Property fails compliance before cert expiry | Access history, tenant engagement, contractor availability | Failure probability | Pre-emptive access campaign |
+
+Each model shows on the AI Predictions page (`/ai/predictions`) with: scatter plot of scored entities, top-50 table, feature importance chart, model accuracy metrics (precision/recall/F1 as gauges), last trained date.
+
+---
+
+## 3D DIGITAL TWIN
+
+When drilling into a BUILDING in the visual hierarchy (Level 4), the 2D map transitions to a Three.js 3D building:
+
+- **Exterior**: Procedurally generated from metadata (storeys, footprint, construction type). Colour-coded facade by compliance. Rotate/zoom/pan with OrbitControls.
+- **Exploded view**: Click to separate floors vertically
+- **Floor plan**: Click a floor → units shown as coloured boxes:
+  - Green: occupied, compliant, no issues
+  - Blue: repair in progress
+  - Amber: compliance approaching deadline
+  - Red: overdue, active Awaab's Law, void >28 days
+  - Purple: AI-flagged
+  - Grey: void
+- **Hover unit**: mini-card (tenant name, rent status, compliance, AI score)
+- **Click unit**: navigates to full unit detail
+
+Built with Three.js r128, `<Canvas>` from React Three Fiber, `OrbitControls` and `Text` from drei. Geometry: `BoxGeometry` for building and units, `LineBasicMaterial` for floor separators. Not photorealistic — informative, interactive, visually striking.
+
+---
+
+## ADMINISTRATOR SYSTEM (`/admin`)
+
+### Admin Dashboard (`/admin`)
+- System health: API response times, error rates, active users, storage usage (live charts)
+- User activity: who's logged in, what they're viewing, last actions
+- Data quality score: overall completeness % with drill-down by entity type
+- Integration status: live connection indicators per external system
+- AI model health: accuracy metrics, last training, drift alerts
+
+### Organisation Management (`/admin/organisation`)
+- Profile: name, RP number, address, regulatory status, charity/company numbers
+- Branding: logo, colours, email footer, letter header template
+- Operational parameters (all editable, audit-trailed):
+  - Repair targets per priority, void target, arrears bands, complaint targets, rent increase policy
+  - Working day calendar (bank holidays, closedowns)
+  - Financial year, rent week pattern
+- Multi-organisation: parent/subsidiary group structures
+
+### User Management (`/admin/users`)
+- RBAC with 10 default roles × permissions matrix (view/create/edit/delete/approve per module)
+- Custom role builder
+- User invitation flow, 2FA management, session control
+- User impersonation ("view as") — fully audited
+- Patch assignment, team assignment, caseload caps
+
+### Team & Patch Management (`/admin/teams`)
+- Team hierarchies (Director → HoS → Manager → Officers)
+- Patch definition: draw on map or assign by postcode/estate/ward
+- Caseload balancing tool: visual workload distribution with rebalancing recommendations
+- Cover/absence management: auto-reassign cases during leave
+
+### Workflow Engine (`/admin/workflows`)
+- Visual builder (simulated drag-and-drop):
+  - Triggers: system events (repair created, arrears threshold crossed, complaint Day 8, cert expires in 30 days)
+  - Conditions: IF-THEN rules with entity attributes
+  - Actions: send notification, create task, assign, escalate, send letter (Notify), create case, trigger AI analysis
+  - SLA timers, approval gates
+- Pre-built templates: arrears escalation, complaint handling, Awaab's Law, gas access programme, void pipeline, ASB escalation, new tenancy onboarding
+
+### Integration Hub (`/admin/integrations`)
+Cards with logo, status, last sync, configuration:
+- GOV.UK Notify (email/SMS/letters), OS Places API, EPC Open Data, DWP Landlord Portal, Open Banking, GOV.UK Pay, Companies House, HM Land Registry, Met Office, Contractor portals, CORE (MHCLG), HouseMark
+- Webhook manager, API key management, data import/export wizard
+
+### Audit & Compliance (`/admin/audit`)
+- Full audit trail: timestamp, user, entity, field, old value, new value, IP
+- GDPR tools: Subject Access Request processor, Right to Erasure workflow, data retention policies, consent management, Data Processing Register
+- Security log: failed logins, password changes, permission changes, admin actions
+
+### System Configuration (`/admin/system`)
+- Reference data: editable lookup tables for all codelists (repair categories, SOR codes, complaint categories, vulnerability types, property types, tenure types, payment methods, etc.)
+- Form builder (simulated): customise fields on key forms — drag, set required/optional, add validation
+- Notification config: which events trigger email/SMS/push per role
+- Reporting config: KPI targets, RAG thresholds, benchmarking peer group
+- AI config: toggle models on/off, confidence thresholds, data source selection, prediction frequency
+- White-label: for multi-HA deployment — each HA gets own branding overlaid on Yantra design
+
+---
+
+## KEY INTERACTIONS TO IMPLEMENT
+
+These are the signature moments that demonstrate the AI-native paradigm:
+
+### 1. The "Holding Reply" Flow
+User views tenant with overdue repair → AI dynamic button "Send Holding Update" → pre-drafted email shown → user edits/approves → sent via Notify → AI asks "Create follow-up task?" → user says "3 days" → task auto-created linked to repair → if repair still not done at follow-up, auto-escalate
+
+### 2. The "Inbound Email Triage" Flow
+Email arrives in unified inbox → AI reads it → categorises as repair request → shows "Create repair? [Yes]" with pre-filled SOR code and priority → officer confirms → repair case created, appointment suggested, confirmation sent to tenant → AI asks "Anything else from this email?" → officer says "They also mentioned a leak in the hallway" → AI creates second repair case linked to same contact
+
+### 3. The "Proactive Damp Prevention" Flow
+Weather API shows heavy rain forecast → AI cross-references with building data (1960s concrete, north-facing, known penetrating damp history) → generates alert: "4 properties at high damp risk this week" → officer views → each property has dynamic button "Send preventive advice letter" → pre-drafted letter about ventilation, heating, reporting → sent to all 4 tenants in one click → follow-up inspection tasks auto-created for 2 weeks later
+
+### 4. The "Compliance Cascade" Flow
+Admin views compliance dashboard → AI highlights: "12 EICRs overdue, contractor available Thursday" → [Book All] button → AI generates 12 job tickets, sends tenant appointment letters, creates calendar entries for contractor, sets follow-up reminders → if any tenant has no-access history, automatically generates escalated access letter instead of standard appointment
+
+### 5. The "Complaint Prevention" Flow
+AI detects: tenant called 3 times about same repair, satisfaction declining, case open 42 days → generates Yantra Assist urgent item: "Complaint likely within 14 days. Recommend: resolve repair this week + proactive apology call + goodwill gesture £50" → officer clicks "Execute prevention plan" → AI: creates urgent repair escalation, drafts apology call script, prepares compensation authorisation for manager → tracks whether complaint was prevented (feeds back to model)
+
+---
+
+## IMPLEMENTATION NOTES FOR DOCUMENT 2
+
+1. **AI dynamic sections should be clearly visually distinct** — purple-tinted border, `--surface-elevated` background, "✦" symbol prefix on AI-generated content
+2. **Every AI action button must explain WHY** — not just "Send Email" but "Send holding update — tenant has waited 47 days, 72% complaint risk"
+3. **The follow-up prompt pattern is essential** — after EVERY action, ask about follow-ups and auto-create if confirmed
+4. **AI elements must appear on EVERY entity page** — tenants, properties, buildings, cases, even closed cases
+5. **Persona switching must immediately change** what's shown in Yantra Assist and what dynamic buttons appear
+6. **Predictions should feel USEFUL, not creepy** — always explain WHY the AI is making a prediction with contributing factors visible
+7. **The admin system must be COMPLETE** — not a settings page, but a full system management suite
+8. **Closed cases still get AI analysis** — recurrence prediction, root cause analysis, trend identification
+9. **External data (weather, DWP, regulator) should feel natural** — woven into insights, not shown as a separate section
+10. **The morning briefing should feel personalised and warm** — not a data dump, but "Good morning Sarah, here's what needs your attention today"
+
+Now apply all of these AI-native features, dynamic interface elements, the persona system, admin system, and prediction models to the base application from Document 1. Every page should have both its standard layout AND the AI dynamic zone with contextually relevant buttons, fields, and prompts.
