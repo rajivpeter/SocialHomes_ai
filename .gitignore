@@ -45,3 +45,13 @@ tests/test_results*.json
 # Misc
 *.tsbuildinfo
 .cursor/
+
+# Reference docs (large, not needed in deploy)
+UK Housing Data Standard Version 3.5/
+
+# Test reports and screenshots
+TEST-REPORT*.md
+page-screenshots/
+tests/
+Doc1-*.txt
+Doc2-*.txt
