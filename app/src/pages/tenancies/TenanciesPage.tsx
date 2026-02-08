@@ -24,7 +24,7 @@ export default function TenanciesPage() {
       
       return matchesName && matchesPostcode && matchesStatus;
     });
-  }, [searchName, searchPostcode, filterStatus]);
+  }, [tenants, properties, searchName, searchPostcode, filterStatus]);
 
   const getRentBalanceColor = (balance: number) => {
     if (balance === 0) return 'text-status-compliant';

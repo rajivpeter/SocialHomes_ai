@@ -10,17 +10,29 @@ casesRouter.use(authMiddleware);
 casesRouter.get('/', async (req, res, next) => {
   try {
     const { type, status, handler, priority, propertyId, tenantId, limit: limitStr } = req.query;
-    const filters: { field: string; op: FirebaseFirestore.WhereFilterOp; value: any }[] = [];
-
-    if (type) filters.push({ field: 'type', op: '==', value: type });
-    if (status) filters.push({ field: 'status', op: '==', value: status });
-    if (handler) filters.push({ field: 'handler', op: '==', value: handler });
-    if (priority) filters.push({ field: 'priority', op: '==', value: priority });
-    if (propertyId) filters.push({ field: 'propertyId', op: '==', value: propertyId });
-    if (tenantId) filters.push({ field: 'tenantId', op: '==', value: tenantId });
-
     const limit = limitStr ? parseInt(limitStr as string, 10) : 200;
-    const cases = await getDocs<CaseDoc>(collections.cases, filters, { field: 'createdDate', direction: 'desc' }, limit);
+
+    // Fetch all cases (no composite index needed), then filter + sort in memory.
+    // With ~300 cases this is fast and avoids Firestore composite index requirements.
+    let cases = await getDocs<CaseDoc>(collections.cases, undefined, undefined, 1000);
+
+    // Apply filters in memory
+    if (type) cases = cases.filter(c => c.type === type);
+    if (status) cases = cases.filter(c => c.status === status);
+    if (handler) cases = cases.filter(c => c.handler === handler);
+    if (priority) cases = cases.filter(c => c.priority === priority);
+    if (propertyId) cases = cases.filter(c => c.propertyId === propertyId);
+    if (tenantId) cases = cases.filter(c => c.tenantId === tenantId);
+
+    // Sort by createdDate descending
+    cases.sort((a, b) => {
+      const dateA = a.createdDate || '';
+      const dateB = b.createdDate || '';
+      return dateB.localeCompare(dateA);
+    });
+
+    // Apply limit
+    if (cases.length > limit) cases = cases.slice(0, limit);
 
     res.json({
       items: cases,
@@ -37,10 +49,11 @@ casesRouter.get('/:id', async (req, res, next) => {
     const caseDoc = await getDoc<CaseDoc>(collections.cases, req.params.id);
     if (!caseDoc) return res.status(404).json({ error: 'Case not found' });
 
-    // Fetch related activities
-    const activities = await getDocs<ActivityDoc>(collections.activities, [
-      { field: 'caseId', op: '==', value: req.params.id },
-    ], { field: 'date', direction: 'desc' });
+    // Fetch related activities (filter in memory to avoid composite index)
+    const allActivities = await getDocs<ActivityDoc>(collections.activities);
+    const activities = allActivities
+      .filter(a => a.caseId === req.params.id)
+      .sort((a, b) => (b.date || '').localeCompare(a.date || ''));
 
     res.json({ ...caseDoc, activities });
   } catch (err) {
@@ -80,9 +93,12 @@ casesRouter.patch('/:id', async (req, res, next) => {
 // GET /api/v1/cases/:id/activities
 casesRouter.get('/:id/activities', async (req, res, next) => {
   try {
-    const activities = await getDocs<ActivityDoc>(collections.activities, [
-      { field: 'caseId', op: '==', value: req.params.id },
-    ], { field: 'date', direction: 'desc' });
+    const caseId = req.params.id;
+    // Filter in memory to avoid composite index requirement
+    const allActivities = await getDocs<ActivityDoc>(collections.activities);
+    const activities = allActivities
+      .filter(a => a.caseId === caseId)
+      .sort((a, b) => (b.date || '').localeCompare(a.date || ''));
     res.json(activities);
   } catch (err) {
     next(err);

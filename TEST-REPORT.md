@@ -464,3 +464,9 @@ Based on fixes applied, here is the expected outcome for each previously failing
 *JSON results: `/tests/test_results_v3.json`*
 *Original report generated: 07/02/2026*
 *Developer fixes applied: 07/02/2026*
+
+---
+
+> **NOTE**: This application is now deployed to Google Cloud Run with Firestore backend.
+> See **TEST-REPORT-V2.md** for the latest deployment details, live URLs, API endpoints, and testing checklist.
+> Live URL: https://socialhomes-674258130066.europe-west2.run.app/

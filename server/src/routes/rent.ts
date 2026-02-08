@@ -72,9 +72,12 @@ rentRouter.get('/dashboard', async (_req, res, next) => {
 // GET /api/v1/rent/transactions/:tenantId
 rentRouter.get('/transactions/:tenantId', async (req, res, next) => {
   try {
-    const transactions = await getDocs(collections.rentTransactions, [
-      { field: 'tenantId', op: '==', value: req.params.tenantId },
-    ], { field: 'date', direction: 'desc' });
+    const tenantId = req.params.tenantId;
+    // Filter in memory to avoid composite index requirement
+    const allTx = await getDocs(collections.rentTransactions);
+    const transactions = allTx
+      .filter((t: any) => t.tenantId === tenantId)
+      .sort((a: any, b: any) => (b.date || '').localeCompare(a.date || ''));
     res.json(transactions);
   } catch (err) {
     next(err);

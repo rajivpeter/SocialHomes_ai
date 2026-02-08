@@ -43,9 +43,12 @@ tenantsRouter.get('/:id', async (req, res, next) => {
 // GET /api/v1/tenants/:id/activities
 tenantsRouter.get('/:id/activities', async (req, res, next) => {
   try {
-    const activities = await getDocs<ActivityDoc>(collections.activities, [
-      { field: 'tenantId', op: '==', value: req.params.id },
-    ], { field: 'date', direction: 'desc' });
+    const tenantId = req.params.id;
+    // Filter in memory to avoid composite index requirement
+    const allActivities = await getDocs<ActivityDoc>(collections.activities);
+    const activities = allActivities
+      .filter(a => a.tenantId === tenantId)
+      .sort((a, b) => (b.date || '').localeCompare(a.date || ''));
     res.json(activities);
   } catch (err) {
     next(err);
@@ -55,9 +58,12 @@ tenantsRouter.get('/:id/activities', async (req, res, next) => {
 // GET /api/v1/tenants/:id/cases
 tenantsRouter.get('/:id/cases', async (req, res, next) => {
   try {
-    const cases = await getDocs<CaseDoc>(collections.cases, [
-      { field: 'tenantId', op: '==', value: req.params.id },
-    ], { field: 'createdDate', direction: 'desc' });
+    const tenantId = req.params.id;
+    // Fetch all cases and filter in memory to avoid composite index requirement
+    const allCases = await getDocs<CaseDoc>(collections.cases, undefined, undefined, 1000);
+    const cases = allCases
+      .filter(c => c.tenantId === tenantId)
+      .sort((a, b) => (b.createdDate || '').localeCompare(a.createdDate || ''));
     res.json(cases);
   } catch (err) {
     next(err);
