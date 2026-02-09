@@ -149,7 +149,7 @@ export default function LoginPage() {
               <span className="text-brand-teal font-mono">sarah.mitchell@rcha.org.uk</span>
             </p>
             <p className="text-text-secondary text-xs">
-              Password: <span className="text-brand-teal font-mono">SocialHomes2026!</span>
+              Password: <span className="text-brand-teal font-mono">Provided separately</span>
             </p>
           </div>
         </div>

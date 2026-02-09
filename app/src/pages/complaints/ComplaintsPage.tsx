@@ -1,15 +1,12 @@
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { 
   MessageSquareWarning, 
   AlertCircle,
   Clock,
   CheckCircle,
-  XCircle,
-  Plus
+  XCircle
 } from 'lucide-react';
 import { useComplaints, useTenants, useTsmReport } from '@/hooks/useApi';
-import ActionModal from '@/components/shared/ActionModal';
 import StatusPill from '@/components/shared/StatusPill';
 import { formatNumber, formatPercent, daysUntil, formatDate } from '@/utils/format';
 
@@ -51,29 +48,12 @@ export default function ComplaintsPage() {
 
   const categoryBreakdown = getCategoryBreakdown();
 
-  const navigate = useNavigate();
-  const [showNewModal, setShowNewModal] = useState(false);
-
   return (
-    <>
-    <ActionModal open={showNewModal} onClose={() => setShowNewModal(false)} title="Log New Complaint" icon={<MessageSquareWarning size={20} className="text-status-warning" />} fields={[
-      { id: 'stage', label: 'Stage', type: 'select', required: true, options: [{ value: '1', label: 'Stage 1' }, { value: '2', label: 'Stage 2 (Escalated)' }] },
-      { id: 'category', label: 'Category', type: 'select', required: true, options: [{ value: 'repairs', label: 'Repairs' }, { value: 'staff-conduct', label: 'Staff Conduct' }, { value: 'service-failure', label: 'Service Failure' }, { value: 'communication', label: 'Communication' }, { value: 'estate-management', label: 'Estate Management' }, { value: 'other', label: 'Other' }] },
-      { id: 'subject', label: 'Subject', type: 'text', required: true, placeholder: 'Brief summary...' },
-      { id: 'description', label: 'Complaint Details', type: 'textarea', required: true, placeholder: 'Full description of the complaint...' },
-      { id: 'desiredOutcome', label: 'Desired Outcome', type: 'textarea', placeholder: 'What does the complainant want?' },
-    ]} submitLabel="Log Complaint" onSubmit={() => setShowNewModal(false)} />
-
     <div className="space-y-6">
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
         <div className="opacity-0 animate-fade-in-up" style={{ animationDelay: '0ms', animationFillMode: 'forwards' }}>
-          <div className="flex items-center justify-between mb-1">
-            <h1 className="text-3xl font-bold font-heading text-gradient-brand tracking-tight">Complaints</h1>
-            <button onClick={() => setShowNewModal(true)} className="flex items-center gap-2 px-4 py-2 bg-brand-teal text-white rounded-lg hover:bg-brand-teal/80 transition-colors text-sm">
-              <Plus size={16} /> Log Complaint
-            </button>
-          </div>
+          <h1 className="text-3xl font-bold font-heading text-gradient-brand mb-1 tracking-tight">Complaints</h1>
           <p className="text-text-muted text-sm">Complaint management and TSM tracking</p>
         </div>
 
@@ -154,7 +134,7 @@ export default function ComplaintsPage() {
                   return (
                     <tr
                       key={complaint.id}
-                      onClick={() => navigate(`/complaints/${complaint.id}`)}
+                      onClick={() => { window.location.href = `/complaints/${complaint.id}`; }}
                       className="hover:bg-surface-hover transition-colors opacity-0 animate-fade-in-up cursor-pointer"
                       style={{ animationDelay: `${250 + index * 30}ms`, animationFillMode: 'forwards' }}
                     >
@@ -219,6 +199,5 @@ export default function ComplaintsPage() {
         )}
       </div>
     </div>
-    </>
   );
 }

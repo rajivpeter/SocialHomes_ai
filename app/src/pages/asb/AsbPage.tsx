@@ -1,9 +1,7 @@
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { AlertTriangle, Clock, User, MapPin, Plus } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { AlertTriangle, Clock, User, MapPin } from 'lucide-react';
 import { asbCases } from '@/data';
 import { useTenants, useProperties } from '@/hooks/useApi';
-import ActionModal from '@/components/shared/ActionModal';
 import { formatDate } from '@/utils/format';
 import type { AsbSeverity } from '@/types';
 
@@ -36,8 +34,6 @@ const getSeverityLabel = (severity: AsbSeverity) => {
 };
 
 export default function AsbPage() {
-  const navigate = useNavigate();
-  const [showNewModal, setShowNewModal] = useState(false);
   const { data: tenants = [] } = useTenants();
   const { data: properties = [] } = useProperties();
 
@@ -59,25 +55,11 @@ export default function AsbPage() {
   const cat3Cases = asbCases.filter(c => c.severity === 'cat-3').length;
 
   return (
-    <>
-    <ActionModal open={showNewModal} onClose={() => setShowNewModal(false)} title="Log New ASB Case" icon={<AlertTriangle size={20} className="text-status-warning" />} fields={[
-      { id: 'category', label: 'Category', type: 'select', required: true, options: [{ value: 'noise', label: 'Noise Nuisance' }, { value: 'harassment', label: 'Harassment' }, { value: 'drug-use', label: 'Drug Use/Dealing' }, { value: 'criminal', label: 'Criminal Activity' }, { value: 'domestic', label: 'Domestic Abuse' }, { value: 'garden', label: 'Garden/Communal Areas' }, { value: 'pets', label: 'Pets/Animals' }, { value: 'other', label: 'Other' }] },
-      { id: 'severity', label: 'Severity', type: 'select', required: true, options: [{ value: 'cat-1', label: 'Cat 1 — Serious/Hate/DV' }, { value: 'cat-2', label: 'Cat 2 — Persistent/Moderate' }, { value: 'cat-3', label: 'Cat 3 — Minor/First report' }] },
-      { id: 'subject', label: 'Subject', type: 'text', required: true, placeholder: 'Brief summary...' },
-      { id: 'description', label: 'Description', type: 'textarea', required: true, placeholder: 'Full details of the ASB reported...' },
-      { id: 'reportedBy', label: 'Reported By', type: 'text', required: true, placeholder: 'Name of complainant' },
-    ]} submitLabel="Log Case" onSubmit={() => setShowNewModal(false)} />
-
     <div className="space-y-6">
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
         <div className="opacity-0 animate-fade-in-up" style={{ animationDelay: '0ms', animationFillMode: 'forwards' }}>
-          <div className="flex items-center justify-between mb-1">
-            <h1 className="text-3xl font-bold font-heading text-gradient-brand tracking-tight">Anti-Social Behaviour</h1>
-            <button onClick={() => setShowNewModal(true)} className="flex items-center gap-2 px-4 py-2 bg-brand-teal text-white rounded-lg hover:bg-brand-teal/80 transition-colors text-sm">
-              <Plus size={16} /> Log ASB Case
-            </button>
-          </div>
+          <h1 className="text-3xl font-bold font-heading text-gradient-brand tracking-tight mb-1">Anti-Social Behaviour</h1>
           <p className="text-text-muted">ASB case management and tracking</p>
         </div>
 
@@ -153,8 +135,7 @@ export default function AsbPage() {
                 {asbCases.map((case_, index) => (
                   <tr
                     key={case_.id}
-                    onClick={() => navigate(`/asb/${case_.id}`)}
-                    className="border-b border-border-default hover:bg-surface-elevated transition-colors opacity-0 animate-fade-in-up cursor-pointer"
+                    className="border-b border-border-default hover:bg-surface-elevated transition-colors opacity-0 animate-fade-in-up"
                     style={{ animationDelay: `${300 + index * 30}ms`, animationFillMode: 'forwards' }}
                   >
                     <td className="py-3 px-4">
@@ -209,6 +190,5 @@ export default function AsbPage() {
         </div>
       </div>
     </div>
-    </>
   );
 }

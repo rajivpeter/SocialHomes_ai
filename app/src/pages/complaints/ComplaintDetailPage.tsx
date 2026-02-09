@@ -321,22 +321,14 @@ export default function ComplaintDetailPage() {
                     <User size={14} />
                     Tenant
                   </div>
-                  {tenant ? (
-                    <Link to={`/tenancies/${tenant.id}`} className="text-sm font-medium text-brand-teal hover:underline">{getTenantName()}</Link>
-                  ) : (
-                    <div className="text-sm font-medium text-text-primary">{getTenantName()}</div>
-                  )}
+                  <div className="text-sm font-medium text-text-primary">{getTenantName()}</div>
                 </div>
                 <div>
                   <div className="flex items-center gap-2 text-sm text-text-muted mb-1">
                     <Home size={14} />
                     Property
                   </div>
-                  {property ? (
-                    <Link to={`/properties/${property.id}`} className="text-sm font-medium text-brand-teal hover:underline">{getPropertyAddress()}</Link>
-                  ) : (
-                    <div className="text-sm font-medium text-text-primary">{getPropertyAddress()}</div>
-                  )}
+                  <div className="text-sm font-medium text-text-primary">{getPropertyAddress()}</div>
                 </div>
                 <div>
                   <div className="flex items-center gap-2 text-sm text-text-muted mb-1">

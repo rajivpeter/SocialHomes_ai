@@ -21,6 +21,16 @@ steps:
       - 'europe-west2-docker.pkg.dev/$PROJECT_ID/socialhomes/app:latest'
 
   # Deploy to Cloud Run
+  # IMPORTANT: All secrets are stored in Google Secret Manager.
+  # Before first deploy, create them:
+  #   gcloud secrets create FIREBASE_API_KEY --data-file=- <<< "YOUR_KEY"
+  #   gcloud secrets create FIREBASE_AUTH_DOMAIN --data-file=- <<< "YOUR_DOMAIN"
+  #   gcloud secrets create FIREBASE_PROJECT_ID --data-file=- <<< "YOUR_PROJECT"
+  #   gcloud secrets create DEMO_USER_PASSWORD --data-file=- <<< "YOUR_PASSWORD"
+  # Grant access to Cloud Build SA and Cloud Run SA:
+  #   gcloud secrets add-iam-policy-binding SECRET_NAME \
+  #     --member="serviceAccount:PROJECT_NUMBER-compute@developer.gserviceaccount.com" \
+  #     --role="roles/secretmanager.secretAccessor"
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     args:
       - 'gcloud'
@@ -45,7 +55,9 @@ steps:
       - '--port'
       - '8080'
       - '--set-env-vars'
-      - 'NODE_ENV=production,FIREBASE_API_KEY=AIzaSyB1nfSDqignmcFAvKzh075flVbWOH9aOLs,FIREBASE_AUTH_DOMAIN=gen-lang-client-0146156913.firebaseapp.com,FIREBASE_PROJECT_ID=gen-lang-client-0146156913'
+      - 'NODE_ENV=production'
+      - '--update-secrets'
+      - 'FIREBASE_API_KEY=FIREBASE_API_KEY:latest,FIREBASE_AUTH_DOMAIN=FIREBASE_AUTH_DOMAIN:latest,FIREBASE_PROJECT_ID=FIREBASE_PROJECT_ID:latest,DEMO_USER_PASSWORD=DEMO_USER_PASSWORD:latest'
 
 images:
   - 'europe-west2-docker.pkg.dev/$PROJECT_ID/socialhomes/app:$COMMIT_SHA'

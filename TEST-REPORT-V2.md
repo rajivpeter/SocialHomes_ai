@@ -585,7 +585,7 @@ The following behaviours have changed since the v3 Cloud Run tests above:
 
 ## Authentication Test Accounts
 
-All accounts use password: `SocialHomes2026!`
+All accounts use password: `[STORED IN SECRET MANAGER]`
 
 | Email | Persona | Team | Patches |
 |-------|---------|------|---------|
@@ -615,9 +615,9 @@ All accounts use password: `SocialHomes2026!`
 ```bash
 # Sign in with Firebase REST API to get an ID token
 TOKEN=$(curl -s -X POST \
-  "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyB1nfSDqignmcFAvKzh075flVbWOH9aOLs" \
+  "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=[STORED IN SECRET MANAGER]" \
   -H "Content-Type: application/json" \
-  -d '{"email":"sarah.mitchell@rcha.org.uk","password":"SocialHomes2026!","returnSecureToken":true}' \
+  -d '{"email":"sarah.mitchell@rcha.org.uk","password":"[STORED IN SECRET MANAGER]","returnSecureToken":true}' \
   | python3 -c "import sys,json; print(json.load(sys.stdin)['idToken'])")
 
 echo "Token obtained: ${TOKEN:0:20}..."
@@ -689,7 +689,7 @@ curl -s https://socialhomes-674258130066.europe-west2.run.app/api/v1/properties 
 - **Steps**:
   1. Go to `/login`
   2. Enter email: `sarah.mitchell@rcha.org.uk`
-  3. Enter password: `SocialHomes2026!`
+  3. Enter password: `[STORED IN SECRET MANAGER]`
   4. Click sign-in button
 - **Expected**: Redirects to `/dashboard` with full app access
 
@@ -764,7 +764,7 @@ def get_firebase_token(email, password):
     """Get Firebase ID token via REST API for Selenium testing."""
     resp = requests.post(
         "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword",
-        params={"key": "AIzaSyB1nfSDqignmcFAvKzh075flVbWOH9aOLs"},
+        params={"key": "[STORED IN SECRET MANAGER]"},
         json={
             "email": email,
             "password": password,

@@ -8,6 +8,31 @@ import { getIdToken } from './firebase';
 
 const API_BASE = '/api/v1';
 
+/**
+ * Recursively walk a JSON value and convert Firestore Timestamp objects
+ * ({_seconds, _nanoseconds}) into ISO date strings so React components
+ * never receive raw objects as children (prevents Error #310).
+ */
+function sanitizeFirestoreTimestamps(value: any): any {
+  if (value === null || value === undefined) return value;
+  if (typeof value !== 'object') return value;
+  if (Array.isArray(value)) return value.map(sanitizeFirestoreTimestamps);
+  // Firestore Timestamp → string
+  if ('_seconds' in value && '_nanoseconds' in value && Object.keys(value).length === 2) {
+    try {
+      return new Date(value._seconds * 1000).toLocaleDateString('en-GB');
+    } catch {
+      return 'N/A';
+    }
+  }
+  // Recurse into plain objects
+  const out: Record<string, any> = {};
+  for (const key of Object.keys(value)) {
+    out[key] = sanitizeFirestoreTimestamps(value[key]);
+  }
+  return out;
+}
+
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
   const url = `${API_BASE}${path}`;
   const persona = localStorage.getItem('socialhomes-persona') || 'housing-officer';
@@ -38,7 +63,8 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
     throw new Error(error.error || `API error: ${response.status}`);
   }
 
-  return response.json() as Promise<T>;
+  const data = await response.json();
+  return sanitizeFirestoreTimestamps(data) as T;
 }
 
 function buildQueryString(params: Record<string, string | number | boolean | undefined>): string {

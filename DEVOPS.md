@@ -14,10 +14,10 @@
 | **Health Check** | https://socialhomes-674258130066.europe-west2.run.app/health |
 | **API Base** | https://socialhomes-674258130066.europe-west2.run.app/api/v1/ |
 | **GitHub Repo** | https://github.com/rajivpeter/SocialHomes_ai |
-| **GCP Project** | `gen-lang-client-0146156913` |
+| **GCP Project** | `${FIREBASE_PROJECT_ID}` |
 | **Cloud Run Service** | `socialhomes` in `europe-west2` |
-| **Artifact Registry** | `europe-west2-docker.pkg.dev/gen-lang-client-0146156913/socialhomes/app` |
-| **Firestore Database** | Default database in `gen-lang-client-0146156913` |
+| **Artifact Registry** | `europe-west2-docker.pkg.dev/${FIREBASE_PROJECT_ID}/socialhomes/app` |
+| **Firestore Database** | Default database in `${FIREBASE_PROJECT_ID}` |
 
 ---
 
@@ -96,7 +96,7 @@ git commit -m "description of changes"
 git push origin main
 
 # Monitor build
-# https://console.cloud.google.com/cloud-build/builds?project=gen-lang-client-0146156913
+# https://console.cloud.google.com/cloud-build/builds?project=${FIREBASE_PROJECT_ID}
 ```
 
 ### Manual Deploy (if needed)
@@ -104,11 +104,11 @@ git push origin main
 ```bash
 # Build and push image locally
 gcloud builds submit --config=cloudbuild.yaml \
-  --project=gen-lang-client-0146156913
+  --project=${FIREBASE_PROJECT_ID}
 
 # Or deploy a specific image
 gcloud run deploy socialhomes \
-  --image=europe-west2-docker.pkg.dev/gen-lang-client-0146156913/socialhomes/app:latest \
+  --image=europe-west2-docker.pkg.dev/${FIREBASE_PROJECT_ID}/socialhomes/app:latest \
   --region=europe-west2 \
   --platform=managed \
   --allow-unauthenticated \
@@ -163,7 +163,7 @@ docker build -t socialhomes:local .
 docker run -p 8080:8080 \
   -e PORT=8080 \
   -e NODE_ENV=production \
-  -e GOOGLE_CLOUD_PROJECT=gen-lang-client-0146156913 \
+  -e GOOGLE_CLOUD_PROJECT=${FIREBASE_PROJECT_ID} \
   socialhomes:local
 ```
 
@@ -212,10 +212,10 @@ gcloud run services describe socialhomes --region=europe-west2 \
 
 ### Project & Access
 
-- **GCP Project**: `gen-lang-client-0146156913`
+- **GCP Project**: `${FIREBASE_PROJECT_ID}`
 - **Database**: `(default)` in Firestore Native mode
 - **Authentication**: Cloud Run's default service account auto-authenticates
-- **Console**: https://console.cloud.google.com/firestore/databases?project=gen-lang-client-0146156913
+- **Console**: https://console.cloud.google.com/firestore/databases?project=${FIREBASE_PROJECT_ID}
 
 ### Collections
 
@@ -263,7 +263,7 @@ If the dataset grows significantly (>10,000 documents), deploy the indexes:
 # Deploy Firestore indexes (requires Firebase CLI)
 npm install -g firebase-tools
 firebase login
-firebase init firestore --project gen-lang-client-0146156913
+firebase init firestore --project ${FIREBASE_PROJECT_ID}
 firebase deploy --only firestore:indexes
 ```
 
@@ -295,7 +295,7 @@ A Cloud Armor security policy (`socialhomes-waf`) is attached to the load balanc
 
 ```bash
 # View current rules
-gcloud compute security-policies describe socialhomes-waf --project=gen-lang-client-0146156913
+gcloud compute security-policies describe socialhomes-waf --project=${FIREBASE_PROJECT_ID}
 
 # Add a new rule
 gcloud compute security-policies rules create <PRIORITY> \
@@ -362,11 +362,11 @@ Supports two authentication modes simultaneously:
 
 | Email | Password | Persona |
 |-------|----------|---------|
-| helen.carter@rcha.org.uk | SocialHomes2026! | coo |
-| james.wright@rcha.org.uk | SocialHomes2026! | head-of-housing |
-| priya.patel@rcha.org.uk | SocialHomes2026! | manager |
-| sarah.mitchell@rcha.org.uk | SocialHomes2026! | housing-officer |
-| mark.johnson@rcha.org.uk | SocialHomes2026! | operative |
+| helen.carter@rcha.org.uk | [STORED IN SECRET MANAGER] | coo |
+| james.wright@rcha.org.uk | [STORED IN SECRET MANAGER] | head-of-housing |
+| priya.patel@rcha.org.uk | [STORED IN SECRET MANAGER] | manager |
+| sarah.mitchell@rcha.org.uk | [STORED IN SECRET MANAGER] | housing-officer |
+| mark.johnson@rcha.org.uk | [STORED IN SECRET MANAGER] | operative |
 
 #### Auth API Endpoints
 
@@ -457,7 +457,7 @@ gcloud run services logs read socialhomes \
   --limit=100
 
 # Or use Cloud Console:
-# https://console.cloud.google.com/run/detail/europe-west2/socialhomes/logs?project=gen-lang-client-0146156913
+# https://console.cloud.google.com/run/detail/europe-west2/socialhomes/logs?project=${FIREBASE_PROJECT_ID}
 ```
 
 Morgan middleware logs every HTTP request in Apache combined format.
@@ -476,14 +476,14 @@ An automated uptime check runs every 5 minutes from 3 global regions:
 | **Content match** | `healthy` |
 | **Regions** | Europe, USA Virginia, Asia Pacific |
 
-View at: https://console.cloud.google.com/monitoring/uptime?project=gen-lang-client-0146156913
+View at: https://console.cloud.google.com/monitoring/uptime?project=${FIREBASE_PROJECT_ID}
 
 ```bash
 # List uptime checks
-gcloud monitoring uptime list-configs --project=gen-lang-client-0146156913
+gcloud monitoring uptime list-configs --project=${FIREBASE_PROJECT_ID}
 
 # Delete if needed
-gcloud monitoring uptime delete <CHECK_ID> --project=gen-lang-client-0146156913
+gcloud monitoring uptime delete <CHECK_ID> --project=${FIREBASE_PROJECT_ID}
 ```
 
 ### Metrics
@@ -494,7 +494,7 @@ Cloud Run auto-provides:
 - Billable container instance time
 - Cold start frequency
 
-View at: https://console.cloud.google.com/run/detail/europe-west2/socialhomes/metrics?project=gen-lang-client-0146156913
+View at: https://console.cloud.google.com/run/detail/europe-west2/socialhomes/metrics?project=${FIREBASE_PROJECT_ID}
 
 ### Error Tracking
 
@@ -603,7 +603,7 @@ gcloud run services update-traffic socialhomes \
 
 # Or redeploy a specific image tag
 gcloud run deploy socialhomes \
-  --image=europe-west2-docker.pkg.dev/gen-lang-client-0146156913/socialhomes/app:<COMMIT_SHA> \
+  --image=europe-west2-docker.pkg.dev/${FIREBASE_PROJECT_ID}/socialhomes/app:<COMMIT_SHA> \
   --region=europe-west2
 ```
 
@@ -635,7 +635,7 @@ npm run dev
 gcloud auth application-default login
 
 # Set project
-export GOOGLE_CLOUD_PROJECT=gen-lang-client-0146156913
+export GOOGLE_CLOUD_PROJECT=${FIREBASE_PROJECT_ID}
 
 cd server
 npm install
@@ -736,7 +736,7 @@ socialhomes/
 GET /api/v1/config → { firebase: { apiKey, authDomain, projectId } }
 ```
 
-### Demo Accounts (all password: `SocialHomes2026!`)
+### Demo Accounts (all password: `[STORED IN SECRET MANAGER]`)
 
 | Email | Persona | Team |
 |-------|---------|------|
@@ -779,14 +779,14 @@ The Dockerfile uses `npm ci --legacy-peer-deps` in the client build stage becaus
 **Fix** (DevOps agent — choose one):
 
 **Option A: Firebase Console**
-1. Go to https://console.firebase.google.com/project/gen-lang-client-0146156913/authentication/settings
+1. Go to https://console.firebase.google.com/project/${FIREBASE_PROJECT_ID}/authentication/settings
 2. Under "User actions", uncheck **"Email enumeration protection"**
 3. Click Save
 
 **Option B: REST API**
 ```bash
 curl -X PATCH \
-  "https://identitytoolkit.googleapis.com/admin/v2/projects/gen-lang-client-0146156913/config" \
+  "https://identitytoolkit.googleapis.com/admin/v2/projects/${FIREBASE_PROJECT_ID}/config" \
   -H "Authorization: Bearer $(gcloud auth print-access-token)" \
   -H "Content-Type: application/json" \
   -d '{"emailPrivacyConfig":{"enableImprovedEmailPrivacy":false}}'
@@ -795,7 +795,7 @@ curl -X PATCH \
 **Option C: Firebase CLI**
 ```bash
 # If firebase-tools is installed
-firebase auth:settings set-email-privacy false --project gen-lang-client-0146156913
+firebase auth:settings set-email-privacy false --project ${FIREBASE_PROJECT_ID}
 ```
 
 After disabling, FirebaseUI will correctly detect existing demo accounts and show a password-only sign-in field instead of the full registration form.

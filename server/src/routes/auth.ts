@@ -9,10 +9,13 @@ import { collections, setDoc, getDoc } from '../services/firestore.js';
 export const authRouter = Router();
 
 // Demo user accounts for seeding
+// Password is loaded from DEMO_USER_PASSWORD env var (set via Secret Manager)
+const DEMO_PASSWORD = process.env.DEMO_USER_PASSWORD || '';
+
 const DEMO_USERS = [
   {
     email: 'helen.carter@rcha.org.uk',
-    password: 'SocialHomes2026!',
+    password: DEMO_PASSWORD,
     displayName: 'Helen Carter',
     persona: 'coo',
     teamId: undefined,
@@ -20,7 +23,7 @@ const DEMO_USERS = [
   },
   {
     email: 'james.wright@rcha.org.uk',
-    password: 'SocialHomes2026!',
+    password: DEMO_PASSWORD,
     displayName: 'James Wright',
     persona: 'head-of-housing',
     teamId: 'london',
@@ -28,7 +31,7 @@ const DEMO_USERS = [
   },
   {
     email: 'priya.patel@rcha.org.uk',
-    password: 'SocialHomes2026!',
+    password: DEMO_PASSWORD,
     displayName: 'Priya Patel',
     persona: 'manager',
     teamId: 'southwark-lewisham',
@@ -36,7 +39,7 @@ const DEMO_USERS = [
   },
   {
     email: 'sarah.mitchell@rcha.org.uk',
-    password: 'SocialHomes2026!',
+    password: DEMO_PASSWORD,
     displayName: 'Sarah Mitchell',
     persona: 'housing-officer',
     teamId: 'southwark-lewisham',
@@ -44,7 +47,7 @@ const DEMO_USERS = [
   },
   {
     email: 'mark.johnson@rcha.org.uk',
-    password: 'SocialHomes2026!',
+    password: DEMO_PASSWORD,
     displayName: 'Mark Johnson',
     persona: 'operative',
     teamId: 'southwark-lewisham',
