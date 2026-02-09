@@ -271,16 +271,49 @@ Then refactor the API routes back to Firestore-native `where()` + `orderBy()` qu
 
 ### Security Rules
 
-The file `firestore.rules` defines persona-based RBAC rules. These are **not yet deployed** because:
-1. Firebase Authentication is not yet integrated
-2. The server-side Express API handles all Firestore access (admin SDK bypasses rules)
-3. Direct client-side Firestore access is not used
+The file `firestore.rules` defines persona-based RBAC rules. **Deployed to production** on 09/02/2026.
 
-Deploy when Firebase Auth is integrated:
+Rules enforce:
+- All reads require authentication (`request.auth != null`)
+- Writes use persona hierarchy from custom claims (`request.auth.token.persona`)
+- Audit log is append-only (no update/delete)
+- Users can only update their own profile (unless admin)
+
+Note: The Express API uses Firebase Admin SDK which bypasses security rules. These rules protect against any future direct client-side Firestore access.
+
+### Cloud Armor WAF
+
+A Cloud Armor security policy (`socialhomes-waf`) is attached to the load balancer:
+
+| Rule | Priority | Action | Description |
+|------|----------|--------|-------------|
+| XSS Protection | 1000 | deny-403 | OWASP XSS v3.3 stable rules |
+| SQL Injection | 1001 | deny-403 | OWASP SQLi v3.3 stable rules |
+| Remote File Inclusion | 1002 | deny-403 | OWASP RFI v3.3 stable rules |
+| Rate Limiting | 900 | throttle | 100 requests/minute per IP, exceed = 429 |
+| Default | 2147483647 | allow | Allow all other traffic |
 
 ```bash
-firebase deploy --only firestore:rules
+# View current rules
+gcloud compute security-policies describe socialhomes-waf --project=gen-lang-client-0146156913
+
+# Add a new rule
+gcloud compute security-policies rules create <PRIORITY> \
+  --security-policy=socialhomes-waf \
+  --expression="<CEL expression>" \
+  --action=deny-403
 ```
+
+### Load Balancer
+
+| Component | Value |
+|-----------|-------|
+| **External IP** | 34.149.218.63 |
+| **URL Map** | `socialhomesai` |
+| **Backend Service** | `socialhomes-backend` (Cloud Armor attached) |
+| **NEG** | `socialhomes-neg` (serverless, europe-west2) |
+| **SSL Cert** | Managed, domains: `socialhomes.ai`, `www.socialhomes.ai` (PROVISIONING) |
+| **HTTP Redirect** | `socialhomesai-redirect` → HTTPS |
 
 ---
 
@@ -317,9 +350,31 @@ firebase deploy --only firestore:rules
 | `/api/v1/public-data` | `public-data.ts` | all | EPC, IMD, weather proxy |
 | `/api/v1/export` | `export.ts` | all | HACT v3.5 JSON export |
 
-### Authentication (v1 — Permissive)
+### Authentication (Dual Mode)
 
-Currently uses a header-based persona system (`X-Persona` header). The `authMiddleware` attaches a user object to `req.user` based on the header value. This is **not production-grade security** — it's a demo/development mode.
+Supports two authentication modes simultaneously:
+
+**1. Firebase JWT (production)**: Client sends `Authorization: Bearer <idToken>`. The server verifies the token via Firebase Admin SDK, loads the user profile from Firestore, and attaches it to `req.user`.
+
+**2. Legacy X-Persona (development/testing)**: When no `Authorization` header is present, the server reads `X-Persona` header and attaches a demo user. This allows backward-compatible API testing via `curl`.
+
+#### Demo Accounts (Firebase Auth)
+
+| Email | Password | Persona |
+|-------|----------|---------|
+| helen.carter@rcha.org.uk | SocialHomes2026! | coo |
+| james.wright@rcha.org.uk | SocialHomes2026! | head-of-housing |
+| priya.patel@rcha.org.uk | SocialHomes2026! | manager |
+| sarah.mitchell@rcha.org.uk | SocialHomes2026! | housing-officer |
+| mark.johnson@rcha.org.uk | SocialHomes2026! | operative |
+
+#### Auth API Endpoints
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/v1/auth/me` | GET | Get authenticated user profile (requires Bearer token) |
+| `/api/v1/auth/seed-users` | POST | Create/sync demo Firebase Auth users |
+| `/login` | SPA | Frontend login page with email/password and demo mode |
 
 Valid personas: `coo`, `head-of-housing`, `manager`, `housing-officer`, `operative`
 
@@ -500,15 +555,24 @@ curl -s https://socialhomes-674258130066.europe-west2.run.app/api/v1/export/hact
 | No HTTPS certificate management | None | Cloud Run provides automatic TLS |
 | No custom domain | Low | Currently using default `*.run.app` domain |
 
-### Immediate TODOs for Production Readiness
+### Production Readiness Status
 
-1. **Integrate Firebase Authentication** — Replace `X-Persona` header with JWT tokens
-2. **Deploy Firestore security rules** — After Firebase Auth is set up
-3. **Set up custom domain** — Map `app.socialhomes.ai` or similar to Cloud Run
-4. **Add Google Secret Manager** — For any future API keys (OpenAI, etc.)
-5. **Enable Cloud Armor** — WAF/DDoS protection for the Cloud Run service
-6. ~~**Set min-instances=1**~~ — DONE (configured in `cloudbuild.yaml`)
-7. ~~**Add uptime monitoring**~~ — DONE (5-min checks from 3 global regions)
+| Item | Status | Notes |
+|------|--------|-------|
+| Firebase Authentication | **DONE** | JWT verification + legacy X-Persona backward compat |
+| Firestore security rules | **DONE** | Persona-based RBAC deployed to production |
+| Google Secret Manager | **DONE** | Session secret created, Cloud Run SA has access |
+| Cloud Armor WAF | **DONE** | XSS, SQLi, RFI protection + 100 req/min rate limit |
+| Load Balancer | **DONE** | Global External LB at 34.149.218.63 |
+| Custom domain SSL | **PROVISIONING** | Cert for `socialhomes.ai` + `www.socialhomes.ai` |
+| Min-instances=1 | **DONE** | Configured in `cloudbuild.yaml` |
+| Uptime monitoring | **DONE** | 5-min checks from 3 global regions |
+
+### Remaining TODO
+
+1. **Configure DNS** — Point `socialhomes.ai` A record to `34.149.218.63` to complete SSL provisioning
+2. **Add Google OAuth sign-in** — As alternative to email/password
+3. **Set up alerting policy** — Email/Slack notifications when uptime check fails
 
 ---
 
