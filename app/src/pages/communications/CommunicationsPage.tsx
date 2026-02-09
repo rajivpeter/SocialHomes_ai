@@ -138,7 +138,11 @@ export default function CommunicationsPage() {
                 {sortedCommunications.map((comm, index) => (
                   <tr
                     key={comm.id}
-                    className={`border-b border-border-default hover:bg-surface-elevated transition-colors opacity-0 animate-fade-in-up ${
+                    onClick={() => {
+                      // Navigate to tenant detail if we have a tenantId
+                      if (comm.tenantId) window.location.href = `/tenancies/${comm.tenantId}`;
+                    }}
+                    className={`border-b border-border-default hover:bg-surface-elevated transition-colors opacity-0 animate-fade-in-up cursor-pointer ${
                       comm.status === 'new' ? 'bg-surface-elevated/50' : ''
                     }`}
                     style={{ animationDelay: `${300 + index * 30}ms`, animationFillMode: 'forwards' }}

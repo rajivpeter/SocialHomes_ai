@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { 
   Shield, 
   TrendingUp, 
@@ -22,6 +22,7 @@ const complianceTypes = [
 ];
 
 export default function CompliancePage() {
+  const navigate = useNavigate();
   const getRagColour = (percentage: number) => {
     if (percentage >= 99) return 'bg-status-compliant/20 text-status-compliant border-status-compliant/30';
     if (percentage >= 97) return 'bg-status-warning/20 text-status-warning border-status-warning/30';
@@ -119,7 +120,8 @@ export default function CompliancePage() {
                 {emergencyCases.slice(0, 3).map((case_, idx) => (
                   <div
                     key={case_.id}
-                    className="bg-surface-elevated rounded-lg p-3 border border-border-default opacity-0 animate-fade-in-up"
+                    onClick={() => navigate(`/compliance/awaabs-law`)}
+                    className="bg-surface-elevated rounded-lg p-3 border border-border-default opacity-0 animate-fade-in-up cursor-pointer hover:bg-surface-hover transition-colors"
                     style={{ animationDelay: `${550 + idx * 50}ms`, animationFillMode: 'forwards' }}
                   >
                     <div className="flex items-start justify-between mb-2">
@@ -152,7 +154,8 @@ export default function CompliancePage() {
                 {significantCases.slice(0, 5).map((case_, idx) => (
                   <div
                     key={case_.id}
-                    className="bg-surface-elevated rounded-lg p-3 border border-border-default opacity-0 animate-fade-in-up"
+                    onClick={() => navigate(`/compliance/awaabs-law`)}
+                    className="bg-surface-elevated rounded-lg p-3 border border-border-default opacity-0 animate-fade-in-up cursor-pointer hover:bg-surface-hover transition-colors"
                     style={{ animationDelay: `${600 + idx * 50}ms`, animationFillMode: 'forwards' }}
                   >
                     <div className="flex items-start justify-between mb-2">

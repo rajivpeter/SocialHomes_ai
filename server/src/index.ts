@@ -78,6 +78,37 @@ app.use('/api/v1/admin', adminRouter);
 app.use('/api/v1/public-data', publicDataRouter);
 app.use('/api/v1/export', exportRouter);
 
+// ---- Convenience Route Aliases ----
+// Repairs and complaints are stored in the `cases` collection with a `type`
+// field. These aliases let external tools (QA, dashboards) hit
+// /api/v1/repairs or /api/v1/complaints directly.
+import { getDocs, collections } from './services/firestore.js';
+
+app.get('/api/v1/repairs', async (_req, res, next) => {
+  try {
+    const allCases = await getDocs<any>(collections.cases, undefined, undefined, 1000);
+    const repairs = allCases.filter((c: any) => c.type === 'repair');
+    res.json({ items: repairs, total: repairs.length });
+  } catch (err) { next(err); }
+});
+
+app.get('/api/v1/complaints', async (_req, res, next) => {
+  try {
+    const allCases = await getDocs<any>(collections.cases, undefined, undefined, 1000);
+    const complaints = allCases.filter((c: any) => c.type === 'complaint');
+    res.json({ items: complaints, total: complaints.length });
+  } catch (err) { next(err); }
+});
+
+app.get('/api/v1/allocations', async (_req, res, next) => {
+  try {
+    // Allocations are derived from void properties
+    const allProps = await getDocs<any>(collections.properties, undefined, undefined, 1000);
+    const voids = allProps.filter((p: any) => p.isVoid);
+    res.json({ items: voids, total: voids.length });
+  } catch (err) { next(err); }
+});
+
 // ---- Serve React SPA Static Files ----
 const clientDistPath = path.resolve(__dirname, '../../app/dist');
 app.use(express.static(clientDistPath));

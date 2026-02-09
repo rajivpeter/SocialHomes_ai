@@ -18,6 +18,7 @@ import RepairsPage from '@/pages/repairs/RepairsPage';
 import RepairDetailPage from '@/pages/repairs/RepairDetailPage';
 import RentPage from '@/pages/rent/RentPage';
 import CompliancePage from '@/pages/compliance/CompliancePage';
+import ComplianceTypePage from '@/pages/compliance/ComplianceTypePage';
 import AwaabsLawPage from '@/pages/compliance/AwaabsLawPage';
 import ComplaintsPage from '@/pages/complaints/ComplaintsPage';
 import ComplaintDetailPage from '@/pages/complaints/ComplaintDetailPage';
@@ -31,6 +32,7 @@ import AiCentrePage from '@/pages/ai-centre/AiCentrePage';
 import AdminPage from '@/pages/admin/AdminPage';
 import TenantPortalPage from '@/pages/tenant-portal/TenantPortalPage';
 import LoginPage from '@/pages/auth/LoginPage';
+import ComingSoonPage from '@/pages/shared/ComingSoonPage';
 
 // Error Boundary to catch and display runtime errors
 class ErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean; error: Error | null }> {
@@ -106,13 +108,8 @@ export default function App() {
             <Route path="/rent/accounts/:id" element={<RentPage />} />
             <Route path="/rent/arrears" element={<RentPage />} />
             <Route path="/compliance" element={<CompliancePage />} />
-            <Route path="/compliance/gas" element={<CompliancePage />} />
-            <Route path="/compliance/electrical" element={<CompliancePage />} />
-            <Route path="/compliance/fire" element={<CompliancePage />} />
-            <Route path="/compliance/asbestos" element={<CompliancePage />} />
-            <Route path="/compliance/legionella" element={<CompliancePage />} />
-            <Route path="/compliance/lifts" element={<CompliancePage />} />
             <Route path="/compliance/awaabs-law" element={<AwaabsLawPage />} />
+            <Route path="/compliance/:type" element={<ComplianceTypePage />} />
             <Route path="/complaints" element={<ComplaintsPage />} />
             <Route path="/complaints/new" element={<ComplaintsPage />} />
             <Route path="/complaints/:id" element={<ComplaintDetailPage />} />
@@ -125,12 +122,7 @@ export default function App() {
             <Route path="/communications/templates" element={<CommunicationsPage />} />
             <Route path="/reports" element={<ReportsPage />} />
             <Route path="/reports/tsm" element={<TsmReportPage />} />
-            <Route path="/reports/core" element={<ReportsPage />} />
-            <Route path="/reports/regulatory" element={<ReportsPage />} />
-            <Route path="/reports/ombudsman" element={<ReportsPage />} />
-            <Route path="/reports/performance" element={<ReportsPage />} />
-            <Route path="/reports/financial" element={<ReportsPage />} />
-            <Route path="/reports/stock-condition" element={<ReportsPage />} />
+            <Route path="/reports/*" element={<ComingSoonPage />} />
             <Route path="/ai" element={<AiCentrePage />} />
             <Route path="/ai/insights" element={<AiCentrePage />} />
             <Route path="/ai/predictions" element={<AiCentrePage />} />

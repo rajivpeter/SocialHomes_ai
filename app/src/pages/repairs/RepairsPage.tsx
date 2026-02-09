@@ -28,16 +28,16 @@ export default function RepairsPage() {
       
       return matchesSearch && matchesStatus && matchesPriority;
     });
-  }, [searchQuery, filterStatus, filterPriority]);
+  }, [repairs, properties, searchQuery, filterStatus, filterPriority]);
 
   const stats = useMemo(() => {
     const total = repairs.length;
-    const emergency = repairs.filter(r => r.priority === 'emergency').length;
-    const urgent = repairs.filter(r => r.priority === 'urgent').length;
-    const routine = repairs.filter(r => r.priority === 'routine').length;
-    const planned = repairs.filter(r => r.priority === 'planned').length;
+    const emergency = repairs.filter((r: any) => r.priority === 'emergency').length;
+    const urgent = repairs.filter((r: any) => r.priority === 'urgent').length;
+    const routine = repairs.filter((r: any) => r.priority === 'routine').length;
+    const planned = repairs.filter((r: any) => r.priority === 'planned').length;
     return { total, emergency, urgent, routine, planned };
-  }, []);
+  }, [repairs]);
 
   const getPriorityBorderColor = (priority: string) => {
     switch (priority) {

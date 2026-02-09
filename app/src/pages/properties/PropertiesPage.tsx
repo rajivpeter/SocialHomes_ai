@@ -84,8 +84,12 @@ export default function PropertiesPage() {
         const marker = L.default.circleMarker([lat, lng], {
           radius: 8, fillColor: color, color: '#1E2A38', weight: 1, opacity: 1, fillOpacity: 0.8
         }).addTo(map);
-        marker.bindPopup(`<b>${prop.address}</b><br>${prop.postcode}<br>EPC: ${prop.epc?.rating || 'N/A'}`);
-        marker.on('click', () => { window.location.href = '/properties/' + prop.id; });
+        marker.bindPopup(
+          `<b>${prop.address}</b><br>${prop.postcode}<br>` +
+          `EPC: ${prop.epc?.rating || 'N/A'}<br>` +
+          `Status: ${prop.compliance?.overall || 'N/A'}<br>` +
+          `<a href="/properties/${prop.id}" style="color:#00D4AA;font-weight:600">View Property →</a>`
+        );
       });
     });
 

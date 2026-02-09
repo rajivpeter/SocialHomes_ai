@@ -3,7 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { useProperties, useTenants, useCases } from '@/hooks/useApi';
 import AiActionCard from '@/components/shared/AiActionCard';
 import StatusPill from '@/components/shared/StatusPill';
-import { formatCurrency, formatDate } from '@/utils/format';
+import { formatCurrency, formatDate, safeText } from '@/utils/format';
 import { usePropertyIntelligence } from '@/hooks/useEntityIntelligence';
 import {
   Home,
@@ -195,7 +195,7 @@ export default function PropertyDetailPage() {
                   <div>
                     <div className="text-sm text-text-muted">SAP Score</div>
                     <div className="text-2xl font-bold text-text-primary">{property.epc.sapScore}</div>
-                    <div className="text-xs text-text-muted mt-1">Expires: {property.epc.expiryDate}</div>
+                    <div className="text-xs text-text-muted mt-1">Expires: {safeText(property.epc?.expiryDate)}</div>
                   </div>
                 </div>
                 <div className="pt-4 border-t border-border-default">
@@ -276,15 +276,15 @@ export default function PropertyDetailPage() {
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between">
                       <span className="text-text-muted">Last Inspection</span>
-                      <span className="text-text-primary">{property.gasSafety.date}</span>
+                      <span className="text-text-primary">{safeText(property.gasSafety.date)}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-text-muted">Expires</span>
-                      <span className="text-text-primary">{property.gasSafety.expiryDate}</span>
+                      <span className="text-text-primary">{safeText(property.gasSafety.expiryDate)}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-text-muted">Engineer</span>
-                      <span className="text-text-primary">{property.gasSafety.engineer}</span>
+                      <span className="text-text-primary">{safeText(property.gasSafety.engineer)}</span>
                     </div>
                   </div>
                 ) : (
@@ -306,15 +306,15 @@ export default function PropertyDetailPage() {
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between">
                       <span className="text-text-muted">Last Inspection</span>
-                      <span className="text-text-primary">{property.eicr.date}</span>
+                      <span className="text-text-primary">{safeText(property.eicr.date)}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-text-muted">Expires</span>
-                      <span className="text-text-primary">{property.eicr.expiryDate}</span>
+                      <span className="text-text-primary">{safeText(property.eicr.expiryDate)}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-text-muted">Observations</span>
-                      <span className="text-text-primary">{property.eicr.observations}</span>
+                      <span className="text-text-primary">{safeText(property.eicr.observations)}</span>
                     </div>
                   </div>
                 ) : (
@@ -339,7 +339,7 @@ export default function PropertyDetailPage() {
                         <span className="text-text-muted">Smoke Alarms</span>
                         <span className="text-text-primary">{property.smokeAlarms.count} installed</span>
                       </div>
-                      <div className="text-xs text-text-muted">Last tested: {property.smokeAlarms.lastTest}</div>
+                      <div className="text-xs text-text-muted">Last tested: {safeText(property.smokeAlarms.lastTest)}</div>
                     </div>
                   )}
                   {property.coAlarms && (
@@ -348,7 +348,7 @@ export default function PropertyDetailPage() {
                         <span className="text-text-muted">CO Alarms</span>
                         <span className="text-text-primary">{property.coAlarms.count} installed</span>
                       </div>
-                      <div className="text-xs text-text-muted">Last tested: {property.coAlarms.lastTest}</div>
+                      <div className="text-xs text-text-muted">Last tested: {safeText(property.coAlarms.lastTest)}</div>
                     </div>
                   )}
                 </div>
@@ -372,7 +372,7 @@ export default function PropertyDetailPage() {
                     </div>
                     <div className="flex justify-between">
                       <span className="text-text-muted">Last Survey</span>
-                      <span className="text-text-primary">{property.asbestos.lastSurvey}</span>
+                      <span className="text-text-primary">{safeText(property.asbestos.lastSurvey)}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-text-muted">Risk Level</span>
@@ -477,7 +477,7 @@ export default function PropertyDetailPage() {
                   </div>
                   <div className="text-sm text-text-primary font-medium mb-1">{case_.subject}</div>
                   <div className="text-xs text-text-muted">{case_.description}</div>
-                  <div className="text-xs text-text-muted mt-2">Opened: {case_.createdDate}</div>
+                  <div className="text-xs text-text-muted mt-2">Opened: {safeText(case_.createdDate)}</div>
                 </div>
               ))}
             </div>
@@ -489,10 +489,10 @@ export default function PropertyDetailPage() {
             <h2 className="text-xl font-bold font-heading text-brand-peach mb-4">Documents</h2>
             <div className="space-y-3">
               {[
-                { name: 'Gas Safety Certificate', type: 'Certificate', date: property.gasSafety?.date || 'N/A', expires: property.gasSafety?.expiryDate || 'N/A', status: property.gasSafety?.status || 'na' },
-                { name: 'EICR Report', type: 'Certificate', date: property.eicr?.date || 'N/A', expires: property.eicr?.expiryDate || 'N/A', status: property.eicr?.status || 'na' },
-                { name: 'EPC Certificate', type: 'Certificate', date: 'On file', expires: property.epc?.expiryDate || 'N/A', status: 'valid' },
-                { name: 'Asbestos Survey', type: 'Report', date: property.asbestos?.lastSurvey || 'N/A', expires: 'N/A', status: property.asbestos ? 'valid' : 'na' },
+                { name: 'Gas Safety Certificate', type: 'Certificate', date: safeText(property.gasSafety?.date), expires: safeText(property.gasSafety?.expiryDate), status: property.gasSafety?.status || 'na' },
+                { name: 'EICR Report', type: 'Certificate', date: safeText(property.eicr?.date), expires: safeText(property.eicr?.expiryDate), status: property.eicr?.status || 'na' },
+                { name: 'EPC Certificate', type: 'Certificate', date: 'On file', expires: safeText(property.epc?.expiryDate), status: 'valid' },
+                { name: 'Asbestos Survey', type: 'Report', date: safeText(property.asbestos?.lastSurvey), expires: 'N/A', status: property.asbestos ? 'valid' : 'na' },
                 { name: 'Fire Risk Assessment', type: 'Report', date: '15/06/2025', expires: '15/06/2026', status: 'valid' },
                 { name: 'Property Photos', type: 'Media', date: '01/01/2026', expires: 'N/A', status: 'valid' },
               ].map((doc, idx) => (

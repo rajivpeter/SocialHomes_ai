@@ -11,7 +11,7 @@ import { useTenants, useProperties, useCases } from '@/hooks/useApi';
 import { activities as activitiesData, rentTransactionsSample } from '@/data';
 import AiActionCard from '@/components/shared/AiActionCard';
 import StatusPill from '@/components/shared/StatusPill';
-import { formatCurrency, formatDate, getCaseTypeColour } from '@/utils/format';
+import { formatCurrency, formatDate, getCaseTypeColour, safeText } from '@/utils/format';
 
 export default function TenancyDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -91,7 +91,7 @@ export default function TenancyDetailPage() {
           tenant, 
           property: property || undefined, 
           communicationType: 'holding-update', 
-          tone: tenant.vulnerabilityFlags.length > 0 ? 'supportive' : 'formal' 
+          tone: (tenant.vulnerabilityFlags ?? []).length > 0 ? 'supportive' : 'formal' 
         })
       });
     }
@@ -119,12 +119,12 @@ export default function TenancyDetailPage() {
           tenant, 
           property: property || undefined, 
           communicationType: 'arrears-support', 
-          tone: tenant.vulnerabilityFlags.length > 0 ? 'supportive' : 'formal' 
+          tone: (tenant.vulnerabilityFlags ?? []).length > 0 ? 'supportive' : 'formal' 
         })
       });
     }
 
-    if (tenant.vulnerabilityFlags.length > 0) {
+    if ((tenant.vulnerabilityFlags ?? []).length > 0) {
       actions.push({
         icon: '🤝',
         label: 'Welfare Check',
@@ -255,7 +255,7 @@ export default function TenancyDetailPage() {
                     <div className="space-y-3 text-sm">
                       <div className="flex justify-between">
                         <span className="text-text-muted">Date of Birth:</span>
-                        <span className="text-text-primary">{tenant.dob}</span>
+                        <span className="text-text-primary">{safeText(tenant.dob)}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-text-muted">Email:</span>
@@ -284,7 +284,7 @@ export default function TenancyDetailPage() {
                     <div className="space-y-3 text-sm">
                       <div className="flex justify-between">
                         <span className="text-text-muted">Tenancy Start:</span>
-                        <span className="text-text-primary">{tenant.tenancyStartDate}</span>
+                        <span className="text-text-primary">{safeText(tenant.tenancyStartDate)}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-text-muted">Tenure Type:</span>
@@ -293,7 +293,7 @@ export default function TenancyDetailPage() {
                       {tenant.lastContact && (
                         <div className="flex justify-between">
                           <span className="text-text-muted">Last Contact:</span>
-                          <span className="text-text-primary">{tenant.lastContact}</span>
+                          <span className="text-text-primary">{safeText(tenant.lastContact)}</span>
                         </div>
                       )}
                       <div className="flex justify-between">
@@ -305,7 +305,7 @@ export default function TenancyDetailPage() {
                 </div>
 
                 {/* Household Members */}
-                {tenant.household.length > 0 && (
+                {(tenant.household ?? []).length > 0 && (
                   <div className="bg-surface-elevated rounded-lg p-4 border border-border-default">
                     <h3 className="text-lg font-semibold text-text-primary mb-4">Household Members</h3>
                     <div className="overflow-x-auto">
@@ -319,11 +319,11 @@ export default function TenancyDetailPage() {
                           </tr>
                         </thead>
                         <tbody>
-                          {tenant.household.map((member: any, idx: number) => (
+                          {(tenant.household ?? []).map((member: any, idx: number) => (
                             <tr key={idx} className="border-b border-border-default last:border-0">
-                              <td className="px-4 py-2 text-sm text-text-primary">{member.name}</td>
-                              <td className="px-4 py-2 text-sm text-text-secondary">{member.relationship}</td>
-                              <td className="px-4 py-2 text-sm text-text-secondary">{member.dob}</td>
+                              <td className="px-4 py-2 text-sm text-text-primary">{safeText(member.name)}</td>
+                              <td className="px-4 py-2 text-sm text-text-secondary">{safeText(member.relationship)}</td>
+                              <td className="px-4 py-2 text-sm text-text-secondary">{safeText(member.dob)}</td>
                               <td className="px-4 py-2 text-sm text-text-secondary">{member.isDependent ? 'Yes' : 'No'}</td>
                             </tr>
                           ))}
@@ -334,39 +334,41 @@ export default function TenancyDetailPage() {
                 )}
 
                 {/* Emergency Contact */}
+                {tenant.emergencyContact && (
                 <div className="bg-surface-elevated rounded-lg p-4 border border-border-default">
                   <h3 className="text-lg font-semibold text-text-primary mb-4">Emergency Contact</h3>
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between">
                       <span className="text-text-muted">Name:</span>
-                      <span className="text-text-primary">{tenant.emergencyContact.name}</span>
+                      <span className="text-text-primary">{safeText(tenant.emergencyContact?.name)}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-text-muted">Phone:</span>
-                      <span className="text-text-primary">{tenant.emergencyContact.phone}</span>
+                      <span className="text-text-primary">{safeText(tenant.emergencyContact?.phone)}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-text-muted">Relationship:</span>
-                      <span className="text-text-primary">{tenant.emergencyContact.relationship}</span>
+                      <span className="text-text-primary">{safeText(tenant.emergencyContact?.relationship)}</span>
                     </div>
                   </div>
                 </div>
+                )}
 
                 {/* Vulnerability Flags */}
-                {tenant.vulnerabilityFlags.length > 0 && (
+                {(tenant.vulnerabilityFlags ?? []).length > 0 && (
                   <div className="bg-surface-elevated rounded-lg p-4 border border-border-default">
                     <h3 className="text-lg font-semibold text-text-primary mb-4 flex items-center gap-2">
                       <AlertTriangle size={18} className="text-status-warning" />
                       Vulnerability Flags
                     </h3>
                     <div className="space-y-2">
-                      {tenant.vulnerabilityFlags.map((flag: any, idx: number) => (
+                      {(tenant.vulnerabilityFlags ?? []).map((flag: any, idx: number) => (
                         <div key={idx} className="flex items-center justify-between p-2 bg-status-warning/10 rounded border border-status-warning/20">
                           <div>
-                            <span className="text-sm font-medium text-text-primary">{flag.type}</span>
-                            <span className="text-xs text-text-muted ml-2 capitalize">({flag.severity})</span>
+                            <span className="text-sm font-medium text-text-primary">{safeText(flag.type)}</span>
+                            <span className="text-xs text-text-muted ml-2 capitalize">({safeText(flag.severity)})</span>
                           </div>
-                          <span className="text-xs text-text-muted">{flag.dateIdentified}</span>
+                          <span className="text-xs text-text-muted">{safeText(flag.dateIdentified)}</span>
                         </div>
                       ))}
                     </div>
@@ -400,7 +402,7 @@ export default function TenancyDetailPage() {
                           <span className="font-mono text-sm text-text-muted">{case_.reference}</span>
                           <StatusPill status={case_.status} />
                         </div>
-                        <span className="text-xs text-text-muted">{case_.createdDate}</span>
+                        <span className="text-xs text-text-muted">{safeText(case_.createdDate)}</span>
                       </div>
                       <h4 className="text-sm font-semibold text-text-primary mb-1">{case_.subject}</h4>
                       <p className="text-xs text-text-muted mb-2">{case_.description}</p>

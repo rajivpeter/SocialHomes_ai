@@ -1,5 +1,45 @@
 // UK formatting utilities
 
+/**
+ * Safely convert any value into a renderable string.
+ * Handles Firestore Timestamps ({_seconds, _nanoseconds}),
+ * Date objects, strings, numbers, null/undefined, and plain objects.
+ * Prevents React Error #310 ("Objects are not valid as a React child").
+ */
+export function safeText(value: any, fallback = 'N/A'): string {
+  if (value === null || value === undefined) return fallback;
+  if (typeof value === 'string') return value || fallback;
+  if (typeof value === 'number') return String(value);
+  if (typeof value === 'boolean') return value ? 'Yes' : 'No';
+  // Firestore Timestamp serialised via JSON (comes from Express API)
+  if (typeof value === 'object' && '_seconds' in value) {
+    try {
+      const d = new Date(value._seconds * 1000);
+      return d.toLocaleDateString('en-GB'); // DD/MM/YYYY
+    } catch {
+      return fallback;
+    }
+  }
+  // Native Date object
+  if (value instanceof Date) {
+    return value.toLocaleDateString('en-GB');
+  }
+  // Firestore Timestamp with toDate() (if used client-side)
+  if (typeof value === 'object' && typeof value.toDate === 'function') {
+    try {
+      return value.toDate().toLocaleDateString('en-GB');
+    } catch {
+      return fallback;
+    }
+  }
+  // Fallback: stringify to prevent Error #310
+  try {
+    return JSON.stringify(value);
+  } catch {
+    return fallback;
+  }
+}
+
 export function formatCurrency(amount: number): string {
   return new Intl.NumberFormat('en-GB', {
     style: 'currency',

@@ -134,7 +134,8 @@ export default function ComplaintsPage() {
                   return (
                     <tr
                       key={complaint.id}
-                      className="hover:bg-surface-hover transition-colors opacity-0 animate-fade-in-up"
+                      onClick={() => { window.location.href = `/complaints/${complaint.id}`; }}
+                      className="hover:bg-surface-hover transition-colors opacity-0 animate-fade-in-up cursor-pointer"
                       style={{ animationDelay: `${250 + index * 30}ms`, animationFillMode: 'forwards' }}
                     >
                       <td className="px-4 py-3">
