@@ -1,8 +1,8 @@
 # SocialHomes.Ai — DevOps & Infrastructure Guide
 
-**Last Updated**: 08/02/2026
-**Maintainer**: Development Agent
-**Status**: Production (live on Cloud Run)
+**Last Updated**: 09/02/2026
+**Maintainer**: DevOps Senior
+**Status**: Production (live on Cloud Run, min-instances=1, uptime monitored)
 
 ---
 
@@ -177,7 +177,7 @@ docker run -p 8080:8080 \
 | **Region** | `europe-west2` (London) | UK data residency |
 | **CPU** | 1 vCPU | |
 | **Memory** | 1 GiB | |
-| **Min Instances** | 0 | Scales to zero (cost saving) |
+| **Min Instances** | 1 | Always-warm instance (no cold starts) |
 | **Max Instances** | 10 | |
 | **Port** | 8080 | Express listens on `$PORT` |
 | **Concurrency** | 80 (default) | |
@@ -195,15 +195,15 @@ docker run -p 8080:8080 \
 
 ### Cold Start Behaviour
 
-- Min instances = 0 means cold starts occur after idle periods
-- Cold start time: ~2-3 seconds (Node.js + Firestore client init)
-- To eliminate cold starts: set `--min-instances=1` (costs ~$15/month)
+- Min instances = 1 ensures one warm instance is always available (no cold starts)
+- Configured in `cloudbuild.yaml` so it persists across deployments
+- Additional instances beyond 1 may still cold-start under load spikes (~2-3s)
+- To revert to scale-to-zero: change `--min-instances` to `0` in `cloudbuild.yaml`
 
 ```bash
-# Set min instances to 1 for zero cold starts
-gcloud run services update socialhomes \
-  --region=europe-west2 \
-  --min-instances=1
+# Check current min-instances setting
+gcloud run services describe socialhomes --region=europe-west2 \
+  --format="value(spec.template.metadata.annotations['autoscaling.knative.dev/minScale'])"
 ```
 
 ---
@@ -407,6 +407,30 @@ gcloud run services logs read socialhomes \
 
 Morgan middleware logs every HTTP request in Apache combined format.
 
+### Uptime Monitoring
+
+An automated uptime check runs every 5 minutes from 3 global regions:
+
+| Setting | Value |
+|---------|-------|
+| **Check Name** | `SocialHomes.Ai Health Check` |
+| **URL** | `https://socialhomes-674258130066.europe-west2.run.app/health` |
+| **Protocol** | HTTPS (GET) |
+| **Period** | 300s (5 minutes) |
+| **Timeout** | 10s |
+| **Content match** | `healthy` |
+| **Regions** | Europe, USA Virginia, Asia Pacific |
+
+View at: https://console.cloud.google.com/monitoring/uptime?project=gen-lang-client-0146156913
+
+```bash
+# List uptime checks
+gcloud monitoring uptime list-configs --project=gen-lang-client-0146156913
+
+# Delete if needed
+gcloud monitoring uptime delete <CHECK_ID> --project=gen-lang-client-0146156913
+```
+
 ### Metrics
 
 Cloud Run auto-provides:
@@ -483,8 +507,8 @@ curl -s https://socialhomes-674258130066.europe-west2.run.app/api/v1/export/hact
 3. **Set up custom domain** — Map `app.socialhomes.ai` or similar to Cloud Run
 4. **Add Google Secret Manager** — For any future API keys (OpenAI, etc.)
 5. **Enable Cloud Armor** — WAF/DDoS protection for the Cloud Run service
-6. **Set min-instances=1** — Eliminate cold starts for production users
-7. **Add uptime monitoring** — Cloud Monitoring uptime check on `/health`
+6. ~~**Set min-instances=1**~~ — DONE (configured in `cloudbuild.yaml`)
+7. ~~**Add uptime monitoring**~~ — DONE (5-min checks from 3 global regions)
 
 ---
 
@@ -492,13 +516,11 @@ curl -s https://socialhomes-674258130066.europe-west2.run.app/api/v1/export/hact
 
 | Resource | Monthly Estimate | Notes |
 |----------|-----------------|-------|
-| Cloud Run (min=0) | ~$0-5 | Pay per request; scales to zero |
-| Cloud Run (min=1) | ~$15-20 | Always-on warm instance |
+| Cloud Run (min=1) | ~$15-20 | Always-on warm instance (current config) |
 | Firestore | ~$0 | Free tier covers ~550 docs easily |
 | Artifact Registry | ~$0.10 | Image storage |
 | Cloud Build | Free tier | 120 min/day free |
-| **Total (dev/demo)** | **~$0-5/month** | |
-| **Total (production, min=1)** | **~$15-25/month** | |
+| **Total (current)** | **~$15-25/month** | min-instances=1 |
 
 ---
 
@@ -633,4 +655,5 @@ socialhomes/
 ---
 
 *Document generated 08/02/2026 by Development Agent.*
+*Updated 09/02/2026 by DevOps Senior: min-instances=1, uptime monitoring, Artifact Registry cleanup.*
 *For QA test results, see `TEST-REPORT-V2.md`.*
