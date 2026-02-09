@@ -1,6 +1,6 @@
 # SocialHomes.Ai — DevOps & Infrastructure Guide
 
-**Last Updated**: 09/02/2026
+**Last Updated**: 09/02/2026 (v3 — Security Hardening Release)
 **Maintainer**: DevOps Senior
 **Status**: Production (live on Cloud Run, min-instances=1, uptime monitored)
 
@@ -185,13 +185,19 @@ docker run -p 8080:8080 \
 | **Auth** | `allUsers` (public) | No IAM gate — app handles auth |
 | **CPU Allocation** | Only during requests | |
 
-### Environment Variables (set in Cloud Run)
+### Environment Variables & Secrets (set in Cloud Run)
 
 | Variable | Value | Source |
 |----------|-------|--------|
 | `PORT` | `8080` | Cloud Run default |
 | `NODE_ENV` | `production` | Set in cloudbuild.yaml |
 | `GOOGLE_CLOUD_PROJECT` | Auto-injected | Cloud Run metadata |
+| `FIREBASE_API_KEY` | (secret) | **Google Secret Manager** |
+| `FIREBASE_AUTH_DOMAIN` | (secret) | **Google Secret Manager** |
+| `FIREBASE_PROJECT_ID` | (secret) | **Google Secret Manager** |
+| `DEMO_USER_PASSWORD` | (secret) | **Google Secret Manager** |
+
+**IMPORTANT**: Secrets are injected via `--update-secrets` in `cloudbuild.yaml`, NOT via env vars. See Section 16 for setup.
 
 ### Cold Start Behaviour
 
@@ -547,12 +553,9 @@ curl -s https://socialhomes-674258130066.europe-west2.run.app/api/v1/export/hact
 
 | Issue | Severity | Notes |
 |-------|----------|-------|
-| No Firebase Auth | High | Using permissive header-based personas. Must integrate Firebase Auth before production use |
 | Composite indexes not deployed | Low | Using in-memory filtering. Fine for current dataset (~550 docs). Deploy indexes if >10K docs |
-| Firestore security rules not deployed | Low | Server-side admin SDK bypasses rules. Deploy when adding client-side Firestore access |
-| Large JS bundle (2 MB) | Medium | Three.js + Leaflet. Code-split with dynamic imports for production |
+| Large JS bundle (~2.5 MB) | Medium | Three.js + Leaflet. Code-split with dynamic imports for production |
 | WebGL in headless Chrome | Low | TC-404 (3D visualisation) fails in headless Selenium. Works in real browsers |
-| No HTTPS certificate management | None | Cloud Run provides automatic TLS |
 | No custom domain | Low | Currently using default `*.run.app` domain |
 
 ### Production Readiness Status
@@ -561,18 +564,22 @@ curl -s https://socialhomes-674258130066.europe-west2.run.app/api/v1/export/hact
 |------|--------|-------|
 | Firebase Authentication | **DONE** | JWT verification + legacy X-Persona backward compat |
 | Firestore security rules | **DONE** | Persona-based RBAC deployed to production |
-| Google Secret Manager | **DONE** | Session secret created, Cloud Run SA has access |
+| Google Secret Manager | **DONE** | 4 secrets: FIREBASE_API_KEY, FIREBASE_AUTH_DOMAIN, FIREBASE_PROJECT_ID, DEMO_USER_PASSWORD |
+| Secrets removed from code | **DONE** | No API keys, passwords, or project IDs in source (commit e0c23e4) |
 | Cloud Armor WAF | **DONE** | XSS, SQLi, RFI protection + 100 req/min rate limit |
 | Load Balancer | **DONE** | Global External LB at 34.149.218.63 |
 | Custom domain SSL | **PROVISIONING** | Cert for `socialhomes.ai` + `www.socialhomes.ai` |
 | Min-instances=1 | **DONE** | Configured in `cloudbuild.yaml` |
 | Uptime monitoring | **DONE** | 5-min checks from 3 global regions |
+| Server-side data serialisation | **DONE** | All Firestore Timestamps converted to ISO strings before API response |
+| Mobile device detection | **DONE** | Login page blocks mobile users with desktop-required message |
 
 ### Remaining TODO
 
 1. **Configure DNS** — Point `socialhomes.ai` A record to `34.149.218.63` to complete SSL provisioning
-2. **Add Google OAuth sign-in** — As alternative to email/password
-3. **Set up alerting policy** — Email/Slack notifications when uptime check fails
+2. **Rotate Firebase API key** — Old key was exposed in git history (see Section 16)
+3. **Clean git history** — Remove exposed secrets from historical commits (see Section 16)
+4. **Set up alerting policy** — Email/Slack notifications when uptime check fails
 
 ---
 
@@ -708,12 +715,14 @@ socialhomes/
 │       │   ├── public-data.ts
 │       │   └── export.ts
 │       └── services/
-│           ├── firestore.ts    # Firestore client + CRUD helpers
-│           ├── hact-export.ts  # HACT v3.5 export transformer
-│           └── seed.ts         # Firestore data seeder
+│           ├── firestore.ts       # Firestore client + CRUD helpers + serializeFirestoreData()
+│           ├── firebase-admin.ts  # Firebase Admin SDK (auth token verification)
+│           ├── hact-export.ts     # HACT v3.5 export transformer
+│           └── seed.ts            # Firestore data seeder
 │
 └── scripts/
-    └── seed-firestore.ts   # Standalone seed script
+    ├── seed-firestore.ts       # Standalone seed script
+    └── setup-secrets.sh        # Google Secret Manager setup (interactive)
 ```
 
 ---
@@ -725,10 +734,9 @@ socialhomes/
 ### What Was Done (DevOps)
 
 1. **Fixed build failure**: `firebaseui@6.1.0` declares peer `firebase@^9||^10` but works with v12 via compat layer. Added `--legacy-peer-deps` to Dockerfile client stage.
-2. **Set Firebase env vars on Cloud Run**: `FIREBASE_API_KEY`, `FIREBASE_AUTH_DOMAIN`, `FIREBASE_PROJECT_ID` set via `gcloud run services update`.
-3. **Hardcoded Firebase config in `cloudbuild.yaml`**: Values are public Firebase Web SDK config (NOT secrets). Removed empty substitution variables; values now persist across all future deploys via `--set-env-vars` in the deploy step.
-4. **Seeded 5 demo Firebase Auth accounts** with Firestore profiles and custom claims.
-5. **Verified end-to-end**: Firebase REST sign-in → ID token → `/api/v1/auth/me` returns correct persona, team, and patch data.
+2. **Secrets moved to Google Secret Manager** (commit e0c23e4): `FIREBASE_API_KEY`, `FIREBASE_AUTH_DOMAIN`, `FIREBASE_PROJECT_ID`, `DEMO_USER_PASSWORD` are now injected via `--update-secrets` in `cloudbuild.yaml`. No secrets in source code.
+3. **Seeded 5 demo Firebase Auth accounts** with Firestore profiles and custom claims.
+4. **Verified end-to-end**: Firebase REST sign-in → ID token → `/api/v1/auth/me` returns correct persona, team, and patch data.
 
 ### Firebase Config Endpoint
 
@@ -767,9 +775,10 @@ The Dockerfile uses `npm ci --legacy-peer-deps` in the client build stage becaus
 
 | Item | Status | Notes |
 |------|--------|-------|
+| **Rotate Firebase API key** | **URGENT** | Old key exposed in git history — see Section 16 |
+| **Clean git history** | **URGENT** | Remove secrets from historical commits — see Section 16 |
 | **Disable email enumeration protection** | **URGENT** | Login shows registration form instead of sign-in — see fix below |
 | Configure DNS | PENDING | Point `socialhomes.ai` A record to `34.149.218.63` |
-| Add Google OAuth sign-in | PENDING | Provider enabled; needs frontend testing |
 | Set up alerting policy | PENDING | Email/Slack notifications on uptime failure |
 
 ### URGENT: Disable Email Enumeration Protection
@@ -802,8 +811,180 @@ After disabling, FirebaseUI will correctly detect existing demo accounts and sho
 
 ---
 
+---
+
+## 16. Security — Secret Manager & Key Rotation
+
+### CRITICAL: Security Incident — Exposed Keys (09/02/2026)
+
+**What happened**: The Firebase API key, Auth Domain, Project ID, and demo user password were hardcoded in `cloudbuild.yaml` and `server/src/routes/auth.ts` and committed to the public GitHub repository. GitHub and Google Cloud both issued security alerts.
+
+**What was done** (commit `e0c23e4`):
+
+1. **Removed all secrets from source code**:
+   - `cloudbuild.yaml`: Replaced `--set-env-vars` (with hardcoded values) with `--update-secrets` (pulls from Secret Manager)
+   - `server/src/routes/auth.ts`: Demo password now reads from `process.env.DEMO_USER_PASSWORD`
+   - `app/src/pages/auth/LoginPage.tsx`: Removed password hint from UI
+   - `DEVOPS.md` + `TEST-REPORT-V2.md`: Redacted all keys and passwords
+
+2. **Created 4 secrets in Google Secret Manager**:
+   - `FIREBASE_API_KEY`
+   - `FIREBASE_AUTH_DOMAIN`
+   - `FIREBASE_PROJECT_ID`
+   - `DEMO_USER_PASSWORD`
+
+3. **Created setup script**: `scripts/setup-secrets.sh`
+
+### Secret Manager Setup
+
+If secrets have not yet been created (e.g., fresh environment), run the interactive setup:
+
+```bash
+cd /path/to/socialhomes
+bash scripts/setup-secrets.sh
+```
+
+This prompts for each value (no echo for secrets), creates the secrets, and grants IAM access to both the Cloud Run and Cloud Build service accounts.
+
+### Manual Secret Operations
+
+```bash
+# List all secrets
+gcloud secrets list
+
+# View a secret value
+gcloud secrets versions access latest --secret=FIREBASE_API_KEY
+
+# Rotate a secret (add new version)
+echo -n "NEW_VALUE" | gcloud secrets versions add FIREBASE_API_KEY --data-file=-
+
+# Grant access to a service account
+gcloud secrets add-iam-policy-binding FIREBASE_API_KEY \
+  --member="serviceAccount:SA_EMAIL" \
+  --role="roles/secretmanager.secretAccessor"
+```
+
+### How `cloudbuild.yaml` Uses Secrets
+
+```yaml
+# The deploy step injects secrets as environment variables at runtime:
+- '--update-secrets'
+- 'FIREBASE_API_KEY=FIREBASE_API_KEY:latest,FIREBASE_AUTH_DOMAIN=FIREBASE_AUTH_DOMAIN:latest,FIREBASE_PROJECT_ID=FIREBASE_PROJECT_ID:latest,DEMO_USER_PASSWORD=DEMO_USER_PASSWORD:latest'
+```
+
+The format is `ENV_VAR_NAME=SECRET_NAME:VERSION`. Cloud Run reads the secret value at container start and injects it as a standard environment variable. The secret is never written to disk or included in the container image.
+
+### REQUIRED: Key Rotation
+
+The old Firebase API key was exposed in git history. Even though it's removed from current code, it remains in historical commits. **You should rotate the key**.
+
+**Step 1: Rotate Firebase API Key**
+1. Go to https://console.cloud.google.com/apis/credentials
+2. Find the "Browser key (auto-created by Firebase)" API key
+3. Click "Regenerate key" or create a new restricted key
+4. Copy the new key
+
+**Step 2: Update Secret Manager**
+```bash
+echo -n "NEW_API_KEY_HERE" | gcloud secrets versions add FIREBASE_API_KEY --data-file=-
+```
+
+**Step 3: Redeploy** (triggers automatically on next `git push`, or manually):
+```bash
+gcloud run deploy socialhomes \
+  --image=europe-west2-docker.pkg.dev/$PROJECT_ID/socialhomes/app:latest \
+  --region=europe-west2 \
+  --update-secrets=FIREBASE_API_KEY=FIREBASE_API_KEY:latest
+```
+
+**Step 4 (Optional): Purge git history**
+```bash
+# WARNING: This rewrites history and requires force-push
+# All collaborators must re-clone after this
+pip install git-filter-repo
+git filter-repo --invert-paths --path cloudbuild.yaml
+# Then re-add the clean cloudbuild.yaml and force-push
+git push origin main --force
+```
+
+### REQUIRED: First Deploy After Security Fix
+
+The first deploy after commit `e0c23e4` will **fail** if Secret Manager secrets have not been created. The `--update-secrets` flag in `cloudbuild.yaml` requires the secrets to exist.
+
+**Before first deploy, run:**
+```bash
+bash scripts/setup-secrets.sh
+```
+
+---
+
+## 17. Data Serialisation — Firestore Timestamp Handling
+
+### Problem
+
+Firestore stores date fields as `Timestamp` objects. When Express serialises these via `res.json()`, they become opaque objects (`{_seconds: N, _nanoseconds: N}` or `{seconds: N, nanoseconds: N}`) in JSON. React cannot render objects as children, causing **Error #310** ("Objects are not valid as a React child").
+
+### Solution (Two Layers)
+
+**Layer 1: Server-side** (`server/src/services/firestore.ts`)
+
+The `serializeFirestoreData()` function recursively converts:
+- `Timestamp` instances → ISO date strings
+- `Date` objects → ISO date strings
+- `DocumentReference` → path string
+- `GeoPoint` → `{latitude, longitude}` plain object
+
+Applied in `getDoc()` and `getDocs()` so ALL API responses contain only JSON-safe primitives.
+
+**Layer 2: Client-side** (`app/src/services/api-client.ts`)
+
+The `sanitizeFirestoreTimestamps()` function runs on every API response as a safety net. It catches:
+- `{_seconds, _nanoseconds}` (older `@google-cloud/firestore` format)
+- `{seconds, nanoseconds}` (newer format)
+
+And converts them to `DD/MM/YYYY` locale strings.
+
+### Why Two Layers?
+
+Belt and suspenders. The server-side fix is definitive, but the client-side sanitiser catches edge cases where:
+- A route bypasses `getDoc`/`getDocs` and uses raw `.data()`
+- A third-party library returns Firestore objects
+- The Firestore SDK changes its serialisation format
+
+---
+
+## 18. Login Page & Mobile Detection
+
+### Login Page (Redesigned 09/02/2026)
+
+The login page no longer shows any credentials or password hints. It now features:
+
+- **Split layout**: Left panel (product showcase) + Right panel (login form)
+- **Product showcase carousel**: 6 auto-advancing slides with feature descriptions
+- **Feature grid**: 8 capability cards (Properties, Tenancies, Repairs, etc.)
+- **Request Access section**: Directs users to `support@yantra.works`
+- **BETA badge**: Clearly indicates closed beta status
+
+### Mobile Detection
+
+If the user visits from a mobile device (screen < 768px or mobile user-agent), they see a dedicated screen explaining:
+- SocialHomes.Ai is a full housing operating system for desktop/laptop
+- A mobile app for housing officers is on the roadmap
+- Contact `support@yantra.works` for help
+
+The FirebaseUI widget is NOT initialised on mobile to prevent broken login attempts.
+
+### Dashboard (Polished 09/02/2026)
+
+- Persona-aware welcome header with time-of-day greeting
+- Quick Action buttons: Morning Briefing, Explore Portfolio, View Reports
+- Gradient accent card with organisation info
+
+---
+
 *Document generated 08/02/2026 by Development Agent.*
 *Updated 09/02/2026 by DevOps Senior: min-instances=1, uptime monitoring, Artifact Registry cleanup.*
 *Updated 09/02/2026: Firebase Authentication deployment instructions added.*
 *Updated 09/02/2026 by DevOps Senior: Firebase Auth deployed — build fix, env vars, seeding, E2E verification complete.*
+*Updated 09/02/2026: Security hardening — secrets moved to Secret Manager, key rotation instructions, data serialisation fix, login redesign, mobile detection.*
 *For QA test results, see `TEST-REPORT-V2.md`.*
