@@ -440,7 +440,7 @@ export default function TenancyDetailPage() {
                         <div className="flex-1">
                           <div className="flex items-center justify-between mb-1">
                             <span className="text-sm font-semibold text-text-primary">{activity.subject}</span>
-                            <span className="text-xs text-text-muted">{activity.date}</span>
+                            <span className="text-xs text-text-muted">{typeof activity.date === 'object' ? String(activity.date) : activity.date}</span>
                           </div>
                           <p className="text-xs text-text-muted mb-2">{activity.description}</p>
                           <div className="flex items-center gap-4 text-xs text-text-muted">
@@ -515,7 +515,7 @@ export default function TenancyDetailPage() {
                       <tbody>
                         {tenantTransactions.map((transaction, idx) => (
                           <tr key={transaction.id} className="border-b border-border-default last:border-0">
-                            <td className="px-4 py-2 text-sm text-text-secondary">{transaction.date}</td>
+                            <td className="px-4 py-2 text-sm text-text-secondary">{typeof transaction.date === 'object' ? String(transaction.date) : transaction.date}</td>
                             <td className="px-4 py-2 text-sm text-text-secondary">{transaction.week}</td>
                             <td className="px-4 py-2 text-sm text-text-secondary capitalize">{transaction.type}</td>
                             <td className="px-4 py-2 text-sm text-text-primary">{transaction.description}</td>

@@ -56,31 +56,56 @@ export function formatPercent(n: number, decimals = 1): string {
   return `${n.toFixed(decimals)}%`;
 }
 
-export function formatDate(dateStr: string): string {
-  // Already DD/MM/YYYY, return as-is
-  if (/^\d{2}\/\d{2}\/\d{4}$/.test(dateStr)) return dateStr;
-  const d = new Date(dateStr);
-  return d.toLocaleDateString('en-GB');
+export function formatDate(dateStr: any): string {
+  if (!dateStr) return 'N/A';
+  // Firestore Timestamp serialised as JSON {_seconds, _nanoseconds}
+  if (typeof dateStr === 'object' && '_seconds' in dateStr) {
+    try { return new Date(dateStr._seconds * 1000).toLocaleDateString('en-GB'); } catch { return 'N/A'; }
+  }
+  // Firestore Timestamp with toDate()
+  if (typeof dateStr === 'object' && typeof dateStr.toDate === 'function') {
+    try { return dateStr.toDate().toLocaleDateString('en-GB'); } catch { return 'N/A'; }
+  }
+  // Native Date
+  if (dateStr instanceof Date) {
+    return dateStr.toLocaleDateString('en-GB');
+  }
+  // String — Already DD/MM/YYYY, return as-is
+  if (typeof dateStr === 'string') {
+    if (/^\d{2}\/\d{2}\/\d{4}$/.test(dateStr)) return dateStr;
+    const d = new Date(dateStr);
+    return isNaN(d.getTime()) ? String(dateStr) : d.toLocaleDateString('en-GB');
+  }
+  return String(dateStr);
 }
 
-export function daysUntil(dateStr: string): number {
-  const parts = dateStr.split('/');
-  const target = new Date(parseInt(parts[2]), parseInt(parts[1]) - 1, parseInt(parts[0]));
-  const now = new Date(2026, 1, 7); // Current date: 07/02/2026
+function toDateObj(dateStr: any): Date {
+  if (!dateStr) return new Date(NaN);
+  if (typeof dateStr === 'object' && '_seconds' in dateStr) return new Date(dateStr._seconds * 1000);
+  if (typeof dateStr === 'object' && typeof dateStr.toDate === 'function') return dateStr.toDate();
+  if (dateStr instanceof Date) return dateStr;
+  if (typeof dateStr === 'string' && /^\d{2}\/\d{2}\/\d{4}$/.test(dateStr)) {
+    const parts = dateStr.split('/');
+    return new Date(parseInt(parts[2]), parseInt(parts[1]) - 1, parseInt(parts[0]));
+  }
+  return new Date(dateStr);
+}
+
+export function daysUntil(dateStr: any): number {
+  const target = toDateObj(dateStr);
+  const now = new Date(2026, 1, 9); // Current date: 09/02/2026
   return Math.ceil((target.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
 }
 
-export function daysSince(dateStr: string): number {
-  const parts = dateStr.split('/');
-  const target = new Date(parseInt(parts[2]), parseInt(parts[1]) - 1, parseInt(parts[0]));
-  const now = new Date(2026, 1, 7);
+export function daysSince(dateStr: any): number {
+  const target = toDateObj(dateStr);
+  const now = new Date(2026, 1, 9);
   return Math.ceil((now.getTime() - target.getTime()) / (1000 * 60 * 60 * 24));
 }
 
-export function workingDaysUntil(dateStr: string): number {
-  const parts = dateStr.split('/');
-  const target = new Date(parseInt(parts[2]), parseInt(parts[1]) - 1, parseInt(parts[0]));
-  const now = new Date(2026, 1, 7);
+export function workingDaysUntil(dateStr: any): number {
+  const target = toDateObj(dateStr);
+  const now = new Date(2026, 1, 9);
   let count = 0;
   const current = new Date(now);
   while (current < target) {

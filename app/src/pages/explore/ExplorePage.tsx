@@ -1020,13 +1020,13 @@ export default function ExplorePage() {
                   <div className="space-y-2">
                     <div className="bg-surface-elevated rounded-lg p-3 border border-border-default">
                       <div className="text-xs uppercase tracking-wider text-brand-teal mb-1">Fire Risk Assessment</div>
-                      <div className="text-sm text-text-primary">{entity.blockDetails.fireRiskAssessment.date}</div>
+                      <div className="text-sm text-text-primary">{typeof entity.blockDetails.fireRiskAssessment.date === 'object' ? String(entity.blockDetails.fireRiskAssessment.date) : entity.blockDetails.fireRiskAssessment.date}</div>
                       <div className="text-xs text-text-muted mt-1">Risk Level: {entity.blockDetails.fireRiskAssessment.riskLevel}</div>
                     </div>
                     <div className="bg-surface-elevated rounded-lg p-3 border border-border-default">
                       <div className="text-xs uppercase tracking-wider text-brand-teal mb-1">Asbestos Management</div>
                       <div className="text-sm text-text-primary">{entity.blockDetails.asbestosManagement.acmCount} ACMs identified</div>
-                      <div className="text-xs text-text-muted mt-1">Last survey: {entity.blockDetails.asbestosManagement.surveyDate}</div>
+                      <div className="text-xs text-text-muted mt-1">Last survey: {typeof entity.blockDetails.asbestosManagement.surveyDate === 'object' ? String(entity.blockDetails.asbestosManagement.surveyDate) : entity.blockDetails.asbestosManagement.surveyDate}</div>
                     </div>
                     <div className="bg-surface-elevated rounded-lg p-3 border border-border-default">
                       <div className="text-xs uppercase tracking-wider text-brand-teal mb-1">Legionella Assessment</div>
@@ -1226,7 +1226,7 @@ export default function ExplorePage() {
                         {areaIntel.intelligence.regulatoryAlerts.slice(0, 2).map((ra, i) => (
                           <div key={i} className="bg-brand-garnet/10 border border-brand-garnet/20 rounded-lg p-2 text-xs">
                             <div className="font-semibold text-brand-peach">{ra.alert}</div>
-                            <div className="text-text-muted mt-0.5">Deadline: {ra.deadline} | Impact: {ra.impact}</div>
+                            <div className="text-text-muted mt-0.5">Deadline: {typeof ra.deadline === 'object' ? String(ra.deadline) : ra.deadline} | Impact: {ra.impact}</div>
                           </div>
                         ))}
                       </div>

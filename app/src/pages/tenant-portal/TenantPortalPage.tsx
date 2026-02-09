@@ -127,7 +127,7 @@ export default function TenantPortalPage() {
                     )}
                   </div>
                   <div className="text-sm text-gray-600">
-                    Reported: {repair.date}
+                    Reported: {typeof repair.date === 'object' ? String(repair.date) : repair.date}
                   </div>
                   {repair.priority === 'urgent' && (
                     <div className="mt-2 flex items-center gap-2 text-sm text-red-600">

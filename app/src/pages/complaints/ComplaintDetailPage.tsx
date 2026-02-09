@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { 
   MessageSquareWarning,
@@ -9,13 +10,18 @@ import {
   Home,
   Calendar,
   AlertTriangle,
-  Sparkles
+  Sparkles,
+  UserCheck,
+  Edit,
+  TrendingUp,
+  Mail
 } from 'lucide-react';
 import { useComplaints, useTenants, useProperties } from '@/hooks/useApi';
 import { activities } from '@/data';
 import CountdownTimer from '@/components/shared/CountdownTimer';
 import StatusPill from '@/components/shared/StatusPill';
 import AiActionCard from '@/components/shared/AiActionCard';
+import ActionModal from '@/components/shared/ActionModal';
 import { formatDate, formatCurrency, daysUntil, getInitials } from '@/utils/format';
 import { useComplaintIntelligence } from '@/hooks/useEntityIntelligence';
 
@@ -47,6 +53,7 @@ export default function ComplaintDetailPage() {
   const property = properties.find((p: any) => p.id === complaint.propertyId);
   const caseActivities = activities.filter(a => a.caseId === complaint.id);
   const intel = useComplaintIntelligence(complaint);
+  const [activeModal, setActiveModal] = useState<string | null>(null);
 
   const getTenantName = () => {
     return tenant ? `${tenant.title} ${tenant.firstName} ${tenant.lastName}` : 'Unknown';
@@ -67,6 +74,7 @@ export default function ComplaintDetailPage() {
   const stage2ResponseDeadline = complaint.stage === 2 ? daysUntil(complaint.responseDeadline) : null;
 
   return (
+    <>
     <div className={`space-y-6 ${intel.urgencyLevel === 'crisis' ? 'ring-1 ring-brand-garnet/20 rounded-xl p-2' : intel.urgencyLevel === 'urgent' ? 'ring-1 ring-status-warning/10 rounded-xl p-2' : ''}`}>
       <div className="max-w-7xl mx-auto space-y-6">
         {/* AI Warnings */}
@@ -377,7 +385,90 @@ export default function ComplaintDetailPage() {
             </div>
           </div>
         </div>
+
+        {/* Action Buttons */}
+        <div className="bg-surface-card rounded-lg p-4 border border-border-default opacity-0 animate-fade-in-up" style={{ animationDelay: '350ms', animationFillMode: 'forwards' }}>
+          <div className="flex flex-wrap items-center gap-3">
+            <button onClick={() => setActiveModal('reassign')} className="flex items-center gap-2 px-4 py-2 bg-brand-teal text-white rounded-lg hover:bg-brand-teal/80 transition-colors">
+              <UserCheck size={16} /> Reassign
+            </button>
+            <button onClick={() => setActiveModal('respond')} className="flex items-center gap-2 px-4 py-2 bg-brand-blue text-white rounded-lg hover:bg-brand-blue/80 transition-colors">
+              <Mail size={16} /> Send Response
+            </button>
+            <button onClick={() => setActiveModal('escalate')} className="flex items-center gap-2 px-4 py-2 bg-status-warning text-white rounded-lg hover:bg-status-warning/80 transition-colors">
+              <TrendingUp size={16} /> Escalate to Stage 2
+            </button>
+            <button onClick={() => setActiveModal('update')} className="flex items-center gap-2 px-4 py-2 bg-surface-elevated text-text-primary rounded-lg hover:bg-surface-hover transition-colors border border-border-default">
+              <Edit size={16} /> Update
+            </button>
+            {complaint.status !== 'closed' && (
+              <button onClick={() => setActiveModal('close')} className="flex items-center gap-2 px-4 py-2 bg-status-compliant text-white rounded-lg hover:bg-status-compliant/80 transition-colors">
+                <CheckCircle size={16} /> Close
+              </button>
+            )}
+          </div>
+        </div>
       </div>
     </div>
+    <ActionModal open={activeModal === 'reassign'} onClose={() => setActiveModal(null)} title="Reassign Complaint" description={`Reassign ${complaint.reference}`} icon={<UserCheck size={20} className="text-brand-teal" />} fields={[
+      { id: 'ref', label: 'Reference', type: 'readonly', defaultValue: complaint.reference },
+      { id: 'handler', label: 'Assign To', type: 'select', required: true, options: [
+        { value: 'sarah-mitchell', label: 'Sarah Mitchell — Housing Officer' },
+        { value: 'priya-patel', label: 'Priya Patel — Manager' },
+        { value: 'james-wright', label: 'James Wright — Head of Housing' },
+        { value: 'helen-carter', label: 'Helen Carter — COO' },
+      ]},
+      { id: 'reason', label: 'Reason', type: 'textarea', placeholder: 'Reason for reassignment...' },
+    ]} submitLabel="Reassign" onSubmit={() => setActiveModal(null)} />
+    <ActionModal open={activeModal === 'respond'} onClose={() => setActiveModal(null)} title="Send Complaint Response" description={`Respond to ${getTenantName()}`} icon={<Mail size={20} className="text-brand-blue" />} fields={[
+      { id: 'ref', label: 'Reference', type: 'readonly', defaultValue: complaint.reference },
+      { id: 'channel', label: 'Response Channel', type: 'select', required: true, options: [
+        { value: 'letter', label: 'Letter' },
+        { value: 'email', label: 'Email' },
+        { value: 'phone', label: 'Phone Call' },
+      ]},
+      { id: 'outcome', label: 'Outcome', type: 'select', required: true, options: [
+        { value: 'upheld', label: 'Upheld' },
+        { value: 'partially-upheld', label: 'Partially Upheld' },
+        { value: 'not-upheld', label: 'Not Upheld' },
+      ]},
+      { id: 'body', label: 'Response Body', type: 'textarea', required: true, placeholder: 'Write the complaint response...' },
+    ]} submitLabel="Send Response" onSubmit={() => setActiveModal(null)} />
+    <ActionModal open={activeModal === 'escalate'} onClose={() => setActiveModal(null)} title="Escalate to Stage 2" description={`Escalate ${complaint.reference}`} icon={<TrendingUp size={20} className="text-status-warning" />} variant="warning" fields={[
+      { id: 'ref', label: 'Reference', type: 'readonly', defaultValue: complaint.reference },
+      { id: 'reason', label: 'Escalation Reason', type: 'textarea', required: true, placeholder: 'Why is this being escalated?' },
+      { id: 'handler', label: 'Stage 2 Handler', type: 'select', required: true, options: [
+        { value: 'priya-patel', label: 'Priya Patel — Manager' },
+        { value: 'james-wright', label: 'James Wright — Head of Housing' },
+        { value: 'helen-carter', label: 'Helen Carter — COO' },
+      ]},
+    ]} submitLabel="Escalate" onSubmit={() => setActiveModal(null)} />
+    <ActionModal open={activeModal === 'update'} onClose={() => setActiveModal(null)} title="Update Complaint" description={`Update ${complaint.reference}`} icon={<Edit size={20} className="text-brand-blue" />} fields={[
+      { id: 'ref', label: 'Reference', type: 'readonly', defaultValue: complaint.reference },
+      { id: 'status', label: 'Status', type: 'select', defaultValue: complaint.status, options: [
+        { value: 'open', label: 'Open' },
+        { value: 'investigation', label: 'Investigation' },
+        { value: 'response-due', label: 'Response Due' },
+        { value: 'closed', label: 'Closed' },
+      ]},
+      { id: 'notes', label: 'Notes', type: 'textarea', placeholder: 'Add an update note...' },
+    ]} submitLabel="Save" onSubmit={() => setActiveModal(null)} />
+    <ActionModal open={activeModal === 'close'} onClose={() => setActiveModal(null)} title="Close Complaint" description={`Close ${complaint.reference}`} icon={<CheckCircle size={20} className="text-status-compliant" />} variant="success" fields={[
+      { id: 'ref', label: 'Reference', type: 'readonly', defaultValue: complaint.reference },
+      { id: 'outcome', label: 'Final Outcome', type: 'select', required: true, options: [
+        { value: 'upheld', label: 'Upheld' },
+        { value: 'partially-upheld', label: 'Partially Upheld' },
+        { value: 'not-upheld', label: 'Not Upheld' },
+      ]},
+      { id: 'satisfaction', label: 'Satisfaction with Handling', type: 'select', options: [
+        { value: '5', label: '5 — Very Satisfied' },
+        { value: '4', label: '4 — Satisfied' },
+        { value: '3', label: '3 — Neutral' },
+        { value: '2', label: '2 — Dissatisfied' },
+        { value: '1', label: '1 — Very Dissatisfied' },
+      ]},
+      { id: 'lessons', label: 'Lessons Learned', type: 'textarea', placeholder: 'What changes should be made to prevent recurrence?' },
+    ]} submitLabel="Close Complaint" onSubmit={() => setActiveModal(null)} />
+  </>
   );
 }

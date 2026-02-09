@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { 
   Building2, User, Calendar, Wrench, AlertTriangle, 
@@ -9,6 +10,8 @@ import { activities as activitiesData } from '@/data';
 import StatusPill from '@/components/shared/StatusPill';
 import CountdownTimer from '@/components/shared/CountdownTimer';
 import AiActionCard from '@/components/shared/AiActionCard';
+import ActionModal from '@/components/shared/ActionModal';
+import type { ActionField } from '@/components/shared/ActionModal';
 import { formatDate, formatCurrency } from '@/utils/format';
 import { useRepairIntelligence } from '@/hooks/useEntityIntelligence';
 
@@ -120,7 +123,90 @@ export default function RepairDetailPage() {
   const aiActions = generateAiActions();
   const intel = useRepairIntelligence(repair);
 
+  const [activeModal, setActiveModal] = useState<string | null>(null);
+
+  const assignFields: ActionField[] = [
+    { id: 'ref', label: 'Reference', type: 'readonly', defaultValue: repair.reference },
+    { id: 'handler', label: 'Assign To', type: 'select', required: true, options: [
+      { value: 'sarah-mitchell', label: 'Sarah Mitchell — Housing Officer' },
+      { value: 'james-wright', label: 'James Wright — Head of Housing' },
+      { value: 'priya-patel', label: 'Priya Patel — Manager' },
+      { value: 'mark-johnson', label: 'Mark Johnson — Operative' },
+    ]},
+    { id: 'operative', label: 'Operative', type: 'select', options: [
+      { value: 'mike-carpenter', label: 'Mike Carpenter — Plumber' },
+      { value: 'dave-spark', label: 'Dave Spark — Electrician' },
+      { value: 'ben-fix', label: 'Ben Fix — General Repairs' },
+      { value: 'jane-build', label: 'Jane Build — Roofer' },
+    ]},
+    { id: 'notes', label: 'Assignment Notes', type: 'textarea', placeholder: 'Add any instructions for the operative...' },
+  ];
+
+  const updateFields: ActionField[] = [
+    { id: 'ref', label: 'Reference', type: 'readonly', defaultValue: repair.reference },
+    { id: 'status', label: 'Status', type: 'select', required: true, defaultValue: repair.status, options: [
+      { value: 'open', label: 'Open' },
+      { value: 'in-progress', label: 'In Progress' },
+      { value: 'awaiting-parts', label: 'Awaiting Parts' },
+      { value: 'completed', label: 'Completed' },
+    ]},
+    { id: 'priority', label: 'Priority', type: 'select', defaultValue: repair.priority, options: [
+      { value: 'emergency', label: 'Emergency (24hr)' },
+      { value: 'urgent', label: 'Urgent (5 WD)' },
+      { value: 'routine', label: 'Routine (20 WD)' },
+      { value: 'planned', label: 'Planned (90 days)' },
+    ]},
+    { id: 'appointmentDate', label: 'Appointment Date', type: 'date' },
+    { id: 'appointmentSlot', label: 'Appointment Slot', type: 'select', options: [
+      { value: 'am', label: 'Morning (8am-12pm)' },
+      { value: 'pm', label: 'Afternoon (12pm-5pm)' },
+      { value: 'all-day', label: 'All Day' },
+    ]},
+    { id: 'notes', label: 'Update Notes', type: 'textarea', placeholder: 'Describe the update...' },
+  ];
+
+  const escalateFields: ActionField[] = [
+    { id: 'ref', label: 'Reference', type: 'readonly', defaultValue: repair.reference },
+    { id: 'escalateTo', label: 'Escalate To', type: 'select', required: true, options: [
+      { value: 'manager', label: 'Team Manager' },
+      { value: 'head-of-housing', label: 'Head of Housing' },
+      { value: 'coo', label: 'Chief Operating Officer' },
+      { value: 'contractor', label: 'Contractor Supervisor' },
+    ]},
+    { id: 'reason', label: 'Reason for Escalation', type: 'select', required: true, options: [
+      { value: 'sla-breach', label: 'SLA Breach' },
+      { value: 'tenant-complaint', label: 'Tenant Complaint' },
+      { value: 'awaabs-law', label: "Awaab's Law Compliance" },
+      { value: 'recurring', label: 'Recurring Issue' },
+      { value: 'health-safety', label: 'Health & Safety Risk' },
+      { value: 'cost', label: 'Cost Exceeds Budget' },
+    ]},
+    { id: 'notes', label: 'Escalation Details', type: 'textarea', required: true, placeholder: 'Explain why this repair needs escalation...' },
+  ];
+
+  const closeFields: ActionField[] = [
+    { id: 'ref', label: 'Reference', type: 'readonly', defaultValue: repair.reference },
+    { id: 'completionDate', label: 'Completion Date', type: 'date', required: true },
+    { id: 'firstTimeFix', label: 'First Time Fix?', type: 'select', required: true, options: [
+      { value: 'yes', label: 'Yes' },
+      { value: 'no', label: 'No — Recall Required' },
+    ]},
+    { id: 'satisfaction', label: 'Tenant Satisfaction', type: 'select', options: [
+      { value: '5', label: '5 — Very Satisfied' },
+      { value: '4', label: '4 — Satisfied' },
+      { value: '3', label: '3 — Neutral' },
+      { value: '2', label: '2 — Dissatisfied' },
+      { value: '1', label: '1 — Very Dissatisfied' },
+    ]},
+    { id: 'notes', label: 'Completion Notes', type: 'textarea', placeholder: 'Describe the work completed...' },
+  ];
+
   return (
+    <>
+    <ActionModal open={activeModal === 'assign'} onClose={() => setActiveModal(null)} title="Assign Repair" description={`Assign ${repair.reference} to a handler or operative`} icon={<UserCheck size={20} className="text-brand-teal" />} fields={assignFields} submitLabel="Assign" onSubmit={(v) => { console.log('Assign:', v); setActiveModal(null); }} />
+    <ActionModal open={activeModal === 'update'} onClose={() => setActiveModal(null)} title="Update Repair" description={`Update status, priority, or schedule for ${repair.reference}`} icon={<Edit size={20} className="text-brand-blue" />} fields={updateFields} submitLabel="Save Changes" onSubmit={(v) => { console.log('Update:', v); setActiveModal(null); }} />
+    <ActionModal open={activeModal === 'escalate'} onClose={() => setActiveModal(null)} title="Escalate Repair" description={`Escalate ${repair.reference} to management`} icon={<TrendingUp size={20} className="text-status-warning" />} fields={escalateFields} submitLabel="Escalate" variant="warning" onSubmit={(v) => { console.log('Escalate:', v); setActiveModal(null); }} />
+    <ActionModal open={activeModal === 'close'} onClose={() => setActiveModal(null)} title="Close Repair" description={`Mark ${repair.reference} as completed`} icon={<CheckCircle size={20} className="text-status-compliant" />} fields={closeFields} submitLabel="Close Repair" variant="success" onSubmit={(v) => { console.log('Close:', v); setActiveModal(null); }} />
     <div className={`space-y-6 ${intel.urgencyLevel === 'crisis' ? 'ring-1 ring-brand-garnet/20 rounded-xl p-2' : intel.urgencyLevel === 'urgent' ? 'ring-1 ring-status-warning/10 rounded-xl p-2' : ''}`}>
       <div className="max-w-7xl mx-auto space-y-6">
         {/* AI Warnings */}
@@ -422,20 +508,20 @@ export default function RepairDetailPage() {
         {/* Bottom Actions */}
         <div className="bg-surface-card rounded-lg p-4 border border-border-default opacity-0 animate-fade-in-up" style={{ animationDelay: '300ms', animationFillMode: 'forwards' }}>
           <div className="flex flex-wrap items-center gap-3">
-            <button className="flex items-center gap-2 px-4 py-2 bg-brand-teal text-white rounded-lg hover:bg-brand-teal/80 transition-colors">
+            <button onClick={() => setActiveModal('assign')} className="flex items-center gap-2 px-4 py-2 bg-brand-teal text-white rounded-lg hover:bg-brand-teal/80 transition-colors">
               <UserCheck size={16} />
               Assign
             </button>
-            <button className="flex items-center gap-2 px-4 py-2 bg-brand-blue text-white rounded-lg hover:bg-brand-blue/80 transition-colors">
+            <button onClick={() => setActiveModal('update')} className="flex items-center gap-2 px-4 py-2 bg-brand-blue text-white rounded-lg hover:bg-brand-blue/80 transition-colors">
               <Edit size={16} />
               Update
             </button>
-            <button className="flex items-center gap-2 px-4 py-2 bg-status-warning text-white rounded-lg hover:bg-status-warning/80 transition-colors">
+            <button onClick={() => setActiveModal('escalate')} className="flex items-center gap-2 px-4 py-2 bg-status-warning text-white rounded-lg hover:bg-status-warning/80 transition-colors">
               <TrendingUp size={16} />
               Escalate
             </button>
             {repair.status !== 'completed' && (
-              <button className="flex items-center gap-2 px-4 py-2 bg-status-compliant text-white rounded-lg hover:bg-status-compliant/80 transition-colors">
+              <button onClick={() => setActiveModal('close')} className="flex items-center gap-2 px-4 py-2 bg-status-compliant text-white rounded-lg hover:bg-status-compliant/80 transition-colors">
                 <CheckCircle size={16} />
                 Close
               </button>
@@ -444,5 +530,6 @@ export default function RepairDetailPage() {
         </div>
       </div>
     </div>
+    </>
   );
 }

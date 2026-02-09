@@ -501,11 +501,11 @@ export default function PropertyDetailPage() {
                     <FileText size={18} className="text-brand-teal" />
                     <div>
                       <div className="text-sm font-medium text-text-primary">{doc.name}</div>
-                      <div className="text-xs text-text-muted">{doc.type} — Last updated: {doc.date}</div>
+                      <div className="text-xs text-text-muted">{doc.type} — Last updated: {typeof doc.date === 'object' ? String(doc.date) : doc.date}</div>
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
-                    <div className="text-xs text-text-muted">Expires: {doc.expires}</div>
+                    <div className="text-xs text-text-muted">Expires: {typeof doc.expires === 'object' ? String(doc.expires) : doc.expires}</div>
                     <StatusPill status={doc.status} size="sm" />
                   </div>
                 </div>

@@ -210,7 +210,7 @@ export default function DashboardPage() {
                 <div key={insight.id} className={`bg-surface-elevated rounded-lg p-4 border-l-[3px] ${col} opacity-0 animate-fade-in-up hover:bg-surface-hover transition-colors duration-200 cursor-pointer`} style={{ animationDelay: `${700 + index * 50}ms`, animationFillMode: 'forwards' }} onClick={() => navigate('/ai/insights')}>
                   <div className="flex items-start justify-between mb-2">
                     <span className="text-[10px] uppercase tracking-wider text-status-ai font-semibold">{insight.type}</span>
-                    <span className="text-[10px] text-text-muted">{insight.date}</span>
+                    <span className="text-[10px] text-text-muted">{typeof insight.date === 'object' ? String(insight.date) : insight.date}</span>
                   </div>
                   <h3 className="text-sm font-semibold text-text-primary mb-1">{insight.title}</h3>
                   <p className="text-xs text-text-muted mb-2 line-clamp-2 leading-relaxed">{insight.description}</p>
@@ -256,7 +256,7 @@ export default function DashboardPage() {
                   <div className="flex items-center gap-2 mb-1">
                     {getIcon(activity.type)}
                     <span className="text-sm font-semibold text-text-primary">{tenantName}</span>
-                    <span className="text-[10px] text-text-muted ml-auto">{activity.date}</span>
+                    <span className="text-[10px] text-text-muted ml-auto">{typeof activity.date === 'object' ? String(activity.date) : activity.date}</span>
                   </div>
                   <div className="text-sm text-text-primary font-medium mb-0.5">{activity.subject}</div>
                   <div className="text-xs text-text-muted leading-relaxed">{activity.description}</div>

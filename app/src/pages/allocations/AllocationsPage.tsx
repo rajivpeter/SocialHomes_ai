@@ -151,7 +151,7 @@ export default function AllocationsPage() {
                         <span className="text-sm text-text-muted">No</span>
                       )}
                     </td>
-                    <td className="py-3 px-4 text-sm text-text-secondary">{applicant.registrationDate}</td>
+                    <td className="py-3 px-4 text-sm text-text-secondary">{typeof applicant.registrationDate === 'object' ? String(applicant.registrationDate) : applicant.registrationDate}</td>
                   </tr>
                 ))}
               </tbody>

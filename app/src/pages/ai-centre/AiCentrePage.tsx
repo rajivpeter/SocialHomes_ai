@@ -178,7 +178,7 @@ export default function AiCentrePage() {
                       <span className="text-xs text-text-muted">• {insight.model}</span>
                     )}
                   </div>
-                  <span className="text-xs text-text-muted">{insight.date}</span>
+                  <span className="text-xs text-text-muted">{typeof insight.date === 'object' ? String(insight.date) : insight.date}</span>
                 </div>
                 <h3 className="text-sm font-semibold text-text-primary mb-1">{insight.title}</h3>
                 <p className="text-xs text-text-muted mb-3 leading-relaxed">{insight.description}</p>

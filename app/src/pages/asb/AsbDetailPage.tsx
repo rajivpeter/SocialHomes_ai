@@ -154,7 +154,7 @@ export default function AsbDetailPage() {
                         <FileText size={16} className="text-brand-teal" />
                         <span className="font-semibold text-text-primary">{evidence.type}</span>
                       </div>
-                      <span className="text-xs text-text-muted">{evidence.date}</span>
+                      <span className="text-xs text-text-muted">{typeof evidence.date === 'object' ? String(evidence.date) : evidence.date}</span>
                     </div>
                     <p className="text-sm text-text-secondary mb-2">{evidence.description}</p>
                     <div className="text-xs text-text-muted">Officer: {evidence.officer}</div>
