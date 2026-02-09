@@ -558,7 +558,327 @@ The application is **successfully deployed and functional** on Google Cloud Run 
 **2 bugs to fix**: Case type filter query and tenant cases endpoint server error.
 
 ---
-*Cloud Run test report generated 08/02/2026*
+
+# FIREBASE AUTHENTICATION — TEST PLAN (09/02/2026)
+
+**Added by**: DevOps Senior
+**Feature**: Firebase Authentication with FirebaseUI drop-in widget
+**Status**: Deployed and verified at API level. Frontend + Selenium testing required.
+
+---
+
+## IMPORTANT: Breaking Changes from Previous Tests
+
+The following behaviours have changed since the v3 Cloud Run tests above:
+
+| Behaviour | Before (v3) | After (Firebase Auth) |
+|-----------|-------------|----------------------|
+| Root URL `/` | Redirected to `/briefing` | Redirects to `/login` (unauthenticated) or `/dashboard` (authenticated) |
+| Authentication | `X-Persona` header (always allowed) | Firebase JWT Bearer token required; `X-Persona` still works as fallback for API-only testing |
+| Persona selection | localStorage `socialhomes-persona` + header | Persona stored in Firestore user profile, set via custom claims |
+| Protected routes | All routes accessible | All routes except `/login` require authentication (ProtectedRoute guard) |
+| Header | Persona dropdown only | Persona dropdown + Sign Out button |
+
+**Test case TC-101 needs updating**: Root no longer redirects to `/briefing`. It redirects to `/login` if not authenticated, or `/dashboard` if authenticated.
+
+---
+
+## Authentication Test Accounts
+
+All accounts use password: `SocialHomes2026!`
+
+| Email | Persona | Team | Patches |
+|-------|---------|------|---------|
+| helen.carter@rcha.org.uk | COO | — | — |
+| james.wright@rcha.org.uk | Head of Housing | london | — |
+| priya.patel@rcha.org.uk | Manager | southwark-lewisham | — |
+| sarah.mitchell@rcha.org.uk | Housing Officer | southwark-lewisham | oak-park, elm-gardens |
+| mark.johnson@rcha.org.uk | Operative | southwark-lewisham | — |
+
+---
+
+## New API Endpoints to Test
+
+| Endpoint | Method | Auth Required | Description | Expected Response |
+|----------|--------|---------------|-------------|-------------------|
+| `/api/v1/config` | GET | No | Firebase client config | `{"firebase":{"apiKey":"AIzaSy...","authDomain":"gen-lang-client-...","projectId":"gen-lang-client-..."}}` |
+| `/api/v1/auth/seed-users` | POST | No | Seed/refresh demo accounts | `{"status":"success","users":[...5 users...]}` |
+| `/api/v1/auth/profile` | POST | Bearer token | Create user profile on first login | `{"status":"created","profile":{...}}` or `{"status":"existing","profile":{...}}` |
+| `/api/v1/auth/me` | GET | Bearer token | Get authenticated user profile | `{"uid":"...","email":"...","persona":"...","teamId":"...","patchIds":[...]}` |
+
+---
+
+## API Smoke Tests (with Firebase Auth)
+
+### Getting a Bearer Token for Testing
+
+```bash
+# Sign in with Firebase REST API to get an ID token
+TOKEN=$(curl -s -X POST \
+  "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyB1nfSDqignmcFAvKzh075flVbWOH9aOLs" \
+  -H "Content-Type: application/json" \
+  -d '{"email":"sarah.mitchell@rcha.org.uk","password":"SocialHomes2026!","returnSecureToken":true}' \
+  | python3 -c "import sys,json; print(json.load(sys.stdin)['idToken'])")
+
+echo "Token obtained: ${TOKEN:0:20}..."
+```
+
+### Authenticated API Calls
+
+```bash
+# Config endpoint (no auth needed)
+curl -s https://socialhomes-674258130066.europe-west2.run.app/api/v1/config
+
+# Auth profile (requires Bearer token)
+curl -s https://socialhomes-674258130066.europe-west2.run.app/api/v1/auth/me \
+  -H "Authorization: Bearer $TOKEN"
+
+# Properties with Bearer token
+curl -s https://socialhomes-674258130066.europe-west2.run.app/api/v1/properties \
+  -H "Authorization: Bearer $TOKEN"
+
+# Briefing with Bearer token (persona from Firestore profile, not header)
+curl -s https://socialhomes-674258130066.europe-west2.run.app/api/v1/briefing \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Legacy X-Persona mode (still works for API-only testing)
+
+```bash
+# X-Persona header still works as fallback when no Bearer token is present
+curl -s https://socialhomes-674258130066.europe-west2.run.app/api/v1/properties \
+  -H "X-Persona: coo"
+```
+
+---
+
+## Verified API Responses (09/02/2026 01:10 UTC)
+
+| Endpoint | Status | Key Data |
+|----------|--------|----------|
+| `/api/v1/config` | 200 OK | Returns Firebase config with valid apiKey, authDomain, projectId |
+| `/api/v1/auth/seed-users` | 200 OK | 5 users (all status: "existing" — already seeded) |
+| `/api/v1/auth/me` (Bearer) | 200 OK | `{"uid":"3q6x...","email":"sarah.mitchell@rcha.org.uk","persona":"housing-officer","teamId":"southwark-lewisham","patchIds":["oak-park","elm-gardens"]}` |
+| `/api/v1/properties` (Bearer) | 200 OK | 75 properties returned |
+| `/health` | 200 OK | `{"status":"healthy"}` |
+
+---
+
+## Frontend Test Cases — Firebase Authentication
+
+### AUTH-01: Login Page Loads (CRITICAL)
+
+- **URL**: `https://socialhomes-674258130066.europe-west2.run.app/login`
+- **Expected**:
+  - Page shows SocialHomes.Ai branding with logo
+  - "Sign in to continue" heading visible
+  - FirebaseUI widget renders with Email/Password sign-in option
+  - Google sign-in button visible
+  - Demo credentials hint at bottom (sarah.mitchell@rcha.org.uk)
+  - BETA badge visible
+  - Dark theme (#0D1117 background)
+
+### AUTH-02: Unauthenticated Redirect (CRITICAL)
+
+- **URL**: `https://socialhomes-674258130066.europe-west2.run.app/`
+- **Expected**: Redirects to `/login`
+- **Also test**: Navigating directly to `/dashboard`, `/properties`, `/repairs` should all redirect to `/login`
+
+### AUTH-03: Email/Password Sign-In (CRITICAL)
+
+- **Steps**:
+  1. Go to `/login`
+  2. Enter email: `sarah.mitchell@rcha.org.uk`
+  3. Enter password: `SocialHomes2026!`
+  4. Click sign-in button
+- **Expected**: Redirects to `/dashboard` with full app access
+
+### AUTH-04: Post-Login Dashboard (CRITICAL)
+
+- **After signing in as sarah.mitchell@rcha.org.uk**:
+  - Dashboard loads with KPI cards populated from Firestore
+  - Persona should be "Housing Officer" (from Firestore profile)
+  - User name "Sarah Mitchell" should appear in header
+  - Data should be scoped to housing-officer view (patch-level data)
+
+### AUTH-05: Sign Out (HIGH)
+
+- **Steps**:
+  1. While authenticated, click on the persona/user dropdown in header
+  2. Click "Sign out" button
+- **Expected**:
+  - User is signed out
+  - Redirected to `/login`
+  - Navigating to `/dashboard` redirects back to `/login`
+
+### AUTH-06: Different Persona Login (HIGH)
+
+- **Steps**:
+  1. Sign in as `helen.carter@rcha.org.uk` (COO)
+  2. Check dashboard
+- **Expected**: Dashboard shows organisation-wide data (all regions, higher numbers than housing officer)
+
+### AUTH-07: Loading State (MEDIUM)
+
+- **On initial page load (before Firebase initialises)**:
+  - Should show a loading spinner with "Loading SocialHomes.Ai..." text
+  - Should NOT flash the login page or dashboard briefly
+
+### AUTH-08: Firebase Config Endpoint (HIGH)
+
+- **URL**: `https://socialhomes-674258130066.europe-west2.run.app/api/v1/config`
+- **Expected**: Returns JSON with non-empty `firebase.apiKey`, `firebase.authDomain`, `firebase.projectId`
+- **If this returns empty values**: Login page will show spinner indefinitely
+
+### AUTH-09: Invalid Credentials (MEDIUM)
+
+- **Steps**:
+  1. Go to `/login`
+  2. Enter email: `sarah.mitchell@rcha.org.uk`
+  3. Enter wrong password: `WrongPassword123`
+  4. Click sign-in
+- **Expected**: FirebaseUI shows an error message (NOT a crash or blank screen)
+
+### AUTH-10: Session Persistence (MEDIUM)
+
+- **Steps**:
+  1. Sign in successfully
+  2. Close the browser tab
+  3. Open the URL again
+- **Expected**: User should still be authenticated (Firebase persists session in IndexedDB)
+
+---
+
+## Selenium Testing Notes — Firebase Auth
+
+### Setting Up Authenticated Sessions in Selenium
+
+The old approach of setting `localStorage` persona **no longer works** for accessing protected routes. Options:
+
+**Option A: Use Firebase REST API to sign in programmatically**
+
+```python
+import requests
+
+def get_firebase_token(email, password):
+    """Get Firebase ID token via REST API for Selenium testing."""
+    resp = requests.post(
+        "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword",
+        params={"key": "AIzaSyB1nfSDqignmcFAvKzh075flVbWOH9aOLs"},
+        json={
+            "email": email,
+            "password": password,
+            "returnSecureToken": True
+        }
+    )
+    return resp.json()["idToken"]
+
+# Then in Selenium, inject the Firebase auth state:
+# This is complex because Firebase stores auth in IndexedDB.
+# Easier approach: just automate the login form via Selenium.
+```
+
+**Option B (Recommended): Automate the FirebaseUI login form**
+
+```python
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+
+def login_via_firebaseui(driver, email, password):
+    """Sign in through the FirebaseUI widget."""
+    driver.get("https://socialhomes-674258130066.europe-west2.run.app/login")
+
+    wait = WebDriverWait(driver, 15)
+
+    # Wait for FirebaseUI to render
+    email_input = wait.until(
+        EC.presence_of_element_located((By.CSS_SELECTOR, ".firebaseui-id-email"))
+    )
+    email_input.clear()
+    email_input.send_keys(email)
+
+    # Click next/submit for email
+    submit_btn = driver.find_element(By.CSS_SELECTOR, ".firebaseui-id-submit")
+    submit_btn.click()
+
+    # Wait for password field (FirebaseUI shows email first, then password)
+    password_input = wait.until(
+        EC.presence_of_element_located((By.CSS_SELECTOR, ".firebaseui-id-password"))
+    )
+    password_input.clear()
+    password_input.send_keys(password)
+
+    # Click sign in
+    sign_in_btn = driver.find_element(By.CSS_SELECTOR, ".firebaseui-id-submit")
+    sign_in_btn.click()
+
+    # Wait for redirect to dashboard
+    wait.until(EC.url_contains("/dashboard"))
+```
+
+### Key Selenium Selectors
+
+| Element | Selector | Notes |
+|---------|----------|-------|
+| FirebaseUI container | `#firebaseui-auth-container` | Main widget div |
+| Email input | `.firebaseui-id-email` | Email field |
+| Password input | `.firebaseui-id-password` | Password field (appears after email step) |
+| Submit button | `.firebaseui-id-submit` | "Next" then "Sign In" |
+| Google sign-in button | `.firebaseui-idp-google` | Google OAuth button |
+| Sign out button | Look for `LogOut` icon or "Sign out" text in header dropdown | In the persona dropdown |
+| Loading spinner | `.animate-spin` | Shown while Firebase initializes |
+
+### Important Timing Considerations
+
+1. **FirebaseUI initialization**: The widget fetches config from `/api/v1/config` first, then initializes Firebase, then renders. Allow **5-10 seconds** for the widget to appear.
+2. **Two-step email flow**: FirebaseUI shows email input first, then password input after clicking "Next". Don't try to fill both at once.
+3. **Post-login profile sync**: After sign-in, `AuthContext` calls `/api/v1/auth/profile` to create/fetch the Firestore profile. This adds ~500ms before the dashboard renders.
+4. **Session persistence**: Once signed in, the session persists across page reloads (Firebase stores auth in IndexedDB). Tests that need a fresh unauthenticated state should clear IndexedDB: `driver.execute_script("indexedDB.deleteDatabase('firebaseLocalStorageDb')")` then reload.
+
+### Updated Test Flow
+
+```
+1. Navigate to root URL → verify redirect to /login
+2. Wait for FirebaseUI to render
+3. Enter email → click Next → enter password → click Sign In
+4. Wait for redirect to /dashboard
+5. Run all existing frontend tests (FE-10 through FE-54) while authenticated
+6. Test sign-out → verify redirect to /login
+7. Verify protected routes redirect when not authenticated
+```
+
+---
+
+## Updated Test Matrix — All Priorities
+
+### Priority 0: Authentication (NEW — test first)
+
+| ID | Title | Severity | Steps |
+|----|-------|----------|-------|
+| AUTH-01 | Login page loads with FirebaseUI | critical | Visit `/login`, verify widget renders |
+| AUTH-02 | Unauthenticated redirect to /login | critical | Visit `/`, `/dashboard`, `/properties` without auth |
+| AUTH-03 | Email/password sign-in works | critical | Sign in with demo account |
+| AUTH-04 | Post-login dashboard loads | critical | Verify dashboard with Firestore data after login |
+| AUTH-05 | Sign out works | high | Click sign out, verify redirect |
+| AUTH-06 | Different persona login | high | Sign in as COO, verify org-wide data |
+| AUTH-07 | Loading state shown | medium | Check spinner during Firebase init |
+| AUTH-08 | Config endpoint returns values | high | GET `/api/v1/config` |
+| AUTH-09 | Invalid credentials handled | medium | Wrong password shows error |
+| AUTH-10 | Session persists across reload | medium | Sign in, close tab, reopen |
+
+### Priority 1: Existing API Smoke Tests (use Bearer token or X-Persona fallback)
+
+Same as before — all existing API tests still work with `X-Persona` header.
+
+### Priority 2: Existing Frontend Tests (must authenticate first)
+
+All existing FE-* tests need to run **after authenticating** via the login page. The test setup should include a `login_via_firebaseui()` call before navigating to any protected route.
+
+---
+
+*Firebase Auth test plan added 09/02/2026 by DevOps Senior*
 *Live URL: https://socialhomes-674258130066.europe-west2.run.app/*
+*Cloud Run test report generated 08/02/2026*
 *Screenshots: `/tests/screenshots_cloudrun/`*
 *JSON results: `/tests/test_results_cloudrun.json`*

@@ -36,7 +36,13 @@ export default function LoginPage() {
       signInSuccessUrl: '/dashboard',
       signInOptions: [
         // Email / Password provider
-        firebase.auth.EmailAuthProvider.PROVIDER_ID,
+        // requireDisplayName: false prevents the "First & last name" field
+        // from appearing when email enumeration protection is enabled
+        // (Firebase can't check if an email exists, so defaults to register form).
+        {
+          provider: firebase.auth.EmailAuthProvider.PROVIDER_ID,
+          requireDisplayName: false,
+        },
         // Google provider with popup mode
         {
           provider: firebase.auth.GoogleAuthProvider.PROVIDER_ID,
@@ -45,6 +51,8 @@ export default function LoginPage() {
           },
         },
       ],
+      // Prevent auto-upgrade for anonymous users
+      autoUpgradeAnonymousUsers: false,
       callbacks: {
         signInSuccessWithAuthResult: () => {
           // Don't redirect — let onAuthStateChanged handle navigation
