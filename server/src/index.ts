@@ -19,6 +19,7 @@ import { aiRouter } from './routes/ai.js';
 import { adminRouter } from './routes/admin.js';
 import { publicDataRouter } from './routes/public-data.js';
 import { exportRouter } from './routes/export.js';
+import { authRouter } from './routes/auth.js';
 import { errorHandler } from './middleware/error-handler.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -49,6 +50,7 @@ app.get('/health', (_req, res) => {
 });
 
 // ---- API Routes ----
+app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/properties', propertiesRouter);
 app.use('/api/v1/tenants', tenantsRouter);
 app.use('/api/v1/cases', casesRouter);

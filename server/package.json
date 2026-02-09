@@ -11,11 +11,12 @@
   },
   "dependencies": {
     "@google-cloud/firestore": "^7.11.0",
+    "compression": "^1.8.0",
     "cors": "^2.8.5",
     "express": "^4.21.2",
+    "firebase-admin": "^13.6.1",
     "helmet": "^8.1.0",
-    "morgan": "^1.10.0",
-    "compression": "^1.8.0"
+    "morgan": "^1.10.0"
   },
   "devDependencies": {
     "@types/compression": "^1.7.5",

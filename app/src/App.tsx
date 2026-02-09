@@ -28,6 +28,7 @@ import TsmReportPage from '@/pages/reports/TsmReportPage';
 import AiCentrePage from '@/pages/ai-centre/AiCentrePage';
 import AdminPage from '@/pages/admin/AdminPage';
 import TenantPortalPage from '@/pages/tenant-portal/TenantPortalPage';
+import LoginPage from '@/pages/auth/LoginPage';
 
 // Error Boundary to catch and display runtime errors
 class ErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean; error: Error | null }> {
@@ -62,6 +63,9 @@ export default function App() {
     <AppProvider>
       <BrowserRouter>
         <Routes>
+          {/* Auth routes (outside Layout) */}
+          <Route path="/login" element={<LoginPage />} />
+
           {/* Root redirect */}
           <Route path="/" element={<Navigate to="/briefing" replace />} />
 

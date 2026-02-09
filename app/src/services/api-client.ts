@@ -4,17 +4,31 @@
 // Falls back to static data when API is unavailable (dev mode)
 // ============================================================
 
+import { getIdToken } from './firebase';
+
 const API_BASE = '/api/v1';
 
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
   const url = `${API_BASE}${path}`;
   const persona = localStorage.getItem('socialhomes-persona') || 'housing-officer';
+  const authMode = localStorage.getItem('socialhomes-auth-mode');
+
+  // Build auth headers: Firebase JWT if authenticated, otherwise X-Persona
+  const authHeaders: Record<string, string> = {};
+  if (authMode === 'firebase') {
+    const token = await getIdToken();
+    if (token) {
+      authHeaders['Authorization'] = `Bearer ${token}`;
+    }
+  }
+  // Always include X-Persona as fallback (server uses it when no Bearer token)
+  authHeaders['X-Persona'] = persona;
 
   const response = await fetch(url, {
     ...options,
     headers: {
       'Content-Type': 'application/json',
-      'X-Persona': persona,
+      ...authHeaders,
       ...options?.headers,
     },
   });
