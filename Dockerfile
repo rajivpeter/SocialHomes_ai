@@ -10,7 +10,9 @@ FROM node:20-slim AS build-client
 
 WORKDIR /build/app
 COPY app/package.json app/package-lock.json ./
-RUN npm ci
+# --legacy-peer-deps needed: firebaseui@6 declares peer firebase@^9||^10
+# but works fine at runtime with firebase v12 via the compat layer.
+RUN npm ci --legacy-peer-deps
 COPY app/ ./
 RUN npm run build
 

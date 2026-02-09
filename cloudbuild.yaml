@@ -45,16 +45,11 @@ steps:
       - '--port'
       - '8080'
       - '--set-env-vars'
-      - 'NODE_ENV=production,FIREBASE_API_KEY=${_FIREBASE_API_KEY},FIREBASE_AUTH_DOMAIN=${_FIREBASE_AUTH_DOMAIN},FIREBASE_PROJECT_ID=${_FIREBASE_PROJECT_ID}'
+      - 'NODE_ENV=production,FIREBASE_API_KEY=AIzaSyB1nfSDqignmcFAvKzh075flVbWOH9aOLs,FIREBASE_AUTH_DOMAIN=gen-lang-client-0146156913.firebaseapp.com,FIREBASE_PROJECT_ID=gen-lang-client-0146156913'
 
 images:
   - 'europe-west2-docker.pkg.dev/$PROJECT_ID/socialhomes/app:$COMMIT_SHA'
   - 'europe-west2-docker.pkg.dev/$PROJECT_ID/socialhomes/app:latest'
-
-substitutions:
-  _FIREBASE_API_KEY: ''
-  _FIREBASE_AUTH_DOMAIN: ''
-  _FIREBASE_PROJECT_ID: ''
 
 options:
   logging: CLOUD_LOGGING_ONLY
