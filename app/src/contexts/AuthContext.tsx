@@ -1,143 +1,141 @@
-import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
-import { onAuthChange, signIn, signOut, getIdToken, type auth } from '../services/firebase';
-import type { User } from 'firebase/auth';
+// ============================================================
+// SocialHomes.Ai — Authentication Context
+// Manages Firebase Auth state across the application.
+// Wraps the app in main.tsx — all components can useAuth().
+// ============================================================
 
-interface UserProfile {
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  type ReactNode,
+} from 'react';
+import {
+  initFirebase,
+  getFirebaseAuth,
+  getIdToken,
+  signOut as firebaseSignOut,
+  firebase,
+} from '@/services/firebase';
+
+export interface AuthUser {
   uid: string;
-  email: string;
-  displayName: string;
-  persona: string;
-  teamId?: string;
-  patchIds?: string[];
+  email: string | null;
+  displayName: string | null;
+  photoURL: string | null;
 }
 
 interface AuthContextType {
-  user: User | null;
-  profile: UserProfile | null;
+  /** The currently authenticated Firebase user (null = not signed in) */
+  user: AuthUser | null;
+  /** True while Firebase is initializing or checking auth state */
   loading: boolean;
-  error: string | null;
-  login: (email: string, password: string) => Promise<void>;
-  logout: () => Promise<void>;
-  isAuthenticated: boolean;
-  /** True when using legacy X-Persona mode (no Firebase login) */
-  isDemoMode: boolean;
-  setDemoMode: (enabled: boolean) => void;
+  /** True when Firebase has been initialized (config loaded) */
+  firebaseReady: boolean;
+  /** Sign out and clear auth state */
+  signOut: () => Promise<void>;
+  /** Get the current ID token for API calls */
+  getToken: () => Promise<string | null>;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [user, setUser] = useState<AuthUser | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [isDemoMode, setIsDemoMode] = useState(() => {
-    return localStorage.getItem('socialhomes-auth-mode') !== 'firebase';
-  });
+  const [firebaseReady, setFirebaseReady] = useState(false);
 
   useEffect(() => {
-    const unsubscribe = onAuthChange(async (firebaseUser) => {
-      setUser(firebaseUser);
+    let unsubscribe: (() => void) | undefined;
 
-      if (firebaseUser && !isDemoMode) {
-        // Fetch user profile from server
-        try {
-          const token = await firebaseUser.getIdToken();
-          const res = await fetch('/api/v1/auth/me', {
-            headers: { Authorization: `Bearer ${token}` },
-          });
-          if (res.ok) {
-            const profileData = await res.json();
-            setProfile(profileData);
-            // Sync persona to localStorage for components that read it
-            localStorage.setItem('socialhomes-persona', profileData.persona);
-          }
-        } catch {
-          // Profile fetch failed — still authenticated but no profile
-          console.warn('Could not fetch user profile');
+    initFirebase()
+      .then(() => {
+        setFirebaseReady(true);
+        const auth = getFirebaseAuth();
+        if (!auth) {
+          // Firebase not configured — allow app to work without auth
+          setLoading(false);
+          return;
         }
-      } else if (isDemoMode) {
-        // In demo mode, use the persona from localStorage
-        const persona = localStorage.getItem('socialhomes-persona') || 'housing-officer';
-        setProfile({
-          uid: 'demo',
-          email: `${persona}@rcha.org.uk`,
-          displayName: persona.split('-').map(w => w[0].toUpperCase() + w.slice(1)).join(' '),
-          persona,
+
+        unsubscribe = auth.onAuthStateChanged(async (fbUser) => {
+          if (fbUser) {
+            setUser({
+              uid: fbUser.uid,
+              email: fbUser.email,
+              displayName: fbUser.displayName,
+              photoURL: fbUser.photoURL,
+            });
+
+            // Store auth mode so api-client knows to send Bearer token
+            localStorage.setItem('socialhomes-auth-mode', 'firebase');
+
+            // Create profile in Firestore on first sign-in
+            try {
+              const token = await fbUser.getIdToken();
+              await fetch('/api/v1/auth/profile', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({
+                  name: fbUser.displayName || '',
+                  email: fbUser.email || '',
+                }),
+              });
+            } catch (err) {
+              console.error('Failed to sync user profile:', err);
+            }
+          } else {
+            setUser(null);
+            localStorage.removeItem('socialhomes-auth-mode');
+          }
+          setLoading(false);
         });
-      } else {
-        setProfile(null);
-      }
-
-      setLoading(false);
-    });
-
-    return unsubscribe;
-  }, [isDemoMode]);
-
-  const login = async (email: string, password: string) => {
-    setError(null);
-    try {
-      await signIn(email, password);
-      setIsDemoMode(false);
-      localStorage.setItem('socialhomes-auth-mode', 'firebase');
-    } catch (err: any) {
-      const message =
-        err.code === 'auth/user-not-found'
-          ? 'No account found with this email'
-          : err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential'
-          ? 'Incorrect password'
-          : err.code === 'auth/too-many-requests'
-          ? 'Too many attempts. Please try again later.'
-          : 'Login failed. Please try again.';
-      setError(message);
-      throw err;
-    }
-  };
-
-  const logout = async () => {
-    await signOut();
-    setProfile(null);
-    setIsDemoMode(true);
-    localStorage.setItem('socialhomes-auth-mode', 'demo');
-    localStorage.setItem('socialhomes-persona', 'housing-officer');
-  };
-
-  const setDemoMode = (enabled: boolean) => {
-    setIsDemoMode(enabled);
-    localStorage.setItem('socialhomes-auth-mode', enabled ? 'demo' : 'firebase');
-    if (enabled) {
-      setLoading(false);
-      const persona = localStorage.getItem('socialhomes-persona') || 'housing-officer';
-      setProfile({
-        uid: 'demo',
-        email: `${persona}@rcha.org.uk`,
-        displayName: persona.split('-').map(w => w[0].toUpperCase() + w.slice(1)).join(' '),
-        persona,
+      })
+      .catch((err) => {
+        console.error('Firebase initialization failed:', err);
+        setLoading(false);
       });
-    }
+
+    return () => {
+      unsubscribe?.();
+    };
+  }, []);
+
+  const handleSignOut = async () => {
+    await firebaseSignOut();
+    setUser(null);
+    localStorage.removeItem('socialhomes-auth-mode');
   };
 
   return (
     <AuthContext.Provider
       value={{
         user,
-        profile,
         loading,
-        error,
-        login,
-        logout,
-        isAuthenticated: isDemoMode || !!user,
-        isDemoMode,
-        setDemoMode,
+        firebaseReady,
+        signOut: handleSignOut,
+        getToken: getIdToken,
       }}
     >
-      {children}
+      {loading ? (
+        <div className="min-h-screen bg-[#0D1117] flex items-center justify-center">
+          <div className="flex flex-col items-center gap-4">
+            <div className="w-10 h-10 border-2 border-brand-teal/30 border-t-brand-teal rounded-full animate-spin" />
+            <p className="text-text-muted text-sm">Loading SocialHomes.Ai...</p>
+          </div>
+        </div>
+      ) : (
+        children
+      )}
     </AuthContext.Provider>
   );
 }
 
-export function useAuth() {
+export function useAuth(): AuthContextType {
   const context = useContext(AuthContext);
   if (!context) {
     throw new Error('useAuth must be used within an AuthProvider');

@@ -49,6 +49,20 @@ app.get('/health', (_req, res) => {
   });
 });
 
+// ---- Firebase Config (public, no auth) ----
+// Serves Firebase client config from environment variables so the SPA
+// never hardcodes keys. The values are NOT secrets — they are the public
+// Firebase Web SDK config used in every browser that loads the app.
+app.get('/api/v1/config', (_req, res) => {
+  res.json({
+    firebase: {
+      apiKey: process.env.FIREBASE_API_KEY || '',
+      authDomain: process.env.FIREBASE_AUTH_DOMAIN || '',
+      projectId: process.env.FIREBASE_PROJECT_ID || process.env.GOOGLE_CLOUD_PROJECT || '',
+    },
+  });
+});
+
 // ---- API Routes ----
 app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/properties', propertiesRouter);

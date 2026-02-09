@@ -1,7 +1,9 @@
 import { Component, type ReactNode } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AppProvider } from '@/context/AppContext';
+import { useAuth } from '@/contexts/AuthContext';
 import Layout from '@/components/layout/Layout';
+import ProtectedRoute from '@/components/shared/ProtectedRoute';
 
 // Pages
 import BriefingPage from '@/pages/briefing/BriefingPage';
@@ -57,20 +59,32 @@ class ErrorBoundary extends Component<{ children: ReactNode }, { hasError: boole
   }
 }
 
+/**
+ * Root redirect: authenticated users go to /dashboard, others to /login.
+ */
+function RootRedirect() {
+  const { user } = useAuth();
+  return <Navigate to={user ? '/dashboard' : '/login'} replace />;
+}
+
 export default function App() {
   return (
     <ErrorBoundary>
     <AppProvider>
       <BrowserRouter>
         <Routes>
-          {/* Auth routes (outside Layout) */}
+          {/* Public routes */}
           <Route path="/login" element={<LoginPage />} />
 
-          {/* Root redirect */}
-          <Route path="/" element={<Navigate to="/briefing" replace />} />
+          {/* Root redirect: /login if not auth'd, /dashboard if auth'd */}
+          <Route path="/" element={<RootRedirect />} />
 
-          {/* All pages inside Layout */}
-          <Route element={<Layout />}>
+          {/* All protected pages inside Layout */}
+          <Route element={
+            <ProtectedRoute>
+              <Layout />
+            </ProtectedRoute>
+          }>
             <Route path="/briefing" element={<BriefingPage />} />
             <Route path="/tenant-portal" element={<TenantPortalPage />} />
             <Route path="/tenant-portal/*" element={<TenantPortalPage />} />

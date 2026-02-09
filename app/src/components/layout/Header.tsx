@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '@/context/AppContext';
-import { Search, Bell, Sparkles, ChevronDown, User } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
+import { Search, Bell, Sparkles, ChevronDown, User, LogOut } from 'lucide-react';
 import type { Persona } from '@/types';
 import { getInitials } from '@/utils/format';
 
@@ -15,10 +16,16 @@ const personas: { id: Persona; label: string; description: string }[] = [
 
 export default function Header() {
   const { state, dispatch } = useApp();
+  const { user: authUser, signOut } = useAuth();
   const navigate = useNavigate();
   const [showNotifications, setShowNotifications] = useState(false);
   const [showPersona, setShowPersona] = useState(false);
   const [searchValue, setSearchValue] = useState('');
+
+  const handleLogout = async () => {
+    await signOut();
+    navigate('/login', { replace: true });
+  };
 
   const unreadCount = state.notifications.filter(n => !n.read).length;
 
@@ -165,13 +172,25 @@ export default function Header() {
                   )}
                 </button>
               ))}
-              <div className="p-3 border-t border-border-default">
+              <div className="p-3 border-t border-border-default space-y-2">
                 <button
                   onClick={() => { navigate('/tenant-portal'); setShowPersona(false); }}
                   className="text-xs text-brand-teal hover:text-brand-teal/80 transition-colors font-medium"
                 >
                   Open Tenant Portal →
                 </button>
+                {authUser && (
+                  <div className="pt-2 border-t border-border-subtle">
+                    <div className="text-[10px] text-text-muted mb-1.5 truncate">{authUser.email}</div>
+                    <button
+                      onClick={() => { setShowPersona(false); handleLogout(); }}
+                      className="flex items-center gap-1.5 text-xs text-brand-garnet hover:text-brand-garnet/80 transition-colors font-medium"
+                    >
+                      <LogOut size={12} />
+                      Sign out
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           )}

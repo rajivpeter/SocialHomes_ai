@@ -1,172 +1,249 @@
-import { useState } from 'react';
-import { useAuth } from '../../contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
-import { LogIn, Shield, Users, Eye, EyeOff } from 'lucide-react';
+// ============================================================
+// SocialHomes.Ai — Login Page
+// Uses FirebaseUI drop-in widget for Email/Password + Google.
+// Redirects to /dashboard once authenticated.
+// ============================================================
 
-const DEMO_ACCOUNTS = [
-  { email: 'helen.carter@rcha.org.uk', role: 'Chief Operating Officer', persona: 'coo' },
-  { email: 'james.wright@rcha.org.uk', role: 'Head of Housing', persona: 'head-of-housing' },
-  { email: 'priya.patel@rcha.org.uk', role: 'Team Manager', persona: 'manager' },
-  { email: 'sarah.mitchell@rcha.org.uk', role: 'Housing Officer', persona: 'housing-officer' },
-  { email: 'mark.johnson@rcha.org.uk', role: 'Operative', persona: 'operative' },
-];
+import { useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
+import { firebase, getFirebaseAuth } from '@/services/firebase';
+import * as firebaseui from 'firebaseui';
+import 'firebaseui/dist/firebaseui.css';
 
 export default function LoginPage() {
-  const { login, error, setDemoMode } = useAuth();
+  const { user, firebaseReady } = useAuth();
   const navigate = useNavigate();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [showDemoAccounts, setShowDemoAccounts] = useState(false);
+  const uiContainerRef = useRef<HTMLDivElement>(null);
+  const uiRef = useRef<firebaseui.auth.AuthUI | null>(null);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    try {
-      await login(email, password);
-      navigate('/briefing');
-    } catch {
-      // error is set in context
-    } finally {
-      setLoading(false);
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (user) {
+      navigate('/dashboard', { replace: true });
     }
-  };
+  }, [user, navigate]);
 
-  const handleDemoLogin = (persona: string) => {
-    localStorage.setItem('socialhomes-persona', persona);
-    setDemoMode(true);
-    navigate('/briefing');
-  };
+  // Render FirebaseUI widget
+  useEffect(() => {
+    if (!firebaseReady || user) return;
+
+    const auth = getFirebaseAuth();
+    if (!auth || !uiContainerRef.current) return;
+
+    const uiConfig: firebaseui.auth.Config = {
+      signInFlow: 'popup',
+      signInSuccessUrl: '/dashboard',
+      signInOptions: [
+        // Email / Password provider
+        firebase.auth.EmailAuthProvider.PROVIDER_ID,
+        // Google provider with popup mode
+        {
+          provider: firebase.auth.GoogleAuthProvider.PROVIDER_ID,
+          customParameters: {
+            prompt: 'select_account',
+          },
+        },
+      ],
+      callbacks: {
+        signInSuccessWithAuthResult: () => {
+          // Don't redirect — let onAuthStateChanged handle navigation
+          return false;
+        },
+      },
+      tosUrl: '#',
+      privacyPolicyUrl: '#',
+    };
+
+    // Get or create FirebaseUI instance
+    if (!uiRef.current) {
+      uiRef.current =
+        firebaseui.auth.AuthUI.getInstance() ||
+        new firebaseui.auth.AuthUI(auth);
+    }
+
+    // Start the widget
+    uiRef.current.start(uiContainerRef.current, uiConfig);
+
+    return () => {
+      uiRef.current?.reset();
+    };
+  }, [firebaseReady, user]);
+
+  // Don't show login page if already authenticated
+  if (user) return null;
 
   return (
-    <div className="min-h-screen bg-[#0D1117] flex items-center justify-center px-4">
-      <div className="w-full max-w-md">
-        {/* Logo & Title */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center gap-3 mb-4">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center">
-              <Shield className="w-7 h-7 text-white" />
-            </div>
-            <div className="text-left">
-              <h1 className="text-2xl font-bold text-white">SocialHomes<span className="text-emerald-400">.Ai</span></h1>
-              <p className="text-xs text-gray-500">by Yantra.Works</p>
+    <div className="min-h-screen bg-[#0D1117] flex flex-col items-center justify-center px-4">
+      {/* Background gradient */}
+      <div className="fixed inset-0 bg-gradient-to-br from-brand-deep/20 via-transparent to-brand-teal/5 pointer-events-none" />
+
+      {/* Login Card */}
+      <div className="relative z-10 w-full max-w-md space-y-8">
+        {/* Logo & Branding */}
+        <div className="text-center space-y-4">
+          <div className="flex items-center justify-center gap-3">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 751 772"
+              width="48"
+              height="50"
+            >
+              <path
+                fill="#058995"
+                d="M745.51,390.8l-95.41-91.94-41.32,42.88,48.94,47.16-250.45,254.19-1.31-194.04,12.47-12.74-.31-.3,143.2-143.64.08.08,42.88-42.58-.29-.29,1-1-41.76-41.63-.79.79L377.89,21.94l-1.41,1.4-.43-.44L10.05,385.9l.67.67-2.57,2.54,325.25,328.97-.16.16,12.35,12.17,30.65,31,.41-.4,2.02,1.99,324.99-329.84.55.53,41.32-42.88ZM345.09,452.5l1.28,189.95-251.12-253.99,92.74-91.98,144.76,141.66-1.03,1.03,13.37,13.33ZM375.98,394.78l-144.51-141.42,146.65-145.45,141.65,142.63-143.79,144.23Z"
+              />
+            </svg>
+            <div>
+              <h1 className="text-2xl font-bold text-text-primary tracking-tight">
+                SocialHomes<span className="text-brand-teal">.Ai</span>
+              </h1>
+              <p className="text-[10px] text-text-muted uppercase tracking-[0.25em]">
+                by Yantra.Works
+              </p>
             </div>
           </div>
-          <p className="text-gray-400 text-sm">AI-Native Social Housing Management</p>
+
+          <div className="space-y-1">
+            <p className="text-text-secondary text-sm">
+              UK Social Housing Management System
+            </p>
+            <span className="inline-block bg-gradient-to-r from-brand-garnet to-brand-garnet/80 text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider">
+              BETA
+            </span>
+          </div>
         </div>
 
-        {/* Login Form */}
-        <div className="bg-[#161B22] border border-gray-800 rounded-2xl p-8">
-          <h2 className="text-lg font-semibold text-white mb-6 flex items-center gap-2">
-            <LogIn className="w-5 h-5 text-emerald-400" />
-            Sign In
+        {/* FirebaseUI Widget Container */}
+        <div className="bg-surface-card/80 backdrop-blur-sm rounded-2xl border border-border-default p-8 shadow-2xl">
+          <h2 className="text-lg font-semibold text-text-primary text-center mb-6">
+            Sign in to continue
           </h2>
 
-          {error && (
-            <div className="mb-4 p-3 bg-red-500/10 border border-red-500/30 rounded-lg text-red-400 text-sm">
-              {error}
+          {!firebaseReady ? (
+            <div className="flex justify-center py-8">
+              <div className="w-8 h-8 border-2 border-brand-teal/30 border-t-brand-teal rounded-full animate-spin" />
             </div>
+          ) : (
+            <div
+              ref={uiContainerRef}
+              id="firebaseui-auth-container"
+              className="firebaseui-dark"
+            />
           )}
+        </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-sm text-gray-400 mb-1.5">Email</label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-2.5 bg-[#0D1117] border border-gray-700 rounded-lg text-white placeholder-gray-600 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-colors"
-                placeholder="name@organisation.org.uk"
-                required
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm text-gray-400 mb-1.5">Password</label>
-              <div className="relative">
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-4 py-2.5 bg-[#0D1117] border border-gray-700 rounded-lg text-white placeholder-gray-600 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-colors pr-12"
-                  placeholder="Enter password"
-                  required
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300"
-                >
-                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                </button>
-              </div>
-            </div>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 disabled:bg-emerald-800 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-colors flex items-center justify-center gap-2"
-            >
-              {loading ? (
-                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              ) : (
-                <>
-                  <LogIn className="w-4 h-4" />
-                  Sign In
-                </>
-              )}
-            </button>
-          </form>
-
-          {/* Divider */}
-          <div className="my-6 flex items-center gap-3">
-            <div className="flex-1 h-px bg-gray-800" />
-            <span className="text-xs text-gray-600 uppercase tracking-wider">or</span>
-            <div className="flex-1 h-px bg-gray-800" />
+        {/* Demo credentials hint */}
+        <div className="bg-surface-card/40 rounded-xl border border-border-subtle p-4 text-center">
+          <p className="text-text-muted text-xs mb-2">Demo Accounts</p>
+          <div className="space-y-1">
+            <p className="text-text-secondary text-xs">
+              <span className="text-brand-teal font-mono">sarah.mitchell@rcha.org.uk</span>
+            </p>
+            <p className="text-text-secondary text-xs">
+              Password: <span className="text-brand-teal font-mono">SocialHomes2026!</span>
+            </p>
           </div>
-
-          {/* Demo Mode Toggle */}
-          <button
-            onClick={() => setShowDemoAccounts(!showDemoAccounts)}
-            className="w-full py-2.5 border border-gray-700 hover:border-gray-600 text-gray-300 hover:text-white font-medium rounded-lg transition-colors flex items-center justify-center gap-2"
-          >
-            <Users className="w-4 h-4" />
-            {showDemoAccounts ? 'Hide Demo Accounts' : 'Continue with Demo Account'}
-          </button>
-
-          {/* Demo Accounts List */}
-          {showDemoAccounts && (
-            <div className="mt-4 space-y-2">
-              <p className="text-xs text-gray-500 mb-3">Select a persona to explore the system:</p>
-              {DEMO_ACCOUNTS.map((account) => (
-                <button
-                  key={account.persona}
-                  onClick={() => handleDemoLogin(account.persona)}
-                  className="w-full px-4 py-3 bg-[#0D1117] hover:bg-[#1C2333] border border-gray-800 hover:border-emerald-500/30 rounded-lg transition-colors text-left group"
-                >
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-white group-hover:text-emerald-400 transition-colors">
-                        {account.role}
-                      </p>
-                      <p className="text-xs text-gray-500">{account.email}</p>
-                    </div>
-                    <span className="text-xs px-2 py-1 bg-gray-800 text-gray-400 rounded-md">
-                      {account.persona}
-                    </span>
-                  </div>
-                </button>
-              ))}
-            </div>
-          )}
         </div>
 
         {/* Footer */}
-        <p className="text-center text-xs text-gray-600 mt-6">
-          BETA &middot; Built by Yantra.Works &middot; HACT v3.5 Compliant
+        <p className="text-center text-text-muted text-[10px]">
+          &copy; 2026 Yantra.Works Ltd. All rights reserved.
         </p>
       </div>
+
+      {/* FirebaseUI dark theme overrides */}
+      <style>{`
+        .firebaseui-dark .firebaseui-container {
+          background: transparent !important;
+          font-family: inherit !important;
+          max-width: 100% !important;
+        }
+        .firebaseui-dark .firebaseui-card-content {
+          padding: 0 !important;
+        }
+        .firebaseui-dark .firebaseui-card-header {
+          display: none !important;
+        }
+        .firebaseui-dark .firebaseui-card-actions {
+          padding: 0 !important;
+        }
+        .firebaseui-dark .mdl-button--raised.mdl-button--colored {
+          background-color: #058995 !important;
+          border-radius: 0.75rem !important;
+          font-weight: 600 !important;
+          text-transform: none !important;
+          letter-spacing: 0 !important;
+          height: 44px !important;
+          font-size: 14px !important;
+        }
+        .firebaseui-dark .mdl-button--raised.mdl-button--colored:hover {
+          background-color: #047a85 !important;
+        }
+        .firebaseui-dark .firebaseui-idp-button {
+          border-radius: 0.75rem !important;
+          max-width: 100% !important;
+          height: 44px !important;
+          border: 1px solid #1E2A3A !important;
+          background: #161B22 !important;
+        }
+        .firebaseui-dark .firebaseui-idp-text {
+          color: #E6EDF3 !important;
+          font-weight: 500 !important;
+          font-size: 14px !important;
+        }
+        .firebaseui-dark .firebaseui-idp-google > .firebaseui-idp-text {
+          color: #E6EDF3 !important;
+        }
+        .firebaseui-dark .mdl-textfield__input {
+          background: #161B22 !important;
+          border: 1px solid #1E2A3A !important;
+          border-radius: 0.75rem !important;
+          color: #E6EDF3 !important;
+          padding: 12px 16px !important;
+          font-size: 14px !important;
+        }
+        .firebaseui-dark .mdl-textfield__input:focus {
+          border-color: #058995 !important;
+          outline: none !important;
+          box-shadow: 0 0 0 2px rgba(5, 137, 149, 0.2) !important;
+        }
+        .firebaseui-dark .mdl-textfield__label {
+          color: #6B7B8D !important;
+          font-size: 14px !important;
+        }
+        .firebaseui-dark .mdl-textfield__label:after {
+          background-color: #058995 !important;
+        }
+        .firebaseui-dark .firebaseui-link {
+          color: #058995 !important;
+        }
+        .firebaseui-dark .firebaseui-label {
+          color: #8B949E !important;
+        }
+        .firebaseui-dark .firebaseui-subtitle,
+        .firebaseui-dark .firebaseui-text {
+          color: #8B949E !important;
+        }
+        .firebaseui-dark .firebaseui-error {
+          color: #BE3358 !important;
+        }
+        .firebaseui-dark .mdl-progress > .progressbar {
+          background-color: #058995 !important;
+        }
+        .firebaseui-dark .mdl-progress > .bufferbar {
+          background: #161B22 !important;
+        }
+        .firebaseui-dark .mdl-shadow--2dp {
+          box-shadow: none !important;
+        }
+        .firebaseui-dark .firebaseui-tos {
+          color: #6B7B8D !important;
+        }
+        .firebaseui-dark .firebaseui-tos a {
+          color: #058995 !important;
+        }
+      `}</style>
     </div>
   );
 }

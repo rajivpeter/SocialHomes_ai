@@ -107,6 +107,50 @@ authRouter.post('/seed-users', async (_req, res, next) => {
 });
 
 /**
+ * POST /api/v1/auth/profile
+ * Creates a user profile in Firestore on first registration.
+ * Idempotent — only writes if profile doesn't exist yet.
+ * Requires Authorization: Bearer <idToken>
+ */
+authRouter.post('/profile', async (req, res, next) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ error: 'No authorization token provided' });
+    }
+
+    const { verifyIdToken: verify } = await import('../services/firebase-admin.js');
+    const decoded = await verify(authHeader.slice(7));
+
+    // Check if profile already exists
+    const existing = await getDoc<any>(collections.users, decoded.uid);
+    if (existing) {
+      return res.json({ status: 'existing', profile: existing });
+    }
+
+    // Create new profile on first registration
+    const profile = {
+      id: decoded.uid,
+      email: decoded.email || '',
+      displayName: decoded.name || req.body.name || '',
+      persona: 'housing-officer', // Default persona for new users
+      teamId: null,
+      patchIds: [],
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    await setDoc(collections.users, decoded.uid, profile);
+    res.status(201).json({ status: 'created', profile });
+  } catch (err: any) {
+    if (err.code === 'auth/id-token-expired' || err.code === 'auth/argument-error') {
+      return res.status(401).json({ error: 'Invalid or expired token' });
+    }
+    next(err);
+  }
+});
+
+/**
  * GET /api/v1/auth/me
  * Returns the authenticated user's profile.
  * Requires Authorization: Bearer <idToken>
