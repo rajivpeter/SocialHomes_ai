@@ -32,7 +32,7 @@ import AiCentrePage from '@/pages/ai-centre/AiCentrePage';
 import AdminPage from '@/pages/admin/AdminPage';
 import TenantPortalPage from '@/pages/tenant-portal/TenantPortalPage';
 import LoginPage from '@/pages/auth/LoginPage';
-import ComingSoonPage from '@/pages/shared/ComingSoonPage';
+import DynamicReportPage from '@/pages/reports/DynamicReportPage';
 
 // Error Boundary to catch and display runtime errors
 class ErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean; error: Error | null }> {
@@ -122,7 +122,7 @@ export default function App() {
             <Route path="/communications/templates" element={<CommunicationsPage />} />
             <Route path="/reports" element={<ReportsPage />} />
             <Route path="/reports/tsm" element={<TsmReportPage />} />
-            <Route path="/reports/*" element={<ComingSoonPage />} />
+            <Route path="/reports/:slug" element={<DynamicReportPage />} />
             <Route path="/ai" element={<AiCentrePage />} />
             <Route path="/ai/insights" element={<AiCentrePage />} />
             <Route path="/ai/predictions" element={<AiCentrePage />} />
