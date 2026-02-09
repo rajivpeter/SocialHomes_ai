@@ -317,7 +317,7 @@ export default function RepairDetailPage() {
               <Building2 size={20} className="text-brand-teal" />
               <div>
                 <div className="text-xs text-text-muted uppercase tracking-wider">Property</div>
-                <Link to={`/properties/${property?.uprn}`} className="text-sm font-medium text-brand-teal hover:underline">
+                <Link to={`/properties/${property?.id || property?.uprn}`} className="text-sm font-medium text-brand-teal hover:underline">
                   {property?.address || 'N/A'}
                 </Link>
               </div>

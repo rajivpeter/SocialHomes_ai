@@ -3,13 +3,15 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { 
   Phone, Mail, MapPin, User, Calendar, AlertTriangle, 
   FileText, Activity, Receipt, Scale, Clock, Home,
-  MessageSquare, Wrench, AlertCircle, DollarSign, Droplets
+  MessageSquare, Wrench, AlertCircle, DollarSign, Droplets,
+  Plus, Edit, CreditCard, UserCheck
 } from 'lucide-react';
 import { useTenantIntelligence } from '@/hooks/useEntityIntelligence';
 import { generateCommunicationDraft } from '@/services/ai-drafting';
 import { useTenants, useProperties, useCases } from '@/hooks/useApi';
 import { activities as activitiesData, rentTransactionsSample } from '@/data';
 import AiActionCard from '@/components/shared/AiActionCard';
+import ActionModal from '@/components/shared/ActionModal';
 import StatusPill from '@/components/shared/StatusPill';
 import { formatCurrency, formatDate, getCaseTypeColour, safeText } from '@/utils/format';
 
@@ -143,8 +145,37 @@ export default function TenancyDetailPage() {
   const navigate = useNavigate();
   const intel = useTenantIntelligence(tenant, tenantCases);
   const aiActions = generateAiActions();
+  const [activeModal, setActiveModal] = useState<string | null>(null);
 
   return (
+    <>
+    <ActionModal open={activeModal === 'log-activity'} onClose={() => setActiveModal(null)} title="Log Activity" icon={<Activity size={20} className="text-brand-teal" />} fields={[
+      { id: 'type', label: 'Activity Type', type: 'select', required: true, options: [{ value: 'call', label: 'Phone Call' }, { value: 'visit', label: 'Home Visit' }, { value: 'email', label: 'Email' }, { value: 'letter', label: 'Letter' }, { value: 'sms', label: 'SMS' }] },
+      { id: 'direction', label: 'Direction', type: 'select', required: true, options: [{ value: 'inbound', label: 'Inbound' }, { value: 'outbound', label: 'Outbound' }] },
+      { id: 'subject', label: 'Subject', type: 'text', required: true, placeholder: 'Brief subject...' },
+      { id: 'description', label: 'Notes', type: 'textarea', required: true, placeholder: 'Activity details...' },
+    ]} submitLabel="Log Activity" onSubmit={() => setActiveModal(null)} />
+    <ActionModal open={activeModal === 'create-case'} onClose={() => setActiveModal(null)} title="Create New Case" icon={<Plus size={20} className="text-brand-teal" />} fields={[
+      { id: 'tenant', label: 'Tenant', type: 'readonly', defaultValue: `${tenant.title} ${tenant.firstName} ${tenant.lastName}` },
+      { id: 'type', label: 'Case Type', type: 'select', required: true, options: [{ value: 'repair', label: 'Repair' }, { value: 'complaint', label: 'Complaint' }, { value: 'asb', label: 'ASB' }, { value: 'damp-mould', label: 'Damp & Mould' }] },
+      { id: 'priority', label: 'Priority', type: 'select', required: true, options: [{ value: 'p1', label: 'P1 — Emergency' }, { value: 'p2', label: 'P2 — Urgent' }, { value: 'p3', label: 'P3 — Routine' }, { value: 'p4', label: 'P4 — Planned' }] },
+      { id: 'subject', label: 'Subject', type: 'text', required: true, placeholder: 'Case subject...' },
+      { id: 'description', label: 'Description', type: 'textarea', required: true, placeholder: 'Describe the issue...' },
+    ]} submitLabel="Create Case" onSubmit={() => setActiveModal(null)} />
+    <ActionModal open={activeModal === 'edit'} onClose={() => setActiveModal(null)} title="Edit Tenant Details" icon={<Edit size={20} className="text-brand-blue" />} fields={[
+      { id: 'phone', label: 'Phone', type: 'text', defaultValue: tenant.phone },
+      { id: 'mobile', label: 'Mobile', type: 'text', defaultValue: tenant.mobile || '' },
+      { id: 'email', label: 'Email', type: 'text', defaultValue: tenant.email || '' },
+      { id: 'commPref', label: 'Communication Preference', type: 'select', defaultValue: tenant.communicationPreference, options: [{ value: 'phone', label: 'Phone' }, { value: 'email', label: 'Email' }, { value: 'sms', label: 'SMS' }, { value: 'letter', label: 'Letter' }] },
+    ]} submitLabel="Save Changes" onSubmit={() => setActiveModal(null)} />
+    <ActionModal open={activeModal === 'payment'} onClose={() => setActiveModal(null)} title="Set Up Payment Arrangement" icon={<CreditCard size={20} className="text-brand-teal" />} fields={[
+      { id: 'tenant', label: 'Tenant', type: 'readonly', defaultValue: `${tenant.title} ${tenant.firstName} ${tenant.lastName}` },
+      { id: 'balance', label: 'Current Balance', type: 'readonly', defaultValue: `£${Math.abs(tenant.rentBalance).toFixed(2)} ${tenant.rentBalance < 0 ? 'arrears' : 'credit'}` },
+      { id: 'method', label: 'Payment Method', type: 'select', required: true, options: [{ value: 'dd', label: 'Direct Debit' }, { value: 'so', label: 'Standing Order' }, { value: 'manual', label: 'Manual Payment' }] },
+      { id: 'amount', label: 'Weekly Amount (£)', type: 'text', required: true, placeholder: '0.00' },
+      { id: 'startDate', label: 'Start Date', type: 'date', required: true },
+    ]} submitLabel="Set Up" onSubmit={() => setActiveModal(null)} />
+
     <div className={`space-y-6 ${intel.urgencyLevel === 'crisis' ? 'ring-1 ring-brand-garnet/20 rounded-xl p-1' : ''}`}>
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
@@ -162,7 +193,7 @@ export default function TenancyDetailPage() {
                 {property && (
                   <div className="flex items-center gap-2 text-text-muted">
                     <MapPin size={16} />
-                    <span>{property.address}, {property.postcode}</span>
+                    <Link to={`/properties/${property.id}`} className="text-brand-teal hover:underline">{property.address}, {property.postcode}</Link>
                   </div>
                 )}
                 <div className="flex items-center gap-2 text-text-muted">
@@ -170,6 +201,11 @@ export default function TenancyDetailPage() {
                   <span>Officer: {tenant.assignedOfficer}</span>
                 </div>
               </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <button onClick={() => setActiveModal('edit')} className="flex items-center gap-2 px-3 py-2 bg-surface-elevated text-text-primary rounded-lg hover:bg-surface-hover transition-colors border border-border-default text-sm">
+                <Edit size={14} /> Edit
+              </button>
             </div>
           </div>
         </div>
@@ -576,7 +612,25 @@ export default function TenancyDetailPage() {
             )}
           </div>
         </div>
+
+        {/* Action Buttons */}
+        <div className="bg-surface-card rounded-lg p-4 border border-border-default opacity-0 animate-fade-in-up" style={{ animationDelay: '200ms', animationFillMode: 'forwards' }}>
+          <div className="flex flex-wrap items-center gap-3">
+            <button onClick={() => setActiveModal('log-activity')} className="flex items-center gap-2 px-4 py-2 bg-brand-teal text-white rounded-lg hover:bg-brand-teal/80 transition-colors text-sm">
+              <Activity size={16} /> Log Activity
+            </button>
+            <button onClick={() => setActiveModal('create-case')} className="flex items-center gap-2 px-4 py-2 bg-brand-blue text-white rounded-lg hover:bg-brand-blue/80 transition-colors text-sm">
+              <Plus size={16} /> Create Case
+            </button>
+            {tenant.rentBalance < -200 && (
+              <button onClick={() => setActiveModal('payment')} className="flex items-center gap-2 px-4 py-2 bg-status-warning text-white rounded-lg hover:bg-status-warning/80 transition-colors text-sm">
+                <CreditCard size={16} /> Payment Arrangement
+              </button>
+            )}
+          </div>
+        </div>
       </div>
     </div>
+    </>
   );
 }

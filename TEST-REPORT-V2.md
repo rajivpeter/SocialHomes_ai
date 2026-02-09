@@ -1579,3 +1579,113 @@ All items below should now pass. Please re-test against the live deployment afte
 *Commits: a1aefda, f346e94, 52e6975 — all pushed to main*
 *Cloud Build auto-deploy in progress*
 *Live URL: https://socialhomes-674258130066.europe-west2.run.app/*
+
+---
+
+# POST-FIX RE-TEST RESULTS (09/02/2026 02:40 UTC)
+
+**Tester**: QA Agent (Selenium + API)
+**Test Suite**: `tests/test_retest_v4.py`, `tests/test_quick_checks.py`
+**Screenshots**: `/tests/screenshots_retest_v4/`
+
+---
+
+## Re-Test Checklist Results
+
+### Critical
+
+| Bug | Test | Result | Detail |
+|-----|------|--------|--------|
+| BUG-C01 | `/tenancies/ten-001` loads without crash | **STILL FAILING** | React Error #310 still occurs. The `safeText()` fix was deployed (new bundle hash `index-BKrzsNFk.js`) but the crash persists. See analysis below. |
+| BUG-C02 | `/properties/prop-001` loads without crash | **PASS** | Property detail now loads fully — shows address, EPC rating (D, SAP 58), Rent & Charges (£118.50/week), AI Recommendations ("Proactive Damp Check"), AI Estimate cards (Carbon 2.6 tonnes/yr, Retrofit Cost £4,500, Damp Risk 72%). Tabs: Overview, Compliance, Stock Condition, Damp Mould, Works History, Documents. |
+| BUG-C03 | `/api/v1/repairs` returns JSON | **PASS** | 200 repair items returned |
+| BUG-C03 | `/api/v1/complaints` returns JSON | **PASS** | 34 complaint items returned |
+| BUG-C03 | `/api/v1/allocations` returns JSON | **PASS** | 7 void properties returned |
+| BUG-C04 | Repairs page shows data | **PASS** | 200 Total, 14 Emergency, 28 Urgent, 135 Routine, 23 Planned. Full table with REP- references, properties, priorities, statuses, operatives, target dates. |
+| FE-30 | Tenancies page shows 68 rows | **PASS** | 68 tenant rows displayed |
+| API-15 | `/api/v1/tenants/ten-001/cases` | **PASS** | 7 cases returned for tenant ten-001 |
+| API-16 | `/api/v1/cases?type=repair` | **PASS** | 200 repair cases returned |
+
+### High
+
+| Bug | Test | Result | Detail |
+|-----|------|--------|--------|
+| BUG-H01 | Report links go to real pages | **PASS (27/27)** | All 27 report slugs load dedicated report pages with data. Slugs: `/reports/tsm`, `/reports/hclic`, `/reports/rsh`, `/reports/repairs`, `/reports/voids`, `/reports/gas`, `/reports/eicr`, `/reports/fire`, `/reports/asbestos`, `/reports/awaabs-law`, `/reports/arrears`, `/reports/uc-impact`, `/reports/board`, `/reports/risk`, `/reports/community-impact` etc. |
+| BUG-H02 | Compliance cards route independently | **PASS (6/6)** | Gas→`/compliance/gas` (24 compliant, 4 non-compliant, 85.7%), Electrical→`/compliance/electrical`, Fire→`/compliance/fire`, Asbestos→`/compliance/asbestos`, Legionella→`/compliance/legionella`, Lifts→`/compliance/lifts`. Each shows type-specific property-level data with Compliant/Expiring/Non-Compliant counts and property lists. |
+| BUG-H03 | Communication rows open detail | **PASS** | Clicking a row opens an inline detail panel below the table showing full message, channel/direction badges, AI category/sentiment analysis, and action buttons. |
+| BUG-H04 | Awaab's Law case cards clickable | **PARTIAL** | Individual DAM- case cards still don't navigate on click (stayed on /compliance). The "View All Cases" button works. |
+| BUG-H05 | Map marker popups | **INCONCLUSIVE** | Selenium couldn't click markers (custom divIcon circles). Needs manual verification. Map renders correctly with tiles and markers. |
+| BUG-H06 | Worklist tenant links navigate | **PASS (link exists) / FAIL (destination crashes)** | 36 tenant links found in worklist (e.g., "Mrs Sharon Walker" → `/tenancies/ten-039`). Links are properly styled `<a>` tags. BUT clicking them leads to the tenant detail page which crashes (BUG-C01). |
+| BUG-M01 | Complaint row → detail | **PASS (navigation) / FAIL (destination crashes)** | Row click navigates to `/complaints/cmp-002` correctly. But the complaint detail page ALSO crashes with React Error #310. |
+
+### Regression
+
+| Test | Result |
+|------|--------|
+| Dashboard KPIs populated | **PASS** |
+| Briefing page personalized | **PASS** |
+| Explore map drill-down | **PASS** |
+| Login as sarah.mitchell | **PASS** |
+
+---
+
+## REMAINING CRITICAL BUG: React Error #310 on Tenant and Complaint Detail Pages
+
+### What's fixed
+- Property detail page (`/properties/XXXXX`) — **FIXED and working excellently** with AI features
+
+### What's still broken
+- **Tenant detail page** (`/tenancies/ten-XXX`) — React Error #310
+- **Complaint detail page** (`/complaints/cmp-XXX`) — React Error #310 (NEW — was not testable before because complaint row click didn't navigate)
+
+### Root Cause Analysis
+
+React Error #310 means **"Objects are not valid as a React child"** — a Firestore document field is being rendered directly in JSX that contains an object/map instead of a string/number.
+
+The `safeText()` fix was applied to `TenancyDetailPage.tsx` for date fields and arrays, but the crash persists. This means there's a **different field** causing the issue — one that wasn't covered by the fix. Likely candidates:
+
+1. **`tenant.vulnerabilityFlags`** — if this is an array of objects (not strings), mapping it to JSX without extracting a string property would crash
+2. **`tenant.household[].relationship`** or other nested object fields from Firestore that aren't plain strings
+3. **`tenant.communicationPreference`** — if stored as an object `{type: "email"}` instead of string `"email"`
+4. **Case/activity sub-documents** loaded on the detail page that have object fields
+
+**Debug steps**:
+1. Open Chrome DevTools (non-headless) and navigate to `/tenancies/ten-001`
+2. The error message will show which component is trying to render an object
+3. Apply `safeText()` or `JSON.stringify()` to that specific field
+4. Also apply the same fix to `ComplaintDetailPage.tsx` which was not in the fix list
+
+**Also note**: The complaint detail page (`ComplaintDetailPage.tsx`) was NOT mentioned in the developer fix notes. It likely needs the same `safeText()` treatment as the tenancy and property detail pages.
+
+---
+
+## Summary Scorecard
+
+| Metric | Deep Dive (Before) | This Re-Test | Change |
+|--------|-------------------|-------------|--------|
+| API Routes | 3/8 working | **8/8 working** | +5 fixed |
+| Report Links | 2/28 working | **27/27 working** | +25 fixed |
+| Compliance Routing | All→same page | **6 independent pages** | Fixed |
+| Repairs Data | 0 records | **200 records** | Fixed |
+| Tenancies List | 0 rows | **68 rows** | Fixed |
+| Property Detail | Crash | **Working with AI features** | Fixed |
+| Tenant Detail | Crash | **Still crashing** | NOT FIXED |
+| Complaint Detail | Untestable | **Crashes** | NEW BUG |
+| Communications | Display only | **Detail panel with AI analysis** | Fixed |
+| Worklist Links | None | **36 links present** | Fixed (but dest crashes) |
+| Dashboard/Briefing/Explore | Working | **Still working** | No regression |
+
+### Bugs Fixed: 10 of 12
+### Bugs Remaining: 2 (both React Error #310)
+### New Bugs: 1 (complaint detail crashes)
+
+### Revised AI-Native Score: 7/10
+Property detail now showcases excellent AI features (Carbon Emission estimate, Retrofit Cost, Damp Risk Score, Proactive Damp Check recommendation). The tenant detail page — where the richest AI features would be (income estimate, arrears trajectory, sustainability score) — still crashes and blocks the AI experience.
+
+**Priority 1**: Fix React Error #310 in `TenancyDetailPage.tsx` and `ComplaintDetailPage.tsx`. Once these are resolved, the score should jump to 9/10.
+
+---
+
+*Post-fix re-test completed 09/02/2026 02:55 UTC by QA Agent*
+*Test suites: `tests/test_retest_v4.py`, `tests/test_quick_checks.py`*
+*Screenshots: `/tests/screenshots_retest_v4/`*

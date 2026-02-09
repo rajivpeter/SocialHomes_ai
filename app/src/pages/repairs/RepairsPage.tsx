@@ -1,7 +1,8 @@
 import { useState, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Search, Filter, List, LayoutGrid } from 'lucide-react';
+import { Search, Filter, List, LayoutGrid, Plus, Wrench } from 'lucide-react';
 import { useRepairs, useProperties } from '@/hooks/useApi';
+import ActionModal from '@/components/shared/ActionModal';
 import StatusPill from '@/components/shared/StatusPill';
 import { formatDate } from '@/utils/format';
 
@@ -60,7 +61,18 @@ export default function RepairsPage() {
     return filteredRepairs.filter(r => r.status === status);
   };
 
+  const [showNewModal, setShowNewModal] = useState(false);
+
   return (
+    <>
+    <ActionModal open={showNewModal} onClose={() => setShowNewModal(false)} title="Raise New Repair" icon={<Wrench size={20} className="text-brand-teal" />} fields={[
+      { id: 'priority', label: 'Priority', type: 'select', required: true, options: [{ value: 'emergency', label: 'P1 — Emergency (attend 4hrs)' }, { value: 'urgent', label: 'P2 — Urgent (attend 24hrs)' }, { value: 'routine', label: 'P3 — Routine (attend 28 days)' }, { value: 'planned', label: 'P4 — Planned' }] },
+      { id: 'trade', label: 'Trade', type: 'select', required: true, options: [{ value: 'plumbing', label: 'Plumbing' }, { value: 'electrical', label: 'Electrical' }, { value: 'carpentry', label: 'Carpentry' }, { value: 'roofing', label: 'Roofing' }, { value: 'glazing', label: 'Glazing' }, { value: 'general', label: 'General' }] },
+      { id: 'subject', label: 'Subject', type: 'text', required: true, placeholder: 'Brief summary of repair' },
+      { id: 'description', label: 'Description', type: 'textarea', required: true, placeholder: 'Detailed fault description...' },
+      { id: 'sorCode', label: 'SOR Code (optional)', type: 'text', placeholder: 'e.g. PLUM01' },
+    ]} submitLabel="Raise Repair" onSubmit={() => setShowNewModal(false)} />
+
     <div className="space-y-6">
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
@@ -68,6 +80,9 @@ export default function RepairsPage() {
           <div className="flex items-center justify-between mb-1">
             <h1 className="text-3xl font-bold font-heading text-gradient-brand tracking-tight">Repairs</h1>
             <div className="flex items-center gap-2">
+              <button onClick={() => setShowNewModal(true)} className="flex items-center gap-2 px-4 py-2 bg-brand-teal text-white rounded-lg hover:bg-brand-teal/80 transition-colors text-sm">
+                <Plus size={16} /> New Repair
+              </button>
               <button
                 onClick={() => setViewMode('list')}
                 className={`p-2 rounded-lg transition-colors ${
@@ -309,5 +324,6 @@ export default function RepairsPage() {
         )}
       </div>
     </div>
+    </>
   );
 }

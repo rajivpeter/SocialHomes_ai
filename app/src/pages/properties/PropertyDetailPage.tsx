@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useProperties, useTenants, useCases } from '@/hooks/useApi';
 import AiActionCard from '@/components/shared/AiActionCard';
+import ActionModal from '@/components/shared/ActionModal';
 import StatusPill from '@/components/shared/StatusPill';
 import { formatCurrency, formatDate, safeText } from '@/utils/format';
 import { usePropertyIntelligence } from '@/hooks/useEntityIntelligence';
@@ -18,7 +19,11 @@ import {
   CheckCircle,
   AlertTriangle,
   Clock,
-  Gauge
+  Gauge,
+  Plus,
+  Edit,
+  Search,
+  ClipboardCheck
 } from 'lucide-react';
 
 export default function PropertyDetailPage() {
@@ -97,12 +102,43 @@ export default function PropertyDetailPage() {
 
   const aiActions = generateAiActions();
   const intel = usePropertyIntelligence(property);
+  const navigate = useNavigate();
+  const [activeModal, setActiveModal] = useState<string | null>(null);
 
   return (
+    <>
+    <ActionModal open={activeModal === 'book-repair'} onClose={() => setActiveModal(null)} title="Book Repair" icon={<Wrench size={20} className="text-brand-teal" />} fields={[
+      { id: 'property', label: 'Property', type: 'readonly', defaultValue: property.address },
+      { id: 'priority', label: 'Priority', type: 'select', required: true, options: [{ value: 'p1', label: 'P1 — Emergency (attend 4hrs)' }, { value: 'p2', label: 'P2 — Urgent (attend 24hrs)' }, { value: 'p3', label: 'P3 — Routine (attend 28 days)' }, { value: 'p4', label: 'P4 — Planned (schedule)' }] },
+      { id: 'trade', label: 'Trade Required', type: 'select', required: true, options: [{ value: 'plumbing', label: 'Plumbing' }, { value: 'electrical', label: 'Electrical' }, { value: 'carpentry', label: 'Carpentry' }, { value: 'roofing', label: 'Roofing' }, { value: 'glazing', label: 'Glazing' }, { value: 'general', label: 'General' }] },
+      { id: 'description', label: 'Fault Description', type: 'textarea', required: true, placeholder: 'Describe the repair needed...' },
+    ]} submitLabel="Book Repair" onSubmit={() => setActiveModal(null)} />
+    <ActionModal open={activeModal === 'schedule-inspection'} onClose={() => setActiveModal(null)} title="Schedule Inspection" icon={<Search size={20} className="text-brand-blue" />} fields={[
+      { id: 'property', label: 'Property', type: 'readonly', defaultValue: property.address },
+      { id: 'type', label: 'Inspection Type', type: 'select', required: true, options: [{ value: 'damp-mould', label: 'Damp & Mould Survey' }, { value: 'stock-condition', label: 'Stock Condition Survey' }, { value: 'tenancy-audit', label: 'Tenancy Audit' }, { value: 'post-void', label: 'Post-Void Inspection' }, { value: 'estate-walkabout', label: 'Estate Walkabout' }] },
+      { id: 'date', label: 'Preferred Date', type: 'date', required: true },
+      { id: 'notes', label: 'Notes', type: 'textarea', placeholder: 'Access instructions, key concerns...' },
+    ]} submitLabel="Schedule" onSubmit={() => setActiveModal(null)} />
+    <ActionModal open={activeModal === 'update-compliance'} onClose={() => setActiveModal(null)} title="Update Compliance" icon={<ClipboardCheck size={20} className="text-status-compliant" />} fields={[
+      { id: 'type', label: 'Certificate Type', type: 'select', required: true, options: [{ value: 'gas', label: 'Gas Safety (LGSR)' }, { value: 'eicr', label: 'EICR' }, { value: 'epc', label: 'EPC' }, { value: 'asbestos', label: 'Asbestos Survey' }, { value: 'fire', label: 'Fire Risk Assessment' }, { value: 'legionella', label: 'Legionella Check' }] },
+      { id: 'date', label: 'Inspection Date', type: 'date', required: true },
+      { id: 'expiryDate', label: 'Expiry Date', type: 'date', required: true },
+      { id: 'engineer', label: 'Engineer/Surveyor', type: 'text', placeholder: 'Name of engineer...' },
+      { id: 'result', label: 'Result', type: 'select', required: true, options: [{ value: 'pass', label: 'Pass' }, { value: 'fail', label: 'Fail — Remedial works needed' }, { value: 'advisory', label: 'Pass with advisories' }] },
+    ]} submitLabel="Update" onSubmit={() => setActiveModal(null)} />
+    <ActionModal open={activeModal === 'edit'} onClose={() => setActiveModal(null)} title="Edit Property Details" icon={<Edit size={20} className="text-brand-blue" />} fields={[
+      { id: 'heatingType', label: 'Heating Type', type: 'select', defaultValue: property.heatingType, options: [{ value: 'gas-central', label: 'Gas Central Heating' }, { value: 'electric', label: 'Electric Heating' }, { value: 'district', label: 'District Heating' }, { value: 'storage', label: 'Storage Heaters' }] },
+      { id: 'bedrooms', label: 'Bedrooms', type: 'select', defaultValue: String(property.bedrooms), options: [{ value: '0', label: 'Studio' }, { value: '1', label: '1' }, { value: '2', label: '2' }, { value: '3', label: '3' }, { value: '4', label: '4+' }] },
+      { id: 'notes', label: 'Property Notes', type: 'textarea', placeholder: 'Key details, access notes...' },
+    ]} submitLabel="Save Changes" onSubmit={() => setActiveModal(null)} />
+
     <div className="space-y-6">
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
         <div className="opacity-0 animate-fade-in-up" style={{ animationDelay: '0ms', animationFillMode: 'forwards' }}>
+          <Link to="/properties" className="text-brand-teal hover:underline text-sm mb-4 inline-block">
+            ← Back to Properties
+          </Link>
           <div className="flex items-start justify-between mb-4">
             <div>
               <h1 className="text-3xl font-bold font-heading text-gradient-brand tracking-tight mb-1">{property.address}</h1>
@@ -115,7 +151,12 @@ export default function PropertyDetailPage() {
                 <span>{property.bedrooms} bedroom{property.bedrooms !== 1 ? 's' : ''}</span>
               </div>
             </div>
-            <StatusPill status={property.isVoid ? 'void' : 'occupied'} size="md" />
+            <div className="flex items-center gap-2">
+              <StatusPill status={property.isVoid ? 'void' : 'occupied'} size="md" />
+              <button onClick={() => setActiveModal('edit')} className="flex items-center gap-2 px-3 py-2 bg-surface-elevated text-text-primary rounded-lg hover:bg-surface-hover transition-colors border border-border-default text-sm">
+                <Edit size={14} /> Edit
+              </button>
+            </div>
           </div>
         </div>
 
@@ -171,9 +212,9 @@ export default function PropertyDetailPage() {
                     <div>
                       <div className="text-xs text-text-muted uppercase tracking-wider">Current Tenancy</div>
                       {tenant ? (
-                        <div className="text-sm text-text-primary">
+                        <Link to={`/tenancies/${tenant.id}`} className="text-sm text-brand-teal hover:underline">
                           {tenant.title} {tenant.firstName} {tenant.lastName}
-                        </div>
+                        </Link>
                       ) : (
                         <div className="text-sm text-text-muted">Void</div>
                       )}
@@ -470,9 +511,9 @@ export default function PropertyDetailPage() {
             <h2 className="text-xl font-bold font-heading text-brand-peach mb-4">Works History</h2>
             <div className="space-y-3">
               {propertyCases.filter(c => c.type === 'repair').map((case_) => (
-                <div key={case_.id} className="bg-surface-elevated rounded-lg p-4 border border-border-default">
+                <div key={case_.id} onClick={() => navigate(`/repairs/${case_.id}`)} className="bg-surface-elevated rounded-lg p-4 border border-border-default cursor-pointer hover:bg-surface-hover transition-colors">
                   <div className="flex items-start justify-between mb-2">
-                    <span className="text-xs font-mono text-text-muted">{case_.reference}</span>
+                    <span className="text-xs font-mono text-brand-teal">{case_.reference}</span>
                     <StatusPill status={case_.status} />
                   </div>
                   <div className="text-sm text-text-primary font-medium mb-1">{case_.subject}</div>
@@ -513,7 +554,23 @@ export default function PropertyDetailPage() {
             </div>
           </div>
         )}
+
+        {/* Action Buttons */}
+        <div className="bg-surface-card rounded-lg p-4 border border-border-default opacity-0 animate-fade-in-up" style={{ animationDelay: '200ms', animationFillMode: 'forwards' }}>
+          <div className="flex flex-wrap items-center gap-3">
+            <button onClick={() => setActiveModal('book-repair')} className="flex items-center gap-2 px-4 py-2 bg-brand-teal text-white rounded-lg hover:bg-brand-teal/80 transition-colors text-sm">
+              <Wrench size={16} /> Book Repair
+            </button>
+            <button onClick={() => setActiveModal('schedule-inspection')} className="flex items-center gap-2 px-4 py-2 bg-brand-blue text-white rounded-lg hover:bg-brand-blue/80 transition-colors text-sm">
+              <Search size={16} /> Schedule Inspection
+            </button>
+            <button onClick={() => setActiveModal('update-compliance')} className="flex items-center gap-2 px-4 py-2 bg-status-compliant text-white rounded-lg hover:bg-status-compliant/80 transition-colors text-sm">
+              <ClipboardCheck size={16} /> Update Compliance
+            </button>
+          </div>
+        </div>
       </div>
     </div>
+    </>
   );
 }

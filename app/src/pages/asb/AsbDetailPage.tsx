@@ -1,8 +1,10 @@
+import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { AlertTriangle, FileText, CheckCircle, Clock, X } from 'lucide-react';
+import { AlertTriangle, FileText, CheckCircle, Clock, X, UserCheck, TrendingUp, Plus, Edit, ArrowRight } from 'lucide-react';
 import { asbCases } from '@/data';
 import { useTenants, useProperties } from '@/hooks/useApi';
 import AiActionCard from '@/components/shared/AiActionCard';
+import ActionModal from '@/components/shared/ActionModal';
 import { formatDate } from '@/utils/format';
 import type { AsbEscalationStage } from '@/types';
 
@@ -71,7 +73,38 @@ export default function AsbDetailPage() {
     { id: 'ev-4', date: '01/12/2025', type: 'ABC Issued', description: 'Acceptable Behaviour Contract signed', officer: 'Sarah Mitchell' },
   ];
 
+  const [activeModal, setActiveModal] = useState<string | null>(null);
+
   return (
+    <>
+    <ActionModal open={activeModal === 'escalate'} onClose={() => setActiveModal(null)} title="Escalate Case" description={`Progress ${case_.reference} to the next stage`} icon={<TrendingUp size={20} className="text-status-warning" />} variant="warning" fields={[
+      { id: 'ref', label: 'Reference', type: 'readonly', defaultValue: case_.reference },
+      { id: 'currentStage', label: 'Current Stage', type: 'readonly', defaultValue: escalationStageLabels[case_.escalationStage] },
+      { id: 'nextStage', label: 'Escalate To', type: 'select', required: true, options: escalationStages.filter((_, i) => i > currentStageIndex).map(s => ({ value: s, label: escalationStageLabels[s] })) },
+      { id: 'reason', label: 'Reason for Escalation', type: 'textarea', required: true, placeholder: 'Why is this case being escalated?' },
+      { id: 'authorisedBy', label: 'Authorised By', type: 'select', required: true, options: [{ value: 'priya-patel', label: 'Priya Patel — Manager' }, { value: 'james-wright', label: 'James Wright — Head of Housing' }, { value: 'helen-carter', label: 'Helen Carter — COO' }] },
+    ]} submitLabel="Escalate" onSubmit={() => setActiveModal(null)} />
+    <ActionModal open={activeModal === 'evidence'} onClose={() => setActiveModal(null)} title="Log Evidence" description="Add a new evidence item to the case" icon={<Plus size={20} className="text-brand-teal" />} fields={[
+      { id: 'type', label: 'Evidence Type', type: 'select', required: true, options: [{ value: 'diary', label: 'Diary Sheet' }, { value: 'visit', label: 'Visit Report' }, { value: 'witness', label: 'Witness Statement' }, { value: 'photo', label: 'Photographs' }, { value: 'cctv', label: 'CCTV Footage' }, { value: 'noise', label: 'Noise Recording' }, { value: 'police', label: 'Police Report' }, { value: 'other', label: 'Other' }] },
+      { id: 'description', label: 'Description', type: 'textarea', required: true, placeholder: 'Describe the evidence...' },
+      { id: 'date', label: 'Date of Evidence', type: 'date', required: true },
+      { id: 'officer', label: 'Recording Officer', type: 'text', defaultValue: 'Sarah Mitchell' },
+    ]} submitLabel="Log Evidence" onSubmit={() => setActiveModal(null)} />
+    <ActionModal open={activeModal === 'reassign'} onClose={() => setActiveModal(null)} title="Reassign Case" icon={<UserCheck size={20} className="text-brand-teal" />} fields={[
+      { id: 'ref', label: 'Reference', type: 'readonly', defaultValue: case_.reference },
+      { id: 'handler', label: 'Assign To', type: 'select', required: true, options: [{ value: 'sarah-mitchell', label: 'Sarah Mitchell — Housing Officer' }, { value: 'priya-patel', label: 'Priya Patel — Manager' }, { value: 'james-wright', label: 'James Wright — Head of Housing' }] },
+      { id: 'notes', label: 'Handover Notes', type: 'textarea', placeholder: 'Notes for the new handler...' },
+    ]} submitLabel="Reassign" onSubmit={() => setActiveModal(null)} />
+    <ActionModal open={activeModal === 'update'} onClose={() => setActiveModal(null)} title="Update Case" icon={<Edit size={20} className="text-brand-blue" />} fields={[
+      { id: 'status', label: 'Status', type: 'select', defaultValue: case_.status, options: [{ value: 'open', label: 'Open' }, { value: 'investigation', label: 'Investigation' }, { value: 'monitoring', label: 'Monitoring' }, { value: 'closed', label: 'Closed' }] },
+      { id: 'severity', label: 'Severity', type: 'select', defaultValue: case_.severity, options: [{ value: 'cat-1', label: 'Category 1 (Serious)' }, { value: 'cat-2', label: 'Category 2 (Moderate)' }, { value: 'cat-3', label: 'Category 3 (Minor)' }] },
+      { id: 'notes', label: 'Case Notes', type: 'textarea', placeholder: 'Add an update...' },
+    ]} submitLabel="Save" onSubmit={() => setActiveModal(null)} />
+    <ActionModal open={activeModal === 'close'} onClose={() => setActiveModal(null)} title="Close Case" icon={<CheckCircle size={20} className="text-status-compliant" />} variant="success" fields={[
+      { id: 'outcome', label: 'Outcome', type: 'select', required: true, options: [{ value: 'resolved', label: 'Resolved — Behaviour improved' }, { value: 'enforcement', label: 'Enforcement action taken' }, { value: 'moved', label: 'Perpetrator moved' }, { value: 'withdrawn', label: 'Complainant withdrew' }, { value: 'no-evidence', label: 'Insufficient evidence' }] },
+      { id: 'lessons', label: 'Lessons Learned', type: 'textarea', placeholder: 'Key learnings from this case...' },
+    ]} submitLabel="Close Case" onSubmit={() => setActiveModal(null)} />
+
     <div className="space-y-6">
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
@@ -173,11 +206,11 @@ export default function AsbDetailPage() {
               <div className="space-y-3 text-sm">
                 <div>
                   <div className="text-text-muted mb-1">Tenant</div>
-                  <div className="text-text-primary">{getTenantName(case_.tenantId)}</div>
+                  <Link to={`/tenancies/${case_.tenantId}`} className="text-brand-teal hover:underline">{getTenantName(case_.tenantId)}</Link>
                 </div>
                 <div>
                   <div className="text-text-muted mb-1">Property</div>
-                  <div className="text-text-primary">{getPropertyAddress(case_.propertyId)}</div>
+                  <Link to={`/properties/${case_.propertyId}`} className="text-brand-teal hover:underline">{getPropertyAddress(case_.propertyId)}</Link>
                 </div>
                 <div>
                   <div className="text-text-muted mb-1">Category</div>
@@ -249,7 +282,31 @@ export default function AsbDetailPage() {
             />
           </div>
         </div>
+
+        {/* Action Buttons */}
+        <div className="bg-surface-card rounded-lg p-4 border border-border-default opacity-0 animate-fade-in-up" style={{ animationDelay: '300ms', animationFillMode: 'forwards' }}>
+          <div className="flex flex-wrap items-center gap-3">
+            <button onClick={() => setActiveModal('evidence')} className="flex items-center gap-2 px-4 py-2 bg-brand-teal text-white rounded-lg hover:bg-brand-teal/80 transition-colors">
+              <Plus size={16} /> Log Evidence
+            </button>
+            <button onClick={() => setActiveModal('escalate')} className="flex items-center gap-2 px-4 py-2 bg-status-warning text-white rounded-lg hover:bg-status-warning/80 transition-colors">
+              <TrendingUp size={16} /> Escalate
+            </button>
+            <button onClick={() => setActiveModal('reassign')} className="flex items-center gap-2 px-4 py-2 bg-brand-blue text-white rounded-lg hover:bg-brand-blue/80 transition-colors">
+              <UserCheck size={16} /> Reassign
+            </button>
+            <button onClick={() => setActiveModal('update')} className="flex items-center gap-2 px-4 py-2 bg-surface-elevated text-text-primary rounded-lg hover:bg-surface-hover transition-colors border border-border-default">
+              <Edit size={16} /> Update
+            </button>
+            {case_.status !== 'closed' && (
+              <button onClick={() => setActiveModal('close')} className="flex items-center gap-2 px-4 py-2 bg-status-compliant text-white rounded-lg hover:bg-status-compliant/80 transition-colors">
+                <CheckCircle size={16} /> Close Case
+              </button>
+            )}
+          </div>
+        </div>
       </div>
     </div>
+    </>
   );
 }
