@@ -10,24 +10,50 @@ const API_BASE = '/api/v1';
 
 /**
  * Recursively walk a JSON value and convert Firestore Timestamp objects
- * ({_seconds, _nanoseconds}) into ISO date strings so React components
- * never receive raw objects as children (prevents Error #310).
+ * into locale date strings so React components never receive raw objects
+ * as children (prevents Error #310).
+ *
+ * Handles both formats:
+ *   - {_seconds, _nanoseconds}   (older @google-cloud/firestore)
+ *   - {seconds, nanoseconds}     (newer @google-cloud/firestore)
+ *
+ * Also catches any remaining plain objects that somehow made it through
+ * server-side serialisation, converting them to "[object]" strings
+ * rather than crashing React.
  */
 function sanitizeFirestoreTimestamps(value: any): any {
   if (value === null || value === undefined) return value;
   if (typeof value !== 'object') return value;
   if (Array.isArray(value)) return value.map(sanitizeFirestoreTimestamps);
-  // Firestore Timestamp → string
-  if ('_seconds' in value && '_nanoseconds' in value && Object.keys(value).length === 2) {
+
+  const keys = Object.keys(value);
+
+  // Firestore Timestamp — underscore variant {_seconds, _nanoseconds}
+  if ('_seconds' in value && '_nanoseconds' in value && keys.length <= 3) {
     try {
       return new Date(value._seconds * 1000).toLocaleDateString('en-GB');
     } catch {
       return 'N/A';
     }
   }
+
+  // Firestore Timestamp — public variant {seconds, nanoseconds}
+  if (
+    'seconds' in value &&
+    'nanoseconds' in value &&
+    typeof value.seconds === 'number' &&
+    keys.length <= 3
+  ) {
+    try {
+      return new Date(value.seconds * 1000).toLocaleDateString('en-GB');
+    } catch {
+      return 'N/A';
+    }
+  }
+
   // Recurse into plain objects
   const out: Record<string, any> = {};
-  for (const key of Object.keys(value)) {
+  for (const key of keys) {
     out[key] = sanitizeFirestoreTimestamps(value[key]);
   }
   return out;

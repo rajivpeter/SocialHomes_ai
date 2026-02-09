@@ -10,6 +10,50 @@ export const db = new Firestore({
   ...(process.env.FIRESTORE_EMULATOR_HOST ? {} : {}),
 });
 
+/**
+ * Recursively convert Firestore-specific types to plain JSON-safe values.
+ * This runs BEFORE Express serialises data with res.json(), so React
+ * components never receive opaque objects (prevents Error #310).
+ */
+export function serializeFirestoreData(value: any): any {
+  if (value === null || value === undefined) return value;
+
+  // Firestore Timestamp → ISO string
+  if (value instanceof Timestamp) {
+    return value.toDate().toISOString();
+  }
+
+  // Native Date → ISO string
+  if (value instanceof Date) {
+    return value.toISOString();
+  }
+
+  // Arrays
+  if (Array.isArray(value)) {
+    return value.map(serializeFirestoreData);
+  }
+
+  // Plain objects — recurse
+  if (typeof value === 'object') {
+    // DocumentReference — just return the path string
+    if (value.constructor?.name === 'DocumentReference' || ('_path' in value && '_converter' in value)) {
+      return value.path || String(value);
+    }
+    // GeoPoint — keep lat/lng as plain numbers
+    if (value.constructor?.name === 'GeoPoint') {
+      return { latitude: value.latitude, longitude: value.longitude };
+    }
+    // Generic object — recurse into every key
+    const out: Record<string, any> = {};
+    for (const key of Object.keys(value)) {
+      out[key] = serializeFirestoreData(value[key]);
+    }
+    return out;
+  }
+
+  return value;
+}
+
 // ---- Collection References ----
 export const collections = {
   organisations: db.collection('organisations'),
@@ -36,7 +80,7 @@ export const collections = {
 export async function getDoc<T>(collection: FirebaseFirestore.CollectionReference, id: string): Promise<T | null> {
   const doc = await collection.doc(id).get();
   if (!doc.exists) return null;
-  return { id: doc.id, ...doc.data() } as T;
+  return serializeFirestoreData({ id: doc.id, ...doc.data() }) as T;
 }
 
 export async function getDocs<T>(
@@ -60,7 +104,7 @@ export async function getDocs<T>(
   }
 
   const snapshot = await query.get();
-  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }) as T);
+  return snapshot.docs.map(doc => serializeFirestoreData({ id: doc.id, ...doc.data() }) as T);
 }
 
 export async function setDoc(

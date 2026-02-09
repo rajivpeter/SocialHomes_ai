@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { 
   Home, Users, Wrench, PoundSterling, AlertTriangle, Shield, 
   MessageSquare, Sparkles, TrendingUp, TrendingDown, Clock, 
-  AlertCircle, Building2
+  AlertCircle, Building2, Sun, Moon, CloudSun, Brain, Map, FileText
 } from 'lucide-react';
 import {
   LineChart, Line, BarChart, Bar, XAxis, YAxis, Tooltip,
@@ -74,15 +74,67 @@ export default function DashboardPage() {
     asbestos: '/compliance/asbestos', legionella: '/compliance/legionella', lifts: '/compliance/lifts',
   };
 
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+  const GreetIcon = hour < 12 ? Sun : hour < 17 ? CloudSun : Moon;
+
+  const personaLabels: Record<string, string> = {
+    coo: 'Chief Operating Officer',
+    'head-of-service': 'Head of Housing Services',
+    manager: 'Area Manager',
+    'housing-officer': 'Housing Officer',
+    operative: 'Repairs Operative',
+  };
+
+  const quickActions = [
+    { label: 'Morning Briefing', icon: Brain, path: '/briefing', colour: 'bg-status-ai/10 text-status-ai border-status-ai/20' },
+    { label: 'Explore Portfolio', icon: Map, path: '/explore', colour: 'bg-brand-teal/10 text-brand-teal border-brand-teal/20' },
+    { label: 'View Reports', icon: FileText, path: '/reports', colour: 'bg-brand-peach/10 text-brand-peach border-brand-peach/20' },
+  ];
+
   return (
     <div className="space-y-6">
-      {/* Header with org name */}
-      <div className="opacity-0 animate-fade-in-up" style={{ animationDelay: '0ms', animationFillMode: 'forwards' }}>
-        <div className="flex items-center gap-3 mb-1">
-          <h1 className="text-3xl font-bold font-heading text-gradient-brand tracking-tight">Dashboard</h1>
-          <span className="text-xs text-text-muted bg-surface-card px-2 py-0.5 rounded-full border border-border-default">{kpis.scopeLabel}</span>
+      {/* Welcome Header */}
+      <div className="bg-gradient-to-r from-surface-card via-surface-card to-surface-card/50 rounded-2xl border border-border-default p-6 relative overflow-hidden opacity-0 animate-fade-in-up" style={{ animationDelay: '0ms', animationFillMode: 'forwards' }}>
+        <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-brand-teal via-brand-blue to-brand-peach" />
+        <div className="absolute -right-8 -top-8 w-40 h-40 bg-gradient-to-br from-brand-teal/5 to-transparent rounded-full" />
+        <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-gradient-to-br from-brand-peach/5 to-transparent rounded-full" />
+
+        <div className="flex items-start justify-between relative">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2.5 mb-1">
+              <GreetIcon size={20} className="text-brand-peach" />
+              <h1 className="text-2xl font-bold font-heading text-text-primary tracking-tight">
+                {greeting}
+              </h1>
+            </div>
+            <p className="text-text-secondary text-sm font-medium">
+              {personaLabels[persona] || persona}
+              <span className="mx-2 text-border-default">|</span>
+              <span className="text-text-muted">{kpis.scopeLabel}</span>
+            </p>
+            <p className="text-text-muted text-xs mt-1">
+              {organisation.name} — {organisation.rpNumber} — {organisation.regulatoryGrade}
+            </p>
+          </div>
+
+          {/* Quick Actions */}
+          <div className="hidden md:flex items-center gap-2">
+            {quickActions.map((action) => {
+              const Icon = action.icon;
+              return (
+                <button
+                  key={action.label}
+                  onClick={() => navigate(action.path)}
+                  className={`flex items-center gap-2 px-3 py-2 rounded-xl border text-xs font-medium transition-all duration-200 hover:scale-[1.02] ${action.colour}`}
+                >
+                  <Icon size={14} />
+                  {action.label}
+                </button>
+              );
+            })}
+          </div>
         </div>
-        <p className="text-text-muted text-sm">{organisation.name} — {organisation.rpNumber} — {organisation.regulatoryGrade}</p>
       </div>
 
       {/* KPI Cards */}

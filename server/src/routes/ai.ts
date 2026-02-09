@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { collections, getDocs } from '../services/firestore.js';
+import { collections, getDocs, serializeFirestoreData } from '../services/firestore.js';
 import { authMiddleware } from '../middleware/auth.js';
 import type { CaseDoc, TenantDoc, PropertyDoc } from '../models/firestore-schemas.js';
 
@@ -59,18 +59,18 @@ aiRouter.post('/draft-communication', async (req, res, next) => {
     const { tenantId, communicationType, tone, caseRef, persona } = req.body;
     const tenantDoc = await collections.tenants.doc(tenantId).get();
     if (!tenantDoc.exists) return res.status(404).json({ error: 'Tenant not found' });
-    const tenant = tenantDoc.data() as any;
+    const tenant = serializeFirestoreData(tenantDoc.data()) as any;
 
     let caseData = null;
     if (caseRef) {
       const caseSnapshot = await collections.cases.where('reference', '==', caseRef).limit(1).get();
       if (!caseSnapshot.empty) {
-        caseData = caseSnapshot.docs[0].data();
+        caseData = serializeFirestoreData(caseSnapshot.docs[0].data());
       }
     }
 
     const propDoc = await collections.properties.doc(tenant.propertyId).get();
-    const property = propDoc.exists ? propDoc.data() as any : null;
+    const property = propDoc.exists ? serializeFirestoreData(propDoc.data()) as any : null;
 
     const draft = generateDraft(tenant, property, caseData, communicationType, tone || 'empathetic', persona || 'housing-officer');
 
