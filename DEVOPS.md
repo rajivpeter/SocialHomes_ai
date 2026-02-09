@@ -718,6 +718,77 @@ socialhomes/
 
 ---
 
+## DEPLOYMENT ACTION REQUIRED: Firebase Authentication
+
+**Status**: Code pushed to `main` (commit `bfdca7a`). Cloud Build will auto-build and deploy the new image. However, **Firebase Auth will not work** until the following environment variables are set on the Cloud Run service.
+
+### Step 1: Set Firebase env vars on Cloud Run
+
+These are the public Firebase Web SDK config values (NOT secrets — safe as env vars):
+
+```bash
+gcloud run services update socialhomes \
+  --region=europe-west2 \
+  --set-env-vars="FIREBASE_API_KEY=AIzaSyB1nfSDqignmcFAvKzh075flVbWOH9aOLs,FIREBASE_AUTH_DOMAIN=gen-lang-client-0146156913.firebaseapp.com,FIREBASE_PROJECT_ID=gen-lang-client-0146156913"
+```
+
+Or set them as Cloud Build trigger substitution variables so every future deploy includes them:
+
+| Substitution Variable | Value |
+|-----------------------|-------|
+| `_FIREBASE_API_KEY` | `AIzaSyB1nfSDqignmcFAvKzh075flVbWOH9aOLs` |
+| `_FIREBASE_AUTH_DOMAIN` | `gen-lang-client-0146156913.firebaseapp.com` |
+| `_FIREBASE_PROJECT_ID` | `gen-lang-client-0146156913` |
+
+### Step 2: Enable Firebase Auth providers in GCP Console
+
+1. Go to https://console.cloud.google.com/identity/providers?project=gen-lang-client-0146156913
+2. Enable **Email/Password** provider
+3. Enable **Google** provider
+
+Or via Firebase Console: https://console.firebase.google.com/project/gen-lang-client-0146156913/authentication/providers
+
+### Step 3: Seed demo user accounts
+
+Once Firebase Auth is enabled and the service is redeployed with env vars:
+
+```bash
+curl -X POST https://socialhomes-674258130066.europe-west2.run.app/api/v1/auth/seed-users \
+  -H "Content-Type: application/json"
+```
+
+This creates 5 demo Firebase Auth accounts with Firestore profiles:
+
+| Email | Password | Persona |
+|-------|----------|---------|
+| helen.carter@rcha.org.uk | SocialHomes2026! | COO |
+| james.wright@rcha.org.uk | SocialHomes2026! | Head of Housing |
+| priya.patel@rcha.org.uk | SocialHomes2026! | Manager |
+| sarah.mitchell@rcha.org.uk | SocialHomes2026! | Housing Officer |
+| mark.johnson@rcha.org.uk | SocialHomes2026! | Operative |
+
+### Step 4: Verify
+
+1. Visit https://socialhomes-674258130066.europe-west2.run.app/
+2. Should redirect to `/login` showing the FirebaseUI widget
+3. Sign in with a demo account
+4. Should redirect to `/dashboard` with full app access
+5. Persona dropdown in header should show "Sign out" button
+
+### How Auth Works
+
+```
+Browser loads /                          → redirects to /login (not authenticated)
+LoginPage fetches /api/v1/config         → gets Firebase config from env vars
+FirebaseUI initialises with config       → renders Email/Password + Google sign-in
+User signs in                            → Firebase returns ID token
+AuthContext stores user, calls profile API → creates Firestore user doc on first login
+All subsequent API calls include Bearer token → server verifies with firebase-admin
+```
+
+---
+
 *Document generated 08/02/2026 by Development Agent.*
 *Updated 09/02/2026 by DevOps Senior: min-instances=1, uptime monitoring, Artifact Registry cleanup.*
+*Updated 09/02/2026: Firebase Authentication deployment instructions added.*
 *For QA test results, see `TEST-REPORT-V2.md`.*
