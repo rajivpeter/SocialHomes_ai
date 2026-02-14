@@ -16,6 +16,7 @@ import { formatCurrency, formatDate, getCaseTypeColour, safeText } from '@/utils
 export default function TenancyDetailPage() {
   const { id } = useParams<{ id: string }>();
   const [activeTab, setActiveTab] = useState<'overview' | 'cases' | 'activities' | 'statement' | 'orders'>('overview');
+  const navigate = useNavigate();
 
   const { data: tenants = [] } = useTenants();
   const { data: properties = [] } = useProperties();
@@ -26,6 +27,7 @@ export default function TenancyDetailPage() {
   const tenantCases = tenant ? allCases.filter((c: any) => c.tenantId === tenant.id) : [];
   const tenantActivities = tenant ? activitiesData.filter(a => a.tenantId === tenant.id) : [];
   const tenantTransactions = tenant ? rentTransactionsSample.filter(t => t.tenantId === tenant.id) : [];
+  const intel = useTenantIntelligence(tenant, tenantCases);
 
   if (!tenant) {
     return (
@@ -140,8 +142,6 @@ export default function TenancyDetailPage() {
     return actions;
   };
 
-  const navigate = useNavigate();
-  const intel = useTenantIntelligence(tenant, tenantCases);
   const aiActions = generateAiActions();
 
   return (

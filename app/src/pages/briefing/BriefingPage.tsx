@@ -1,13 +1,13 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useApp } from '@/context/AppContext';
 import { usePersonaScope } from '@/hooks/usePersonaScope';
-import { 
-  CloudRain, AlertTriangle, AlertCircle, CheckCircle2, 
-  TrendingUp, TrendingDown, ArrowRight, Home, Users, 
-  Wrench, PoundSterling, Sparkles
+import {
+  CloudRain, AlertTriangle, AlertCircle, CheckCircle2,
+  TrendingUp, TrendingDown, ArrowRight, Home, Users,
+  Wrench, PoundSterling, Sparkles, Shield
 } from 'lucide-react';
 import { format } from 'date-fns';
-import { organisation, dampMouldCases } from '@/data';
+import { organisation, dampMouldCases, complianceStats } from '@/data';
 import { formatCurrency } from '@/utils/format';
 
 export default function BriefingPage() {
@@ -135,9 +135,12 @@ export default function BriefingPage() {
             </p>
             <div className="space-y-2">
               {tasks.map((task, idx) => (
-                <div key={task.id} className="flex items-start gap-3 py-2.5 border-b border-border-default last:border-0 opacity-0 animate-fade-in-up cursor-pointer hover:bg-surface-hover/30 rounded-lg px-2 -mx-2 transition-colors" style={{ animationDelay: `${1.9 + idx * 0.1}s`, animationFillMode: 'forwards' }} onClick={() => navigate(task.route)}>
+                <div key={task.id} className="flex items-center gap-3 py-2.5 border-b border-border-default last:border-0 opacity-0 animate-fade-in-up cursor-pointer hover:bg-surface-hover/30 rounded-lg px-2 -mx-2 transition-colors" style={{ animationDelay: `${1.9 + idx * 0.1}s`, animationFillMode: 'forwards' }} onClick={() => navigate(task.route)}>
                   <div className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${task.urgent ? 'bg-status-critical shadow-sm shadow-status-critical/50' : 'bg-brand-teal/60'}`} />
-                  <span className="text-text-secondary text-sm">{task.text}</span>
+                  <span className="text-text-secondary text-sm flex-1">{task.text}</span>
+                  <button className="text-xs px-2 py-1 rounded bg-brand-teal/10 text-brand-teal hover:bg-brand-teal/20 transition-colors shrink-0" onClick={(e) => { e.stopPropagation(); navigate(task.route); }}>
+                    {task.urgent ? 'Review' : 'View'}
+                  </button>
                 </div>
               ))}
             </div>
@@ -153,6 +156,25 @@ export default function BriefingPage() {
               <div className="flex items-center gap-3"><div className="w-2 h-2 rounded-full bg-status-warning" /><p className="text-text-muted"><span className="text-text-primary font-semibold">{arrearsRiskCount} tenancies</span> predicted to enter arrears (30 days)</p></div>
               <div className="flex items-center gap-3"><div className="w-2 h-2 rounded-full bg-status-critical" /><p className="text-text-muted"><span className="text-text-primary font-semibold">72%</span> complaint probability for Mrs Chen</p></div>
               <div className="flex items-center gap-3"><div className="w-2 h-2 rounded-full bg-brand-teal" /><p className="text-text-muted"><span className="text-text-primary font-semibold">{dampRiskCount} properties</span> at damp risk from weather</p></div>
+            </div>
+          </div>
+        </div>
+
+        {/* COMPLIANCE SUMMARY */}
+        <div className="mb-6 opacity-0 animate-fade-in-up" style={{ animationDelay: '2.5s', animationFillMode: 'forwards' }}>
+          <h2 className="text-lg font-heading font-bold text-text-primary mb-3 flex items-center gap-2"><Shield size={18} className="text-brand-teal" /> COMPLIANCE</h2>
+          <div className="bg-surface-card/80 backdrop-blur-sm rounded-xl p-5 border border-border-default cursor-pointer hover:bg-surface-hover/30 transition-colors" onClick={() => navigate('/compliance')}>
+            <div className="grid grid-cols-3 gap-3">
+              {Object.entries(complianceStats).slice(0, 6).map(([key, stat]) => {
+                const labels: Record<string, string> = { gas: 'Gas', electrical: 'Electrical', fire: 'Fire', asbestos: 'Asbestos', legionella: 'Legionella', lifts: 'Lifts' };
+                const color = stat.percentage >= 99 ? 'text-status-compliant' : stat.percentage >= 97 ? 'text-status-warning' : 'text-status-critical';
+                return (
+                  <div key={key} className="text-center">
+                    <div className="text-[10px] text-text-muted uppercase tracking-wider">{labels[key] || key}</div>
+                    <div className={`text-lg font-bold font-heading ${color}`}>{stat.percentage}%</div>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>

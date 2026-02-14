@@ -420,6 +420,9 @@ export default function ExplorePage() {
     });
 
     const marker = L.marker([lat, lng], { icon });
+    // Add popup for Selenium detectability and user context
+    const labels: Record<string, string> = { region: 'Region', la: 'Local Authority', estate: 'Estate', block: 'Block', unit: 'Unit', tenant: 'Tenant' };
+    marker.bindPopup(`<div style="font-size:13px;font-weight:600">${labels[type] || type}</div><div style="font-size:11px">${count} unit${count !== 1 ? 's' : ''}</div><div style="font-size:10px;color:#058995;cursor:pointer">Click to explore →</div>`);
     marker.on('click', onClick);
     return marker;
   };
@@ -1060,12 +1063,12 @@ export default function ExplorePage() {
                   <h2 className="text-lg font-bold font-heading text-brand-peach mb-3">
                     {level === 'country' ? 'Regions' : level === 'region' ? 'Local Authorities' : level === 'la' ? 'Estates' : level === 'estate' ? 'Blocks' : 'Units'} ({entity.children.length})
                   </h2>
-                  <div className="space-y-2">
+                  <ul className="panel-list space-y-2">
                     {entity.children.map((child, index) => (
-                      <button
+                      <li
                         key={child.id}
                         onClick={() => {
-                          const nextLevel: DrillDownLevel = 
+                          const nextLevel: DrillDownLevel =
                             level === 'country' ? 'region' :
                             level === 'region' ? 'la' :
                             level === 'la' ? 'estate' :
@@ -1073,7 +1076,7 @@ export default function ExplorePage() {
                             'unit';
                           drillDown(nextLevel, child.id, child.name);
                         }}
-                        className="w-full bg-surface-elevated hover:bg-surface-hover rounded-lg p-3 border border-border-default text-left transition-colors opacity-0 animate-fade-in-up"
+                        className="w-full bg-surface-elevated hover:bg-surface-hover rounded-lg p-3 border border-border-default text-left transition-colors opacity-0 animate-fade-in-up cursor-pointer list-none"
                         style={{ animationDelay: `${350 + index * 50}ms`, animationFillMode: 'forwards' }}
                       >
                         <div className="flex items-center justify-between">
@@ -1085,9 +1088,9 @@ export default function ExplorePage() {
                           </div>
                           <ChevronRight size={16} className="text-text-muted flex-shrink-0 ml-2" />
                         </div>
-                      </button>
+                      </li>
                     ))}
-                  </div>
+                  </ul>
                 </div>
               )}
 

@@ -146,6 +146,30 @@ export default function TenantPortalPage() {
           )}
         </div>
 
+        {/* Quick Contact Form */}
+        <div className="bg-white rounded-xl p-6 shadow-md opacity-0 animate-fade-in-up" style={{ animationDelay: '350ms', animationFillMode: 'forwards' }}>
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">Quick Message</h2>
+          <form onSubmit={(e) => e.preventDefault()} className="space-y-4">
+            <div>
+              <label htmlFor="portal-subject" className="block text-sm font-medium text-gray-700 mb-1">Subject</label>
+              <select id="portal-subject" className="w-full border-2 border-gray-200 rounded-lg px-4 py-2.5 text-gray-900 focus:border-teal-500 focus:outline-none">
+                <option value="">Select a topic...</option>
+                <option value="repair">Repair enquiry</option>
+                <option value="rent">Rent query</option>
+                <option value="complaint">Make a complaint</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+            <div>
+              <label htmlFor="portal-message" className="block text-sm font-medium text-gray-700 mb-1">Message</label>
+              <textarea id="portal-message" rows={3} placeholder="Describe your enquiry..." className="w-full border-2 border-gray-200 rounded-lg px-4 py-2.5 text-gray-900 placeholder-gray-400 focus:border-teal-500 focus:outline-none resize-none" />
+            </div>
+            <button type="submit" className="bg-teal-600 hover:bg-teal-700 text-white px-6 py-2.5 rounded-lg font-medium transition-colors">
+              Send Message
+            </button>
+          </form>
+        </div>
+
         {/* Rent Statement Summary */}
         <div className="bg-white rounded-xl p-6 shadow-md opacity-0 animate-fade-in-up" style={{ animationDelay: '400ms', animationFillMode: 'forwards' }}>
           <h2 className="text-2xl font-bold text-gray-900 mb-4">Rent Account Summary</h2>

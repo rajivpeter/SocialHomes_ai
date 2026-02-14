@@ -51,10 +51,10 @@ export default function AllocationsPage() {
       const property = properties.find((p: any) => p.id === v.propertyId);
       return {
         ...v,
-        address: property?.address || 'Unknown',
+        address: property?.address || v.address || 'Unknown',
       };
     });
-  }, []);
+  }, [properties]);
 
   // Group voids by stage
   const voidsByStage = useMemo(() => {

@@ -73,8 +73,8 @@ export default function Breadcrumbs() {
   });
 
   return (
-    <div className="px-6 py-2.5 border-b border-border-subtle bg-surface-dark/60 backdrop-blur-sm" style={{ marginLeft: 0 }}>
-      <nav className="flex items-center gap-1.5 text-xs max-w-[1400px] mx-auto">
+    <div className="breadcrumb-container px-6 py-2.5 border-b border-border-subtle bg-surface-dark/60 backdrop-blur-sm" style={{ marginLeft: 0 }}>
+      <nav aria-label="breadcrumb" className="breadcrumb-nav flex items-center gap-1.5 text-xs max-w-[1400px] mx-auto">
         <Link to="/dashboard" className="text-text-muted hover:text-brand-teal flex items-center gap-1 transition-colors duration-200">
           <Home size={12} />
           <span className="hidden sm:inline">Home</span>

@@ -56,7 +56,11 @@ export default function TenanciesPage() {
         {/* Header */}
         <div className="opacity-0 animate-fade-in-up" style={{ animationDelay: '0ms', animationFillMode: 'forwards' }}>
           <h1 className="text-3xl font-bold font-heading text-gradient-brand mb-1 tracking-tight">Tenancies</h1>
-          <p className="text-text-muted text-sm">Manage all tenancies and tenant information</p>
+          <p className="text-text-muted text-sm">
+            {filteredTenants.length === tenants.length
+              ? `${tenants.length} tenancies`
+              : `${filteredTenants.length} of ${tenants.length} tenancies`}
+          </p>
         </div>
 
         {/* Search and Filter Bar */}
@@ -69,6 +73,7 @@ export default function TenanciesPage() {
                 placeholder="Search by name..."
                 value={searchName}
                 onChange={(e) => setSearchName(e.target.value)}
+                data-testid="search-name"
                 className="w-full pl-10 pr-4 py-2 bg-surface-dark border border-border-default rounded-lg text-text-primary placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-brand-teal focus:border-transparent"
               />
             </div>

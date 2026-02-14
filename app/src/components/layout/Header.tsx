@@ -113,7 +113,8 @@ export default function Header() {
         {/* AI Assist trigger */}
         <button
           onClick={() => dispatch({ type: 'TOGGLE_YANTRA_ASSIST' })}
-          className="relative p-2 rounded-lg hover:bg-surface-hover transition-all duration-200"
+          className="yantra-assist-trigger relative p-2 rounded-lg hover:bg-surface-hover transition-all duration-200"
+          aria-label="Yantra Assist"
         >
           <div className={`${state.yantraAssistOpen ? '' : 'animate-pulse-glow'} rounded-lg`}>
             <Sparkles size={18} className="text-status-ai" />

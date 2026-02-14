@@ -10,6 +10,7 @@ type ViewMode = 'list' | 'map';
 export default function PropertiesPage() {
   const navigate = useNavigate();
   const mapRef = useRef<HTMLDivElement>(null);
+  const miniMapRef = useRef<HTMLDivElement>(null);
   const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [searchQuery, setSearchQuery] = useState('');
   const [filterType, setFilterType] = useState<string>('all');
@@ -62,12 +63,40 @@ export default function PropertiesPage() {
     };
   }, []);
 
-  // Initialize Leaflet map
+  // Initialize mini map (always visible in list mode)
+  useEffect(() => {
+    if (viewMode !== 'list' || !miniMapRef.current || filteredProperties.length === 0) return;
+
+    let miniMap: any;
+
+    import('leaflet').then((L) => {
+      miniMap = L.default.map(miniMapRef.current!, { zoomControl: false, attributionControl: false }).setView([51.47, -0.07], 12);
+      L.default.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap'
+      }).addTo(miniMap);
+
+      filteredProperties.forEach(prop => {
+        const lat = prop.lat || 51.47 + (Math.random() - 0.5) * 0.01;
+        const lng = prop.lng || -0.07 + (Math.random() - 0.5) * 0.01;
+        const color = prop.compliance?.overall === 'compliant' ? '#10B981' :
+                      prop.compliance?.overall === 'expiring' ? '#F59E0B' : '#EF4444';
+        L.default.circleMarker([lat, lng], {
+          radius: 5, fillColor: color, color: '#1E2A38', weight: 1, opacity: 1, fillOpacity: 0.8
+        }).addTo(miniMap);
+      });
+    });
+
+    return () => {
+      if (miniMap) miniMap.remove();
+    };
+  }, [viewMode, filteredProperties]);
+
+  // Initialize Leaflet map (full view)
   useEffect(() => {
     if (viewMode !== 'map' || !mapRef.current) return;
-    
+
     let map: any;
-    
+
     import('leaflet').then((L) => {
       map = L.default.map(mapRef.current!).setView([51.47, -0.07], 13);
       L.default.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -75,11 +104,10 @@ export default function PropertiesPage() {
       }).addTo(map);
 
       filteredProperties.forEach(prop => {
-        // Use lat/lng if available, otherwise use approximate coordinates near Southwark
         const lat = prop.lat || 51.47 + (Math.random() - 0.5) * 0.01;
         const lng = prop.lng || -0.07 + (Math.random() - 0.5) * 0.01;
-        
-        const color = prop.compliance?.overall === 'compliant' ? '#10B981' : 
+
+        const color = prop.compliance?.overall === 'compliant' ? '#10B981' :
                       prop.compliance?.overall === 'expiring' ? '#F59E0B' : '#EF4444';
         const marker = L.default.circleMarker([lat, lng], {
           radius: 8, fillColor: color, color: '#1E2A38', weight: 1, opacity: 1, fillOpacity: 0.8
@@ -93,7 +121,7 @@ export default function PropertiesPage() {
       });
     });
 
-    return () => { 
+    return () => {
       if (map) {
         map.remove();
       }
@@ -175,6 +203,13 @@ export default function PropertiesPage() {
             </div>
           </div>
         </div>
+
+        {/* Mini Map (always visible in list mode) */}
+        {viewMode === 'list' && (
+          <div className="bg-surface-card rounded-lg border border-border-default overflow-hidden opacity-0 animate-fade-in-up" style={{ animationDelay: '150ms', animationFillMode: 'forwards' }}>
+            <div ref={miniMapRef} className="w-full h-[200px]" />
+          </div>
+        )}
 
         {/* Content */}
         {viewMode === 'list' ? (

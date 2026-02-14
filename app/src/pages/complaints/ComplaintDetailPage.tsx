@@ -32,6 +32,11 @@ export default function ComplaintDetailPage() {
   const { data: properties = [] } = useProperties();
 
   const complaint = complaints.find((c: any) => c.id === id);
+  const tenant = complaint ? tenants.find((t: any) => t.id === complaint.tenantId) : null;
+  const property = complaint ? properties.find((p: any) => p.id === complaint.propertyId) : null;
+  const caseActivities = complaint ? activities.filter(a => a.caseId === complaint.id) : [];
+  const intel = useComplaintIntelligence(complaint);
+  const [activeModal, setActiveModal] = useState<string | null>(null);
 
   if (!complaint) {
     return (
@@ -48,12 +53,6 @@ export default function ComplaintDetailPage() {
       </div>
     );
   }
-
-  const tenant = tenants.find((t: any) => t.id === complaint.tenantId);
-  const property = properties.find((p: any) => p.id === complaint.propertyId);
-  const caseActivities = activities.filter(a => a.caseId === complaint.id);
-  const intel = useComplaintIntelligence(complaint);
-  const [activeModal, setActiveModal] = useState<string | null>(null);
 
   const getTenantName = () => {
     return tenant ? `${tenant.title} ${tenant.firstName} ${tenant.lastName}` : 'Unknown';

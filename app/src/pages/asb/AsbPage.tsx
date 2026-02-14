@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { AlertTriangle, Clock, User, MapPin } from 'lucide-react';
 import { asbCases } from '@/data';
 import { useTenants, useProperties } from '@/hooks/useApi';
@@ -34,6 +34,7 @@ const getSeverityLabel = (severity: AsbSeverity) => {
 };
 
 export default function AsbPage() {
+  const navigate = useNavigate();
   const { data: tenants = [] } = useTenants();
   const { data: properties = [] } = useProperties();
 
@@ -135,7 +136,8 @@ export default function AsbPage() {
                 {asbCases.map((case_, index) => (
                   <tr
                     key={case_.id}
-                    className="border-b border-border-default hover:bg-surface-elevated transition-colors opacity-0 animate-fade-in-up"
+                    onClick={() => navigate(`/asb/${case_.id}`)}
+                    className="border-b border-border-default hover:bg-surface-elevated transition-colors opacity-0 animate-fade-in-up cursor-pointer"
                     style={{ animationDelay: `${300 + index * 30}ms`, animationFillMode: 'forwards' }}
                   >
                     <td className="py-3 px-4">

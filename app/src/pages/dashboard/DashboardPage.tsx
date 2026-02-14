@@ -8,7 +8,7 @@ import {
   LineChart, Line, BarChart, Bar, XAxis, YAxis, Tooltip,
   ResponsiveContainer, CartesianGrid, Legend
 } from 'recharts';
-import { organisation, complianceStats, aiInsights, dampMouldCases, activities } from '@/data';
+import { organisation, complianceStats, aiInsights, dampMouldCases, activities, voidProperties } from '@/data';
 import { tenants } from '@/data/tenants';
 import { usePersonaScope } from '@/hooks/usePersonaScope';
 import KpiCard from '@/components/shared/KpiCard';
@@ -138,7 +138,7 @@ export default function DashboardPage() {
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         <KpiCard label="Properties" value={persona === 'coo' || persona === 'head-of-service' ? formatNumber(organisation.totalUnits) : formatNumber(kpis.totalUnits)} trend="stable" trendValue="+12 this month" icon={<Home size={20} />} colour="brand-teal" delay={0} onClick={() => navigate('/properties')} />
         <KpiCard label="Tenancies" value={persona === 'coo' || persona === 'head-of-service' ? formatNumber(organisation.totalTenancies) : formatNumber(kpis.totalTenancies)} trend="up" trendValue="+8 this month" icon={<Users size={20} />} colour="brand-teal" delay={50} onClick={() => navigate('/tenancies')} />
         <KpiCard label="Active Repairs" value={persona === 'coo' || persona === 'head-of-service' ? formatNumber(organisation.activeRepairs) : formatNumber(kpis.activeRepairs)} trend="down" trendValue="-12 this week" icon={<Wrench size={20} />} colour="brand-blue" delay={100} onClick={() => navigate('/repairs')} />
@@ -146,7 +146,8 @@ export default function DashboardPage() {
         <KpiCard label="Arrears" value={persona === 'coo' || persona === 'head-of-service' ? formatCurrency(organisation.totalArrears) : formatCurrency(kpis.totalArrears)} trend="down" trendValue="-2.3% this month" icon={<AlertTriangle size={20} />} colour="brand-garnet" delay={200} onClick={() => navigate('/rent/arrears')} />
         <KpiCard label="Compliance" value={formatPercent(persona === 'coo' ? organisation.complianceRate : kpis.complianceRate)} trend="stable" trendValue="Above target" icon={<Shield size={20} />} colour="brand-teal" delay={250} onClick={() => navigate('/compliance')} />
         <KpiCard label="Open Complaints" value={persona === 'coo' || persona === 'head-of-service' ? formatNumber(organisation.openComplaints) : formatNumber(kpis.openComplaints)} trend="down" trendValue="-3 this month" icon={<MessageSquare size={20} />} colour="brand-peach" delay={300} onClick={() => navigate('/complaints')} />
-        <KpiCard label="AI Alerts" value={formatNumber(organisation.aiAlerts)} trend="up" trendValue="+2 today" icon={<Sparkles size={20} />} colour="status-ai" delay={350} onClick={() => navigate('/ai/insights')} />
+        <KpiCard label="Void Properties" value={formatNumber(voidProperties.length)} subValue={`${organisation.voidRate}% void rate`} trend="down" trendValue="-1 this month" icon={<Building2 size={20} />} colour="status-void" delay={350} onClick={() => navigate('/allocations')} />
+        <KpiCard label="AI Alerts" value={formatNumber(organisation.aiAlerts)} trend="up" trendValue="+2 today" icon={<Sparkles size={20} />} colour="status-ai" delay={400} onClick={() => navigate('/ai/insights')} />
       </div>
 
       {/* Charts */}
