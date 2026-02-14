@@ -1,6 +1,6 @@
 import { useParams, Link } from 'react-router-dom';
 import { AlertTriangle, FileText, CheckCircle, Clock, X } from 'lucide-react';
-import { asbCases } from '@/data';
+import { allAsbCases as asbCases } from '@/data';
 import { useTenants, useProperties } from '@/hooks/useApi';
 import AiActionCard from '@/components/shared/AiActionCard';
 import { formatDate } from '@/utils/format';

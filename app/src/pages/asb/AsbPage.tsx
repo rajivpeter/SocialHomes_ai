@@ -1,6 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { AlertTriangle, Clock, User, MapPin } from 'lucide-react';
-import { asbCases } from '@/data';
+import { allAsbCases as asbCases } from '@/data';
 import { useTenants, useProperties } from '@/hooks/useApi';
 import { formatDate } from '@/utils/format';
 import type { AsbSeverity } from '@/types';

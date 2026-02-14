@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { 
   MessageSquareWarning, 
   AlertCircle,
@@ -11,6 +11,7 @@ import StatusPill from '@/components/shared/StatusPill';
 import { formatNumber, formatPercent, daysUntil, formatDate } from '@/utils/format';
 
 export default function ComplaintsPage() {
+  const navigate = useNavigate();
   const { data: complaints = [] } = useComplaints();
   const { data: tenants = [] } = useTenants();
   const { data: tsmMeasures = [] } = useTsmReport();
@@ -134,7 +135,7 @@ export default function ComplaintsPage() {
                   return (
                     <tr
                       key={complaint.id}
-                      onClick={() => { window.location.href = `/complaints/${complaint.id}`; }}
+                      onClick={() => navigate(`/complaints/${complaint.id}`)}
                       className="hover:bg-surface-hover transition-colors opacity-0 animate-fade-in-up cursor-pointer"
                       style={{ animationDelay: `${250 + index * 30}ms`, animationFillMode: 'forwards' }}
                     >

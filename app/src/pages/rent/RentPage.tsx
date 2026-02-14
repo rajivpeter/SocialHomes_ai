@@ -260,9 +260,9 @@ export default function RentPage() {
                       style={{ animationDelay: `${300 + index * 30}ms`, animationFillMode: 'forwards' }}
                     >
                       <td className="py-3 px-4">
-                        <a href={`/tenancies/${tenant.id}`} className="font-medium text-brand-teal hover:underline">
+                        <Link to={`/tenancies/${tenant.id}`} className="font-medium text-brand-teal hover:underline">
                           {tenant.title} {tenant.firstName} {tenant.lastName}
-                        </a>
+                        </Link>
                       </td>
                       <td className="py-3 px-4 text-sm text-text-secondary">
                         {tenant.propertyAddress}
@@ -296,9 +296,9 @@ export default function RentPage() {
                         <div className="flex items-center gap-2">
                           <span className="text-lg">{action.icon}</span>
                           <span className="text-sm text-text-secondary">{action.text}</span>
-                          <a href={`/tenancies/${tenant.id}`} className="ml-2 p-1.5 rounded hover:bg-surface-hover transition-colors inline-block">
+                          <Link to={`/tenancies/${tenant.id}`} className="ml-2 p-1.5 rounded hover:bg-surface-hover transition-colors inline-block">
                             <ArrowRight size={14} className="text-brand-teal" />
-                          </a>
+                          </Link>
                         </div>
                       </td>
                     </tr>
