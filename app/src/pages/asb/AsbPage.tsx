@@ -66,7 +66,7 @@ export default function AsbPage() {
 
         {/* Summary Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div className="bg-surface-card rounded-lg p-6 border border-border-default opacity-0 animate-fade-in-up" style={{ animationDelay: '50ms', animationFillMode: 'forwards' }}>
+          <div className="bg-surface-panel rounded-lg p-6 border border-border-default opacity-0 animate-fade-in-up" style={{ animationDelay: '50ms', animationFillMode: 'forwards' }}>
             <div className="flex items-center gap-3">
               <div className="p-2 bg-status-info/20 rounded-lg">
                 <AlertTriangle size={20} className="text-status-info" />
@@ -77,8 +77,8 @@ export default function AsbPage() {
               </div>
             </div>
           </div>
-          
-          <div className="bg-surface-card rounded-lg p-6 border border-border-default opacity-0 animate-fade-in-up" style={{ animationDelay: '100ms', animationFillMode: 'forwards' }}>
+
+          <div className="bg-surface-panel rounded-lg p-6 border border-border-default opacity-0 animate-fade-in-up" style={{ animationDelay: '100ms', animationFillMode: 'forwards' }}>
             <div className="flex items-center gap-3">
               <div className="p-2 bg-status-critical/20 rounded-lg">
                 <AlertTriangle size={20} className="text-status-critical" />
@@ -89,8 +89,8 @@ export default function AsbPage() {
               </div>
             </div>
           </div>
-          
-          <div className="bg-surface-card rounded-lg p-6 border border-border-default opacity-0 animate-fade-in-up" style={{ animationDelay: '150ms', animationFillMode: 'forwards' }}>
+
+          <div className="bg-surface-panel rounded-lg p-6 border border-border-default opacity-0 animate-fade-in-up" style={{ animationDelay: '150ms', animationFillMode: 'forwards' }}>
             <div className="flex items-center gap-3">
               <div className="p-2 bg-status-warning/20 rounded-lg">
                 <AlertTriangle size={20} className="text-status-warning" />
@@ -101,8 +101,8 @@ export default function AsbPage() {
               </div>
             </div>
           </div>
-          
-          <div className="bg-surface-card rounded-lg p-6 border border-border-default opacity-0 animate-fade-in-up" style={{ animationDelay: '200ms', animationFillMode: 'forwards' }}>
+
+          <div className="bg-surface-panel rounded-lg p-6 border border-border-default opacity-0 animate-fade-in-up" style={{ animationDelay: '200ms', animationFillMode: 'forwards' }}>
             <div className="flex items-center gap-3">
               <div className="p-2 bg-status-void/20 rounded-lg">
                 <AlertTriangle size={20} className="text-status-void" />
@@ -116,7 +116,7 @@ export default function AsbPage() {
         </div>
 
         {/* Case List */}
-        <div className="bg-surface-card rounded-lg p-6 border border-border-default opacity-0 animate-fade-in-up" style={{ animationDelay: '250ms', animationFillMode: 'forwards' }}>
+        <div className="bg-surface-panel rounded-lg p-6 border border-border-default opacity-0 animate-fade-in-up" style={{ animationDelay: '250ms', animationFillMode: 'forwards' }}>
           <h2 className="text-xl font-bold font-heading text-brand-peach mb-4">Case List</h2>
           
           <div className="overflow-x-auto">
