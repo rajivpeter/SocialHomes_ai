@@ -1,0 +1,2333 @@
+# DOCUMENT 3 OF 3: PUBLIC API INTEGRATION REQUIREMENTS
+# SocialHomes.Ai — AI-Native Housing Operating System by Yantra.Works
+# Business Analyst Requirements Specification
+# Version 1.0 — 14 February 2026
+
+## TABLE OF CONTENTS
+
+1.  Executive Summary
+2.  Integration Architecture
+3.  Tier 1: Free APIs (No API Key)
+4.  Tier 2: Free APIs (Registration Required)
+5.  Tier 3: Mock Now, Wire Later
+6.  Seven Killer Differentiators — Composite Feature Specifications
+7.  Data Model Extensions
+8.  Server Route Summary
+9.  Environment Variable Registry
+10. Implementation Roadmap
+11. Appendix: Affected Pages Matrix
+
+---
+
+## 1. EXECUTIVE SUMMARY
+
+SocialHomes.Ai currently operates with rich internal data (properties, tenants, cases,
+compliance, rent) stored in Firestore and served through an Express API on Cloud Run.
+The existing server/src/routes/public-data.ts has three starter integrations:
+
+  - EPC Register API (simulated fallback when no key)
+  - IMD data (fully simulated)
+  - Open-Meteo weather (live, no key required)
+
+This document specifies the full integration of 25+ external public service APIs across
+three tiers, culminating in seven composite "Killer Differentiator" features that combine
+internal and external data to produce intelligence no competitor can match.
+
+### Guiding Principles
+
+  GP-1  Server-side proxy only — the React client NEVER calls external APIs directly.
+        All external calls route through /api/v1/public-data/* endpoints.
+  GP-2  Graceful degradation — every external call has a simulated fallback. If an API
+        is down or unregistered, the system continues with synthetic data marked
+        source: "simulated".
+  GP-3  Caching — external data is cached in Firestore subcollections with TTL metadata.
+        Weather: 1 hour. Crime: 24 hours. EPC: 30 days. IMD/Census: 90 days.
+  GP-4  Audit trail — every external API call is logged to the auditLog collection with
+        action: "external-api-call", including source, endpoint, response status, and
+        latency.
+  GP-5  Rate limiting — server-side rate limiting per API. Never exceed published
+        fair-use limits. Use token bucket pattern in memory.
+  GP-6  Cost control — Tier 1 and Tier 2 APIs are free. No paid API calls without
+        explicit admin opt-in via /admin/integrations.
+
+---
+
+## 2. INTEGRATION ARCHITECTURE
+
+### 2.1 Server-Side Proxy Pattern
+
+All external API calls follow this pattern:
+
+  Client (React)
+    --> GET /api/v1/public-data/{source}/{params}
+    --> Express route handler (server/src/routes/public-data.ts)
+      --> Check Firestore cache (collection: externalDataCache)
+      --> If cache valid: return cached data with source: "cached"
+      --> If cache expired or missing:
+        --> Call external API
+        --> Transform response to internal schema
+        --> Write to Firestore cache with TTL
+        --> Return data with source: "{api-name}"
+      --> If external call fails:
+        --> Return simulated data with source: "simulated"
+        --> Log error to auditLog
+
+### 2.2 New Firestore Collection: externalDataCache
+
+  Document ID: {source}:{lookup-key}  (e.g., "police-crime:SE15-4QN")
+  Fields:
+    source        string    — API identifier
+    lookupKey     string    — postcode, UPRN, lat/lng, LSOA code
+    data          map       — the cached response payload
+    fetchedAt     timestamp — when the data was retrieved
+    ttlSeconds    number    — cache duration
+    expiresAt     timestamp — fetchedAt + ttlSeconds
+    httpStatus    number    — response status from external API
+    latencyMs     number    — round-trip time
+
+### 2.3 New Server Service: server/src/services/external-api.ts
+
+Shared utility module providing:
+  - fetchWithCache(source, key, ttl, fetchFn) — cache-through helper
+  - rateLimiter(source, maxPerMinute) — token bucket
+  - buildAuditEntry(source, endpoint, status, latency) — audit logging
+  - simulatedFallback(source, key) — returns synthetic data
+
+### 2.4 Admin Integration Management
+
+The existing Integration type (app/src/types/index.ts) maps directly to the
+/admin/integrations page. Each API below gets an Integration record:
+
+  { id, name, description, status, lastSync, logo, category }
+
+Admin users can toggle integrations on/off, view last sync status, and manage
+API keys through Secret Manager references.
+
+---
+
+## 3. TIER 1: FREE APIs — NO API KEY REQUIRED
+
+========================================================================
+### 3.1 data.police.uk — Street-Level Crime & ASB
+========================================================================
+
+Base URL:         https://data.police.uk/api/
+Auth:             None (completely open, no key)
+Rate Limit:       15 requests/second (fair use)
+Documentation:    https://data.police.uk/docs/
+
+Key Endpoints:
+  GET /crimes-street/all-crime?lat={lat}&lng={lng}&date={YYYY-MM}
+  GET /crimes-street/anti-social-behaviour?lat={lat}&lng={lng}&date={YYYY-MM}
+  GET /crimes-at-location?location_id={id}&date={YYYY-MM}
+  GET /outcomes-at-location?lat={lat}&lng={lng}&date={YYYY-MM}
+  GET /crime-categories?date={YYYY-MM}
+
+Response Shape (crimes-street):
+  [
+    {
+      "category": "anti-social-behaviour",
+      "location_type": "Force",
+      "location": { "latitude": "51.5", "longitude": "-0.09", "street": { "id": 123, "name": "On or near..." } },
+      "context": "",
+      "outcome_status": { "category": "...", "date": "2026-01" },
+      "persistent_id": "abc123",
+      "id": 12345678,
+      "month": "2026-01"
+    }
+  ]
+
+Data Mapping to SocialHomes.Ai:
+  Police API field         --> Internal model / usage
+  ---------------------------------------------------------------
+  category                 --> CrimeIncident.category (new type)
+  location.latitude        --> CrimeIncident.lat
+  location.longitude       --> CrimeIncident.lng
+  location.street.name     --> CrimeIncident.streetName
+  outcome_status.category  --> CrimeIncident.outcome
+  month                    --> CrimeIncident.month
+  persistent_id            --> CrimeIncident.externalId
+
+  Aggregate by estate postcode to enrich:
+    Estate.asbCases         — correlate police ASB with internal ASB cases
+    AsbCase (context panel)  — show nearby police-reported incidents
+    BriefingPage             — "X police-reported ASB incidents near your estates this month"
+
+New Server Route:
+  GET /api/v1/public-data/crime/:lat/:lng?date=YYYY-MM&category=anti-social-behaviour
+  GET /api/v1/public-data/crime/postcode/:postcode?months=3
+
+  Implementation: Geocode postcode via postcodes.io, then call police API with lat/lng.
+  Cache TTL: 24 hours per postcode per month.
+
+Affected Pages:
+  - /asb (AsbPage.tsx) — crime heatmap overlay on estate map
+  - /asb/:id (AsbDetailPage.tsx) — "Nearby police incidents" context card
+  - /explore/.../estate/:id — crime overlay on estate drill-down map
+  - /briefing (BriefingPage.tsx) — estate-level crime summary
+  - /dashboard (DashboardPage.tsx) — ASB KPI enrichment
+
+Priority: P1
+Complexity: Medium
+Dependencies: postcodes.io (for postcode-to-latlong conversion)
+
+User Stories:
+  US-CRIME-01: As a housing officer viewing an ASB case, I want to see police-reported
+    crime incidents near the property on a map, so I can assess the wider pattern of
+    antisocial behaviour and determine whether multi-agency referral is warranted.
+    Acceptance: ASB detail page shows a Leaflet map with markers for police-reported
+    incidents within 500m, colour-coded by category, for the last 3 months.
+
+  US-CRIME-02: As a neighbourhood manager, I want to see a crime heatmap overlaid on
+    my estate maps in the Explore view, so I can identify hotspots and allocate
+    resources accordingly.
+    Acceptance: Explore estate-level map shows translucent heatmap layer with crime
+    density. Toggle for ASB-only vs all crime. Date range selector (last 1/3/6 months).
+
+  US-CRIME-03: As a COO reading the morning briefing, I want to see a summary of
+    police-reported ASB incidents across all estates this month compared to last month,
+    so I can spot emerging patterns requiring strategic intervention.
+    Acceptance: Briefing page includes "Crime Context" section with month-on-month
+    comparison per estate. Trend arrows (up/down/stable). Click-through to estate view.
+
+  US-CRIME-04: As a housing officer, I want the AI to automatically correlate internal
+    ASB cases with police data, so I can identify cases where tenants have also reported
+    to the police and build stronger evidence bundles.
+    Acceptance: AI dynamic zone on ASB case detail shows "Police reports matching this
+    location and timeframe: X incidents" with link to details.
+
+========================================================================
+### 3.2 postcodes.io — Postcode Lookup, LSOA, Ward, Geography
+========================================================================
+
+Base URL:         https://api.postcodes.io/
+Auth:             None
+Rate Limit:       No published limit (fair use)
+Documentation:    https://postcodes.io/docs
+
+Key Endpoints:
+  GET /postcodes/:postcode
+  POST /postcodes (bulk lookup, max 100)
+  GET /postcodes/:postcode/validate
+  GET /postcodes?lon={lng}&lat={lat} (reverse geocode)
+  GET /outcodes/:outcode
+
+Response Shape (postcode lookup):
+  {
+    "result": {
+      "postcode": "SE15 4QN",
+      "longitude": -0.059,
+      "latitude": 51.472,
+      "admin_district": "Southwark",
+      "admin_ward": "Peckham",
+      "parish": null,
+      "parliamentary_constituency": "Camberwell and Peckham",
+      "lsoa": "Southwark 026A",
+      "msoa": "Southwark 026",
+      "codes": {
+        "admin_district": "E09000028",
+        "admin_ward": "E05000535",
+        "lsoa": "E01003968",
+        "msoa": "E02000818"
+      }
+    }
+  }
+
+Data Mapping to SocialHomes.Ai:
+  postcodes.io field          --> Internal model / usage
+  ---------------------------------------------------------------
+  result.latitude             --> Property.lat (validation/enrichment)
+  result.longitude            --> Property.lng (validation/enrichment)
+  result.admin_district       --> LocalAuthority.name (cross-ref)
+  result.admin_ward           --> Property.ward (new field)
+  result.lsoa                 --> Property.lsoa (new field)
+  result.codes.lsoa           --> Property.lsoaCode (new field) — used for IMD lookup
+  result.parliamentary_constituency --> Property.constituency (new field)
+  result.codes.admin_district --> LocalAuthority.onsCode (new field)
+
+  Used as prerequisite for:
+    - Police API (needs lat/lng from postcode)
+    - IMD lookup (needs LSOA code)
+    - Census API (needs LSOA/MSOA codes)
+    - Flood risk API (needs lat/lng)
+    - Geographic grouping in reports
+
+New Server Route:
+  GET /api/v1/public-data/postcode/:postcode
+  POST /api/v1/public-data/postcodes/bulk (body: { postcodes: [...] })
+  GET /api/v1/public-data/postcode/validate/:postcode
+
+  Cache TTL: 90 days (postcodes rarely change).
+
+Affected Pages:
+  - /properties (PropertiesPage.tsx) — address validation on create/edit
+  - /properties/:uprn (PropertyDetailPage.tsx) — geographic context card
+  - /tenancies/new — postcode validation in tenancy creation
+  - /explore (ExplorePage.tsx) — geographic hierarchy enrichment
+  - /reports (ReportsPage.tsx) — grouping by ward/constituency
+  - /allocations (AllocationsPage.tsx) — local connection verification
+
+Priority: P1
+Complexity: Low
+Dependencies: None (this is itself a dependency for many other APIs)
+
+User Stories:
+  US-POST-01: As a housing officer creating a new tenancy, I want the system to
+    validate the postcode and auto-populate latitude, longitude, ward, and LSOA data,
+    so I do not need to manually look up geographic information.
+    Acceptance: On postcode entry, system calls postcodes.io, validates the postcode,
+    and populates lat/lng/ward/lsoa fields. Invalid postcodes show inline error.
+
+  US-POST-02: As a data analyst, I want all properties enriched with LSOA codes, so I
+    can link them to IMD deprivation data and Census demographics for vulnerability
+    analysis.
+    Acceptance: A batch enrichment job (admin-triggered) calls postcodes.io for all
+    properties without LSOA codes and updates their records.
+
+  US-POST-03: As a head of service, I want to group properties and KPIs by ward and
+    parliamentary constituency in reports, so I can produce place-based intelligence
+    for council partnerships.
+    Acceptance: Reports page includes ward/constituency grouping options. Data sourced
+    from postcodes.io-enriched property records.
+
+========================================================================
+### 3.3 Open UPRN (uprn.uk) — UPRN Lookup
+========================================================================
+
+Base URL:         https://uprn.uk/
+Auth:             None (open data under OGL)
+Rate Limit:       Fair use
+Documentation:    https://uprn.uk/
+
+Key Endpoints:
+  GET /postcode/{postcode}.json
+  GET /{uprn}.json
+
+Response Shape (UPRN lookup):
+  {
+    "uprn": "10091553414",
+    "postcode": "SE15 4QN",
+    "latitude": 51.472,
+    "longitude": -0.059,
+    "x": 534123.4,
+    "y": 176543.2,
+    "country": "England",
+    "class_desc": "Residential",
+    "type_desc": "Flat"
+  }
+
+Data Mapping to SocialHomes.Ai:
+  uprn.uk field        --> Internal model / usage
+  ---------------------------------------------------------------
+  uprn                 --> Property.uprn (validation)
+  postcode             --> Property.postcode (cross-check)
+  latitude/longitude   --> Property.lat/lng (authoritative coordinates)
+  class_desc           --> Property.classificationDesc (new field)
+  type_desc            --> Property.uprnTypeDesc (new field)
+
+  Used to:
+    - Validate UPRNs on property creation
+    - Match EPC certificates to properties by UPRN
+    - Link Gas Safe and EICR records to specific addresses
+    - Support the Property Passport feature (Differentiator 5)
+
+New Server Route:
+  GET /api/v1/public-data/uprn/:uprn
+  GET /api/v1/public-data/uprn/postcode/:postcode
+
+  Cache TTL: 90 days.
+
+Affected Pages:
+  - /properties/:uprn (PropertyDetailPage.tsx) — UPRN validation badge
+  - /properties (PropertiesPage.tsx) — UPRN search/match
+  - /compliance (CompliancePage.tsx) — linking certs to verified UPRNs
+  - /admin/integrations — UPRN match status dashboard
+
+Priority: P1
+Complexity: Low
+Dependencies: None
+
+User Stories:
+  US-UPRN-01: As a data steward, I want to validate all property UPRNs against the
+    national UPRN register, so I can ensure our asset data is accurate and linkable
+    to external datasets (EPC, Gas Safe, Land Registry).
+    Acceptance: Property detail page shows a green "UPRN Verified" badge when the UPRN
+    matches uprn.uk data, or a yellow "UPRN Unverified" badge when not checked.
+
+  US-UPRN-02: As a system administrator, I want to run a batch UPRN validation job that
+    checks all properties and flags mismatches, so I can maintain data quality.
+    Acceptance: Admin page provides "Validate All UPRNs" button. Progress bar shown.
+    Results summary: X verified, Y mismatched, Z not found.
+
+========================================================================
+### 3.4 Open-Meteo API — Weather Forecasts & Historical Data
+========================================================================
+
+Base URL:         https://api.open-meteo.com/v1/
+Auth:             None
+Rate Limit:       10,000 requests/day (non-commercial)
+Documentation:    https://open-meteo.com/en/docs
+
+Key Endpoints (extending existing implementation):
+  GET /forecast?latitude={lat}&longitude={lng}
+      &daily=temperature_2m_max,temperature_2m_min,precipitation_sum,
+             relative_humidity_2m_mean,wind_speed_10m_max
+      &hourly=temperature_2m,relative_humidity_2m,dew_point_2m,
+              surface_pressure,precipitation
+      &timezone=Europe/London
+      &forecast_days=7
+
+  GET /archive?latitude={lat}&longitude={lng}
+      &start_date={YYYY-MM-DD}&end_date={YYYY-MM-DD}
+      &daily=temperature_2m_mean,precipitation_sum,relative_humidity_2m_mean
+      &timezone=Europe/London
+
+Response Shape (forecast):
+  {
+    "daily": {
+      "time": ["2026-02-14", ...],
+      "temperature_2m_max": [8.2, ...],
+      "temperature_2m_min": [2.1, ...],
+      "precipitation_sum": [12.5, ...],
+      "relative_humidity_2m_mean": [85, ...]
+    }
+  }
+
+Data Mapping to SocialHomes.Ai:
+  Open-Meteo field                --> Internal model / usage
+  ---------------------------------------------------------------
+  daily.temperature_2m_min        --> DampRiskInput.externalTemp
+  daily.relative_humidity_2m_mean --> DampRiskInput.externalHumidity
+  daily.precipitation_sum         --> DampRiskInput.precipitation
+  hourly.dew_point_2m             --> DampRiskInput.dewPoint (new)
+  archive data (90 days)          --> DampRiskInput.historicalProfile
+
+  Feeds into:
+    - Damp Risk Score calculation (Property.dampRisk)
+    - Awaab's Law risk assessment
+    - Predictive Damp Intelligence (Differentiator 1)
+    - AI Neighbourhood Briefing (Differentiator 6)
+
+New Server Route (extend existing /api/v1/public-data/weather):
+  GET /api/v1/public-data/weather/:lat/:lng (EXISTING — enhance with hourly data)
+  GET /api/v1/public-data/weather/history/:lat/:lng?days=90
+
+  Cache TTL: 1 hour (forecast), 7 days (historical).
+
+Affected Pages:
+  - /compliance/awaabs-law (AwaabsLawPage.tsx) — weather context for damp risk
+  - /properties/:uprn (PropertyDetailPage.tsx) — weather widget, damp risk factors
+  - /briefing (BriefingPage.tsx) — weather summary, damp risk alerts
+  - /dashboard (DashboardPage.tsx) — weather-linked damp risk KPI
+  - /explore/.../estate/:id — weather overlay on estate maps
+
+Priority: P1
+Complexity: Low (existing route, needs enhancement)
+Dependencies: postcodes.io (for lat/lng if only postcode known)
+
+User Stories:
+  US-WEATHER-01: As a property manager, I want to see a 7-day weather forecast for
+    each estate, so I can anticipate conditions that increase damp and mould risk
+    (sustained cold, high humidity, heavy rainfall).
+    Acceptance: Estate detail and property detail pages show a compact weather widget.
+    Days with damp-risk conditions (temp <5C + humidity >80% + precipitation) are
+    highlighted in amber/red.
+
+  US-WEATHER-02: As the AI system, I want 90-day historical weather data for each
+    property location, so I can correlate weather patterns with reported damp/mould
+    cases and improve the predictive damp model.
+    Acceptance: Historical weather data is fetched and cached. Damp risk score
+    calculation incorporates 90-day average humidity and precipitation totals.
+
+  US-WEATHER-03: As a COO reading the morning briefing, I want weather warnings
+    relevant to my estates, so I can proactively prepare for conditions that will
+    generate repair demand (frost, storms, heavy rain).
+    Acceptance: Briefing page shows "Weather Outlook" section with 3-day summary.
+    Properties at elevated damp risk due to weather are listed.
+
+========================================================================
+### 3.5 DEFRA Flood Risk API — Flood Warnings & Risk Zones
+========================================================================
+
+Base URL:         https://environment.data.gov.uk/flood-monitoring/
+Auth:             None
+Rate Limit:       Fair use
+Documentation:    https://environment.data.gov.uk/flood-monitoring/doc/reference
+
+Key Endpoints:
+  GET /id/floods?lat={lat}&long={lng}&dist=5
+  GET /id/floodAreas?lat={lat}&long={lng}&dist=3
+  GET /id/stations?lat={lat}&long={lng}&dist=5
+  GET /id/stations/{id}/readings?since=48h
+
+Response Shape (flood warnings):
+  {
+    "items": [
+      {
+        "floodAreaID": "062WAF945",
+        "severity": "Flood alert",      // "Severe flood warning" | "Flood warning" | "Flood alert" | "No longer in force"
+        "severityLevel": 3,
+        "description": "River Thames at Southwark",
+        "timeRaised": "2026-02-14T08:00:00Z",
+        "timeSeverityChanged": "2026-02-14T08:00:00Z",
+        "message": "..."
+      }
+    ]
+  }
+
+Data Mapping to SocialHomes.Ai:
+  DEFRA field           --> Internal model / usage
+  ---------------------------------------------------------------
+  severity              --> FloodAlert.severity (new type)
+  severityLevel         --> FloodAlert.severityLevel
+  description           --> FloodAlert.description
+  timeRaised            --> FloodAlert.raisedAt
+  message               --> FloodAlert.message
+  floodAreaID           --> FloodAlert.areaId
+
+  Feeds into:
+    - Property risk assessment
+    - Briefing page alerts
+    - Insurance and stock condition planning
+
+New Server Route:
+  GET /api/v1/public-data/flood/:lat/:lng?dist=5
+  GET /api/v1/public-data/flood/postcode/:postcode
+
+  Cache TTL: 1 hour (active warnings change frequently).
+
+Affected Pages:
+  - /properties/:uprn (PropertyDetailPage.tsx) — flood risk badge
+  - /explore (ExplorePage.tsx) — flood zone overlay on maps
+  - /briefing (BriefingPage.tsx) — active flood warnings
+  - /dashboard (DashboardPage.tsx) — flood warning KPI
+  - /reports (ReportsPage.tsx) — flood risk analysis
+
+Priority: P2
+Complexity: Low
+Dependencies: postcodes.io (for lat/lng)
+
+User Stories:
+  US-FLOOD-01: As a property manager, I want to see active flood warnings for
+    properties in my patch, so I can contact vulnerable tenants proactively and
+    prepare for potential emergency repairs.
+    Acceptance: Properties within active flood warning areas show a red "Flood
+    Warning" banner on their detail page. Briefing page lists all affected properties.
+
+  US-FLOOD-02: As a stock investment planner, I want to see which properties are
+    in flood risk zones, so I can factor flood resilience into planned works programmes.
+    Acceptance: Property detail page shows flood risk zone classification. Reports
+    page allows filtering properties by flood risk level.
+
+========================================================================
+### 3.6 IMD — Index of Multiple Deprivation (ONS Open Data)
+========================================================================
+
+Base URL:         https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/
+                  (ArcGIS REST API for ONS geographies)
+Alt URL:          https://assets.publishing.service.gov.uk/media/
+                  (Static CSV downloads for IMD 2019)
+Auth:             None
+Rate Limit:       Fair use
+Documentation:    https://www.gov.uk/government/statistics/english-indices-of-deprivation-2019
+
+Key Endpoints:
+  GET IMD_2019/FeatureServer/0/query?where=lsoa11cd='{lsoaCode}'
+      &outFields=*&f=json
+
+  Alternatively, pre-load the IMD CSV (32,844 LSOAs) into Firestore on deployment.
+
+Response Fields:
+  lsoa11cd                          — LSOA code
+  IMDScore                          — Overall IMD score (0-100)
+  IMDRank                           — Rank (1 = most deprived, 32844 = least)
+  IMDDecile                         — Decile (1 = most deprived 10%)
+  IncScore, IncRank                 — Income domain
+  EmpScore, EmpRank                 — Employment domain
+  EduScore, EduRank                 — Education domain
+  HeaScore, HeaRank                 — Health and disability domain
+  CriScore, CriRank                 — Crime domain
+  HouScore, HouRank                 — Housing and services barriers
+  LivScore, LivRank                 — Living environment domain
+
+Data Mapping to SocialHomes.Ai:
+  IMD field        --> Internal model / usage
+  ---------------------------------------------------------------
+  IMDDecile        --> Property.imdDecile (new field)
+  IMDScore         --> Property.imdScore (new field)
+  IMDRank          --> Property.imdRank (new field)
+  IncScore         --> DeprivationProfile.incomeScore (new type)
+  EmpScore         --> DeprivationProfile.employmentScore
+  HeaScore         --> DeprivationProfile.healthScore
+  CriScore         --> DeprivationProfile.crimeScore
+  HouScore         --> DeprivationProfile.housingScore
+  LivScore         --> DeprivationProfile.livingEnvironmentScore
+
+  Feeds into:
+    - Automatic Vulnerability Detection (Differentiator 3)
+    - Benefits Entitlement Engine (Differentiator 4)
+    - AI Neighbourhood Briefing (Differentiator 6)
+    - Tenant vulnerability scoring
+    - Allocations prioritisation
+
+New Server Route (replace existing simulated /api/v1/public-data/imd):
+  GET /api/v1/public-data/imd/:lsoaCode
+  GET /api/v1/public-data/imd/summary/:estateId (aggregate for all LSOAs in estate)
+
+  Recommended: Pre-load IMD dataset into Firestore collection "imdData" at deployment.
+  Cache TTL: 90 days (IMD data is updated infrequently — roughly every 4-5 years).
+
+Affected Pages:
+  - /properties/:uprn (PropertyDetailPage.tsx) — deprivation context card
+  - /tenancies/:id (TenancyDetailPage.tsx) — vulnerability context
+  - /explore/.../estate/:id — deprivation heatmap
+  - /reports (ReportsPage.tsx) — deprivation analysis
+  - /allocations (AllocationsPage.tsx) — needs-based allocation
+  - /briefing (BriefingPage.tsx) — deprivation context
+  - /dashboard (DashboardPage.tsx) — vulnerability KPI
+
+Priority: P1
+Complexity: Medium (recommend pre-loading CSV to Firestore)
+Dependencies: postcodes.io (for LSOA code derivation)
+
+User Stories:
+  US-IMD-01: As a housing officer, I want to see the deprivation profile (overall
+    decile and domain scores) for the area around a tenant's property, so I can
+    understand the socioeconomic context when assessing vulnerability and support needs.
+    Acceptance: Tenant and property detail pages show a compact "Area Deprivation"
+    card with IMD decile (colour-coded 1=red to 10=green), income, employment, health,
+    and crime domain scores.
+
+  US-IMD-02: As a head of service, I want to overlay IMD deprivation data on estate
+    maps, so I can identify which estates are in the most deprived areas and allocate
+    services accordingly.
+    Acceptance: Explore estate view shows deprivation heatmap. Estates in deciles
+    1-3 are highlighted. Dashboard shows "X% of stock in decile 1-3 areas".
+
+  US-IMD-03: As the AI system, I want to use IMD data as an input to the automatic
+    vulnerability detection model, so I can flag tenants in highly deprived areas who
+    may need proactive support even before they ask for it.
+    Acceptance: Vulnerability scoring model incorporates IMD decile. Tenants in
+    decile 1-2 areas receive an automatic +15 to their vulnerability score.
+
+========================================================================
+### 3.7 Census 2021 API (ONS) — Demographics & Housing Tenure
+========================================================================
+
+Base URL:         https://api.beta.ons.gov.uk/v1/
+Alt URL:          https://www.nomisweb.co.uk/api/v01/ (NOMIS access to Census tables)
+Auth:             None
+Rate Limit:       Fair use
+Documentation:    https://developer.ons.gov.uk/
+
+Key Endpoints:
+  GET /datasets/TS054/editions/2021/versions/1/observations?geography={lsoaCode}
+      (Tenure by household — owner/social/private rent)
+  GET /datasets/TS011/editions/2021/versions/1/observations?geography={lsoaCode}
+      (Household size)
+  GET /datasets/TS009/editions/2021/versions/1/observations?geography={lsoaCode}
+      (Age structure)
+  GET /datasets/TS021/editions/2021/versions/1/observations?geography={lsoaCode}
+      (Ethnic group)
+  GET /datasets/TS038/editions/2021/versions/1/observations?geography={lsoaCode}
+      (Disability)
+
+Data Mapping to SocialHomes.Ai:
+  Census field                --> Internal model / usage
+  ---------------------------------------------------------------
+  TS054 (Tenure)              --> AreaDemographics.socialRentPct (new type)
+  TS054 (Tenure)              --> AreaDemographics.privateRentPct
+  TS054 (Tenure)              --> AreaDemographics.ownerOccupiedPct
+  TS011 (Household size)      --> AreaDemographics.averageHouseholdSize
+  TS009 (Age structure)       --> AreaDemographics.over65Pct
+  TS009 (Age structure)       --> AreaDemographics.under18Pct
+  TS038 (Disability)          --> AreaDemographics.limitedActivitiesPct
+
+  Feeds into:
+    - Allocations planning (understanding local housing demand)
+    - Vulnerability detection (high elderly %, high disability %)
+    - AI Neighbourhood Briefing (Differentiator 6)
+    - Reports — community profiling
+
+New Server Route:
+  GET /api/v1/public-data/census/:lsoaCode?tables=TS054,TS011,TS009
+  GET /api/v1/public-data/census/summary/:estateId
+
+  Recommended: Pre-load key Census tables for relevant LSOAs into Firestore.
+  Cache TTL: 90 days (Census data does not change between Census years).
+
+Affected Pages:
+  - /explore/.../estate/:id — community demographics panel
+  - /allocations (AllocationsPage.tsx) — demand analysis
+  - /reports (ReportsPage.tsx) — community profiling
+  - /briefing (BriefingPage.tsx) — demographic context
+
+Priority: P2
+Complexity: Medium
+Dependencies: postcodes.io (for LSOA codes)
+
+User Stories:
+  US-CENSUS-01: As an allocations manager, I want to see Census demographics for
+    areas where we have stock, so I can understand local housing demand patterns
+    and plan lettings accordingly.
+    Acceptance: Allocations page shows an "Area Profile" panel with tenure mix,
+    household size distribution, age profile, and disability prevalence for the
+    selected estate's LSOA.
+
+  US-CENSUS-02: As the AI system, I want Census data about elderly and disabled
+    populations in each LSOA, so I can flag estates where adapted property demand
+    is likely to be high.
+    Acceptance: Estates in LSOAs with >25% over-65 or >20% activity-limited
+    population generate an AI insight: "High demand for adapted/sheltered housing
+    in this area."
+
+========================================================================
+### 3.8 NOMIS API — Labour Market Statistics
+========================================================================
+
+Base URL:         https://www.nomisweb.co.uk/api/v01/
+Auth:             None (API key optional for higher limits)
+Rate Limit:       Fair use
+Documentation:    https://www.nomisweb.co.uk/api/v01/help
+
+Key Endpoints:
+  GET /dataset/NM_17_5.data.json?geography={laCode}
+      &variable=45&measures=20100  (Claimant count by LA)
+  GET /dataset/NM_1_1.data.json?geography={laCode}
+      &variable=18&measures=20100  (Employment rate by LA)
+  GET /dataset/NM_30_1.data.json?geography={laCode}
+      &measures=20100  (Job density)
+
+Data Mapping to SocialHomes.Ai:
+  NOMIS field            --> Internal model / usage
+  ---------------------------------------------------------------
+  Claimant count         --> LabourMarket.claimantCount (new type)
+  Employment rate        --> LabourMarket.employmentRate
+  Job density            --> LabourMarket.jobDensity
+  Out-of-work benefits   --> LabourMarket.oowBenefitsRate
+
+  Feeds into:
+    - Benefits Entitlement Engine (Differentiator 4)
+    - Vulnerability detection
+    - Arrears prediction (unemployment correlation)
+    - AI Neighbourhood Briefing (Differentiator 6)
+
+New Server Route:
+  GET /api/v1/public-data/labour/:laCode
+
+  Cache TTL: 7 days (monthly releases).
+
+Affected Pages:
+  - /rent (RentPage.tsx) — economic context for arrears
+  - /tenancies/:id (TenancyDetailPage.tsx) — employment context
+  - /reports (ReportsPage.tsx) — economic analysis
+  - /briefing (BriefingPage.tsx) — economic summary
+
+Priority: P2
+Complexity: Low
+Dependencies: None (uses LA code from existing LocalAuthority model)
+
+User Stories:
+  US-NOMIS-01: As a rent recovery officer, I want to see the local unemployment rate
+    and claimant count for the area where a tenant lives, so I can assess whether
+    arrears are likely related to local economic conditions and adjust my approach
+    accordingly.
+    Acceptance: Tenant detail and rent account pages show a compact "Local Economy"
+    card with employment rate, claimant count, and trend vs national average.
+
+  US-NOMIS-02: As the AI system, I want labour market data to improve arrears risk
+    prediction, so tenants in areas with rising unemployment are flagged for proactive
+    support before they fall into arrears.
+    Acceptance: Arrears risk model incorporates local claimant count trend. A rising
+    claimant count in the tenant's LA adds +10 to arrearsRisk score.
+
+---
+
+## 4. TIER 2: FREE APIs — REGISTRATION REQUIRED
+
+========================================================================
+### 4.1 Met Office DataHub — Weather Warnings & Detailed Forecasts
+========================================================================
+
+Base URL:         https://data.hub.api.metoffice.gov.uk/sitespecific/v0/
+Auth:             API key (free registration at MetOffice DataHub)
+Rate Limit:       360 requests/hour (free tier)
+Env Variable:     MET_OFFICE_API_KEY
+Documentation:    https://datahub.metoffice.gov.uk/
+
+Key Endpoints:
+  GET /point/hourly?latitude={lat}&longitude={lng}
+  GET /point/daily?latitude={lat}&longitude={lng}
+  GET /point/three-hourly?latitude={lat}&longitude={lng}
+
+  Weather Warnings:
+  https://data.hub.api.metoffice.gov.uk/atmospheric/v0/
+  GET /warnings (national weather warnings)
+
+Data Mapping to SocialHomes.Ai:
+  Met Office field         --> Internal model / usage
+  ---------------------------------------------------------------
+  screenTemperature        --> WeatherDetail.temperature
+  screenRelativeHumidity   --> WeatherDetail.humidity
+  totalPrecipAmount        --> WeatherDetail.precipitation
+  windSpeed10m             --> WeatherDetail.windSpeed
+  windGustSpeed            --> WeatherDetail.windGust
+  significantWeatherCode   --> WeatherDetail.weatherCode
+  Warning severity/type    --> WeatherWarning.severity (new type)
+
+  Feeds into:
+    - Predictive Damp Intelligence (Differentiator 1) — more granular than Open-Meteo
+    - AI Neighbourhood Briefing (Differentiator 6)
+    - Storm damage prediction for repairs
+    - Frost alerts for burst pipe prevention
+
+New Server Route:
+  GET /api/v1/public-data/metoffice/forecast/:lat/:lng
+  GET /api/v1/public-data/metoffice/warnings
+
+  Cache TTL: 1 hour (forecast), 30 minutes (warnings).
+
+Affected Pages:
+  - /compliance/awaabs-law (AwaabsLawPage.tsx) — enhanced damp prediction
+  - /properties/:uprn (PropertyDetailPage.tsx) — detailed weather
+  - /briefing (BriefingPage.tsx) — Met Office warnings
+  - /dashboard (DashboardPage.tsx) — weather warning alerts
+  - /repairs (RepairsPage.tsx) — storm damage preparedness
+
+Priority: P2
+Complexity: Medium
+Dependencies: None (uses lat/lng from property records)
+
+User Stories:
+  US-MET-01: As a repairs manager, I want Met Office weather warnings displayed on
+    the briefing and dashboard pages, so I can prepare for increased repair demand
+    from storms, frost, or heavy rainfall.
+    Acceptance: Active Met Office warnings (amber/red) for areas containing our stock
+    appear as prominent alert cards on briefing and dashboard. Yellow warnings shown
+    in a secondary section.
+
+  US-MET-02: As the predictive damp model, I want hourly temperature, humidity, and
+    dew point data from Met Office (higher resolution than Open-Meteo), so I can
+    calculate condensation risk more accurately.
+    Acceptance: When MET_OFFICE_API_KEY is configured, the damp risk calculation
+    uses Met Office hourly data instead of Open-Meteo. Fallback to Open-Meteo if
+    Met Office is unavailable.
+
+========================================================================
+### 4.2 EPC Register API — Energy Performance Certificates
+========================================================================
+
+Base URL:         https://epc.opendatacommunities.org/api/v1/
+Auth:             Basic auth with registered API key
+Registration:     https://epc.opendatacommunities.org/login
+Env Variable:     EPC_API_KEY
+Rate Limit:       No published limit (fair use)
+Documentation:    https://epc.opendatacommunities.org/docs/api
+
+Key Endpoints:
+  GET /domestic/search?postcode={postcode}&size=100
+  GET /domestic/search?uprn={uprn}
+  GET /domestic/certificate/{lmk-key}
+  GET /domestic/recommendations/{lmk-key}
+
+Response Shape:
+  {
+    "rows": [
+      {
+        "lmk-key": "abc123",
+        "address": "1 Example Road",
+        "postcode": "SE15 4QN",
+        "uprn": "10091553414",
+        "current-energy-rating": "D",
+        "potential-energy-rating": "B",
+        "current-energy-efficiency": "58",
+        "potential-energy-efficiency": "82",
+        "property-type": "Flat",
+        "built-form": "Mid-Terrace",
+        "floor-area": "62",
+        "heating-cost-current": "1120",
+        "hot-water-cost-current": "280",
+        "lighting-cost-current": "110",
+        "co2-emissions-current": "3.8",
+        "walls-description": "Solid brick, no insulation",
+        "roof-description": "Flat roof, limited insulation",
+        "windows-description": "Single glazed",
+        "main-heating-description": "Gas central heating",
+        "lodgement-date": "2023-11-15",
+        "transaction-type": "rental (social)"
+      }
+    ]
+  }
+
+Data Mapping to SocialHomes.Ai:
+  EPC API field                 --> Internal model / usage
+  ---------------------------------------------------------------
+  current-energy-rating         --> Property.epc.rating
+  current-energy-efficiency     --> Property.epc.sapScore
+  potential-energy-rating       --> Property.epc.potentialRating (new)
+  potential-energy-efficiency   --> Property.epc.potentialScore (new)
+  lodgement-date                --> Property.epc.expiryDate (+ 10 years)
+  floor-area                    --> Property.floorArea (validation)
+  walls-description             --> Property.epc.wallsDesc (new)
+  roof-description              --> Property.epc.roofDesc (new)
+  windows-description           --> Property.epc.windowsDesc (new)
+  main-heating-description      --> Property.epc.heatingDesc (new)
+  co2-emissions-current         --> Property.epc.co2Current (new)
+  heating-cost-current          --> Property.epc.heatingCostAnnual (new)
+  recommendations (sub-endpoint)--> Property.epc.recommendations[] (new)
+
+  NOTE: Existing Property.epc has { rating, sapScore, expiryDate }.
+  This integration enriches it significantly.
+
+  Feeds into:
+    - Predictive Damp Intelligence (Differentiator 1) — wall/roof/window insulation
+    - Property Passport (Differentiator 5) — authoritative EPC data
+    - Stock condition / retrofit planning
+    - Carbon emissions reporting
+    - TSM measure BS06 (energy efficiency compliance)
+
+New Server Route (extend existing /api/v1/public-data/epc):
+  GET /api/v1/public-data/epc/:postcode (EXISTING — enhance response)
+  GET /api/v1/public-data/epc/uprn/:uprn (NEW — lookup by UPRN)
+  GET /api/v1/public-data/epc/certificate/:lmkKey (NEW — full cert)
+  GET /api/v1/public-data/epc/recommendations/:lmkKey (NEW — improvement recs)
+
+  Cache TTL: 30 days (EPCs change only on re-lodgement).
+
+Affected Pages:
+  - /properties/:uprn (PropertyDetailPage.tsx) — full EPC data panel
+  - /compliance (CompliancePage.tsx) — EPC compliance summary
+  - /compliance/awaabs-law (AwaabsLawPage.tsx) — building fabric data for damp
+  - /reports/stock-condition — retrofit planning
+  - /reports (ReportsPage.tsx) — carbon emissions, energy cost analysis
+
+Priority: P1
+Complexity: Medium (existing route, significant enhancement)
+Dependencies: Open UPRN (for UPRN-based lookup)
+
+User Stories:
+  US-EPC-01: As a property manager, I want to see the full EPC certificate data
+    for each property (not just the rating), including wall, roof, window, and
+    heating descriptions, so I can understand the building fabric and identify
+    properties at risk of damp due to poor insulation.
+    Acceptance: Property detail page shows an expanded "Energy Performance" panel
+    with current/potential ratings, fabric descriptions, heating costs, CO2 emissions,
+    and improvement recommendations with estimated savings.
+
+  US-EPC-02: As a stock investment planner, I want to see aggregated EPC data across
+    all properties, so I can prioritise retrofit programmes by cost-benefit analysis.
+    Acceptance: Reports page shows EPC distribution chart (A-G), estimated total
+    retrofit cost to reach EPC C for all properties below C, and a prioritised list
+    by potential savings per pound invested.
+
+  US-EPC-03: As the predictive damp model, I want building fabric data from EPC
+    certificates (wall type, insulation, window glazing), so I can identify
+    properties where poor thermal performance increases condensation risk.
+    Acceptance: Damp risk model incorporates EPC building fabric data. Properties
+    with solid walls + no insulation + single glazing receive +20 damp risk score.
+
+========================================================================
+### 4.3 GOV.UK Notify — Government Communications Platform
+========================================================================
+
+Base URL:         https://api.notifications.service.gov.uk/
+Auth:             API key (free registration for public sector)
+Registration:     https://www.notifications.service.gov.uk/
+Env Variable:     GOVUK_NOTIFY_API_KEY
+Rate Limit:       3,000 messages/minute
+Documentation:    https://docs.notifications.service.gov.uk/
+
+Key Endpoints:
+  POST /v2/notifications/email
+    Body: { email_address, template_id, personalisation: { name, ref, ... } }
+  POST /v2/notifications/sms
+    Body: { phone_number, template_id, personalisation: { ... } }
+  POST /v2/notifications/letter
+    Body: { template_id, personalisation: { address_line_1, ..., postcode, ... } }
+  GET  /v2/notifications/{id} — check delivery status
+  GET  /v2/notifications?reference={caseRef} — get by reference
+
+Response Shape:
+  {
+    "id": "notify-uuid",
+    "reference": "COMP-2026-00012",
+    "content": { "body": "...", "subject": "..." },
+    "template": { "id": "...", "version": 1 },
+    "uri": "https://api.notifications.service.gov.uk/v2/notifications/...",
+    "status": "sending" | "delivered" | "permanent-failure" | "temporary-failure"
+  }
+
+Data Mapping to SocialHomes.Ai:
+  GOV.UK Notify field     --> Internal model / usage
+  ---------------------------------------------------------------
+  id                      --> Communication.externalId (new field)
+  status                  --> Communication.deliveryStatus (new field)
+  reference               --> Communication.caseRef (existing)
+  template.id             --> Communication.templateId (new field)
+
+  Integrates with:
+    - Communication model (existing)
+    - AI draft communications (existing /api/v1/ai/draft-communication)
+    - Activity logging (existing ActivityDoc)
+    - Tenant notification preferences (existing communicationPreference)
+
+New Server Route:
+  POST /api/v1/public-data/notify/email
+  POST /api/v1/public-data/notify/sms
+  POST /api/v1/public-data/notify/letter
+  GET  /api/v1/public-data/notify/status/:notificationId
+  GET  /api/v1/public-data/notify/templates
+
+  Recommended: Create a dedicated route file server/src/routes/notify.ts
+
+Affected Pages:
+  - /communications (CommunicationsPage.tsx) — send via GOV.UK Notify
+  - /communications/templates — template management synced with Notify
+  - /tenancies/:id (TenancyDetailPage.tsx) — send communication from tenant page
+  - /complaints/:id (ComplaintDetailPage.tsx) — send acknowledgement/response
+  - /repairs/:id (RepairDetailPage.tsx) — send appointment confirmation
+  - /asb/:id (AsbDetailPage.tsx) — send warning letters
+  - /rent (RentPage.tsx) — send arrears letters
+  - /tenant-portal (TenantPortalPage.tsx) — notification delivery tracking
+
+Priority: P1
+Complexity: High (template management, delivery tracking, multi-channel)
+Dependencies: None
+
+User Stories:
+  US-NOTIFY-01: As a housing officer, I want to send AI-drafted communications to
+    tenants via GOV.UK Notify (email, SMS, or letter based on their preference),
+    so all communications are tracked, auditable, and delivered through the
+    government's own platform.
+    Acceptance: When an AI-drafted communication is approved, the system sends it
+    via GOV.UK Notify using the tenant's preferred channel. A Communication record
+    is created with delivery status tracking. Activity log entry is auto-created.
+
+  US-NOTIFY-02: As a complaints handler, I want complaint acknowledgement and
+    response letters sent automatically via GOV.UK Notify with tracked delivery,
+    so I can prove compliance with the Housing Ombudsman Complaint Handling Code
+    timescales.
+    Acceptance: Complaint acknowledgement triggers auto-send via Notify. Response
+    deadline timer starts from Notify delivery confirmation. Failed deliveries
+    trigger alert to handler.
+
+  US-NOTIFY-03: As a system administrator, I want to manage GOV.UK Notify templates
+    from within SocialHomes.Ai, so I can maintain consistent branding and messaging
+    across all tenant communications.
+    Acceptance: /communications/templates page lists all Notify templates, allows
+    preview, and maps templates to communication types (arrears letter, repair
+    confirmation, complaint response, etc.).
+
+  US-NOTIFY-04: As a COO, I want a dashboard showing communication delivery rates
+    and failures, so I can ensure our tenant engagement is effective.
+    Acceptance: Dashboard shows: X messages sent this month, Y% delivered, Z failures.
+    Communications page shows delivery status per message with retry option for failures.
+
+========================================================================
+### 4.4 Twilio (Free Tier) — SMS & Voice Notifications
+========================================================================
+
+Base URL:         https://api.twilio.com/2010-04-01/
+Auth:             Account SID + Auth Token
+Registration:     https://www.twilio.com/try-twilio
+Env Variables:    TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_PHONE_NUMBER
+Rate Limit:       1 message/second (free trial)
+Documentation:    https://www.twilio.com/docs/sms
+
+Key Endpoints:
+  POST /Accounts/{AccountSid}/Messages.json
+    Body: { To, From, Body }
+  POST /Accounts/{AccountSid}/Calls.json
+    Body: { To, From, Url (TwiML) }
+  GET  /Accounts/{AccountSid}/Messages/{Sid}.json
+
+Data Mapping to SocialHomes.Ai:
+  Twilio field      --> Internal model / usage
+  ---------------------------------------------------------------
+  Sid               --> Communication.externalId
+  Status            --> Communication.deliveryStatus
+  DateSent          --> Communication.date
+
+  Note: Twilio serves as a FALLBACK to GOV.UK Notify for SMS when Notify is
+  not configured, and as the PRIMARY channel for voice calls (Notify does not
+  support voice).
+
+New Server Route:
+  POST /api/v1/public-data/twilio/sms
+  POST /api/v1/public-data/twilio/call
+  GET  /api/v1/public-data/twilio/status/:sid
+
+Affected Pages:
+  - /communications (CommunicationsPage.tsx) — SMS/voice channel
+  - /repairs/:id (RepairDetailPage.tsx) — appointment reminder SMS
+  - /rent (RentPage.tsx) — payment reminder SMS
+
+Priority: P2
+Complexity: Medium
+Dependencies: None
+
+User Stories:
+  US-TWILIO-01: As a housing officer, I want to send urgent SMS notifications to
+    tenants (e.g., emergency repair access required, gas safety appointment), so
+    time-sensitive messages reach tenants immediately.
+    Acceptance: SMS send option available on tenant communication panel. Delivery
+    status tracked. Character count shown. Compliant with GDPR consent requirements.
+
+  US-TWILIO-02: As the system, I want to send automated appointment reminder SMS
+    messages 24 hours before scheduled repair visits, so we reduce missed access
+    rates and improve first-time fix.
+    Acceptance: Scheduled job checks tomorrow's repair appointments and sends SMS
+    reminders via Twilio. Delivery confirmation logged. Failed sends trigger
+    alert to operative.
+
+========================================================================
+### 4.5 OS Places/Maps API (PSGA) — Authoritative Addresses & Mapping
+========================================================================
+
+Base URL:         https://api.os.uk/search/places/v1/
+Auth:             API key (free for public sector via PSGA)
+Registration:     https://osdatahub.os.uk/
+Env Variable:     OS_DATA_HUB_API_KEY
+Rate Limit:       Varies by plan
+Documentation:    https://osdatahub.os.uk/docs/places/overview
+
+Key Endpoints:
+  GET /find?query={address}&key={key}
+  GET /uprn?uprn={uprn}&key={key}
+  GET /postcode?postcode={postcode}&key={key}
+
+  Maps API:
+  GET https://api.os.uk/maps/raster/v1/zxy/{layer}/{z}/{x}/{y}.png?key={key}
+
+Data Mapping to SocialHomes.Ai:
+  OS Places field         --> Internal model / usage
+  ---------------------------------------------------------------
+  UPRN                    --> Property.uprn (authoritative)
+  ADDRESS                 --> Property.address (formatted)
+  X_COORDINATE/Y_COORD   --> Property.osEasting/osNorthing (new)
+  LATITUDE/LONGITUDE      --> Property.lat/lng (authoritative)
+  CLASSIFICATION_CODE     --> Property.classificationCode (new)
+  LOCAL_CUSTODIAN_CODE    --> Property.localCustodianCode (new)
+
+  Maps API replaces OpenStreetMap tiles for higher-quality mapping.
+
+New Server Route:
+  GET /api/v1/public-data/os/search?query={address}
+  GET /api/v1/public-data/os/uprn/:uprn
+  GET /api/v1/public-data/os/postcode/:postcode
+
+  Cache TTL: 90 days.
+
+Affected Pages:
+  - /properties (PropertiesPage.tsx) — address search with type-ahead
+  - /properties/:uprn (PropertyDetailPage.tsx) — OS map tiles
+  - /explore (ExplorePage.tsx) — OS map base layer (replaces OSM)
+  - /tenancies/new — address lookup
+
+Priority: P2
+Complexity: Medium
+Dependencies: PSGA agreement (public sector)
+
+User Stories:
+  US-OS-01: As a housing officer creating a new property record, I want to search
+    for addresses using OS Places API, so I get the authoritative address format and
+    UPRN in one lookup.
+    Acceptance: Address input field has type-ahead powered by OS Places. Selecting
+    a result auto-populates UPRN, formatted address, postcode, lat/lng.
+
+  US-OS-02: As any user viewing a map in Explore or Property detail, I want to see
+    OS mapping tiles (when available) instead of OpenStreetMap, so I see the
+    highest-quality UK mapping.
+    Acceptance: When OS_DATA_HUB_API_KEY is set, Leaflet uses OS raster tiles.
+    Falls back to OpenStreetMap if not configured.
+
+========================================================================
+### 4.6 Gas Safe Register — Engineer Credential Verification
+========================================================================
+
+Base URL:         https://api.gassaferegister.co.uk/ (or web scrape if no API)
+Auth:             Registration required
+Env Variable:     GAS_SAFE_API_KEY
+Documentation:    https://www.gassaferegister.co.uk/
+
+Key Lookup:
+  Verify engineer by registration number
+  Returns: name, business, registration status, qualifications, expiry
+
+Data Mapping to SocialHomes.Ai:
+  Gas Safe field         --> Internal model / usage
+  ---------------------------------------------------------------
+  registrationNumber     --> ComplianceCertificate.contractorRegNo (new)
+  status                 --> ComplianceCertificate.contractorVerified (new bool)
+  qualifications         --> ComplianceCertificate.contractorQuals (new)
+  expiryDate             --> ComplianceCertificate.contractorRegExpiry (new)
+
+  Feeds into:
+    - Property Passport (Differentiator 5)
+    - Compliance verification chain
+
+New Server Route:
+  GET /api/v1/public-data/gas-safe/:registrationNumber
+
+  Cache TTL: 30 days.
+
+Affected Pages:
+  - /compliance/gas (ComplianceTypePage.tsx) — engineer verification badge
+  - /properties/:uprn (PropertyDetailPage.tsx) — gas cert engineer status
+  - /admin/integrations — Gas Safe connection status
+
+Priority: P2
+Complexity: Low
+Dependencies: None
+
+User Stories:
+  US-GAS-01: As a compliance manager, I want to automatically verify that the
+    engineer who signed a gas safety certificate is currently registered with
+    Gas Safe, so I can demonstrate due diligence in contractor management.
+    Acceptance: Gas safety certificates show engineer name with a green "Gas Safe
+    Verified" badge or a red "Not Verified" warning. Expired registrations flagged.
+
+========================================================================
+### 4.7 Electrical Safety Register — Electrician Verification
+========================================================================
+
+Base URL:         https://www.electricalcompetentperson.co.uk/ (or equivalent API)
+Auth:             Registration required
+Env Variable:     ELEC_SAFETY_API_KEY
+Documentation:    Various competent person scheme providers
+
+Key Lookup:
+  Verify electrician by registration number or business name
+
+Data Mapping:
+  Same pattern as Gas Safe — extends ComplianceCertificate with contractor verification.
+
+New Server Route:
+  GET /api/v1/public-data/electrical-safety/:registrationNumber
+
+  Cache TTL: 30 days.
+
+Affected Pages:
+  - /compliance/electrical (ComplianceTypePage.tsx) — electrician verification
+  - /properties/:uprn (PropertyDetailPage.tsx) — EICR electrician status
+
+Priority: P3
+Complexity: Low
+Dependencies: None
+
+User Stories:
+  US-ELEC-01: As a compliance manager, I want to verify that electricians who issued
+    EICR certificates are registered with a competent person scheme, so I can
+    ensure regulatory compliance.
+    Acceptance: EICR certificates show electrician verification status badge.
+
+========================================================================
+### 4.8 Land Registry Open Data — Price Paid & Ownership
+========================================================================
+
+Base URL:         https://landregistry.data.gov.uk/
+Auth:             None for open data; registration for detailed queries
+Env Variable:     LAND_REGISTRY_API_KEY (optional)
+Documentation:    https://landregistry.data.gov.uk/app/root/doc/ppd
+
+Key Endpoints:
+  GET /data/ppi/transaction-record.json?propertyAddress.postcode={postcode}
+  SPARQL endpoint: https://landregistry.data.gov.uk/app/root/qonsole
+
+Data Mapping to SocialHomes.Ai:
+  Land Registry field     --> Internal model / usage
+  ---------------------------------------------------------------
+  pricePaid               --> Property.acquisitionPrice (new)
+  transactionDate         --> Property.acquisitionDate (new)
+  propertyType            --> Property.lrPropertyType (new)
+  estateType              --> Property.lrEstateType (new)
+  newBuild                --> Property.isNewBuild (new)
+
+  Feeds into:
+    - Property Passport (Differentiator 5)
+    - Stock valuation
+    - Shared ownership calculations
+
+New Server Route:
+  GET /api/v1/public-data/land-registry/:postcode
+
+  Cache TTL: 90 days.
+
+Affected Pages:
+  - /properties/:uprn (PropertyDetailPage.tsx) — acquisition/valuation data
+  - /reports/stock-condition — stock valuation
+  - /reports/financial — asset register
+
+Priority: P3
+Complexity: Low
+Dependencies: None
+
+User Stories:
+  US-LR-01: As a finance director, I want Land Registry price paid data linked
+    to our properties, so I can maintain an accurate asset register and track
+    property values for balance sheet purposes.
+    Acceptance: Property detail page shows "Acquisition & Value" section with
+    original price paid, transaction date, and estimated current value.
+
+---
+
+## 5. TIER 3: MOCK NOW, WIRE LATER
+
+These integrations are implemented with realistic mock data and clearly defined
+interface contracts. When the real API becomes available, only the data-fetching
+layer changes — the UI, data mapping, and business logic remain identical.
+
+========================================================================
+### 5.1 DWP Universal Credit API — Managed Payments & APAs
+========================================================================
+
+Base URL (mock):  /api/v1/mock/dwp/
+Real API:         DWP API Gateway (requires DWP partnership agreement)
+Auth:             OAuth 2.0 (when real)
+Env Variable:     DWP_UC_API_KEY, DWP_UC_CLIENT_SECRET
+
+Mock Endpoints:
+  GET  /api/v1/mock/dwp/uc-status/:nino
+  POST /api/v1/mock/dwp/apa-request
+  GET  /api/v1/mock/dwp/managed-payment/:tenantId
+
+Mock Response (uc-status):
+  {
+    "source": "mock",
+    "nino": "AB123456C",
+    "ucStatus": "claiming",
+    "claimStartDate": "2025-11-15",
+    "nextPaymentDate": "2026-02-28",
+    "estimatedAmount": 1208.40,
+    "housingElement": 780.00,
+    "apaInPlace": false,
+    "managedPayment": false,
+    "deductions": []
+  }
+
+Data Mapping:
+  DWP field               --> Internal model / usage
+  ---------------------------------------------------------------
+  ucStatus                --> Tenant.ucStatus (existing — enrich)
+  housingElement          --> Tenant.ucHousingElement (new field)
+  apaInPlace              --> Tenant.apaActive (new field)
+  managedPayment          --> Tenant.managedPayment (new field)
+  nextPaymentDate         --> Tenant.ucNextPayment (new field)
+
+  Feeds into:
+    - Rent arrears management
+    - APA/managed payment requests
+    - Benefits Entitlement Engine (Differentiator 4)
+    - Arrears risk prediction
+
+New Server Route:
+  GET  /api/v1/mock/dwp/uc-status/:tenantId
+  POST /api/v1/mock/dwp/apa-request
+  GET  /api/v1/mock/dwp/managed-payment/:tenantId
+
+Affected Pages:
+  - /rent (RentPage.tsx) — UC payment tracking
+  - /rent/accounts/:id — UC housing element breakdown
+  - /tenancies/:id (TenancyDetailPage.tsx) — UC status panel
+
+Priority: P1
+Complexity: High (mock is Medium; real integration is High)
+Dependencies: None for mock
+
+User Stories:
+  US-DWP-01: As a rent recovery officer, I want to see a tenant's UC claim status,
+    housing element amount, and next expected payment date, so I can accurately assess
+    their arrears position and avoid unnecessary escalation during UC transition.
+    Acceptance: Tenant detail page shows "Universal Credit" panel with claim status,
+    housing element, APA status, and next payment date. Data sourced from mock API.
+
+  US-DWP-02: As a housing officer, I want to submit an Alternative Payment Arrangement
+    (APA) request for a tenant in arrears, so I can redirect their UC housing element
+    directly to us.
+    Acceptance: Tenant detail page shows "Request APA" button (AI-recommended when
+    arrears >4 weeks and no APA in place). Clicking opens pre-filled form.
+    Submission creates a mock DWP request and logs the activity.
+
+========================================================================
+### 5.2 GoCardless / Allpay — Direct Debit & Payment Processing
+========================================================================
+
+Mock Endpoints:
+  POST /api/v1/mock/payments/dd-setup
+  POST /api/v1/mock/payments/dd-cancel
+  GET  /api/v1/mock/payments/dd-status/:tenantId
+  POST /api/v1/mock/payments/card-payment
+
+Data Mapping:
+  Payment field           --> Internal model / usage
+  ---------------------------------------------------------------
+  mandateId               --> RentTransaction.mandateId (new)
+  status                  --> RentTransaction.ddStatus (new)
+  nextCollectionDate      --> Tenant.nextDdDate (new)
+  failureReason           --> RentTransaction.failureReason (new)
+
+Affected Pages:
+  - /rent (RentPage.tsx) — DD management dashboard
+  - /rent/accounts/:id — DD setup/cancel
+  - /tenant-portal/rent — self-service payment
+
+Priority: P2
+Complexity: Medium (mock), High (real)
+
+User Stories:
+  US-PAY-01: As a tenant using the self-service portal, I want to set up a Direct
+    Debit for my rent, so payments are taken automatically and I do not fall behind.
+    Acceptance: Tenant portal shows "Set Up Direct Debit" flow. Mock GoCardless
+    integration creates a mandate. Confirmation shown with next collection date.
+
+  US-PAY-02: As a rent officer, I want to see which tenants have failed DD collections,
+    so I can contact them immediately and prevent arrears accumulating.
+    Acceptance: Rent dashboard shows "Failed Direct Debits" section with tenant name,
+    failure reason, and quick-action buttons (call, SMS, email).
+
+========================================================================
+### 5.3 RSH / CORE / Housing Ombudsman — Regulatory Submissions
+========================================================================
+
+Mock Endpoints:
+  POST /api/v1/mock/regulatory/core-return
+  POST /api/v1/mock/regulatory/tsm-submission
+  POST /api/v1/mock/regulatory/ombudsman-self-assessment
+  GET  /api/v1/mock/regulatory/submission-status/:id
+
+Data Mapping:
+  Extends existing TsmMeasure and reports models with submission tracking.
+
+Affected Pages:
+  - /reports/tsm (TsmReportPage.tsx) — submit TSM to regulator
+  - /reports/core — CORE return generation
+  - /reports/ombudsman — self-assessment submission
+  - /reports/regulatory — submission history
+
+Priority: P2
+Complexity: Medium (mock), High (real)
+
+User Stories:
+  US-REG-01: As a compliance director, I want to generate and submit our TSM annual
+    return directly from SocialHomes.Ai, so I do not need to manually re-key data
+    into the RSH submission portal.
+    Acceptance: TSM report page shows "Submit to RSH" button. Pre-submission
+    validation checks all 22 measures are populated. Mock submission returns a
+    reference number. Audit trail created.
+
+========================================================================
+### 5.4 Plentific / Fixflo — Repairs Marketplace & Contractor Booking
+========================================================================
+
+Mock Endpoints:
+  POST /api/v1/mock/repairs-marketplace/create-job
+  GET  /api/v1/mock/repairs-marketplace/contractors?trade={trade}&postcode={pc}
+  POST /api/v1/mock/repairs-marketplace/book-appointment
+  GET  /api/v1/mock/repairs-marketplace/job-status/:id
+
+Data Mapping:
+  Extends existing Repair case type with contractor booking fields.
+
+Affected Pages:
+  - /repairs (RepairsPage.tsx) — contractor assignment
+  - /repairs/:id (RepairDetailPage.tsx) — booking panel
+  - /repairs/schedule — workforce calendar
+
+Priority: P2
+Complexity: Medium (mock), High (real)
+
+User Stories:
+  US-REPAIR-MKT-01: As a repairs scheduler, I want to find available contractors
+    by trade and postcode, so I can book the nearest qualified contractor for a
+    repair job.
+    Acceptance: Repair detail page shows "Find Contractor" button. Returns mock list
+    of contractors with availability, rating, and price. One-click booking.
+
+========================================================================
+### 5.5 Switchee / Aico / Homelync — IoT Sensors (Damp, Smoke, CO)
+========================================================================
+
+Mock Endpoints:
+  GET  /api/v1/mock/iot/sensors/:propertyId
+  GET  /api/v1/mock/iot/readings/:sensorId?from=&to=
+  POST /api/v1/mock/iot/alerts/acknowledge/:alertId
+
+Mock Response (sensor readings):
+  {
+    "source": "mock",
+    "sensorId": "SW-001-TEMP-01",
+    "propertyId": "prop-oak-1-001",
+    "readings": [
+      { "timestamp": "2026-02-14T08:00:00Z", "temperature": 14.2, "humidity": 78, "moisture": 62 },
+      { "timestamp": "2026-02-14T09:00:00Z", "temperature": 14.5, "humidity": 76, "moisture": 60 }
+    ],
+    "alerts": [
+      { "id": "alert-001", "type": "high-humidity", "severity": "warning", "value": 85, "threshold": 80, "timestamp": "2026-02-13T23:00:00Z" }
+    ]
+  }
+
+Data Mapping:
+  IoT field               --> Internal model / usage
+  ---------------------------------------------------------------
+  temperature             --> DampMouldCase.environmentalData.temperature
+  humidity                --> DampMouldCase.environmentalData.humidity
+  moisture                --> DampMouldCase.environmentalData.moisture
+  alerts                  --> Notification (new IoT alert type)
+
+  Feeds into:
+    - Predictive Damp Intelligence (Differentiator 1)
+    - Real-time environmental monitoring
+    - Awaab's Law compliance evidence
+
+Affected Pages:
+  - /properties/:uprn (PropertyDetailPage.tsx) — live sensor readings
+  - /compliance/awaabs-law (AwaabsLawPage.tsx) — sensor data dashboard
+  - /dashboard (DashboardPage.tsx) — IoT alert summary
+
+Priority: P1 (mock), P2 (real)
+Complexity: Medium (mock), High (real)
+
+User Stories:
+  US-IOT-01: As a damp and mould officer, I want to see real-time temperature,
+    humidity, and moisture readings from IoT sensors installed in properties, so
+    I can identify properties at risk before tenants report problems.
+    Acceptance: Property detail page shows "Environmental Monitoring" panel with
+    live sensor readings, 7-day trend chart, and alert history.
+
+  US-IOT-02: As the predictive damp model, I want continuous sensor data to
+    improve damp risk predictions, so I can identify at-risk properties weeks
+    before visible mould appears.
+    Acceptance: Properties with sensors feeding humidity >80% for >48 continuous
+    hours automatically receive a +30 damp risk score boost and trigger a
+    proactive inspection recommendation.
+
+========================================================================
+### 5.6 DocuSign — Digital Tenancy Agreements
+========================================================================
+
+Mock Endpoints:
+  POST /api/v1/mock/docusign/send-envelope
+  GET  /api/v1/mock/docusign/envelope-status/:envelopeId
+  GET  /api/v1/mock/docusign/download/:envelopeId
+
+Affected Pages:
+  - /tenancies/new — digital signing workflow
+  - /tenancies/:id (TenancyDetailPage.tsx) — document status
+
+Priority: P3
+Complexity: Low (mock), Medium (real)
+
+User Stories:
+  US-DOCU-01: As a lettings officer, I want to send tenancy agreements for digital
+    signature, so tenants can sign remotely and move in faster.
+    Acceptance: Tenancy creation workflow includes "Send for Signature" step. Mock
+    DocuSign integration shows envelope status (sent, viewed, signed, completed).
+
+========================================================================
+### 5.7 Experian / TransUnion — Tenant Referencing
+========================================================================
+
+Mock Endpoints:
+  POST /api/v1/mock/referencing/credit-check
+  POST /api/v1/mock/referencing/landlord-reference
+  POST /api/v1/mock/referencing/employment-check
+  GET  /api/v1/mock/referencing/report/:applicationId
+
+Affected Pages:
+  - /allocations (AllocationsPage.tsx) — referencing workflow
+  - /tenancies/new — pre-tenancy checks
+
+Priority: P3
+Complexity: Low (mock), High (real — regulated data)
+
+User Stories:
+  US-REF-01: As a lettings officer, I want to run tenant referencing checks
+    (credit, landlord, employment) from within SocialHomes.Ai, so I do not
+    need to switch to a separate referencing portal.
+    Acceptance: Applicant detail shows "Run Reference Check" button. Mock response
+    returns pass/refer/fail with risk indicators. Results stored against applicant.
+
+---
+
+## 6. SEVEN KILLER DIFFERENTIATORS — COMPOSITE FEATURE SPECIFICATIONS
+
+These features combine multiple APIs with internal data to create intelligence
+that no single integration can provide.
+
+========================================================================
+### DIFFERENTIATOR 1: Predictive Damp Intelligence
+========================================================================
+
+Data Sources:
+  - Open-Meteo / Met Office   — temperature, humidity, dew point, precipitation
+  - EPC Register               — wall insulation, window glazing, roof type
+  - IoT Sensors (mock)         — real-time temperature, humidity, moisture
+  - Internal repair history    — previous damp/mould cases per property
+  - Building data              — construction type, year, storeys
+
+Algorithm (server-side, in server/src/services/damp-prediction.ts):
+
+  dampRiskScore = weightedSum(
+    weatherFactor:     0.25  — sustained cold + high humidity + rain
+    buildingFactor:    0.25  — EPC fabric data (poor insulation, single glazing)
+    historyFactor:     0.20  — previous damp repairs at this property
+    sensorFactor:      0.20  — live humidity/moisture (if sensors present)
+    occupancyFactor:   0.10  — overcrowding, heating affordability (IMD)
+  )
+
+  Each factor is a 0-100 score. Final dampRiskScore is 0-100.
+
+  Thresholds:
+    0-30:   Low risk (green)
+    31-50:  Moderate risk (amber) — schedule inspection in next quarter
+    51-70:  High risk (red) — schedule inspection within 2 weeks
+    71-100: Critical risk (pulsing red) — inspect within 48 hours
+
+New Server Route:
+  GET /api/v1/ai/damp-risk/:propertyId
+  GET /api/v1/ai/damp-risk/estate/:estateId (aggregate)
+  POST /api/v1/ai/damp-risk/recalculate (batch recalculation for all properties)
+
+Affected Pages:
+  - /compliance/awaabs-law — primary damp intelligence dashboard
+  - /properties/:uprn — damp risk panel with factor breakdown
+  - /dashboard — damp risk KPI
+  - /briefing — "X properties at critical damp risk today"
+
+Priority: P1
+Complexity: High
+
+User Stories:
+  US-DAMP-01: As a damp and mould officer, I want to see a predictive damp risk
+    score for every property, broken down by contributing factors (weather, building
+    fabric, history, sensors, occupancy), so I can prioritise inspections based on
+    data rather than waiting for tenant reports.
+    Acceptance: Property detail page shows a damp risk score gauge (0-100) with
+    radar chart showing 5 factor contributions. Colour-coded threshold. "Schedule
+    Inspection" AI action button when score >50.
+
+  US-DAMP-02: As a COO, I want a dashboard showing all properties above the damp
+    risk threshold, ranked by risk score, so I can demonstrate Awaab's Law compliance
+    and proactive management to the regulator.
+    Acceptance: Awaab's Law page shows sortable table of at-risk properties with
+    risk score, contributing factors, last inspection date, and recommended action.
+
+  US-DAMP-03: As the AI system, I want to automatically raise a damp-mould case
+    when a property's predictive risk score exceeds 70 for more than 48 hours, so
+    no high-risk property goes without investigation.
+    Acceptance: Automated workflow creates a damp-mould case with priority "urgent",
+    pre-filled with risk factor data. Assigned to the property's managing officer.
+    Notification sent to officer and manager.
+
+========================================================================
+### DIFFERENTIATOR 2: Live Crime Context for ASB
+========================================================================
+
+Data Sources:
+  - data.police.uk    — street-level crime incidents
+  - postcodes.io      — postcode-to-coordinate conversion
+  - Internal ASB cases — correlate with police data
+  - Leaflet maps      — visualisation layer
+
+Composite Feature:
+  - Estate maps show a heatmap of police-reported crime, overlaid with internal
+    ASB case markers
+  - AI correlates police incidents with internal cases (same location + timeframe)
+  - Pattern detection: "ASB reports have increased 40% on this estate vs last quarter,
+    driven by noise complaints on the north side of the estate"
+  - Escalation recommendation: "Police have logged 8 ASB incidents at this location
+    in 3 months. Consider multi-agency panel request."
+
+New Server Route:
+  GET /api/v1/ai/crime-context/:estateId
+  GET /api/v1/ai/crime-context/case/:asbCaseId
+
+Affected Pages:
+  - /asb — crime heatmap overlay
+  - /asb/:id — police incident correlation
+  - /explore/.../estate/:id — crime context panel
+  - /briefing — crime pattern summary
+
+Priority: P1
+Complexity: Medium
+
+User Stories:
+  US-CRIME-CONTEXT-01: As an ASB officer, I want to see police-reported crime
+    incidents overlaid on the estate map alongside my internal ASB cases, so I
+    can identify patterns that span both reporting channels and build stronger
+    evidence for legal action.
+    Acceptance: ASB page shows Leaflet map with two layers: police incidents
+    (blue markers) and internal ASB cases (red markers). Click marker for details.
+    Toggle layers on/off.
+
+  US-CRIME-CONTEXT-02: As the AI system, I want to detect when police-reported
+    ASB incidents near an estate increase by >30% quarter-on-quarter, so I can
+    alert the neighbourhood manager to a deteriorating situation.
+    Acceptance: AI insight generated: "ASB incidents near [estate] up X% vs last
+    quarter. Top categories: [list]. Recommend: [action]." Appears on briefing
+    page and as notification.
+
+========================================================================
+### DIFFERENTIATOR 3: Automatic Vulnerability Detection
+========================================================================
+
+Data Sources:
+  - IMD (ONS)           — deprivation scores by LSOA
+  - Census 2021         — age, disability prevalence
+  - Internal arrears    — rent balance, payment history
+  - Internal repairs    — repair frequency, access issues
+  - UC status           — transitioning, managed migration
+  - Household data      — composition, dependents
+
+Algorithm (server-side, in server/src/services/vulnerability-detection.ts):
+
+  vulnerabilityScore = weightedSum(
+    deprivationFactor:  0.20  — IMD decile 1-3 = high
+    arrearsFactor:      0.20  — persistent arrears, failed payments
+    healthFactor:       0.15  — Census health deprivation, existing vuln flags
+    isolationFactor:    0.15  — single person, no emergency contact, low contact
+    ageFactor:          0.10  — over 70 or under 25 as sole tenant
+    dependentsFactor:   0.10  — children in household, especially under 5
+    ucTransitionFactor: 0.10  — currently transitioning to UC
+  )
+
+  Output: vulnerability score 0-100, with auto-generated flags:
+    - "Financial hardship" (arrears + IMD decile 1-3)
+    - "Social isolation" (single person + low contact + no dependents)
+    - "Health and mobility" (Census health data + age > 70)
+    - "UC transition risk" (UC transitioning + first claim)
+
+New Server Route:
+  GET  /api/v1/ai/vulnerability/:tenantId
+  POST /api/v1/ai/vulnerability/scan (batch scan all tenants)
+
+Affected Pages:
+  - /tenancies/:id — vulnerability panel with factor breakdown
+  - /dashboard — vulnerability KPI
+  - /briefing — "X tenants flagged as newly vulnerable"
+  - /reports — vulnerability analysis report
+
+Priority: P1
+Complexity: High
+
+User Stories:
+  US-VULN-01: As a housing officer, I want the system to automatically detect and
+    flag vulnerable tenants based on a combination of deprivation data, arrears
+    patterns, household composition, and UC status, so I can provide proactive
+    support rather than reactive crisis management.
+    Acceptance: Tenant detail page shows AI vulnerability score with factor
+    breakdown. New vulnerability flags auto-added to tenant record. Officer
+    receives notification when a tenant's score crosses the "high" threshold (>60).
+
+  US-VULN-02: As a safeguarding lead, I want a weekly vulnerability scan that
+    identifies newly at-risk tenants across the organisation, so I can ensure
+    no vulnerable person falls through the gaps.
+    Acceptance: Automated weekly job runs vulnerability scan. Results emailed
+    to safeguarding lead. New cases flagged on briefing page. Trend tracking
+    (improving/deteriorating) per tenant.
+
+========================================================================
+### DIFFERENTIATOR 4: Benefits Entitlement Engine
+========================================================================
+
+Data Sources:
+  - NOMIS API        — local employment rates, benefit claimant counts
+  - IMD data         — income deprivation score
+  - Internal data    — household composition, tenure type, rent level
+  - DWP mock         — UC status, housing element
+
+Composite Feature:
+  - Estimates total benefit entitlement for a household based on known data
+  - Identifies potential unclaimed benefits (Pension Credit, Carer's Allowance,
+    Council Tax Reduction, Attendance Allowance)
+  - Compares actual income indicators with expected entitlement
+  - Generates "Income Maximisation Check" recommendations
+
+New Server Route:
+  GET /api/v1/ai/benefits-check/:tenantId
+
+Affected Pages:
+  - /tenancies/:id — "Benefits Entitlement Estimate" AI card
+  - /rent — "Income Maximisation" action on arrears worklist
+  - /briefing — "X tenants may have unclaimed benefits"
+
+Priority: P2
+Complexity: High
+
+User Stories:
+  US-BEN-01: As a housing officer, I want the system to estimate a tenant's
+    benefit entitlement based on their household composition and local economic
+    data, so I can identify tenants who may be missing benefits they are entitled
+    to and refer them for income maximisation advice.
+    Acceptance: Tenant detail page shows "Estimated Entitlement" AI card with:
+    estimated total benefit amount, breakdown by benefit type, potential
+    unclaimed benefits highlighted, and "Refer to Money Advice" action button.
+
+========================================================================
+### DIFFERENTIATOR 5: Property Passport
+========================================================================
+
+Data Sources:
+  - Open UPRN         — verified UPRN
+  - EPC Register      — energy performance certificate
+  - Gas Safe Register — gas safety verification
+  - Electrical Safety — EICR verification
+  - Land Registry     — ownership history
+  - Internal data     — fire risk, asbestos, compliance certs, repair history
+
+Composite Feature:
+  A single "Property Passport" view that aggregates ALL known information about
+  a property from internal and external sources into one authoritative record,
+  linked by UPRN.
+
+  Sections:
+    1. Identity: UPRN, address, coordinates, classification (UPRN + OS)
+    2. Energy: Full EPC data, retrofit recommendations, carbon emissions (EPC API)
+    3. Gas Safety: Current certificate, engineer verification (Gas Safe)
+    4. Electrical Safety: EICR status, electrician verification (Elec Safety)
+    5. Fire Safety: FRA status, action items (internal)
+    6. Asbestos: ACM register, survey dates (internal)
+    7. Ownership: Acquisition history, price paid (Land Registry)
+    8. Compliance Timeline: Visual timeline of all certificates with expiry dates
+    9. Repair History: Complete repair log with root cause analysis
+    10. Damp Risk: Predictive score with factor breakdown (Differentiator 1)
+
+New Server Route:
+  GET /api/v1/properties/:id/passport
+
+Affected Pages:
+  - /properties/:uprn — new "Property Passport" tab
+  - /compliance — link to passport from any compliance item
+  - /reports/stock-condition — passport data export
+
+Priority: P1
+Complexity: High (aggregation of many sources)
+
+User Stories:
+  US-PASSPORT-01: As a property manager, I want a single "Property Passport"
+    view that shows everything known about a property from all internal and
+    external sources in one place, so I do not need to check multiple systems
+    to understand a property's status.
+    Acceptance: Property detail page has a "Passport" tab showing all 10 sections.
+    External data sections show source badges (EPC, Gas Safe, Land Registry).
+    "Last refreshed" timestamp per section. "Refresh All" button.
+
+  US-PASSPORT-02: As a regulator performing a desktop review, I want to export
+    a property passport as a PDF, so I can share a complete property compliance
+    record with external stakeholders.
+    Acceptance: "Export Passport" button generates a branded PDF with all sections,
+    source attributions, and generated date.
+
+========================================================================
+### DIFFERENTIATOR 6: AI Neighbourhood Briefing
+========================================================================
+
+Data Sources:
+  - data.police.uk      — crime/ASB incidents
+  - Open-Meteo/Met Office — weather forecast and warnings
+  - DEFRA Flood          — flood warnings
+  - IMD/Census           — demographic context
+  - NOMIS                — employment trends
+  - Internal data        — repairs, complaints, arrears, voids per estate
+
+Composite Feature:
+  A per-estate AI-generated briefing that combines all external context with
+  internal operational data into a natural-language summary with actionable
+  recommendations.
+
+  Example Output:
+    "Oak Park Estate — Weekly Briefing (w/c 14 Feb 2026)
+
+    WEATHER: Cold spell expected (highs 4-6C, lows -2C) with rain Thursday-Friday.
+    12 properties flagged at elevated damp risk due to weather conditions.
+    ACTION: Schedule proactive damp inspections for Friday.
+
+    CRIME: 3 police-reported ASB incidents this week (1 noise, 2 criminal damage),
+    down from 5 last week. Hotspot: north side car park area.
+    ACTION: Liaise with Safer Neighbourhood Team regarding car park patrols.
+
+    ARREARS: Total arrears for estate: GBP 12,400 (up 3% from last week).
+    2 new UC transitions this month. 1 tenant at risk of NOSP threshold.
+    ACTION: Prioritise contact with Mrs A. Chen (arrears GBP 1,200, no contact 21 days).
+
+    REPAIRS: 8 open repairs (2 emergency). Average wait time: 6.3 days.
+    1 Awaab's Law case approaching investigation deadline (Wednesday).
+    ACTION: Ensure contractor attends Unit 12 by Wednesday AM.
+
+    COMMUNITY: IMD decile 2 area, unemployment rising locally. Food bank referrals
+    up in adjacent estates. Consider community event or signposting session."
+
+New Server Route:
+  GET /api/v1/ai/neighbourhood-briefing/:estateId
+
+Affected Pages:
+  - /briefing — per-estate briefing accordion
+  - /explore/.../estate/:id — "AI Briefing" panel
+  - /dashboard — summarised estate insights
+
+Priority: P1
+Complexity: High
+
+User Stories:
+  US-BRIEF-01: As a housing officer, I want an AI-generated weekly neighbourhood
+    briefing for each estate in my patch, combining weather, crime, arrears, repairs,
+    and community context into actionable intelligence, so I start each week with
+    a clear picture of what needs attention.
+    Acceptance: Briefing page shows estate-level briefing with sections for weather,
+    crime, arrears, repairs, and community. Each section has at least one recommended
+    ACTION. Briefing regenerated weekly (or on-demand).
+
+  US-BRIEF-02: As a COO, I want to see AI neighbourhood briefings aggregated
+    across all estates, highlighting the estates that need the most attention
+    this week, so I can allocate strategic resources effectively.
+    Acceptance: COO briefing view shows estate ranking by "attention score"
+    (composite of all factors). Top 5 estates highlighted with summary reasons.
+
+========================================================================
+### DIFFERENTIATOR 7: GOV.UK Notify Integration — Full Comms Platform
+========================================================================
+
+(See Section 4.3 for full API specification)
+
+Composite Feature:
+  End-to-end government-grade communications platform integrated into every
+  workflow in SocialHomes.Ai:
+
+  1. AI drafts communication (existing /api/v1/ai/draft-communication)
+  2. Officer reviews and approves
+  3. System sends via GOV.UK Notify (email/SMS/letter)
+  4. Delivery status tracked in real-time
+  5. Activity log entry auto-created
+  6. Follow-up task auto-generated if delivery fails
+  7. Full audit trail for regulatory compliance
+
+  Template Library:
+    - Arrears: pre-action letter, payment plan offer, NOSP warning
+    - Repairs: appointment confirmation, completion follow-up, satisfaction survey
+    - Complaints: acknowledgement (Stage 1/2), response, Ombudsman referral
+    - ASB: warning letter, ABC agreement, CPN notification
+    - Compliance: access request, gas safety appointment, EICR reminder
+    - Allocations: offer letter, viewing invitation, tenancy sign-up
+
+Priority: P1
+Complexity: High
+
+---
+
+## 7. DATA MODEL EXTENSIONS
+
+The following additions to app/src/types/index.ts are required:
+
+### 7.1 New Types
+
+  // ---- External API: Crime ----
+  export interface CrimeIncident {
+    externalId: string;
+    category: string;
+    lat: number;
+    lng: number;
+    streetName: string;
+    outcome?: string;
+    month: string;
+    source: 'police-api' | 'simulated';
+  }
+
+  // ---- External API: Deprivation ----
+  export interface DeprivationProfile {
+    lsoaCode: string;
+    imdScore: number;
+    imdRank: number;
+    imdDecile: number;
+    incomeScore: number;
+    employmentScore: number;
+    educationScore: number;
+    healthScore: number;
+    crimeScore: number;
+    housingScore: number;
+    livingEnvironmentScore: number;
+    source: 'ons' | 'simulated';
+  }
+
+  // ---- External API: Area Demographics (Census) ----
+  export interface AreaDemographics {
+    lsoaCode: string;
+    socialRentPct: number;
+    privateRentPct: number;
+    ownerOccupiedPct: number;
+    averageHouseholdSize: number;
+    over65Pct: number;
+    under18Pct: number;
+    limitedActivitiesPct: number;
+    source: 'census-2021' | 'simulated';
+  }
+
+  // ---- External API: Labour Market ----
+  export interface LabourMarket {
+    laCode: string;
+    claimantCount: number;
+    claimantRate: number;
+    employmentRate: number;
+    jobDensity: number;
+    oowBenefitsRate: number;
+    period: string;
+    source: 'nomis' | 'simulated';
+  }
+
+  // ---- External API: Flood Risk ----
+  export interface FloodAlert {
+    areaId: string;
+    severity: 'severe-warning' | 'warning' | 'alert' | 'none';
+    severityLevel: number;
+    description: string;
+    raisedAt: string;
+    message: string;
+    source: 'defra' | 'simulated';
+  }
+
+  // ---- External API: Weather (enhanced) ----
+  export interface WeatherDetail {
+    date: string;
+    temperature: number;
+    humidity: number;
+    precipitation: number;
+    windSpeed: number;
+    windGust?: number;
+    dewPoint?: number;
+    weatherCode?: number;
+    dampRiskCondition: boolean; // true when temp<5 + humidity>80 + precip>0
+    source: 'open-meteo' | 'met-office' | 'simulated';
+  }
+
+  export interface WeatherWarning {
+    id: string;
+    severity: 'red' | 'amber' | 'yellow';
+    type: string; // 'rain', 'wind', 'snow', 'ice', 'fog', 'thunderstorm'
+    headline: string;
+    validFrom: string;
+    validTo: string;
+    affectedAreas: string[];
+    source: 'met-office' | 'simulated';
+  }
+
+  // ---- External API: IoT Sensors (mock) ----
+  export interface SensorReading {
+    sensorId: string;
+    propertyId: string;
+    timestamp: string;
+    temperature: number;
+    humidity: number;
+    moisture: number;
+    co2Level?: number;
+    source: 'switchee' | 'aico' | 'homelync' | 'simulated';
+  }
+
+  export interface SensorAlert {
+    id: string;
+    sensorId: string;
+    propertyId: string;
+    type: 'high-humidity' | 'high-moisture' | 'low-temperature' | 'smoke' | 'co';
+    severity: 'critical' | 'warning' | 'info';
+    value: number;
+    threshold: number;
+    timestamp: string;
+    acknowledged: boolean;
+  }
+
+  // ---- External API: DWP Universal Credit (mock) ----
+  export interface UcStatus {
+    tenantId: string;
+    ucStatus: 'claiming' | 'transitioning' | 'managed-migration' | 'none';
+    claimStartDate?: string;
+    nextPaymentDate?: string;
+    estimatedAmount?: number;
+    housingElement?: number;
+    apaInPlace: boolean;
+    managedPayment: boolean;
+    source: 'dwp' | 'simulated';
+  }
+
+  // ---- Composite: Damp Risk Breakdown ----
+  export interface DampRiskBreakdown {
+    propertyId: string;
+    overallScore: number;
+    weatherFactor: number;
+    buildingFactor: number;
+    historyFactor: number;
+    sensorFactor: number;
+    occupancyFactor: number;
+    calculatedAt: string;
+    sources: string[];
+  }
+
+  // ---- Composite: Vulnerability Assessment ----
+  export interface VulnerabilityAssessment {
+    tenantId: string;
+    overallScore: number;
+    deprivationFactor: number;
+    arrearsFactor: number;
+    healthFactor: number;
+    isolationFactor: number;
+    ageFactor: number;
+    dependentsFactor: number;
+    ucTransitionFactor: number;
+    autoFlags: string[];
+    calculatedAt: string;
+    sources: string[];
+  }
+
+### 7.2 Extensions to Existing Types
+
+  // Property — add fields:
+  ward?: string;
+  lsoa?: string;
+  lsoaCode?: string;
+  constituency?: string;
+  imdDecile?: number;
+  imdScore?: number;
+  classificationCode?: string;
+  localCustodianCode?: string;
+  acquisitionPrice?: number;
+  acquisitionDate?: string;
+  floodRiskZone?: string;
+
+  // Property.epc — extend with:
+  potentialRating?: string;
+  potentialScore?: number;
+  wallsDesc?: string;
+  roofDesc?: string;
+  windowsDesc?: string;
+  heatingDesc?: string;
+  co2Current?: number;
+  heatingCostAnnual?: number;
+  recommendations?: { description: string; estimatedSavings: number; indicativeCost: string; }[];
+
+  // Tenant — add fields:
+  ucHousingElement?: number;
+  apaActive?: boolean;
+  managedPayment?: boolean;
+  ucNextPayment?: string;
+  vulnerabilityScore?: number;
+
+  // Communication — add fields:
+  externalId?: string;
+  deliveryStatus?: 'sending' | 'delivered' | 'permanent-failure' | 'temporary-failure';
+  templateId?: string;
+  channel: 'email' | 'phone' | 'letter' | 'sms' | 'portal' | 'govuk-notify';
+
+  // ComplianceCertificate — add fields:
+  contractorRegNo?: string;
+  contractorVerified?: boolean;
+  contractorQuals?: string[];
+  contractorRegExpiry?: string;
+
+  // Estate — add fields:
+  lsoaCodes?: string[];
+  crimeCount30Days?: number;
+  crimeCountPrevious30Days?: number;
+  crimeTrend?: 'up' | 'down' | 'stable';
+
+---
+
+## 8. SERVER ROUTE SUMMARY
+
+### 8.1 Existing Routes (Enhanced)
+
+  Route File                          Endpoint                                  Changes
+  ----------------------------------  ------------------------------------------  -------------------
+  routes/public-data.ts               GET /weather/:lat/:lng                      Add hourly data, history
+  routes/public-data.ts               GET /epc/:postcode                          Add UPRN lookup, full cert
+  routes/public-data.ts               GET /imd/:laCode                            Replace with LSOA-based real data
+
+### 8.2 New Routes in routes/public-data.ts
+
+  GET  /api/v1/public-data/crime/:lat/:lng
+  GET  /api/v1/public-data/crime/postcode/:postcode
+  GET  /api/v1/public-data/postcode/:postcode
+  POST /api/v1/public-data/postcodes/bulk
+  GET  /api/v1/public-data/postcode/validate/:postcode
+  GET  /api/v1/public-data/uprn/:uprn
+  GET  /api/v1/public-data/uprn/postcode/:postcode
+  GET  /api/v1/public-data/weather/history/:lat/:lng
+  GET  /api/v1/public-data/flood/:lat/:lng
+  GET  /api/v1/public-data/flood/postcode/:postcode
+  GET  /api/v1/public-data/imd/:lsoaCode                    (REPLACE existing)
+  GET  /api/v1/public-data/imd/summary/:estateId
+  GET  /api/v1/public-data/census/:lsoaCode
+  GET  /api/v1/public-data/census/summary/:estateId
+  GET  /api/v1/public-data/labour/:laCode
+  GET  /api/v1/public-data/metoffice/forecast/:lat/:lng
+  GET  /api/v1/public-data/metoffice/warnings
+  GET  /api/v1/public-data/epc/uprn/:uprn
+  GET  /api/v1/public-data/epc/certificate/:lmkKey
+  GET  /api/v1/public-data/epc/recommendations/:lmkKey
+  GET  /api/v1/public-data/os/search
+  GET  /api/v1/public-data/os/uprn/:uprn
+  GET  /api/v1/public-data/os/postcode/:postcode
+  GET  /api/v1/public-data/gas-safe/:registrationNumber
+  GET  /api/v1/public-data/electrical-safety/:registrationNumber
+  GET  /api/v1/public-data/land-registry/:postcode
+
+### 8.3 New Route File: routes/notify.ts
+
+  POST /api/v1/notify/email
+  POST /api/v1/notify/sms
+  POST /api/v1/notify/letter
+  GET  /api/v1/notify/status/:notificationId
+  GET  /api/v1/notify/templates
+
+### 8.4 New Route File: routes/mock.ts
+
+  GET  /api/v1/mock/dwp/uc-status/:tenantId
+  POST /api/v1/mock/dwp/apa-request
+  GET  /api/v1/mock/dwp/managed-payment/:tenantId
+  POST /api/v1/mock/payments/dd-setup
+  POST /api/v1/mock/payments/dd-cancel
+  GET  /api/v1/mock/payments/dd-status/:tenantId
+  POST /api/v1/mock/payments/card-payment
+  POST /api/v1/mock/regulatory/core-return
+  POST /api/v1/mock/regulatory/tsm-submission
+  GET  /api/v1/mock/regulatory/submission-status/:id
+  POST /api/v1/mock/repairs-marketplace/create-job
+  GET  /api/v1/mock/repairs-marketplace/contractors
+  POST /api/v1/mock/repairs-marketplace/book-appointment
+  GET  /api/v1/mock/repairs-marketplace/job-status/:id
+  GET  /api/v1/mock/iot/sensors/:propertyId
+  GET  /api/v1/mock/iot/readings/:sensorId
+  POST /api/v1/mock/iot/alerts/acknowledge/:alertId
+  POST /api/v1/mock/docusign/send-envelope
+  GET  /api/v1/mock/docusign/envelope-status/:envelopeId
+  POST /api/v1/mock/referencing/credit-check
+  GET  /api/v1/mock/referencing/report/:applicationId
+
+### 8.5 New AI Routes (extend routes/ai.ts)
+
+  GET  /api/v1/ai/damp-risk/:propertyId
+  GET  /api/v1/ai/damp-risk/estate/:estateId
+  POST /api/v1/ai/damp-risk/recalculate
+  GET  /api/v1/ai/crime-context/:estateId
+  GET  /api/v1/ai/crime-context/case/:asbCaseId
+  GET  /api/v1/ai/vulnerability/:tenantId
+  POST /api/v1/ai/vulnerability/scan
+  GET  /api/v1/ai/benefits-check/:tenantId
+  GET  /api/v1/ai/neighbourhood-briefing/:estateId
+  GET  /api/v1/properties/:id/passport
+
+---
+
+## 9. ENVIRONMENT VARIABLE REGISTRY
+
+All API keys are stored in Google Cloud Secret Manager and injected as environment
+variables in Cloud Run. The server reads them via process.env.
+
+  Variable Name              API                     Tier   Required
+  -------------------------  ----------------------  -----  --------
+  EPC_API_KEY                EPC Register            T2     Optional
+  MET_OFFICE_API_KEY         Met Office DataHub      T2     Optional
+  GOVUK_NOTIFY_API_KEY       GOV.UK Notify           T2     Optional
+  TWILIO_ACCOUNT_SID         Twilio                  T2     Optional
+  TWILIO_AUTH_TOKEN          Twilio                  T2     Optional
+  TWILIO_PHONE_NUMBER        Twilio                  T2     Optional
+  OS_DATA_HUB_API_KEY        OS Places/Maps          T2     Optional
+  GAS_SAFE_API_KEY           Gas Safe Register       T2     Optional
+  ELEC_SAFETY_API_KEY        Electrical Safety       T2     Optional
+  LAND_REGISTRY_API_KEY      Land Registry           T2     Optional
+  DWP_UC_API_KEY             DWP Universal Credit    T3     N/A (mock)
+  DWP_UC_CLIENT_SECRET       DWP Universal Credit    T3     N/A (mock)
+
+  Note: All Tier 1 APIs require NO environment variables.
+  When a Tier 2 key is not set, the system falls back to simulated data.
+
+---
+
+## 10. IMPLEMENTATION ROADMAP
+
+### Phase 1 — Foundation (Sprint 1-2, weeks 1-4)
+  Priority: P1 items, foundational services
+
+  1. server/src/services/external-api.ts — shared caching, rate limiting, audit
+  2. postcodes.io integration (dependency for many others)
+  3. Open UPRN integration
+  4. Open-Meteo enhancement (hourly + historical)
+  5. data.police.uk integration
+  6. IMD data loading (pre-load CSV to Firestore)
+  7. New Firestore collection: externalDataCache
+  8. Data model extensions (types/index.ts, firestore-schemas.ts)
+
+### Phase 2 — Intelligence (Sprint 3-4, weeks 5-8)
+  Priority: P1 differentiators, core integrations
+
+  1. Predictive Damp Intelligence algorithm + routes
+  2. Live Crime Context for ASB + map overlay
+  3. Automatic Vulnerability Detection algorithm + routes
+  4. EPC Register full integration
+  5. GOV.UK Notify integration + template management
+  6. DWP Universal Credit mock
+  7. IoT sensor mock
+  8. Property Passport aggregation view
+
+### Phase 3 — Enrichment (Sprint 5-6, weeks 9-12)
+  Priority: P2 items, remaining differentiators
+
+  1. Met Office DataHub integration
+  2. DEFRA Flood Risk integration
+  3. Census 2021 data integration
+  4. NOMIS labour market integration
+  5. Benefits Entitlement Engine
+  6. AI Neighbourhood Briefing
+  7. Twilio integration
+  8. OS Places/Maps API
+  9. Gas Safe / Electrical Safety verification
+
+### Phase 4 — Completion (Sprint 7-8, weeks 13-16)
+  Priority: P3 items, mock services, polish
+
+  1. GoCardless/Allpay mock
+  2. Plentific/Fixflo mock
+  3. RSH/CORE/Ombudsman mock submissions
+  4. DocuSign mock
+  5. Experian/TransUnion referencing mock
+  6. Land Registry integration
+  7. Admin integration management dashboard
+  8. Full end-to-end testing
+  9. Performance optimisation (cache warming, batch updates)
+
+---
+
+## 11. APPENDIX: AFFECTED PAGES MATRIX
+
+  Page                          APIs Used                                       Differentiators
+  ----------------------------  ----------------------------------------------  ----------------
+  /briefing                     Police, Weather, Met Office, Flood, IMD,        1, 2, 3, 6
+                                Census, NOMIS, internal
+  /dashboard                    Weather, Police, IMD, IoT, internal             1, 2, 3
+  /explore                      Police, Postcodes, IMD, Census, Flood,          2, 6
+                                Weather, OS Maps
+  /properties/:uprn             EPC, Weather, IoT, UPRN, Flood, Gas Safe,       1, 5
+                                Elec Safety, Land Registry, IMD
+  /tenancies/:id                IMD, Census, NOMIS, DWP, Benefits,              3, 4
+                                Postcodes, GOV.UK Notify
+  /repairs/:id                  Weather, IoT, Plentific, GOV.UK Notify,         1, 7
+                                Twilio
+  /repairs                      Weather, Plentific                              1
+  /rent                         DWP, GoCardless, NOMIS, IMD, GOV.UK Notify      3, 4, 7
+  /compliance                   EPC, Gas Safe, Elec Safety, IoT                 5
+  /compliance/awaabs-law        Weather, Met Office, EPC, IoT                   1
+  /complaints/:id               GOV.UK Notify                                   7
+  /asb                          Police, Postcodes                               2
+  /asb/:id                      Police, Postcodes, GOV.UK Notify                2, 7
+  /allocations                  Census, Postcodes, Referencing                  -
+  /communications               GOV.UK Notify, Twilio                           7
+  /communications/templates     GOV.UK Notify                                   7
+  /reports                      IMD, Census, NOMIS, EPC, Land Registry          -
+  /reports/tsm                  RSH/CORE mock                                   -
+  /admin/integrations           All APIs — status dashboard                     -
+  /tenant-portal                GOV.UK Notify, GoCardless, DocuSign             7
+  /ai                           All AI routes (damp, crime, vuln, benefits,     1-6
+                                briefing)
+
+---
+
+## END OF DOCUMENT 3
+## SocialHomes.Ai — Public API Integration Requirements
+## Version 1.0 — 14 February 2026
+## Author: Business Analysis, Yantra.Works

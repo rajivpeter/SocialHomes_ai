@@ -46,6 +46,12 @@ tests/test_results*.json
 *.tsbuildinfo
 .cursor/
 
+# MCP server config (contains bot tokens)
+.mcp.json
+
+# Session history (local dev reference)
+SESSION-HISTORY.md
+
 # Reference docs (large, not needed in deploy)
 UK Housing Data Standard Version 3.5/
 
