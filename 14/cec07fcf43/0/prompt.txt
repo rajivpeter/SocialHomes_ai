@@ -1,0 +1,538 @@
+Implement the following plan:
+
+# Mission Control - Developer Command Centre
+
+## Context
+You manage multiple projects under `/mnt/c/.netapps/` and need a single dashboard to visually understand the state of each project: what agents are working on, bugs, deployment status, test results, roadmap progress, MCP servers, and more. Currently this information is scattered across markdown files, git history, and config files with no unified view.
+
+## Architecture
+- **Standalone project** at `/mnt/c/.netapps/mission-control/`
+- **Local only** — runs on localhost:3001 (server) + localhost:5174 (Vite dev)
+- **No database** — reads directly from filesystem (markdown files, git repos, JSON configs)
+- **Tech stack:** React 19 + TypeScript + Vite + Tailwind CSS v4 + Express.js (matching SocialHomes patterns)
+
+## Data Sources (per project directory)
+| Source | Data Extracted |
+|--------|---------------|
+| `git log/status/branch` | Branch, commits, dirty files, remote URL |
+| `CLAUDE.md` | Project description, tech stack, commands |
+| `SESSION-HISTORY.md` | Agent sessions, what was done, pending work |
+| `DEV-FIX-LIST.md` | Test pass rate, bugs (P1-P4), warnings |
+| `EXECUTION-PLAN.md` | Phase progress, task counts, completion % |
+| `DEVOPS.md` | Cloud Run config, deployment URL, costs |
+| `.claude/settings.json` | Hooks (Entire.io etc.) |
+| `.mcp.json` | MCP servers (Telegram etc.) |
+| `package.json` | Project name, scripts, dependencies |
+| `cloudbuild.yaml` / `Dockerfile` | CI/CD presence |
+
+## UI Design
+
+### View 1: All Projects Grid (`/`)
+- **Stats row:** Total projects, Active (7d), Open bugs, Bootstrapped count
+- **Project cards** in a responsive grid, each showing:
+  - Name + status indicator (green=active, amber=stale, grey=unconfigured)
+  - Git branch + last commit time + message
+  - Test pass rate + bug count + warning count
+  - Current phase with mini progress bar
+  - Click to drill into detail
+
+### View 2: Project Detail (`/projects/:name`)
+Tabbed layout with 5 sections:
+
+| Tab | Content |
+|-----|---------|
+| **Overview** | Git branch, last 20 commits, description, tech stack badges, build commands |
+| **Progress** | Execution plan phases as progress bars, task breakdown, overall % |
+| **Quality** | Test pass rate gauge, bug list with severity badges, warning list |
+| **Sessions** | Timeline of agent sessions (expandable), pending work items |
+| **Infrastructure** | MCP servers, hooks, deployment config, CI/CD status |
+
+### Bootstrap Panel
+- Un-configured projects show an "Initialize Project" button
+- Creates template files: CLAUDE.md, SESSION-HISTORY.md, DEV-FIX-LIST.md, EXECUTION-PLAN.md, .claude/settings.json
+
+## File Structure
+```
+mission-control/
+├── app/
+│   ├── src/
+│   │   ├── pages/
+│   │   │   ├── ProjectsPage.tsx        # Main grid view
+│   │   │   └── ProjectDetailPage.tsx   # Tabbed detail view
+│   │   ├── components/
+│   │   │   ├── layout/Layout.tsx       # Header + outlet (no sidebar)
+│   │   │   ├── ProjectCard.tsx         # Grid card per project
+│   │   │   ├── StatsRow.tsx            # Summary stats
+│   │   │   ├── BootstrapModal.tsx      # Initialize project dialog
+│   │   │   └── detail/
+│   │   │       ├── OverviewTab.tsx     # Git + description
+│   │   │       ├── ProgressTab.tsx     # Phase progress bars
+│   │   │       ├── QualityTab.tsx      # Tests + bugs
+│   │   │       ├── SessionsTab.tsx     # Agent activity timeline
+│   │   │       └── InfraTab.tsx        # MCP, hooks, deployment
+│   │   ├── services/api.ts            # Fetch wrapper
+│   │   ├── types/index.ts             # Shared interfaces
+│   │   ├── App.tsx                     # Router (2 routes)
+│   │   ├── main.tsx                    # Entry + React Query
+│   │   └── index.css                  # Tailwind v4 theme (copied from SocialHomes)
+│   ├── index.html
+│   ├── vite.config.ts
+│   └── package.json
+├── server/
+│   ├── src/
+│   │   ├── index.ts                    # Express setup (port 3001)
+│   │   ├── routes/projects.ts          # All API endpoints
+│   │   ├── services/
+│   │   │   ├── scanner.ts              # Scan /mnt/c/.netapps/ directories
+│   │   │   ├── git-reader.ts           # Git CLI wrapper (execFile)
+│   │   │   ├── markdown-parser.ts      # Parse DEV-FIX-LIST, EXECUTION-PLAN, SESSION-HISTORY
+│   │   │   ├── config-reader.ts        # Read .claude/, .mcp.json, package.json, DEVOPS.md
+│   │   │   └── bootstrap.ts            # Create template files for new projects
+│   │   └── types/index.ts
+│   ├── tsconfig.json
+│   └── package.json
+├── CLAUDE.md
+├── .gitignore
+└── package.json                        # Root with concurrently for dev
+```
+
+## API Endpoints
+```
+GET  /api/projects                  — List all projects with summary
+GET  /api/projects/:name            — Full project detail
+GET  /api/projects/:name/git        — Git history + status
+GET  /api/projects/:name/tests      — Parsed DEV-FIX-LIST.md
+GET  /api/projects/:name/roadmap    — Parsed EXECUTION-PLAN.md
+GET  /api/projects/:name/sessions   — Parsed SESSION-HISTORY.md
+GET  /api/projects/:name/infra      — MCP, hooks, deployment config
+POST /api/projects/:name/bootstrap  — Create template files
+GET  /health                        — Health check
+```
+
+## Build Order
+
+| Step | What | Files |
+|------|------|-------|
+| 1 | Scaffolding — all config files, package.json, tsconfig, vite config | Root configs |
+| 2 | Server types + scanner + git-reader | `server/src/types/`, `scanner.ts`, `git-reader.ts` |
+| 3 | Markdown parser (highest complexity) | `markdown-parser.ts` |
+| 4 | Config reader | `config-reader.ts` |
+| 5 | Express server + API routes | `index.ts`, `routes/projects.ts` |
+| 6 | Frontend theme + layout + router | `index.css`, `Layout.tsx`, `App.tsx`, `main.tsx` |
+| 7 | Projects grid page + cards | `ProjectsPage.tsx`, `ProjectCard.tsx`, `StatsRow.tsx` |
+| 8 | Project detail page + all 5 tabs | `ProjectDetailPage.tsx`, `detail/*.tsx` |
+| 9 | Bootstrap service + modal | `bootstrap.ts`, `BootstrapModal.tsx` |
+| 10 | Polish — auto-refresh, error states, loading skeletons | Various |
+
+## Styling
+- Dark theme matching SocialHomes (copy `index.css` theme tokens)
+- Brand teal accent, peach headings, Inter + Space Grotesk fonts
+- Glass-card effect on project cards
+- Status colours: green (passing), amber (warning), red (critical)
+
+## Verification
+1. `cd /mnt/c/.netapps/mission-control/server && npm run dev` — server starts on 3001
+2. `cd /mnt/c/.netapps/mission-control/app && npm run dev` — Vite starts on 5174
+3. Open `http://localhost:5174` — projects grid loads with SocialHomes + other directories
+4. Click SocialHomes card — detail view shows git commits, test results, phase progress, sessions
+5. Click an unconfigured project — bootstrap button appears and creates template files
+6. `GET http://localhost:3001/api/projects` returns JSON with all project summaries
+
+
+If you need specific details from before exiting plan mode (like exact code snippets, error messages, or content you generated), read the full transcript at: /home/rajiv/.REDACTED.jsonl
+
+---
+
+what is the url
+
+---
+
+[Request interrupted by user]
+
+---
+
+i dont see anything on http://localhost:5174
+
+---
+
+I cant see live what each agent is doing
+
+---
+
+<task-notification>
+<task-id>bee9d73</task-id>
+<output-file>/tmp/claude-1000/-mnt-c--netapps-socialhomes/tasks/bee9d73.output</output-file>
+<status>completed</status>
+<summary>Background command "Start server in background" completed (exit code 0)</summary>
+</task-notification>
+Read the output file to retrieve the result: /tmp/claude-1000/-mnt-c--netapps-socialhomes/tasks/bee9d73.output
+
+---
+
+<task-notification>
+<task-id>b5b8f84</task-id>
+<output-file>/tmp/claude-1000/-mnt-c--netapps-socialhomes/tasks/b5b8f84.output</output-file>
+<status>failed</status>
+<summary>Background command "Start Vite dev server" failed with exit code 144</summary>
+</task-notification>
+Read the output file to retrieve the result: /tmp/claude-1000/-mnt-c--netapps-socialhomes/tasks/b5b8f84.output
+
+---
+
+filesystem:chrome-extension:REDACTED.png still see no agents
+
+---
+
+okay contine on the next phase of enhancements
+
+---
+
+I was execting agents only when you click into a project like socialhomes. Also, the agents would be frontend, devops, tester etc and it will have a pipeline of where the code is at i'd imagine systerm analyst> fullstack >front end> tester>devops etc. also expected all the documents produced by each agent. To be clear what i am seeing does not help me at all. it need to show me the state of things and why each agent is doing and has produced, and where in the pipeline the code is at vsually and whats gong on eg if they are stuck or if they have got though x out of y tasks etc. instead i see this on the homepage 
+socialhomes
+dynamic-singing-wombat
+system
+
+about 2 hours ago
+main
+1 sub-agent
+v2.1.42
+socialhomes
+dynamic-singing-wombat
+Waiting for input
+
+about 7 hours ago
+2h 19m
+main
+4 sub-agents
+v2.1.42
+claude
+Waiting for input
+
+about 9 hours ago
+HEAD
+v2.1.42
+claude
+ticklish-snuggling-penguin
+Waiting for input
+
+about 9 hours ago
+HEAD
+7 sub-agents
+v2.1.42
+Buddy
+queue-operation
+
+about 13 hours ago
+01-Programming-basics
+Waiting for input
+
+about 13 hours ago
+master
+v2.1.42
+socialhomes
+gentle-wiggling-hennessy
+Edit .../services/firestore.ts
+
+about 17 hours ago
+main
+1 sub-agent
+v2.1.42
+socialhomes
+greedy-mapping-cloud
+Waiting for input
+
+about 17 hours ago
+main
+v2.1.42
+socialhomes
+steady-zooming-goblet
+Waiting for input
+
+about 17 hours ago
+main
+2 sub-agents
+v2.1.42
+socialhomes
+Waiting for input
+
+about 21 hours ago
+main
+v2.1.42
+socialhomes
+fizzy-purring-toast
+Waiting for input
+
+about 21 hours ago
+25h 0m
+main
+2 sub-agents
+v2.1.39
+
+---
+
+This session is being continued from a previous conversation that ran out of context. The summary below covers the earlier portion of the conversation.
+
+Analysis:
+Let me chronologically analyze the conversation:
+
+1. **Initial Request**: User asked to implement a full "Mission Control - Developer Command Centre" dashboard project based on a detailed plan. The plan specified:
+   - Standalone project at `/mnt/c/.netapps/mission-control/`
+   - React 19 + TypeScript + Vite + Tailwind CSS v4 + Express.js
+   - Reads from filesystem (no database)
+   - Two views: Projects Grid and Project Detail with 5 tabs
+   - Bootstrap panel for unconfigured projects
+   - Specific file structure, API endpoints, and build order
+
+2. **Phase 1 - Initial Build**: I created the entire project following the 10-step build order:
+   - Scaffolding (configs, package.json files)
+   - Server types, scanner, git-reader
+   - Markdown parser
+   - Config reader
+   - Express server + API routes
+   - Frontend theme, layout, router
+   - Projects grid page with cards and stats
+   - Project detail page with 5 tabs
+   - Bootstrap service and modal
+   - Polish
+
+3. **User asked "what is the url"** - I told them http://localhost:5174
+
+4. **User reported "i dont see anything on http://localhost:5174"** - I debugged, restarted servers, confirmed both were running
+
+5. **User said "I cant see live what each agent is doing"** - This led to Phase 2 where I:
+   - Explored Claude Code's JSONL session files at `~/.claude/projects/`
+   - Built `agent-monitor.ts` to scan JSONL files for active sessions
+   - Added `/api/agents/live` and `/api/agents/project/:name` endpoints
+   - Created `LiveAgentsPanel.tsx` component
+   - Created `AgentsPage.tsx` dedicated page
+   - Updated header with nav and live agent indicator
+   - Added search/filter to projects page
+
+6. **User gave critical feedback**: "I was expecting agents only when you click into a project like socialhomes. Also, the agents would be frontend, devops, tester etc and it will have a pipeline of where the code is at... system analyst > fullstack > frontend > tester > devops etc. also expected all the documents produced by each agent."
+
+   The user explicitly said the current view "does not help me at all" and wants to see:
+   - State of things visually
+   - What each agent role is doing and has produced
+   - Where in the pipeline the code is at
+   - If agents are stuck or have gotten through x out of y tasks
+   - Documents produced by each agent
+
+7. **Phase 3 - Pipeline Rebuild**: I started rebuilding:
+   - Created `pipeline-parser.ts` server service that:
+     - Parses EXECUTION-PLAN.md for agent role definitions
+     - Extracts tasks per agent per phase with completion status
+     - Scans for documents and attributes to producing agent
+     - Builds pipeline data with status (idle/active/blocked/complete)
+   - Added `/api/projects/:name/pipeline` endpoint
+   - Added frontend types for pipeline data
+   - Created `PipelineTab.tsx` with:
+     - Visual pipeline flow (BA → Claude Code → Fullstack → Frontend → Tester → DevOps)
+     - Per-agent cards with task progress, documents, status
+     - Expandable task lists
+   - Was about to update `ProjectDetailPage.tsx` to add the Pipeline tab
+
+8. **The conversation was interrupted for summary right as I was editing ProjectDetailPage.tsx** to add the Pipeline tab to the tab bar.
+
+Key errors:
+- tsconfig typo: "tpiTarget" instead of "target" - fixed immediately
+- Path decoder bug: `decodeProjectDir` naively replaced all `-` with `/`, breaking paths like `-mnt-c--netapps-socialhomes` → `/mnt/c//netapps/socialhomes`. Fixed by reading `cwd` from JSONL entries directly.
+- Server processes dying in background - had to restart multiple times
+- Port conflicts with Vite (5174 already in use, started on 5175) - killed stale processes and restarted
+
+The most critical user feedback was that the raw JSONL session dump was completely useless. They wanted role-based agents (BA, Fullstack, Frontend, Tester, DevOps) with a pipeline view showing progression and deliverables.
+
+Summary:
+1. Primary Request and Intent:
+   The user requested implementation of a "Mission Control - Developer Command Centre" — a standalone dashboard at `/mnt/c/.netapps/mission-control/` that provides a unified view of all projects under `/mnt/c/.netapps/`. The dashboard should show project status, git info, test results, roadmap progress, and critically — a **pipeline view of agent roles** (BA → Fullstack → Frontend → Tester → DevOps) showing where the code is at, what each agent has produced (documents), task progress (x/y), and whether agents are stuck or blocked. The user explicitly rejected the raw Claude Code session dump approach, saying "what i am seeing does not help me at all" and wants to see the state of the defined agent roles from EXECUTION-PLAN.md, not raw JSONL sessions.
+
+2. Key Technical Concepts:
+   - React 19 + TypeScript + Vite 7 + Tailwind CSS v4 + Express.js
+   - `@tanstack/react-query` for data fetching with auto-refresh
+   - Vite proxy for `/api` routes to Express backend on port 3001
+   - Filesystem-based data (no database) — reads markdown, git, JSON configs
+   - SocialHomes dark theme (brand-teal `#058995`, peach `#EFAC92` headings, glass-card effects)
+   - Claude Code JSONL session files at `~/.claude/projects/` for live monitoring
+   - Pipeline/agent roles parsed from EXECUTION-PLAN.md's `## AGENT ROLES` section and task tables
+   - Agent pipeline order: BA(0) → Claude Code(1) → Fullstack(2) → Frontend(3) → Tester(4) → DevOps(5)
+   - Document attribution: Doc1-3 → BA, Doc4 → Frontend, DEV-FIX-LIST → Tester, DEVOPS.md → DevOps, etc.
+   - `npm install --legacy-peer-deps` required (firebaseui conflict pattern from SocialHomes)
+
+3. Files and Code Sections:
+
+   **Root configs:**
+   - `/mnt/c/.netapps/mission-control/package.json` — Root with concurrently for `npm run dev`
+   - `/mnt/c/.netapps/mission-control/.gitignore` — node_modules, dist, .env
+   - `/mnt/c/.netapps/mission-control/CLAUDE.md` — Project instructions
+
+   **Server:**
+   - `/mnt/c/.netapps/mission-control/server/package.json` — Express + cors + tsx
+   - `/mnt/c/.netapps/mission-control/server/tsconfig.json` — ES2022, NodeNext modules
+   - `/mnt/c/.netapps/mission-control/server/src/types/index.ts` — All shared interfaces (ProjectSummary, GitData, TestData, RoadmapData, SessionData, InfraData, ProjectDetail)
+   - `/mnt/c/.netapps/mission-control/server/src/index.ts` — Express setup on port 3001, CORS for localhost:5173/5174, routes for projects, agents, pipeline, health
+   - `/mnt/c/.netapps/mission-control/server/src/routes/projects.ts` — 8 API endpoints: GET /api/projects, GET /api/projects/:name, /git, /tests, /roadmap, /sessions, /infra, POST /bootstrap
+   - `/mnt/c/.netapps/mission-control/server/src/services/scanner.ts` — Scans `/mnt/c/.netapps/` directories, categorizes as active/stale/unconfigured
+   - `/mnt/c/.netapps/mission-control/server/src/services/git-reader.ts` — Uses `execFile('git', ...)` for branch, status, commits
+   - `/mnt/c/.netapps/mission-control/server/src/services/markdown-parser.ts` — Parses DEV-FIX-LIST.md (test summary regex, bug/warning extraction), EXECUTION-PLAN.md (phase tables), SESSION-HISTORY.md (session blocks)
+   - `/mnt/c/.netapps/mission-control/server/src/services/config-reader.ts` — Reads CLAUDE.md (description, tech stack, commands), .mcp.json (MCP servers), .claude/settings.json (hooks), DEVOPS.md (deployment URL), package.json
+   - `/mnt/c/.netapps/mission-control/server/src/services/bootstrap.ts` — Creates template CLAUDE.md, SESSION-HISTORY.md, DEV-FIX-LIST.md, EXECUTION-PLAN.md, .claude/settings.json
+   - `/mnt/c/.netapps/mission-control/server/src/services/agent-monitor.ts` — Scans `~/.claude/projects/` JSONL files for active/recent sessions, reads first line + last 64KB efficiently, parses activity events (tool uses with file paths, text, hooks, user input). Fixed path decoding to use `cwd` field from JSONL entries.
+   - `/mnt/c/.netapps/mission-control/server/src/services/pipeline-parser.ts` — **NEW, most recent work**. Parses EXECUTION-PLAN.md for:
+     - Agent roles from `## AGENT ROLES` table
+     - Tasks per agent per phase with DONE/TODO status
+     - Documents produced per agent (scans filesystem)
+     - Pipeline status per agent (idle/active/blocked/complete)
+     ```typescript
+     export interface PipelineAgent {
+       role: AgentRole;
+       status: 'idle' | 'active' | 'blocked' | 'complete';
+       tasks: AgentTask[];
+       totalTasks: number;
+       completedTasks: number;
+       progress: number;
+       documents: AgentDocument[];
+       currentPhase?: string;
+     }
+     ```
+
+   **Frontend:**
+   - `/mnt/c/.netapps/mission-control/app/package.json` — React 19, react-router-dom, @tanstack/react-query, lucide-react, date-fns, tailwindcss v4
+   - `/mnt/c/.netapps/mission-control/app/vite.config.ts` — Port 5174, proxy /api and /health to localhost:3001, @tailwindcss/vite plugin, @ alias
+   - `/mnt/c/.netapps/mission-control/app/tsconfig.app.json` — target ES2020, jsx react-jsx, bundler resolution
+   - `/mnt/c/.netapps/mission-control/app/src/index.css` — Full SocialHomes dark theme copied (brand colors, glass-card, glow effects, animations)
+   - `/mnt/c/.netapps/mission-control/app/src/types/index.ts` — Frontend mirror of server types plus AgentActivity, LiveDashboard, PipelineData, PipelineAgent, AgentRole, AgentTask, AgentDocument
+   - `/mnt/c/.netapps/mission-control/app/src/services/api.ts` — Fetch wrapper with fetchProjects, fetchProjectDetail, bootstrapProject, fetchLiveAgents, fetchProjectAgents, fetchPipeline
+   - `/mnt/c/.netapps/mission-control/app/src/main.tsx` — React Query client with 30s refetchInterval, 15s staleTime
+   - `/mnt/c/.netapps/mission-control/app/src/App.tsx` — BrowserRouter with 3 routes: /, /projects/:name, /agents
+   - `/mnt/c/.netapps/mission-control/app/src/components/layout/Layout.tsx` — Header with nav tabs (Projects, Agents), live agent count badge with pulsing dot
+   - `/mnt/c/.netapps/mission-control/app/src/pages/ProjectsPage.tsx` — Projects grid with search input, status filter tabs (All/Active/Stale/Unconfigured), LiveAgentsPanel, StatsRow, ProjectCards
+   - `/mnt/c/.netapps/mission-control/app/src/pages/ProjectDetailPage.tsx` — Tabbed detail view with 5 tabs: Overview, Progress, Quality, Sessions, Infrastructure. **This file needs to be updated to add Pipeline tab — this was the exact point of interruption.**
+   - `/mnt/c/.netapps/mission-control/app/src/pages/AgentsPage.tsx` — Dedicated agents page (raw JSONL session dump — user said this is NOT useful)
+   - `/mnt/c/.netapps/mission-control/app/src/components/StatsRow.tsx` — Total/Active/Bugs/Bootstrapped stats
+   - `/mnt/c/.netapps/mission-control/app/src/components/ProjectCard.tsx` — Glass card with status dot, git info, test metrics, phase progress bar
+   - `/mnt/c/.netapps/mission-control/app/src/components/BootstrapModal.tsx` — Initialize project dialog
+   - `/mnt/c/.netapps/mission-control/app/src/components/LiveAgentsPanel.tsx` — Home page panel showing active sessions with mini activity feed
+   - `/mnt/c/.netapps/mission-control/app/src/components/detail/OverviewTab.tsx` — Git status, commits, tech stack badges, commands
+   - `/mnt/c/.netapps/mission-control/app/src/components/detail/ProgressTab.tsx` — Phase progress bars with task breakdowns
+   - `/mnt/c/.netapps/mission-control/app/src/components/detail/QualityTab.tsx` — Test pass rate gauge, bug list, warning list
+   - `/mnt/c/.netapps/mission-control/app/src/components/detail/SessionsTab.tsx` — Historical sessions + live agent cards (uses fetchProjectAgents)
+   - `/mnt/c/.netapps/mission-control/app/src/components/detail/InfraTab.tsx` — MCP servers, hooks, deployment, CI/CD, scripts
+   - `/mnt/c/.netapps/mission-control/app/src/components/detail/PipelineTab.tsx` — **NEW, just created**. Visual pipeline flow with agent cards, progress bars, document lists, task breakdowns. Takes `projectName` prop and fetches via `fetchPipeline`.
+
+4. Errors and fixes:
+   - **tsconfig typo**: `"tpiTarget"` instead of `"target"` in `tsconfig.app.json` and `tsconfig.node.json`. Fixed with Edit tool immediately after creation.
+   - **Path decoder bug**: `decodeProjectDir` replaced all `-` with `/`, turning `-mnt-c--netapps-socialhomes` into `/mnt/c//netapps/socialhomes` (double slash). Fixed by reading the `cwd` field directly from the first JSONL entry in each session file, which contains the correct path.
+   - **Server processes dying**: Background server tasks kept exiting. Used `nohup` with output redirection to `/tmp/mc-server.log` for persistence.
+   - **Port conflict**: Vite started on 5175 because 5174 was occupied by a stale process. Fixed by killing all Vite processes and restarting.
+   - **User feedback — useless agent view**: User explicitly said the raw JSONL session dump showing slugs like "dynamic-singing-wombat" and "Waiting for input" is not helpful. They want role-based agents (BA, Fullstack, Frontend, Tester, DevOps) with pipeline progression, task counts, and documents produced. This led to the complete pipeline rebuild.
+
+5. Problem Solving:
+   - Solved the filesystem scanning challenge by using `readdir` + `stat` + `access` to detect project types
+   - Solved git data extraction by using `execFile('git', ...)` with proper error handling
+   - Solved markdown parsing with regex-based parsers for 3 different file formats
+   - Solved live agent detection by reading Claude Code's `~/.claude/projects/` JSONL files efficiently (first line + last 64KB)
+   - Solved the agent role extraction by parsing EXECUTION-PLAN.md's `## AGENT ROLES` table and cross-referencing with task table Agent columns
+   - Ongoing: Need to wire PipelineTab into ProjectDetailPage and potentially restructure the Agents page / nav
+
+6. All user messages:
+   - "Implement the following plan: # Mission Control - Developer Command Centre [full detailed plan]"
+   - "what is the url"
+   - "i dont see anything on http://localhost:5174"
+   - "I cant see live what each agent is doing"
+   - "okay contine on the next phase of enhancements"
+   - "still see no agents" (with screenshot reference)
+   - "I was execting agents only when you click into a project like socialhomes. Also, the agents would be frontend, devops, tester etc and it will have a pipeline of where the code is at i'd imagine systerm analyst> fullstack >front end> tester>devops etc. also expected all the documents produced by each agent. To be clear what i am seeing does not help me at all. it need to show me the state of things and why each agent is doing and has produced, and where in the pipeline the code is at vsually and whats gong on eg if they are stuck or if they have got though x out of y tasks etc. instead i see this on the homepage [dump of useless session data]"
+
+7. Pending Tasks:
+   - **Wire PipelineTab into ProjectDetailPage.tsx** — Add "Pipeline" as a primary tab (likely replacing or supplementing "Sessions"), import PipelineTab component
+   - **Remove or repurpose the standalone /agents page** — User wants pipeline inside project detail, not a separate page
+   - **Consider removing LiveAgentsPanel from home page** — The raw session dump on the home page is what the user complained about
+   - **Restart server** with new pipeline-parser.ts code
+   - **Test the pipeline API** endpoint with SocialHomes data
+   - **Verify TypeScript compiles** after ProjectDetailPage changes
+
+8. Current Work:
+   I was in the middle of updating `ProjectDetailPage.tsx` to add the Pipeline tab. I had just:
+   1. Created `pipeline-parser.ts` on the server
+   2. Added `/api/projects/:name/pipeline` endpoint to `server/src/index.ts`
+   3. Added pipeline types to `app/src/types/index.ts`
+   4. Added `fetchPipeline` to `app/src/services/api.ts`
+   5. Created `app/src/components/detail/PipelineTab.tsx`
+   6. **Read `ProjectDetailPage.tsx` to edit it** — this was the last action before the summary request
+
+   The exact next step is to edit `ProjectDetailPage.tsx` to:
+   - Import `PipelineTab` and add `Users` icon from lucide-react
+   - Add `{ id: 'pipeline', label: 'Pipeline', icon: Users }` to the TABS array (likely as the second tab)
+   - Add `{activeTab === 'pipeline' && <PipelineTab projectName={project.name} />}` to the tab content
+   - Consider making 'pipeline' the default active tab
+
+   Then restart the server and verify the pipeline view works for SocialHomes.
+
+9. Optional Next Step:
+   Edit `/mnt/c/.netapps/mission-control/app/src/pages/ProjectDetailPage.tsx` to add the Pipeline tab. The user's most recent request was: "I was execting agents only when you click into a project like socialhomes. Also, the agents would be frontend, devops, tester etc and it will have a pipeline of where the code is at..." — I had read the file and was about to modify it when the summary was requested. The `PipelineTab.tsx` component is already created and ready to be wired in.
+
+If you need specific details from before compaction (like exact code snippets, error messages, or content you generated), read the full transcript at: /home/rajiv/.claude/projects/-mnt-c--netapps-socialhomes/549e3cf8-d48c-4a1f-9d35-3ca566450dd1.jsonl
+Please continue the conversation from where we left off without asking the user any further questions. Continue with the last task that you were asked to work on.
+
+---
+
+what is going on? is it built
+
+---
+
+I see no difference
+
+---
+
+[Request interrupted by user]
+
+---
+
+its beeing stuck on creating agents view on projects whats wrong why is it not completing
+
+---
+
+try now
+
+---
+
+[Request interrupted by user]
+
+---
+
+maybe you should restart and ry again because its nowe working
+
+---
+
+[Request interrupted by user]
+
+---
+
+go ahead and finsih
+
+---
+
+<task-notification>
+<task-id>bed2e9d</task-id>
+<output-file>/tmp/claude-1000/-mnt-c--netapps-socialhomes/tasks/bed2e9d.output</output-file>
+<status>completed</status>
+<summary>Background command "Start server" completed (exit code 0)</summary>
+</task-notification>
+Read the output file to retrieve the result: /tmp/claude-1000/-mnt-c--netapps-socialhomes/tasks/bed2e9d.output
+
+---
+
+<task-notification>
+<task-id>b3636f7</task-id>
+<output-file>/tmp/claude-1000/-mnt-c--netapps-socialhomes/tasks/b3636f7.output</output-file>
+<status>completed</status>
+<summary>Background command "Start Vite frontend" completed (exit code 0)</summary>
+</task-notification>
+Read the output file to retrieve the result: /tmp/claude-1000/-mnt-c--netapps-socialhomes/tasks/b3636f7.output
+
+---
+
+its still isnt good enough
+
+---
+
+[Request interrupted by user for tool use]
