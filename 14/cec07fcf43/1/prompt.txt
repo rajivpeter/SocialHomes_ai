@@ -1,0 +1,111 @@
+Implement the following plan:
+
+# Pipeline Tab Rebuild — Horizontal Swimlane
+
+## Context
+The current PipelineTab uses stacked vertical cards which don't convey the pipeline flow visually. The user wants a horizontal swimlane with real-time activity, task dependencies, interactive drill-downs, and document previews.
+
+## Files to Change
+
+| # | File | Action |
+|---|------|--------|
+| 1 | `server/src/services/pipeline-parser.ts` | Add `blockedReason` + `dependencies` edge list |
+| 2 | `server/src/index.ts` | Add `GET /api/projects/:name/documents/:docPath` endpoint |
+| 3 | `app/src/types/index.ts` | Add `PipelineDependency`, `DocumentContent` types |
+| 4 | `app/src/services/api.ts` | Add `fetchDocumentContent()` |
+| 5 | `app/src/components/detail/PipelineTab.tsx` | **Complete rewrite** |
+
+## Step 1: Server — pipeline-parser.ts
+
+- At line ~266 where `status = 'blocked'`, compute `blockedReason` from which prerequisite agents still have incomplete tasks (e.g. "Waiting for BA, Claude Code")
+- Add `PipelineDependency` type: `{ from: string, to: string, status: 'satisfied' | 'blocking' }`
+- Compute dependency edges from `pipelineOrder` and return in `PipelineData.dependencies`
+
+## Step 2: Server — index.ts
+
+New endpoint for document content preview:
+```
+GET /api/projects/:name/documents/:docPath
+```
+- `path.basename()` to prevent directory traversal
+- Returns `{ name, content (max 100KB), sizeBytes, lastModified }`
+- 404 if file not found
+
+## Step 3: Frontend Types + API
+
+- Add `PipelineDependency` and `DocumentContent` interfaces to `types/index.ts`
+- Add `dependencies` field to existing `PipelineData` interface
+- Add `fetchDocumentContent(projectName, docPath)` to `api.ts`
+
+## Step 4: PipelineTab.tsx — Complete Rewrite
+
+### Layout (top to bottom):
+1. **PipelineHeader** — Overall progress bar + current phase (kept from existing)
+2. **Horizontal Swimlane** — `flex flex-row overflow-x-auto` with 6 agent columns + dependency arrows between them
+3. **AgentDetailDrawer** — Slides open below swimlane when a column is clicked (3-col grid: tasks | documents | live activity)
+4. **DocumentPreviewModal** — Fixed overlay for viewing file contents
+
+### Sub-components (all in same file):
+
+**ProgressRing** — SVG circular progress ring per agent (56px). Colour matches status. Shows percentage in centre.
+
+**AgentColumn** — 180px wide vertical card per agent:
+- Color-coded top bar (green=complete, teal=active, peach=blocked, gray=idle)
+- Agent icon + name + status badge
+- Circular progress ring
+- Task count (e.g. "8/8") with mini dot visualization (green=done, gray=todo)
+- Document count badge
+- LIVE indicator with animated ping (when agent has active Claude Code session)
+- Blocked reason text (if blocked, e.g. "Waiting for Fullstack")
+- Click to open detail drawer below
+
+**DependencyArrow** — Horizontal line + ArrowRight icon between columns. Green if upstream complete, peach if blocking.
+
+**AgentDetailDrawer** — 3-column responsive grid:
+- **Left: Tasks** — grouped by phase, checkmarks for DONE, priority badges
+- **Middle: Documents** — clickable rows with Eye icon, opens preview modal
+- **Right: Live Activity** — live event feed from agent-monitor API (5s polling), shows current tool, recent events, duration
+
+**DocumentPreviewModal** — Glass-card overlay (`fixed inset-0 z-50`), shows file content in `<pre>` monospace block. Close on click-outside or X button.
+
+### Data fetching:
+- `useQuery('pipeline', projectName)` — 30s refetch (default)
+- `useQuery('agents-project', projectName)` — 5s refetch for live sessions
+- `useQuery('doc-content', ...)` — on-demand when modal opens, 60s staleTime
+
+### State:
+- `selectedAgent: string | null` — which column drawer is open
+- `previewDoc: AgentDocument | null` — which document modal is open
+
+## Verification
+1. Restart server and Vite
+2. Open http://localhost:5174 → click socialhomes → Pipeline tab
+3. **6 agent columns** visible horizontally with arrows between them
+4. **Claude Code** = green/complete with 8/8 and full progress ring
+5. **Fullstack** = peach/blocked with "Waiting for BA, Claude Code" text
+6. Click an agent column → drawer opens below with tasks, docs, live activity
+7. Click a document → modal opens with file content
+8. TypeScript check: `cd app && npx tsc --noEmit`
+
+
+If you need specific details from before exiting plan mode (like exact code snippets, error messages, or content you generated), read the full transcript at: /home/rajiv/.claude/projects/-mnt-c--netapps-socialhomes/549e3cf8-d48c-4a1f-9d35-3ca566450dd1.jsonl
+
+---
+
+I dint see anhy difference did you deploy
+
+---
+
+what you are saying does not match what im seeing
+
+---
+
+[Image: source: /mnt/c/Users/Rajiv/Downloads/Screenshot 2026-02-15 140055.png]
+
+---
+
+this is what shows at the moment - is this correct? i seems wrong to me
+
+---
+
+[Image: source: /mnt/c/Users/Rajiv/Downloads/Screenshot 2026-02-15 143952.png]
