@@ -1,19 +1,22 @@
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useApp } from '@/context/AppContext';
 import { usePersonaScope } from '@/hooks/usePersonaScope';
 import {
   CloudRain, AlertTriangle, AlertCircle, CheckCircle2,
   TrendingUp, TrendingDown, ArrowRight, Home, Users,
-  Wrench, PoundSterling, Sparkles, Shield
+  Wrench, PoundSterling, Sparkles, Shield, Map
 } from 'lucide-react';
 import { format } from 'date-fns';
-import { organisation, dampMouldCases, complianceStats } from '@/data';
+import { organisation, dampMouldCases, complianceStats, estates } from '@/data';
 import { formatCurrency } from '@/utils/format';
+import NeighbourhoodBriefingPanel from '@/components/shared/NeighbourhoodBriefingPanel';
 
 export default function BriefingPage() {
   const { state } = useApp();
   const navigate = useNavigate();
   const { tasks, kpis, scopedRepairs, scopedTenants, scopedDampCases, persona } = usePersonaScope();
+  const [selectedEstateId, setSelectedEstateId] = useState(estates[0]?.id ?? '');
   const userName = state.user.name.split(' ')[0];
   
   const today = new Date();
@@ -157,6 +160,28 @@ export default function BriefingPage() {
               <div className="flex items-center gap-3"><div className="w-2 h-2 rounded-full bg-status-critical" /><p className="text-text-muted"><span className="text-text-primary font-semibold">72%</span> complaint probability for Mrs Chen</p></div>
               <div className="flex items-center gap-3"><div className="w-2 h-2 rounded-full bg-brand-teal" /><p className="text-text-muted"><span className="text-text-primary font-semibold">{dampRiskCount} properties</span> at damp risk from weather</p></div>
             </div>
+          </div>
+        </div>
+
+        {/* AI NEIGHBOURHOOD BRIEFING */}
+        <div className="mb-6 opacity-0 animate-fade-in-up" style={{ animationDelay: '2.45s', animationFillMode: 'forwards' }}>
+          <h2 className="text-lg font-heading font-bold text-status-ai mb-3 flex items-center gap-2"><Map size={18} /> AI NEIGHBOURHOOD BRIEFING</h2>
+          <div className="bg-surface-card/80 backdrop-blur-sm rounded-xl p-5 border border-status-ai/20">
+            <div className="mb-4">
+              <label htmlFor="estate-select" className="text-xs text-text-muted uppercase tracking-wider font-semibold mb-1.5 block">Select Estate</label>
+              <select
+                id="estate-select"
+                value={selectedEstateId}
+                onChange={(e) => setSelectedEstateId(e.target.value)}
+                className="w-full bg-surface-elevated border border-border-default rounded-lg px-3 py-2 text-sm text-text-primary focus:outline-none focus:ring-1 focus:ring-brand-teal/50 focus:border-brand-teal/50 appearance-none cursor-pointer"
+                style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236B7B8D' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 12px center' }}
+              >
+                {estates.map((estate) => (
+                  <option key={estate.id} value={estate.id}>{estate.name}</option>
+                ))}
+              </select>
+            </div>
+            <NeighbourhoodBriefingPanel estateId={selectedEstateId} />
           </div>
         </div>
 

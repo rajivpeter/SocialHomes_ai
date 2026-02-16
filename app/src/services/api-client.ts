@@ -216,6 +216,17 @@ export const aiApi = {
   mockIotSensors: (propertyId: string) => request<any>(`/ai/mock/iot-sensors/${propertyId}`),
   mockDirectDebit: (tenantId: string) => request<any>(`/ai/mock/direct-debit/${tenantId}`),
   mockLabourMarket: (lsoaCode: string) => request<any>(`/ai/mock/labour-market/${lsoaCode}`),
+
+  // GOV.UK Notify Template Library
+  notifyTemplates: () => request<{ templates: any[]; total: number }>('/ai/notify/templates'),
+  notifyTemplatesByCategory: (category: string) =>
+    request<{ category: string; templates: any[]; total: number }>('/ai/notify/templates/' + category),
+  notifyTemplate: (id: string) => request<any>('/ai/notify/template/' + id),
+  notifyRender: (templateId: string, personalisation: Record<string, string>) =>
+    request<{ subject: string; body: string; missingFields: string[] }>('/ai/notify/render', {
+      method: 'POST',
+      body: JSON.stringify({ templateId, personalisation }),
+    }),
 };
 
 // ---- Admin ----
@@ -258,6 +269,18 @@ export const publicDataApi = {
 
   // EPC
   epc: (postcode: string) => request<any>(`/public-data/epc/${encodeURIComponent(postcode)}`),
+
+  // Census 2021 (ONS)
+  census: (lsoaCode: string) => request<any>(`/public-data/census/${encodeURIComponent(lsoaCode)}`),
+
+  // NOMIS Labour Market
+  nomis: (lsoaCode: string) => request<any>(`/public-data/nomis/${encodeURIComponent(lsoaCode)}`),
+
+  // Gas Safe Register
+  gasSafe: (regNumber: string) => request<any>(`/public-data/gas-safe/${encodeURIComponent(regNumber)}`),
+
+  // Electrical Safety Register
+  electricalSafety: (regNumber: string) => request<any>(`/public-data/electrical-safety/${encodeURIComponent(regNumber)}`),
 };
 
 // ---- Lettings (Viewings) ----

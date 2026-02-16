@@ -4,7 +4,7 @@ import { regions, localAuthorities, estates, blocks, properties, tenants } from 
 import { allRepairs as repairs, allComplaints as complaints, allDampCases as dampCases } from '@/data';
 import { organisation, aiInsights } from '@/data';
 import { formatCurrency, formatNumber, formatPercent } from '@/utils/format';
-import { ChevronRight, Map as MapIcon, List, ExternalLink, AlertTriangle, TrendingUp, TrendingDown, Thermometer, Shield, BarChart3, Activity } from 'lucide-react';
+import { ChevronRight, Map as MapIcon, List, ExternalLink, AlertTriangle, TrendingUp, TrendingDown, Thermometer, Shield, BarChart3, Activity, Droplets, CheckCircle2 } from 'lucide-react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
 import * as THREE from 'three';
@@ -104,6 +104,7 @@ export default function ExplorePage() {
   ]);
   const [viewMode, setViewMode] = useState<'map' | 'list'>('map');
   const [show3D, setShow3D] = useState(false);
+  const [dataLayers, setDataLayers] = useState({ crime: false, damp: false, compliance: true });
   const navigate = useNavigate();
 
   // Compute area intelligence based on current selection
@@ -1433,6 +1434,46 @@ export default function ExplorePage() {
           {level === 'tenant' && 'Tenant detail view'}
         </div>
         <div className="flex items-center gap-2">
+          {/* Data Layer Toggles */}
+          <div className="flex items-center gap-1 mr-2 border-r border-border-default pr-3">
+            <button
+              onClick={() => setDataLayers(prev => ({ ...prev, crime: !prev.crime }))}
+              className={`px-2 py-1.5 rounded text-xs font-medium transition-colors flex items-center gap-1 ${
+                dataLayers.crime
+                  ? 'bg-status-critical/20 text-status-critical'
+                  : 'bg-surface-elevated text-text-muted hover:bg-surface-hover'
+              }`}
+              title="Crime Heatmap"
+            >
+              <Shield size={14} />
+              Crime
+            </button>
+            <button
+              onClick={() => setDataLayers(prev => ({ ...prev, damp: !prev.damp }))}
+              className={`px-2 py-1.5 rounded text-xs font-medium transition-colors flex items-center gap-1 ${
+                dataLayers.damp
+                  ? 'bg-brand-blue/20 text-brand-blue'
+                  : 'bg-surface-elevated text-text-muted hover:bg-surface-hover'
+              }`}
+              title="Damp Risk"
+            >
+              <Droplets size={14} />
+              Damp
+            </button>
+            <button
+              onClick={() => setDataLayers(prev => ({ ...prev, compliance: !prev.compliance }))}
+              className={`px-2 py-1.5 rounded text-xs font-medium transition-colors flex items-center gap-1 ${
+                dataLayers.compliance
+                  ? 'bg-brand-teal/20 text-brand-teal'
+                  : 'bg-surface-elevated text-text-muted hover:bg-surface-hover'
+              }`}
+              title="Compliance"
+            >
+              <CheckCircle2 size={14} />
+              Compliance
+            </button>
+          </div>
+
           <button
             onClick={() => setViewMode('map')}
             className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${

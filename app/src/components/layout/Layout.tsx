@@ -25,11 +25,13 @@ export default function Layout() {
 
   return (
     <div className="min-h-screen bg-surface-dark">
+      <a href="#main-content" className="skip-to-content">Skip to main content</a>
       <div className="bg-pattern" />
       <Sidebar />
       <Header />
       <YantraAssist />
       <main
+        id="main-content"
         className="pt-14 transition-all duration-300 relative z-10"
         style={{ marginLeft: state.sidebarCollapsed ? 64 : 280 }}
       >

@@ -11,6 +11,12 @@
 import { Router } from 'express';
 import { authMiddleware } from '../middleware/auth.js';
 import { fetchWithCache } from '../services/external-api.js';
+import {
+  getCensusData,
+  getNomisLabourMarket,
+  verifyGasSafeEngineer,
+  verifyElectricalEngineer,
+} from '../services/census-nomis.js';
 
 export const publicDataRouter = Router();
 publicDataRouter.use(authMiddleware);
@@ -25,6 +31,10 @@ const TTL = {
   FLOOD: 3600,                 // 1 hour
   IMD: 90 * 24 * 3600,        // 90 days
   EPC: 30 * 24 * 3600,        // 30 days
+  CENSUS: 30 * 24 * 3600,     // 30 days
+  NOMIS: 7 * 24 * 3600,       // 7 days
+  GAS_SAFE: 24 * 3600,        // 24 hours
+  ELECTRICAL: 24 * 3600,      // 24 hours
 };
 
 // ============================================================
@@ -550,6 +560,56 @@ publicDataRouter.get('/epc/:postcode', async (req, res, next) => {
       },
     );
 
+    res.json(result);
+  } catch (err) { next(err); }
+});
+
+// ============================================================
+// 3.7  Census 2021 (ONS via NOMIS) — Population, Households,
+//      Tenure, Ethnicity, Health by LSOA
+// ============================================================
+
+publicDataRouter.get('/census/:lsoaCode', async (req, res, next) => {
+  try {
+    const lsoaCode = req.params.lsoaCode.trim();
+    const result = await getCensusData(lsoaCode);
+    res.json(result);
+  } catch (err) { next(err); }
+});
+
+// ============================================================
+// 3.8  NOMIS — Labour Market Stats (Claimant Count,
+//      Employment/Unemployment, Industry Sectors) by LSOA
+// ============================================================
+
+publicDataRouter.get('/nomis/:lsoaCode', async (req, res, next) => {
+  try {
+    const lsoaCode = req.params.lsoaCode.trim();
+    const result = await getNomisLabourMarket(lsoaCode);
+    res.json(result);
+  } catch (err) { next(err); }
+});
+
+// ============================================================
+// 3.9  Gas Safe Register — Contractor Verification
+// ============================================================
+
+publicDataRouter.get('/gas-safe/:registrationNumber', async (req, res, next) => {
+  try {
+    const registrationNumber = req.params.registrationNumber.trim();
+    const result = await verifyGasSafeEngineer(registrationNumber);
+    res.json(result);
+  } catch (err) { next(err); }
+});
+
+// ============================================================
+// 3.10 Electrical Safety Register — Contractor Verification
+// ============================================================
+
+publicDataRouter.get('/electrical-safety/:registrationNumber', async (req, res, next) => {
+  try {
+    const registrationNumber = req.params.registrationNumber.trim();
+    const result = await verifyElectricalEngineer(registrationNumber);
     res.json(result);
   } catch (err) { next(err); }
 });

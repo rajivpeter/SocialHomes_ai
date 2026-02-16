@@ -17,6 +17,15 @@ import {
   mockNomisData,
 } from '../services/mock-services.js';
 
+// GOV.UK Notify template library
+import {
+  getAllTemplates,
+  getTemplateById,
+  getTemplatesByCategory,
+  renderTemplate,
+} from '../services/govuk-notify.js';
+import type { TemplateCategory } from '../services/govuk-notify.js';
+
 export const aiRouter = Router();
 aiRouter.use(authMiddleware);
 
@@ -273,4 +282,58 @@ aiRouter.get('/mock/direct-debit/:tenantId', async (req, res, next) => {
 // GET /api/v1/ai/mock/labour-market/:lsoaCode
 aiRouter.get('/mock/labour-market/:lsoaCode', (req, res) => {
   res.json(mockNomisData(req.params.lsoaCode));
+});
+
+// ================================================================
+// GOV.UK Notify Template Library
+// ================================================================
+
+// GET /api/v1/ai/notify/templates — list all templates
+aiRouter.get('/notify/templates', (_req, res) => {
+  const templates = getAllTemplates();
+  res.json({ templates, total: templates.length });
+});
+
+// GET /api/v1/ai/notify/templates/:category — list templates by category
+aiRouter.get('/notify/templates/:category', (req, res) => {
+  const category = req.params.category as TemplateCategory;
+  const validCategories: TemplateCategory[] = [
+    'rent-arrears', 'repairs', 'asb', 'compliance', 'tenancy', 'damp-mould', 'general',
+  ];
+  if (!validCategories.includes(category)) {
+    return res.status(400).json({
+      error: `Invalid category: ${category}. Valid categories are: ${validCategories.join(', ')}`,
+    });
+  }
+  const templates = getTemplatesByCategory(category);
+  res.json({ category, templates, total: templates.length });
+});
+
+// GET /api/v1/ai/notify/template/:id — get a single template
+aiRouter.get('/notify/template/:id', (req, res) => {
+  const template = getTemplateById(req.params.id);
+  if (!template) {
+    return res.status(404).json({ error: `Template not found: ${req.params.id}` });
+  }
+  res.json(template);
+});
+
+// POST /api/v1/ai/notify/render — render a template with personalisation data
+aiRouter.post('/notify/render', (req, res) => {
+  const { templateId, personalisation } = req.body;
+  if (!templateId) {
+    return res.status(400).json({ error: 'templateId is required' });
+  }
+  if (!personalisation || typeof personalisation !== 'object') {
+    return res.status(400).json({ error: 'personalisation must be an object' });
+  }
+  try {
+    const rendered = renderTemplate(templateId, personalisation);
+    res.json(rendered);
+  } catch (err: any) {
+    if (err.message?.includes('not found')) {
+      return res.status(404).json({ error: err.message });
+    }
+    return res.status(500).json({ error: 'Failed to render template' });
+  }
 });

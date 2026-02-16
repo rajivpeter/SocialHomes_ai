@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { 
-  Building2, User, Calendar, Wrench, AlertTriangle, 
-  CheckCircle, Clock, ArrowRight, UserCheck, Edit, 
-  TrendingUp, XCircle, Home, FileText
+import {
+  Building2, User, Calendar, Wrench, AlertTriangle,
+  CheckCircle, Clock, ArrowRight, UserCheck, Edit,
+  TrendingUp, XCircle, Home, FileText, ShieldCheck, ShieldAlert
 } from 'lucide-react';
 import { useRepairs, useProperties, useTenants } from '@/hooks/useApi';
 import { activities as activitiesData } from '@/data';
@@ -399,6 +399,22 @@ export default function RepairDetailPage() {
                   <div>
                     <div className="text-xs text-text-muted uppercase tracking-wider mb-1">Operative</div>
                     <div className="text-sm text-text-primary">{repair.operative || '-'}</div>
+                    {repair.operative && (
+                      <div className="flex flex-wrap gap-1.5 mt-1.5">
+                        {(repair.trade?.toLowerCase() === 'plumbing' || repair.trade?.toLowerCase() === 'gas') && (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-status-compliant/20 text-status-compliant border border-status-compliant/30">
+                            <ShieldCheck size={10} />
+                            Gas Safe Registered
+                          </span>
+                        )}
+                        {repair.trade?.toLowerCase() === 'electrical' && (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-brand-blue/20 text-brand-blue border border-brand-blue/30">
+                            <ShieldCheck size={10} />
+                            NICEIC Verified
+                          </span>
+                        )}
+                      </div>
+                    )}
                   </div>
                   <div>
                     <div className="text-xs text-text-muted uppercase tracking-wider mb-1">Created Date</div>

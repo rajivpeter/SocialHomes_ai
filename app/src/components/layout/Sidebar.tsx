@@ -90,7 +90,7 @@ export default function Sidebar() {
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 overflow-y-auto py-3 scrollbar-thin">
+      <nav aria-label="Main navigation" className="flex-1 overflow-y-auto py-3 scrollbar-thin">
         {navSections.map((section) => (
           <div key={section.label} className="mb-1">
             {!collapsed && (
@@ -131,6 +131,7 @@ export default function Sidebar() {
       <div className="border-t border-border-default p-3">
         <button
           onClick={() => dispatch({ type: 'TOGGLE_SIDEBAR' })}
+          aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           className="w-full flex items-center justify-center gap-2 py-2 rounded-lg text-text-muted hover:bg-surface-hover hover:text-text-primary transition-all duration-200 text-sm"
         >
           {collapsed ? <ChevronRight size={16} /> : <><ChevronLeft size={16} /> <span className="font-medium">Collapse</span></>}

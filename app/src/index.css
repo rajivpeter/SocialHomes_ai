@@ -423,3 +423,93 @@
 .recharts-cartesian-grid-vertical line {
   stroke: var(--color-border-default) !important;
 }
+
+/* ---- Accessibility: Focus-visible ring ---- */
+@layer base {
+  *:focus-visible {
+    outline: 2px solid var(--color-brand-teal);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  button:focus-visible,
+  a:focus-visible,
+  [role="button"]:focus-visible {
+    outline: 2px solid var(--color-brand-teal);
+    outline-offset: 2px;
+    box-shadow: 0 0 0 4px rgba(5, 137, 149, 0.2);
+  }
+
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible {
+    outline: none;
+    border-color: var(--color-brand-teal);
+    box-shadow: 0 0 0 3px rgba(5, 137, 149, 0.15);
+  }
+}
+
+/* ---- Accessibility: Reduced motion ---- */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .animate-fade-in-up,
+  .animate-fade-in,
+  .animate-slide-in-left,
+  .animate-slide-in-right,
+  .animate-slide-in-down,
+  .animate-count-up {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
+/* ---- Accessibility: Screen reader only ---- */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* ---- Accessibility: Skip to content link ---- */
+.skip-to-content {
+  position: absolute;
+  top: -100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--color-brand-teal);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 0 0 8px 8px;
+  font-size: 14px;
+  font-weight: 600;
+  z-index: 9999;
+  transition: top 0.2s ease;
+}
+.skip-to-content:focus {
+  top: 0;
+}
+
+/* ---- Form validation error state ---- */
+.field-error {
+  border-color: var(--color-status-critical) !important;
+  box-shadow: 0 0 0 3px rgba(190, 51, 88, 0.15) !important;
+}
+
+.field-error:focus {
+  border-color: var(--color-status-critical) !important;
+  box-shadow: 0 0 0 3px rgba(190, 51, 88, 0.2) !important;
+}
