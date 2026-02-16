@@ -10,9 +10,9 @@
 
 | Resource | URL / Identifier |
 |----------|-----------------|
-| **Live Application** | https://socialhomes-674258130066.europe-west2.run.app |
-| **Health Check** | https://socialhomes-674258130066.europe-west2.run.app/health |
-| **API Base** | https://socialhomes-674258130066.europe-west2.run.app/api/v1/ |
+| **Live Application** | https://socialhomes-587984201316.europe-west2.run.app |
+| **Health Check** | https://socialhomes-587984201316.europe-west2.run.app/health |
+| **API Base** | https://socialhomes-587984201316.europe-west2.run.app/api/v1/ |
 | **GitHub Repo** | https://github.com/rajivpeter/SocialHomes_ai |
 | **GCP Project** | `${FIREBASE_PROJECT_ID}` |
 | **Cloud Run Service** | `socialhomes` in `europe-west2` |
@@ -251,7 +251,7 @@ Data is seeded via the admin API endpoint. The seed script reads static data fro
 
 ```bash
 # Trigger seed from API (POST with JSON body containing all static data)
-curl -X POST https://socialhomes-674258130066.europe-west2.run.app/api/v1/admin/seed \
+curl -X POST https://socialhomes-587984201316.europe-west2.run.app/api/v1/admin/seed \
   -H "Content-Type: application/json" \
   -H "X-Persona: coo" \
   -d @seed-data.json
@@ -439,7 +439,7 @@ The large JS bundle includes Three.js and Leaflet. Future optimisation: code-spl
 ### Health Check
 
 ```bash
-curl -s https://socialhomes-674258130066.europe-west2.run.app/health | jq .
+curl -s https://socialhomes-587984201316.europe-west2.run.app/health | jq .
 ```
 
 Expected response:
@@ -475,7 +475,7 @@ An automated uptime check runs every 5 minutes from 3 global regions:
 | Setting | Value |
 |---------|-------|
 | **Check Name** | `SocialHomes.Ai Health Check` |
-| **URL** | `https://socialhomes-674258130066.europe-west2.run.app/health` |
+| **URL** | `https://socialhomes-587984201316.europe-west2.run.app/health` |
 | **Protocol** | HTTPS (GET) |
 | **Period** | 300s (5 minutes) |
 | **Timeout** | 10s |
@@ -541,7 +541,7 @@ The application stores HACT-coded sub-objects alongside application data:
 
 ```bash
 # Export a property as HACT v3.5 JSON
-curl -s https://socialhomes-674258130066.europe-west2.run.app/api/v1/export/hact/property/prop-001 \
+curl -s https://socialhomes-587984201316.europe-west2.run.app/api/v1/export/hact/property/prop-001 \
   -H "X-Persona: coo" | jq .
 ```
 
@@ -850,7 +850,7 @@ The format is `ENV_VAR_NAME=SECRET_NAME:VERSION`. Cloud Run reads the secret val
 
 The old Firebase API key was exposed in git history. Rather than rotating (which would break all active sessions), the key has been **restricted to allowed HTTP referrers only**:
 
-- `https://socialhomes-674258130066.europe-west2.run.app/*`
+- `https://socialhomes-587984201316.europe-west2.run.app/*`
 - `https://socialhomes.ai/*`
 - `https://www.socialhomes.ai/*`
 - `http://localhost:*/*`
@@ -859,7 +859,7 @@ This means the key cannot be used from unauthorized origins, even if found in gi
 
 ```bash
 gcloud services api-keys update projects/674258130066/locations/global/keys/51b47da7-88a0-4711-b308-89bff721c0ca \
-  --allowed-referrers="https://socialhomes-674258130066.europe-west2.run.app/*,https://socialhomes.ai/*,https://www.socialhomes.ai/*,http://localhost:*/*"
+  --allowed-referrers="https://socialhomes-587984201316.europe-west2.run.app/*,https://socialhomes.ai/*,https://www.socialhomes.ai/*,http://localhost:*/*"
 ```
 
 If full rotation is still desired in the future, follow steps in the git history of this document.
