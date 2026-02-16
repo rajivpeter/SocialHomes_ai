@@ -18,10 +18,12 @@ export default function TenanciesPage() {
     return tenants.filter((tenant: any) => {
       const property = properties.find((p: any) => p.id === tenant.propertyId);
       const fullName = `${tenant.title} ${tenant.firstName} ${tenant.lastName}`.toLowerCase();
-      const matchesName = !searchName || fullName.includes(searchName.toLowerCase());
+      const address = (property?.address || '').toLowerCase();
+      const term = searchName.toLowerCase();
+      const matchesName = !searchName || fullName.includes(term) || address.includes(term) || tenant.id.includes(term);
       const matchesPostcode = !searchPostcode || (property?.postcode.toLowerCase().includes(searchPostcode.toLowerCase()) ?? false);
       const matchesStatus = filterStatus === 'all' || tenant.tenancyStatus === filterStatus;
-      
+
       return matchesName && matchesPostcode && matchesStatus;
     });
   }, [tenants, properties, searchName, searchPostcode, filterStatus]);
@@ -70,7 +72,7 @@ export default function TenanciesPage() {
               <Search size={18} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-text-muted" />
               <input
                 type="text"
-                placeholder="Search by name..."
+                placeholder="Search by name or address..."
                 value={searchName}
                 onChange={(e) => setSearchName(e.target.value)}
                 data-testid="search-name"

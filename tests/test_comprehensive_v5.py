@@ -509,19 +509,22 @@ def test_tenancies(d):
         log("Tenancies", "TN-05", "Row data quality", "pass" if has_name else "warn",
             f"Name: {has_name}, Status: {has_status}. Sample: '{first_row[:100]}'")
 
-    # Test search functionality
-    if search:
+    # Test search functionality — use page-level search (data-testid), not global header search
+    page_search = d.find_elements(By.CSS_SELECTOR, "[data-testid='search-name'], input[placeholder*='Search by name' i]")
+    if page_search:
         try:
-            search[0].clear()
-            search[0].send_keys("Mitchell")
+            page_search[0].clear()
+            page_search[0].send_keys("Hassan")
             time.sleep(2)
             filtered_rows = d.find_elements(By.CSS_SELECTOR, "table tbody tr")
             log("Tenancies", "TN-06", "Search filters rows", "pass" if len(filtered_rows) < len(rows) else "warn",
                 f"Before: {len(rows)}, After: {len(filtered_rows)}")
-            search[0].clear()
+            page_search[0].clear()
             time.sleep(1)
         except:
             log("Tenancies", "TN-06", "Search filters rows", "warn", "Could not test search")
+    elif search:
+        log("Tenancies", "TN-06", "Search filters rows", "warn", "Page search input not found, only global search")
 
     # Click tenant row → detail
     nav(d, "/tenancies", 4)
