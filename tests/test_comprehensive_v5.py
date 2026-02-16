@@ -20,7 +20,7 @@ from selenium.common.exceptions import (
     StaleElementReferenceException, WebDriverException
 )
 
-BASE = "https://socialhomes-674258130066.europe-west2.run.app"
+BASE = "https://socialhomes-587984201316.europe-west2.run.app"
 SS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "screenshots_v5")
 os.makedirs(SS_DIR, exist_ok=True)
 
@@ -127,23 +127,53 @@ def create_driver():
 
 def do_login(driver):
     driver.get(BASE + "/login")
-    time.sleep(4)
-    w = WebDriverWait(driver, 20)
-    # Click "Sign in with email"
-    for b in driver.find_elements(By.CSS_SELECTOR, "button, li"):
-        try:
-            if "email" in b.text.lower() and "sign" in b.text.lower():
-                b.click()
-                time.sleep(2)
-                break
-        except:
-            continue
-    w.until(EC.presence_of_element_located((By.CSS_SELECTOR, "input[name='email'], input[type='email']"))).send_keys(EMAIL)
+    time.sleep(8)  # Wait for Firebase init + FirebaseUI render
+    w = WebDriverWait(driver, 30)
+
+    # Click "Sign in with email" via FirebaseUI button
+    try:
+        btn = w.until(EC.element_to_be_clickable((By.CSS_SELECTOR, ".firebaseui-idp-password")))
+        btn.click()
+        time.sleep(2)
+    except:
+        # Fallback: look for any button with "email" text
+        for b in driver.find_elements(By.CSS_SELECTOR, "button, li"):
+            try:
+                if "email" in (b.text or "").lower():
+                    b.click()
+                    time.sleep(2)
+                    break
+            except:
+                continue
+
+    # Fill email
+    email_input = w.until(EC.presence_of_element_located((
+        By.CSS_SELECTOR, "input[name='email'], input[type='email'], .firebaseui-id-email"
+    )))
+    email_input.clear()
+    email_input.send_keys(EMAIL)
+
+    # Click Next
     w.until(EC.element_to_be_clickable((By.CSS_SELECTOR, ".firebaseui-id-submit, button[type='submit']"))).click()
-    time.sleep(2)
-    w.until(EC.presence_of_element_located((By.CSS_SELECTOR, "input[name='password'], input[type='password']"))).send_keys(PASSWORD)
+    time.sleep(3)
+
+    # Fill password
+    pwd_input = w.until(EC.presence_of_element_located((
+        By.CSS_SELECTOR, "input[name='password'], input[type='password'], .firebaseui-id-password"
+    )))
+    pwd_input.clear()
+    pwd_input.send_keys(PASSWORD)
+
+    # Click Sign In
     w.until(EC.element_to_be_clickable((By.CSS_SELECTOR, ".firebaseui-id-submit, button[type='submit']"))).click()
-    w.until(lambda x: "/login" not in x.current_url)
+    time.sleep(5)
+
+    # Wait for redirect away from /login
+    try:
+        w.until(lambda x: "/login" not in x.current_url)
+    except TimeoutException:
+        print(f"  WARNING: Still on login page after submit. URL: {driver.current_url}")
+        ss(driver, "login_stuck")
     time.sleep(3)
     print(f"  Logged in as Sarah Mitchell -> {driver.current_url}")
 
@@ -1376,47 +1406,41 @@ def main():
 
     d = create_driver()
 
-    try:
-        # 0. API health
-        test_health_and_api(d)
+    test_functions = [
+        ("API Health", test_health_and_api),
+        ("Login", test_login),
+        ("Sidebar Navigation", test_sidebar_navigation),
+        ("Header", test_header),
+        ("Dashboard", test_dashboard),
+        ("Briefing", test_briefing),
+        ("Explore", test_explore),
+        ("Tenancies", test_tenancies),
+        ("Properties", test_properties),
+        ("Repairs", test_repairs),
+        ("Rent", test_rent),
+        ("Compliance", test_compliance),
+        ("Complaints", test_complaints),
+        ("Allocations", test_allocations),
+        ("ASB", test_asb),
+        ("Communications", test_communications),
+        ("Reports", test_reports),
+        ("AI Centre", test_ai_centre),
+        ("Admin", test_admin),
+        ("Tenant Portal", test_tenant_portal),
+        ("Yantra Assist", test_yantra_assist),
+        ("Global Checks", test_global_checks),
+    ]
 
-        # 1. Login
-        test_login(d)
+    for name, func in test_functions:
+        try:
+            func(d)
+        except Exception as e:
+            print(f"\n!!! ERROR in {name}: {e}")
+            traceback.print_exc()
+            ss(d, f"ERROR_{name.replace(' ', '_')}")
+            log(name, f"FATAL-{name[:6]}", f"{name} section fatal error", "fail", str(e)[:500])
 
-        # 2. Sidebar navigation
-        test_sidebar_navigation(d)
-
-        # 3. Header
-        test_header(d)
-
-        # 4-19. All pages
-        test_dashboard(d)
-        test_briefing(d)
-        test_explore(d)
-        test_tenancies(d)
-        test_properties(d)
-        test_repairs(d)
-        test_rent(d)
-        test_compliance(d)
-        test_complaints(d)
-        test_allocations(d)
-        test_asb(d)
-        test_communications(d)
-        test_reports(d)
-        test_ai_centre(d)
-        test_admin(d)
-        test_tenant_portal(d)
-        test_yantra_assist(d)
-
-        # Global checks
-        test_global_checks(d)
-
-    except Exception as e:
-        print(f"\n!!! FATAL ERROR: {e}")
-        traceback.print_exc()
-        ss(d, "FATAL_ERROR")
-    finally:
-        d.quit()
+    d.quit()
 
     # Compile results
     end_time = datetime.now(timezone.utc)
