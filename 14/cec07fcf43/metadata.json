@@ -3,13 +3,38 @@
   "checkpoint_id": "14cec07fcf43",
   "strategy": "manual-commit",
   "branch": "main",
-  "checkpoints_count": 2,
+  "checkpoints_count": 3,
   "files_touched": [
     ".claude/settings.local.json",
     "CLAUDE.md",
     "Doc3-Public-API-Integration-Requirements.txt",
     "Doc4-UI-UX-Audit-Build-Guide.md",
-    "EXECUTION-PLAN.md"
+    "EXECUTION-PLAN.md",
+    "app/src/components/shared/HelpDrawer.tsx",
+    "app/src/data/help-content.ts",
+    "app/src/services/api-client.ts",
+    "app/src/types/index.ts",
+    "docs/01-briefing.png",
+    "docs/02-dashboard.png",
+    "docs/03-tenancies.png",
+    "docs/04-properties.png",
+    "docs/05-repairs.png",
+    "docs/06-compliance.png",
+    "docs/07-complaints.png",
+    "docs/08-rent.png",
+    "docs/09-reports.png",
+    "docs/10-ai-centre.png",
+    "docs/SocialHomes-Ai-Brochure.html",
+    "server/package.json",
+    "server/src/routes/public-data.test.ts",
+    "server/src/routes/public-data.ts",
+    "server/src/scripts/seed-imd.ts",
+    "server/src/services/external-api.test.ts",
+    "server/src/services/external-api.ts",
+    "server/src/services/firestore.test.ts",
+    "server/src/services/firestore.ts",
+    "server/src/services/seed-data.ts",
+    "server/vitest.config.ts"
   ],
   "sessions": [
     {
@@ -28,10 +53,10 @@
     }
   ],
   "token_usage": {
-    "input_tokens": 2205,
-    "cache_creation_tokens": 893517,
-    "cache_read_tokens": 24511410,
-    "output_tokens": 19300,
-    "api_call_count": 297
+    "input_tokens": 7033,
+    "cache_creation_tokens": 1103136,
+    "cache_read_tokens": 27620924,
+    "output_tokens": 23349,
+    "api_call_count": 315
   }
 }
