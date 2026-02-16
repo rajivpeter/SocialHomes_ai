@@ -1,0 +1,1083 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SocialHomes.Ai — Product Brochure</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+  :root {
+    --teal: #058995;
+    --teal-dark: #046E78;
+    --teal-light: #0AACBA;
+    --teal-bg: rgba(5,137,149,0.06);
+    --garnet: #BE3358;
+    --garnet-bg: rgba(190,51,88,0.06);
+    --deep: #0D1117;
+    --text: #1a1e2c;
+    --text-secondary: #4a5068;
+    --text-muted: #7a8098;
+    --border: #e2e5ed;
+    --bg-light: #f6f7fa;
+    --bg-card: #ffffff;
+    --green: #16a34a;
+    --amber: #d97706;
+    --blue: #2563eb;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: white;
+    color: var(--text);
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* ===== PRINT / PDF ===== */
+  @page {
+    size: A4;
+    margin: 0;
+  }
+  @media print {
+    body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .page { page-break-after: always; min-height: 0; height: auto; }
+    .page:last-child { page-break-after: avoid; }
+    .no-break { page-break-inside: avoid; }
+  }
+
+  /* ===== PAGE STRUCTURE ===== */
+  .page {
+    width: 210mm;
+    min-height: 297mm;
+    margin: 0 auto;
+    padding: 48px 56px;
+    position: relative;
+    background: white;
+    overflow: hidden;
+  }
+  @media screen {
+    .page {
+      margin-bottom: 20px;
+      box-shadow: 0 1px 8px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.04);
+    }
+  }
+
+  /* ===== COVER PAGE ===== */
+  .cover {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 60px;
+    background: linear-gradient(180deg, white 0%, var(--bg-light) 100%);
+  }
+  .cover-logo { display: flex; align-items: center; gap: 14px; margin-bottom: 56px; }
+  .cover-logo svg { width: 52px; height: 54px; }
+  .cover-logo .brand { font-size: 26px; font-weight: 800; letter-spacing: -0.5px; color: var(--text); }
+  .cover-logo .brand span { color: var(--teal); }
+  .cover-logo .byline { font-size: 9px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 3px; }
+  .cover h1 {
+    font-size: 38px;
+    font-weight: 900;
+    letter-spacing: -1.2px;
+    line-height: 1.15;
+    color: var(--text);
+    margin-bottom: 20px;
+    max-width: 520px;
+  }
+  .cover h1 em { font-style: normal; color: var(--teal); }
+  .cover .subtitle {
+    font-size: 16px;
+    color: var(--text-secondary);
+    max-width: 440px;
+    line-height: 1.7;
+    margin-bottom: 48px;
+  }
+  .cover-badges { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-bottom: 56px; }
+  .cover-badge {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 7px 18px;
+    border-radius: 100px;
+    border: 1.5px solid var(--border);
+    color: var(--text-secondary);
+    background: white;
+  }
+  .cover-badge.teal { border-color: var(--teal); color: var(--teal); background: var(--teal-bg); }
+
+  .cover-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; width: 100%; max-width: 520px; }
+  .cover-stat {
+    text-align: center;
+    padding: 18px 8px;
+    border-radius: 12px;
+    border: 1.5px solid var(--border);
+    background: white;
+  }
+  .cover-stat .num { font-size: 28px; font-weight: 900; color: var(--teal); display: block; }
+  .cover-stat .lbl { font-size: 9px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1.5px; margin-top: 2px; }
+
+  .cover-footer {
+    position: absolute;
+    bottom: 40px;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-size: 10px;
+    color: var(--text-muted);
+  }
+  .cover-footer a { color: var(--teal); text-decoration: none; font-weight: 600; }
+  .cover-url { font-size: 14px; color: var(--teal); font-weight: 700; margin-bottom: 6px; letter-spacing: 0.3px; }
+
+  /* ===== SECTION HEADER ===== */
+  .section-num {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2.5px;
+    color: var(--teal);
+    margin-bottom: 6px;
+  }
+  .section-title {
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: -0.8px;
+    line-height: 1.2;
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+  .section-desc {
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.7;
+    max-width: 560px;
+    margin-bottom: 24px;
+  }
+
+  /* ===== SCREENSHOT FRAME ===== */
+  .screenshot-frame {
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    box-shadow: 0 4px 24px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.04);
+    background: var(--deep);
+  }
+  .screenshot-frame img {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+  .screenshot-frame.small {
+    max-width: 85%;
+    margin: 0 auto;
+  }
+
+  /* ===== KEY POINTS ===== */
+  .key-points {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 20px;
+  }
+  .key-point {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 10px 14px;
+    border-radius: 8px;
+    background: var(--bg-light);
+    border: 1px solid var(--border);
+  }
+  .key-point .icon {
+    width: 20px;
+    height: 20px;
+    border-radius: 5px;
+    background: var(--teal-bg);
+    color: var(--teal);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: 800;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .key-point .icon.garnet { background: var(--garnet-bg); color: var(--garnet); }
+  .key-point .icon.green { background: rgba(22,163,74,0.08); color: var(--green); }
+  .key-point .icon.blue { background: rgba(37,99,235,0.08); color: var(--blue); }
+  .key-point .icon.amber { background: rgba(217,119,6,0.08); color: var(--amber); }
+  .key-point h4 { font-size: 11px; font-weight: 700; color: var(--text); line-height: 1.3; }
+  .key-point p { font-size: 10px; color: var(--text-muted); line-height: 1.4; margin-top: 1px; }
+
+  /* ===== INLINE TAGS ===== */
+  .tags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 12px; }
+  .tag {
+    font-size: 9px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 100px;
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+  }
+  .tag.teal { border-color: rgba(5,137,149,0.3); color: var(--teal); background: var(--teal-bg); }
+  .tag.garnet { border-color: rgba(190,51,88,0.3); color: var(--garnet); background: var(--garnet-bg); }
+
+  /* ===== CALLOUT BOX ===== */
+  .callout {
+    padding: 16px 20px;
+    border-radius: 10px;
+    border-left: 3px solid var(--teal);
+    background: var(--teal-bg);
+    margin-top: 16px;
+  }
+  .callout.garnet { border-left-color: var(--garnet); background: var(--garnet-bg); }
+  .callout h4 { font-size: 12px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+  .callout p { font-size: 11px; color: var(--text-secondary); line-height: 1.6; }
+
+  /* ===== TWO-COL ===== */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: start; }
+  .two-col.wide-right { grid-template-columns: 2fr 3fr; }
+  .two-col.wide-left { grid-template-columns: 3fr 2fr; }
+
+  /* ===== PAGE FOOTER ===== */
+  .page-footer {
+    position: absolute;
+    bottom: 28px;
+    left: 56px;
+    right: 56px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 8px;
+    color: var(--text-muted);
+    border-top: 1px solid var(--border);
+    padding-top: 10px;
+  }
+  .page-footer .logo-small { display: flex; align-items: center; gap: 6px; }
+  .page-footer .logo-small svg { width: 12px; height: 12px; }
+  .page-footer .logo-small span { font-weight: 700; font-size: 9px; color: var(--text-secondary); }
+
+  /* ===== DIVIDER ===== */
+  .divider {
+    width: 40px;
+    height: 3px;
+    border-radius: 3px;
+    background: var(--teal);
+    margin-bottom: 20px;
+  }
+
+  /* ===== TECH GRID ===== */
+  .tech-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .tech-card {
+    padding: 18px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--bg-light);
+  }
+  .tech-card h4 {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--teal);
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+  .tech-card li {
+    font-size: 11px;
+    color: var(--text-secondary);
+    padding: 3px 0;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .tech-card li::before {
+    content: '';
+    width: 4px; height: 4px;
+    border-radius: 50%;
+    background: var(--teal);
+    flex-shrink: 0;
+  }
+
+  /* ===== PERSONA ROW ===== */
+  .persona-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
+  .persona-item {
+    text-align: center;
+    padding: 16px 8px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--bg-light);
+  }
+  .persona-avatar {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    margin: 0 auto 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    font-weight: 800;
+    color: white;
+  }
+  .persona-item h4 { font-size: 10px; font-weight: 700; color: var(--text); margin-bottom: 2px; }
+  .persona-item .scope { font-size: 8px; font-weight: 600; color: var(--teal); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+  .persona-item p { font-size: 9px; color: var(--text-muted); line-height: 1.4; }
+
+  /* ===== METRIC BOXES ===== */
+  .metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 20px; }
+  .metric {
+    text-align: center;
+    padding: 14px 8px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+  }
+  .metric .val { font-size: 20px; font-weight: 900; color: var(--teal); }
+  .metric .lbl { font-size: 8px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; }
+
+  /* ===== CTA PAGE ===== */
+  .cta-page {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    min-height: 297mm;
+    background: linear-gradient(180deg, white 0%, var(--bg-light) 100%);
+  }
+  .cta-page h2 {
+    font-size: 32px;
+    font-weight: 900;
+    letter-spacing: -1px;
+    margin-bottom: 14px;
+  }
+  .cta-page h2 em { font-style: normal; color: var(--teal); }
+  .cta-page .sub {
+    font-size: 14px;
+    color: var(--text-secondary);
+    max-width: 420px;
+    line-height: 1.7;
+    margin-bottom: 36px;
+  }
+  .cta-btn {
+    display: inline-block;
+    padding: 14px 40px;
+    border-radius: 10px;
+    background: var(--teal);
+    color: white;
+    font-size: 15px;
+    font-weight: 700;
+    text-decoration: none;
+    margin-bottom: 16px;
+  }
+  .cta-contact { font-size: 13px; color: var(--text-muted); }
+  .cta-contact a { color: var(--teal); text-decoration: none; font-weight: 600; }
+  .cta-details { display: flex; gap: 40px; margin-top: 48px; }
+  .cta-detail { text-align: center; }
+  .cta-detail .label { font-size: 9px; text-transform: uppercase; letter-spacing: 2px; color: var(--text-muted); margin-bottom: 4px; }
+  .cta-detail .value { font-size: 14px; font-weight: 700; color: var(--text); }
+  .cta-detail .value a { color: var(--teal); text-decoration: none; }
+
+  /* ===== OVERVIEW GRID ===== */
+  .overview-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .overview-item {
+    padding: 14px 16px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--bg-light);
+  }
+  .overview-item h4 { font-size: 12px; font-weight: 700; color: var(--text); margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }
+  .overview-item p { font-size: 10px; color: var(--text-muted); line-height: 1.5; }
+  .overview-item .emoji { font-size: 14px; }
+</style>
+</head>
+<body>
+
+<!-- ============================================= -->
+<!-- PAGE 1: COVER                                 -->
+<!-- ============================================= -->
+<div class="page cover">
+  <div class="cover-logo">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 751 772">
+      <path fill="#058995" d="M745.51,390.8l-95.41-91.94-41.32,42.88,48.94,47.16-250.45,254.19-1.31-194.04,12.47-12.74-.31-.3,143.2-143.64.08.08,42.88-42.58-.29-.29,1-1-41.76-41.63-.79.79L377.89,21.94l-1.41,1.4-.43-.44L10.05,385.9l.67.67-2.57,2.54,325.25,328.97-.16.16,12.35,12.17,30.65,31,.41-.4,2.02,1.99,324.99-329.84.55.53,41.32-42.88ZM345.09,452.5l1.28,189.95-251.12-253.99,92.74-91.98,144.76,141.66-1.03,1.03,13.37,13.33ZM375.98,394.78l-144.51-141.42,146.65-145.45,141.65,142.63-143.79,144.23Z"/>
+    </svg>
+    <div>
+      <div class="brand">SocialHomes<span>.Ai</span></div>
+      <div class="byline">by Yantra.Works</div>
+    </div>
+  </div>
+
+  <h1>The UK's First <em>AI-Native</em> Housing Management System</h1>
+
+  <p class="subtitle">
+    Purpose-built for social housing providers. Manage properties, tenancies, repairs, 
+    compliance, rent, and tenant services &mdash; powered by artificial intelligence.
+  </p>
+
+  <div class="cover-badges">
+    <span class="cover-badge teal">Cloud-Native</span>
+    <span class="cover-badge teal">HACT v3.5 Compliant</span>
+    <span class="cover-badge teal">Awaab's Law Ready</span>
+    <span class="cover-badge">5-Persona RBAC</span>
+    <span class="cover-badge">UK Data Residency</span>
+  </div>
+
+  <div class="cover-stats">
+    <div class="cover-stat"><span class="num">8</span><span class="lbl">AI Models</span></div>
+    <div class="cover-stat"><span class="num">30+</span><span class="lbl">Reports</span></div>
+    <div class="cover-stat"><span class="num">Big 6</span><span class="lbl">Compliance</span></div>
+    <div class="cover-stat"><span class="num">5</span><span class="lbl">Personas</span></div>
+  </div>
+
+  <div class="cover-footer">
+    <div class="cover-url">socialhomes.ai</div>
+    <p>&copy; 2026 Yantra.Works Ltd. &nbsp;|&nbsp; Confidential</p>
+  </div>
+</div>
+
+<!-- ============================================= -->
+<!-- PAGE 2: PRODUCT OVERVIEW                      -->
+<!-- ============================================= -->
+<div class="page">
+  <div class="section-num">Overview</div>
+  <h2 class="section-title">Built for Social Housing. Powered by AI.</h2>
+  <p class="section-desc">
+    SocialHomes.Ai is a comprehensive housing management platform designed exclusively for UK social 
+    housing providers. It replaces fragmented legacy systems with a single, intelligent operating 
+    system that covers the full spectrum of housing operations.
+  </p>
+
+  <div class="overview-grid">
+    <div class="overview-item">
+      <h4><span class="emoji">&#x1F3D7;</span> Property Management</h4>
+      <p>Full property lifecycle with compliance tracking, EPC ratings, damp risk scoring, interactive maps, and 3D building visualisation.</p>
+    </div>
+    <div class="overview-item">
+      <h4><span class="emoji">&#x1F465;</span> Tenancy Management</h4>
+      <p>Complete tenant records with rent balances, arrears tracking, Universal Credit status, vulnerability flags, and household composition.</p>
+    </div>
+    <div class="overview-item">
+      <h4><span class="emoji">&#x1F527;</span> Repairs &amp; Maintenance</h4>
+      <p>End-to-end repairs with priority triage, SLA tracking, contractor assignment, and work history across Emergency, Urgent, Routine, and Planned works.</p>
+    </div>
+    <div class="overview-item">
+      <h4><span class="emoji">&#x1F6E1;</span> Compliance &amp; Safety</h4>
+      <p>Big 6 compliance dashboard (Gas, Electrical, Fire, Asbestos, Legionella, Lifts) with Awaab's Law countdown timers and automated alerts.</p>
+    </div>
+    <div class="overview-item">
+      <h4><span class="emoji">&#x00A3;</span> Rent &amp; Income</h4>
+      <p>Rent collection dashboard with arrears analysis, AI-prioritised worklists, Universal Credit impact tracking, and payment method breakdowns.</p>
+    </div>
+    <div class="overview-item">
+      <h4><span class="emoji">&#x1F4AC;</span> Complaints Handling</h4>
+      <p>Housing Ombudsman-ready complaint management with stage tracking, TSM metrics, category breakdown, and resolution workflow.</p>
+    </div>
+    <div class="overview-item">
+      <h4><span class="emoji">&#x1F9E0;</span> AI Intelligence Centre</h4>
+      <p>8 AI prediction models for arrears trajectory, damp risk, complaint escalation, weather impact, and proactive welfare alerts.</p>
+    </div>
+    <div class="overview-item">
+      <h4><span class="emoji">&#x1F4CA;</span> 30+ Reports</h4>
+      <p>Regulatory returns (TSM, H-CLIC, RSH), operational performance, compliance reports, governance packs, and tenant-facing summaries.</p>
+    </div>
+  </div>
+
+  <div class="callout" style="margin-top: 20px;">
+    <h4>HACT v3.5 Data Standard</h4>
+    <p>The entire data model is built on the HACT UK Housing Data Standard v3.5, ensuring interoperability and regulatory compliance from the ground up.</p>
+  </div>
+
+  <div class="page-footer">
+    <div class="logo-small">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 751 772"><path fill="#058995" d="M745.51,390.8l-95.41-91.94-41.32,42.88,48.94,47.16-250.45,254.19-1.31-194.04,12.47-12.74-.31-.3,143.2-143.64.08.08,42.88-42.58-.29-.29,1-1-41.76-41.63-.79.79L377.89,21.94l-1.41,1.4-.43-.44L10.05,385.9l.67.67-2.57,2.54,325.25,328.97-.16.16,12.35,12.17,30.65,31,.41-.4,2.02,1.99,324.99-329.84.55.53,41.32-42.88ZM345.09,452.5l1.28,189.95-251.12-253.99,92.74-91.98,144.76,141.66-1.03,1.03,13.37,13.33ZM375.98,394.78l-144.51-141.42,146.65-145.45,141.65,142.63-143.79,144.23Z"/></svg>
+      <span>SocialHomes.Ai</span>
+    </div>
+    <span>socialhomes.ai &nbsp;|&nbsp; &copy; 2026 Yantra.Works Ltd.</span>
+  </div>
+</div>
+
+<!-- ============================================= -->
+<!-- PAGE 3: DAILY BRIEFING                        -->
+<!-- ============================================= -->
+<div class="page">
+  <div class="section-num">01 &mdash; Daily Briefing</div>
+  <h2 class="section-title">Start Every Day Informed</h2>
+  <p class="section-desc">
+    Each user receives a personalised daily briefing scoped to their role. Weather-linked damp 
+    alerts, urgent cases, overdue tasks, AI predictions, and a patch snapshot &mdash; before they 
+    even open their caseload.
+  </p>
+
+  <div class="screenshot-frame" style="max-width: 72%; margin: 0 auto;">
+    <img src="01-briefing.png" alt="SocialHomes.Ai Daily Briefing page showing personalised morning briefing with urgent cases, weather alerts, tasks, AI predictions, and patch snapshot">
+  </div>
+
+  <div class="key-points" style="margin-top: 18px;">
+    <div class="key-point">
+      <div class="icon garnet">!</div>
+      <div><h4>Urgent Alerts</h4><p>Emergency damp cases and expired gas certificates surfaced immediately</p></div>
+    </div>
+    <div class="key-point">
+      <div class="icon">AI</div>
+      <div><h4>AI Predictions</h4><p>Arrears forecasts, complaint risk, and damp alerts generated overnight</p></div>
+    </div>
+    <div class="key-point">
+      <div class="icon blue">T</div>
+      <div><h4>Today's Tasks</h4><p>12 tasks, 3 appointments, 5 overdue cases &mdash; prioritised for action</p></div>
+    </div>
+    <div class="key-point">
+      <div class="icon green">P</div>
+      <div><h4>Patch Snapshot</h4><p>Properties, tenancies, open repairs, and arrears total at a glance</p></div>
+    </div>
+  </div>
+
+  <div class="page-footer">
+    <div class="logo-small">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 751 772"><path fill="#058995" d="M745.51,390.8l-95.41-91.94-41.32,42.88,48.94,47.16-250.45,254.19-1.31-194.04,12.47-12.74-.31-.3,143.2-143.64.08.08,42.88-42.58-.29-.29,1-1-41.76-41.63-.79.79L377.89,21.94l-1.41,1.4-.43-.44L10.05,385.9l.67.67-2.57,2.54,325.25,328.97-.16.16,12.35,12.17,30.65,31,.41-.4,2.02,1.99,324.99-329.84.55.53,41.32-42.88ZM345.09,452.5l1.28,189.95-251.12-253.99,92.74-91.98,144.76,141.66-1.03,1.03,13.37,13.33ZM375.98,394.78l-144.51-141.42,146.65-145.45,141.65,142.63-143.79,144.23Z"/></svg>
+      <span>SocialHomes.Ai</span>
+    </div>
+    <span>socialhomes.ai &nbsp;|&nbsp; &copy; 2026 Yantra.Works Ltd.</span>
+  </div>
+</div>
+
+<!-- ============================================= -->
+<!-- PAGE 4: DASHBOARD                             -->
+<!-- ============================================= -->
+<div class="page">
+  <div class="section-num">02 &mdash; Dashboard</div>
+  <h2 class="section-title">Organisation-Wide Intelligence</h2>
+  <p class="section-desc">
+    A real-time operational dashboard with KPIs, rent collection trends, repairs by priority, 
+    Big 6 compliance gauges, Awaab's Law active cases, AI insights, and recent activity &mdash; 
+    all persona-scoped.
+  </p>
+
+  <div class="screenshot-frame">
+    <img src="02-dashboard.png" alt="SocialHomes.Ai Dashboard showing KPI cards, rent collection trend chart, repairs by priority bar chart, Big 6 compliance percentages, Awaab's Law cases, and AI insights panel">
+  </div>
+
+  <div class="tags" style="margin-top: 14px;">
+    <span class="tag teal">12,847 Properties</span>
+    <span class="tag teal">12,103 Tenancies</span>
+    <span class="tag teal">98.7% Compliance</span>
+    <span class="tag teal">95.8% Rent Collection</span>
+    <span class="tag">Rent Trends</span>
+    <span class="tag">Repairs by Priority</span>
+    <span class="tag">AI Predictions</span>
+    <span class="tag">Recent Activity Feed</span>
+  </div>
+
+  <div class="page-footer">
+    <div class="logo-small">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 751 772"><path fill="#058995" d="M745.51,390.8l-95.41-91.94-41.32,42.88,48.94,47.16-250.45,254.19-1.31-194.04,12.47-12.74-.31-.3,143.2-143.64.08.08,42.88-42.58-.29-.29,1-1-41.76-41.63-.79.79L377.89,21.94l-1.41,1.4-.43-.44L10.05,385.9l.67.67-2.57,2.54,325.25,328.97-.16.16,12.35,12.17,30.65,31,.41-.4,2.02,1.99,324.99-329.84.55.53,41.32-42.88ZM345.09,452.5l1.28,189.95-251.12-253.99,92.74-91.98,144.76,141.66-1.03,1.03,13.37,13.33ZM375.98,394.78l-144.51-141.42,146.65-145.45,141.65,142.63-143.79,144.23Z"/></svg>
+      <span>SocialHomes.Ai</span>
+    </div>
+    <span>socialhomes.ai &nbsp;|&nbsp; &copy; 2026 Yantra.Works Ltd.</span>
+  </div>
+</div>
+
+<!-- ============================================= -->
+<!-- PAGE 5: TENANCIES                             -->
+<!-- ============================================= -->
+<div class="page">
+  <div class="section-num">03 &mdash; Tenancy Management</div>
+  <h2 class="section-title">Complete Tenant Records</h2>
+  <p class="section-desc">
+    Manage all tenancies with searchable records, rent balances, postcode lookup, status filtering, 
+    Universal Credit tracking, and payment method visibility. Each tenant links to their full 
+    case history, activity feed, and AI-generated risk profile.
+  </p>
+
+  <div class="screenshot-frame">
+    <img src="03-tenancies.png" alt="SocialHomes.Ai Tenancies page showing searchable tenant list with name, property, postcode, tenure, status, rent balance, and payment method columns">
+  </div>
+
+  <div class="key-points" style="margin-top: 16px;">
+    <div class="key-point">
+      <div class="icon">UC</div>
+      <div><h4>Universal Credit Tracking</h4><p>Live UC status for every tenant &mdash; Claiming, Transitioning, or N/A</p></div>
+    </div>
+    <div class="key-point">
+      <div class="icon garnet">V</div>
+      <div><h4>Vulnerability Flags</h4><p>Elderly, disability, mental health, children-at-risk flags visible at a glance</p></div>
+    </div>
+    <div class="key-point">
+      <div class="icon green">S</div>
+      <div><h4>Search &amp; Filter</h4><p>Search by name, postcode, or status. Filter by arrears, tenure type, or payment method</p></div>
+    </div>
+    <div class="key-point">
+      <div class="icon blue">H</div>
+      <div><h4>Full History</h4><p>Activity timeline, case linkages, communication logs, and AI risk scoring per tenant</p></div>
+    </div>
+  </div>
+
+  <div class="page-footer">
+    <div class="logo-small">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 751 772"><path fill="#058995" d="M745.51,390.8l-95.41-91.94-41.32,42.88,48.94,47.16-250.45,254.19-1.31-194.04,12.47-12.74-.31-.3,143.2-143.64.08.08,42.88-42.58-.29-.29,1-1-41.76-41.63-.79.79L377.89,21.94l-1.41,1.4-.43-.44L10.05,385.9l.67.67-2.57,2.54,325.25,328.97-.16.16,12.35,12.17,30.65,31,.41-.4,2.02,1.99,324.99-329.84.55.53,41.32-42.88ZM345.09,452.5l1.28,189.95-251.12-253.99,92.74-91.98,144.76,141.66-1.03,1.03,13.37,13.33ZM375.98,394.78l-144.51-141.42,146.65-145.45,141.65,142.63-143.79,144.23Z"/></svg>
+      <span>SocialHomes.Ai</span>
+    </div>
+    <span>socialhomes.ai &nbsp;|&nbsp; &copy; 2026 Yantra.Works Ltd.</span>
+  </div>
+</div>
+
+<!-- ============================================= -->
+<!-- PAGE 6: PROPERTIES                            -->
+<!-- ============================================= -->
+<div class="page">
+  <div class="section-num">04 &mdash; Property Management</div>
+  <h2 class="section-title">Your Entire Portfolio, One View</h2>
+  <p class="section-desc">
+    Browse and manage your full housing stock with filtering by type, compliance status, postcode, 
+    and estate. Each property carries compliance RAG status, tenure type, security level, rent 
+    amount, and a direct link to its full detail page with map, 3D view, and case history.
+  </p>
+
+  <div class="screenshot-frame">
+    <img src="04-properties.png" alt="SocialHomes.Ai Properties page showing a detailed property list with compliance status indicators, property types, postcode search, and rent information">
+  </div>
+
+  <div class="tags" style="margin-top: 14px;">
+    <span class="tag teal">Interactive Map View</span>
+    <span class="tag teal">3D Building Visualisation</span>
+    <span class="tag">Compliance RAG Status</span>
+    <span class="tag">EPC Ratings</span>
+    <span class="tag">Damp Risk Scoring</span>
+    <span class="tag">Postcode Search</span>
+    <span class="tag">Type Filtering</span>
+  </div>
+
+  <div class="page-footer">
+    <div class="logo-small">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 751 772"><path fill="#058995" d="M745.51,390.8l-95.41-91.94-41.32,42.88,48.94,47.16-250.45,254.19-1.31-194.04,12.47-12.74-.31-.3,143.2-143.64.08.08,42.88-42.58-.29-.29,1-1-41.76-41.63-.79.79L377.89,21.94l-1.41,1.4-.43-.44L10.05,385.9l.67.67-2.57,2.54,325.25,328.97-.16.16,12.35,12.17,30.65,31,.41-.4,2.02,1.99,324.99-329.84.55.53,41.32-42.88ZM345.09,452.5l1.28,189.95-251.12-253.99,92.74-91.98,144.76,141.66-1.03,1.03,13.37,13.33ZM375.98,394.78l-144.51-141.42,146.65-145.45,141.65,142.63-143.79,144.23Z"/></svg>
+      <span>SocialHomes.Ai</span>
+    </div>
+    <span>socialhomes.ai &nbsp;|&nbsp; &copy; 2026 Yantra.Works Ltd.</span>
+  </div>
+</div>
+
+<!-- ============================================= -->
+<!-- PAGE 7: REPAIRS                               -->
+<!-- ============================================= -->
+<div class="page">
+  <div class="section-num">05 &mdash; Repairs &amp; Maintenance</div>
+  <h2 class="section-title">End-to-End Repairs Tracking</h2>
+  <p class="section-desc">
+    Manage repair requests from creation to completion. Priority-based triage (Emergency, Urgent, 
+    Routine, Planned), SLA tracking, contractor assignment, and full work history for every case.
+  </p>
+
+  <div class="screenshot-frame">
+    <img src="05-repairs.png" alt="SocialHomes.Ai Repairs page showing summary KPI cards for total, emergency, urgent, routine, and planned repairs, with a detailed case table including reference numbers, dates, properties, SOR codes, priority levels, statuses, and contractor assignments">
+  </div>
+
+  <div class="key-points" style="margin-top: 16px;">
+    <div class="key-point">
+      <div class="icon garnet">E</div>
+      <div><h4>Priority Triage</h4><p>Emergency (24hr), Urgent (5 days), Routine (28 days), Planned &mdash; colour-coded and SLA-tracked</p></div>
+    </div>
+    <div class="key-point">
+      <div class="icon">SOR</div>
+      <div><h4>SOR Code Integration</h4><p>Schedule of Rates codes linked to every repair for accurate costing and contractor billing</p></div>
+    </div>
+    <div class="key-point">
+      <div class="icon green">C</div>
+      <div><h4>Contractor Management</h4><p>Assign operatives, track completion status, and monitor performance across contractors</p></div>
+    </div>
+    <div class="key-point">
+      <div class="icon blue">F</div>
+      <div><h4>Search &amp; Filter</h4><p>Filter by status, priority, date range, property, or contractor. List and grid views available</p></div>
+    </div>
+  </div>
+
+  <div class="page-footer">
+    <div class="logo-small">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 751 772"><path fill="#058995" d="M745.51,390.8l-95.41-91.94-41.32,42.88,48.94,47.16-250.45,254.19-1.31-194.04,12.47-12.74-.31-.3,143.2-143.64.08.08,42.88-42.58-.29-.29,1-1-41.76-41.63-.79.79L377.89,21.94l-1.41,1.4-.43-.44L10.05,385.9l.67.67-2.57,2.54,325.25,328.97-.16.16,12.35,12.17,30.65,31,.41-.4,2.02,1.99,324.99-329.84.55.53,41.32-42.88ZM345.09,452.5l1.28,189.95-251.12-253.99,92.74-91.98,144.76,141.66-1.03,1.03,13.37,13.33ZM375.98,394.78l-144.51-141.42,146.65-145.45,141.65,142.63-143.79,144.23Z"/></svg>
+      <span>SocialHomes.Ai</span>
+    </div>
+    <span>socialhomes.ai &nbsp;|&nbsp; &copy; 2026 Yantra.Works Ltd.</span>
+  </div>
+</div>
+
+<!-- ============================================= -->
+<!-- PAGE 8: COMPLIANCE                            -->
+<!-- ============================================= -->
+<div class="page">
+  <div class="section-num">06 &mdash; Compliance &amp; Awaab's Law</div>
+  <h2 class="section-title">Big 6 Compliance &amp; Damp Safety</h2>
+  <p class="section-desc">
+    A single compliance dashboard covering all six key safety areas with real-time percentages, 
+    expiry tracking, and integrated Awaab's Law countdown timers for every damp and mould case.
+  </p>
+
+  <div class="screenshot-frame">
+    <img src="06-compliance.png" alt="SocialHomes.Ai Compliance page showing Big 6 compliance cards for Gas (99.4%), Electrical (97.8%), Fire (99.1%), Asbestos (98.5%), Legionella (99.0%), and Lifts (100.0%), plus Awaab's Law tracker with emergency and significant damp cases showing deadline countdowns and breach alerts">
+  </div>
+
+  <div class="callout garnet" style="margin-top: 16px;">
+    <h4>Awaab's Law &mdash; Real-Time Deadline Tracking</h4>
+    <p>
+      Every damp and mould case carries a live countdown timer. Emergency cases (24hr), 
+      Significant Hazard, and Standard Response deadlines are tracked to the minute. 
+      Breached deadlines are flagged in red with overdue counts. Automated escalation alerts 
+      ensure no statutory deadline is ever missed.
+    </p>
+  </div>
+
+  <div class="tags" style="margin-top: 12px;">
+    <span class="tag garnet">Emergency 24hr Tracking</span>
+    <span class="tag garnet">Breach Alerts</span>
+    <span class="tag teal">Gas 99.4%</span>
+    <span class="tag teal">Electrical 97.8%</span>
+    <span class="tag teal">Fire 99.1%</span>
+    <span class="tag teal">Asbestos 98.5%</span>
+    <span class="tag teal">Legionella 99.0%</span>
+    <span class="tag teal">Lifts 100%</span>
+  </div>
+
+  <div class="page-footer">
+    <div class="logo-small">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 751 772"><path fill="#058995" d="M745.51,390.8l-95.41-91.94-41.32,42.88,48.94,47.16-250.45,254.19-1.31-194.04,12.47-12.74-.31-.3,143.2-143.64.08.08,42.88-42.58-.29-.29,1-1-41.76-41.63-.79.79L377.89,21.94l-1.41,1.4-.43-.44L10.05,385.9l.67.67-2.57,2.54,325.25,328.97-.16.16,12.35,12.17,30.65,31,.41-.4,2.02,1.99,324.99-329.84.55.53,41.32-42.88ZM345.09,452.5l1.28,189.95-251.12-253.99,92.74-91.98,144.76,141.66-1.03,1.03,13.37,13.33ZM375.98,394.78l-144.51-141.42,146.65-145.45,141.65,142.63-143.79,144.23Z"/></svg>
+      <span>SocialHomes.Ai</span>
+    </div>
+    <span>socialhomes.ai &nbsp;|&nbsp; &copy; 2026 Yantra.Works Ltd.</span>
+  </div>
+</div>
+
+<!-- ============================================= -->
+<!-- PAGE 9: COMPLAINTS                            -->
+<!-- ============================================= -->
+<div class="page">
+  <div class="section-num">07 &mdash; Complaints Management</div>
+  <h2 class="section-title">Ombudsman-Ready Complaint Handling</h2>
+  <p class="section-desc">
+    Full complaint lifecycle management aligned with the Housing Ombudsman Complaint Handling 
+    Code. Stage 1 and Stage 2 tracking, TSM metrics, response timescale monitoring, category 
+    breakdown, and finding outcomes.
+  </p>
+
+  <div class="screenshot-frame">
+    <img src="07-complaints.png" alt="SocialHomes.Ai Complaints page showing Stage 1 and Stage 2 summary cards, TSM metrics for complaints per 1000 and response timescale, a detailed complaints table with reference, tenant, category, stage, status, days open, deadline, and finding columns, and a category breakdown">
+  </div>
+
+  <div class="key-points" style="margin-top: 16px;">
+    <div class="key-point">
+      <div class="icon">S1</div>
+      <div><h4>Stage Tracking</h4><p>Stage 1 and Stage 2 with open, investigation, response due, and closed statuses</p></div>
+    </div>
+    <div class="key-point">
+      <div class="icon green">T</div>
+      <div><h4>TSM Metrics</h4><p>CH01 Complaints per 1000 (2.8) and CH02 Response Within Timescale (91.2%)</p></div>
+    </div>
+    <div class="key-point">
+      <div class="icon amber">D</div>
+      <div><h4>Deadline Monitoring</h4><p>Response deadlines tracked with days-open counters and overdue flagging</p></div>
+    </div>
+    <div class="key-point">
+      <div class="icon blue">F</div>
+      <div><h4>Findings &amp; Outcomes</h4><p>Upheld, Partially Upheld outcomes recorded for regulator reporting</p></div>
+    </div>
+  </div>
+
+  <div class="page-footer">
+    <div class="logo-small">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 751 772"><path fill="#058995" d="M745.51,390.8l-95.41-91.94-41.32,42.88,48.94,47.16-250.45,254.19-1.31-194.04,12.47-12.74-.31-.3,143.2-143.64.08.08,42.88-42.58-.29-.29,1-1-41.76-41.63-.79.79L377.89,21.94l-1.41,1.4-.43-.44L10.05,385.9l.67.67-2.57,2.54,325.25,328.97-.16.16,12.35,12.17,30.65,31,.41-.4,2.02,1.99,324.99-329.84.55.53,41.32-42.88ZM345.09,452.5l1.28,189.95-251.12-253.99,92.74-91.98,144.76,141.66-1.03,1.03,13.37,13.33ZM375.98,394.78l-144.51-141.42,146.65-145.45,141.65,142.63-143.79,144.23Z"/></svg>
+      <span>SocialHomes.Ai</span>
+    </div>
+    <span>socialhomes.ai &nbsp;|&nbsp; &copy; 2026 Yantra.Works Ltd.</span>
+  </div>
+</div>
+
+<!-- ============================================= -->
+<!-- PAGE 10: RENT & INCOME                        -->
+<!-- ============================================= -->
+<div class="page">
+  <div class="section-num">08 &mdash; Rent &amp; Income</div>
+  <h2 class="section-title">AI-Prioritised Arrears Management</h2>
+  <p class="section-desc">
+    Complete rent and income dashboard with total arrears, collection rate tracking, payment method 
+    breakdown, arrears banding analysis, and an AI-prioritised worklist that ranks tenants by 
+    risk score and recommends the next action.
+  </p>
+
+  <div class="screenshot-frame">
+    <img src="08-rent.png" alt="SocialHomes.Ai Rent and Income page showing total arrears of 7157.60 pounds, 95.8% collection rate, arrears by band bar chart, payment method pie chart, and AI-prioritised worklist with tenant details, balance, risk score, UC status, and recommended actions">
+  </div>
+
+  <div class="key-points" style="margin-top: 16px;">
+    <div class="key-point">
+      <div class="icon">AI</div>
+      <div><h4>AI Worklist</h4><p>Tenants ranked by arrears risk score. Recommended actions: UC helpline, phone call, payment plan</p></div>
+    </div>
+    <div class="key-point">
+      <div class="icon green">UC</div>
+      <div><h4>Universal Credit Impact</h4><p>UC status (Claiming, Transitioning, N/A) tracked alongside payment method and balance</p></div>
+    </div>
+    <div class="key-point">
+      <div class="icon amber">B</div>
+      <div><h4>Arrears Banding</h4><p>Visual breakdown by band: Nil, &lt;&pound;250, &pound;250-500, &pound;500+, &gt;4 weeks</p></div>
+    </div>
+    <div class="key-point">
+      <div class="icon blue">P</div>
+      <div><h4>Payment Methods</h4><p>DD 35%, UC 30%, SO 15%, Card 10%, HB 5%, Cash 5% &mdash; full visibility</p></div>
+    </div>
+  </div>
+
+  <div class="page-footer">
+    <div class="logo-small">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 751 772"><path fill="#058995" d="M745.51,390.8l-95.41-91.94-41.32,42.88,48.94,47.16-250.45,254.19-1.31-194.04,12.47-12.74-.31-.3,143.2-143.64.08.08,42.88-42.58-.29-.29,1-1-41.76-41.63-.79.79L377.89,21.94l-1.41,1.4-.43-.44L10.05,385.9l.67.67-2.57,2.54,325.25,328.97-.16.16,12.35,12.17,30.65,31,.41-.4,2.02,1.99,324.99-329.84.55.53,41.32-42.88ZM345.09,452.5l1.28,189.95-251.12-253.99,92.74-91.98,144.76,141.66-1.03,1.03,13.37,13.33ZM375.98,394.78l-144.51-141.42,146.65-145.45,141.65,142.63-143.79,144.23Z"/></svg>
+      <span>SocialHomes.Ai</span>
+    </div>
+    <span>socialhomes.ai &nbsp;|&nbsp; &copy; 2026 Yantra.Works Ltd.</span>
+  </div>
+</div>
+
+<!-- ============================================= -->
+<!-- PAGE 11: AI CENTRE                            -->
+<!-- ============================================= -->
+<div class="page">
+  <div class="section-num">09 &mdash; AI Intelligence Centre</div>
+  <h2 class="section-title">8 AI Models. Proactive, Not Reactive.</h2>
+  <p class="section-desc">
+    The AI Centre surfaces predictions, alerts, recommendations, and analyses generated by 
+    8 purpose-built AI models. Each insight shows confidence level, affected entities, and a 
+    one-click action button.
+  </p>
+
+  <div class="screenshot-frame">
+    <img src="10-ai-centre.png" alt="SocialHomes.Ai AI Centre showing Insights, Predictions, and Assistant tabs, with cards for complaint prediction (72% confidence), Awaab's Law breach alert (99%), weather impact on 4 properties (88%), silent tenant welfare check (86%), arrears risk for 5 tenancies (74%), recurring repair pattern analysis (82%), TSM improvement opportunity (71%), and EICRs at risk (90%)">
+  </div>
+
+  <div class="callout" style="margin-top: 16px;">
+    <h4>Yantra Assist &mdash; AI on Every Page</h4>
+    <p>
+      Beyond the AI Centre, every screen in SocialHomes.Ai has contextual AI capabilities. 
+      Draft tenant communications, explain compliance requirements, analyse trends, or generate 
+      board-ready summaries with natural language queries.
+    </p>
+  </div>
+
+  <div class="tags" style="margin-top: 12px;">
+    <span class="tag teal">Arrears Prediction</span>
+    <span class="tag teal">Damp Risk Scoring</span>
+    <span class="tag teal">Complaint Escalation</span>
+    <span class="tag teal">Weather Impact</span>
+    <span class="tag teal">Welfare Alerts</span>
+    <span class="tag teal">Repair Patterns</span>
+    <span class="tag teal">TSM Improvement</span>
+    <span class="tag teal">Compliance Forecasting</span>
+  </div>
+
+  <div class="page-footer">
+    <div class="logo-small">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 751 772"><path fill="#058995" d="M745.51,390.8l-95.41-91.94-41.32,42.88,48.94,47.16-250.45,254.19-1.31-194.04,12.47-12.74-.31-.3,143.2-143.64.08.08,42.88-42.58-.29-.29,1-1-41.76-41.63-.79.79L377.89,21.94l-1.41,1.4-.43-.44L10.05,385.9l.67.67-2.57,2.54,325.25,328.97-.16.16,12.35,12.17,30.65,31,.41-.4,2.02,1.99,324.99-329.84.55.53,41.32-42.88ZM345.09,452.5l1.28,189.95-251.12-253.99,92.74-91.98,144.76,141.66-1.03,1.03,13.37,13.33ZM375.98,394.78l-144.51-141.42,146.65-145.45,141.65,142.63-143.79,144.23Z"/></svg>
+      <span>SocialHomes.Ai</span>
+    </div>
+    <span>socialhomes.ai &nbsp;|&nbsp; &copy; 2026 Yantra.Works Ltd.</span>
+  </div>
+</div>
+
+<!-- ============================================= -->
+<!-- PAGE 12: REPORTS                              -->
+<!-- ============================================= -->
+<div class="page">
+  <div class="section-num">10 &mdash; Reports &amp; Analytics</div>
+  <h2 class="section-title">30+ Reports. One Click.</h2>
+  <p class="section-desc">
+    Six report categories covering regulatory returns, operational performance, compliance, 
+    financial analysis, governance, and tenant-facing outputs. All generated instantly from live 
+    data with HACT v3.5 compliance throughout.
+  </p>
+
+  <div class="screenshot-frame">
+    <img src="09-reports.png" alt="SocialHomes.Ai Reports page showing six report category cards: Regulatory Returns (TSM, CORE, H-CLIC, RSH), Operational Performance (Repairs, Voids, Allocations, First-Time-Fix, SLA), Compliance Reports (Big 6, Gas, Electrical, Fire, Asbestos, Awaab's Law), Financial Reports (Rent Collection, Arrears, Income, Service Charge, UC Impact), Governance (Board Performance, Risk Register, Customer Satisfaction, Strategic KPIs), and Tenant-Facing (Satisfaction Survey, Performance Summary, Community Impact). Bottom shows 3 due this month, 0 overdue, last updated 07/02/2026, 27 total reports">
+  </div>
+
+  <div class="key-points" style="margin-top: 16px;">
+    <div class="key-point">
+      <div class="icon">R</div>
+      <div><h4>Regulatory Returns</h4><p>TSM, CORE Lettings/Sales, H-CLIC, RSH IDA, SDR &mdash; ready for submission</p></div>
+    </div>
+    <div class="key-point">
+      <div class="icon green">O</div>
+      <div><h4>Operational Performance</h4><p>Repairs KPIs, void turnaround, first-time-fix rates, SLA compliance analysis</p></div>
+    </div>
+    <div class="key-point">
+      <div class="icon amber">F</div>
+      <div><h4>Financial &amp; Governance</h4><p>Rent collection, arrears ageing, board packs, risk registers, strategic KPIs</p></div>
+    </div>
+    <div class="key-point">
+      <div class="icon blue">T</div>
+      <div><h4>Tenant-Facing</h4><p>Satisfaction surveys, service performance summaries, community impact reports</p></div>
+    </div>
+  </div>
+
+  <div class="page-footer">
+    <div class="logo-small">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 751 772"><path fill="#058995" d="M745.51,390.8l-95.41-91.94-41.32,42.88,48.94,47.16-250.45,254.19-1.31-194.04,12.47-12.74-.31-.3,143.2-143.64.08.08,42.88-42.58-.29-.29,1-1-41.76-41.63-.79.79L377.89,21.94l-1.41,1.4-.43-.44L10.05,385.9l.67.67-2.57,2.54,325.25,328.97-.16.16,12.35,12.17,30.65,31,.41-.4,2.02,1.99,324.99-329.84.55.53,41.32-42.88ZM345.09,452.5l1.28,189.95-251.12-253.99,92.74-91.98,144.76,141.66-1.03,1.03,13.37,13.33ZM375.98,394.78l-144.51-141.42,146.65-145.45,141.65,142.63-143.79,144.23Z"/></svg>
+      <span>SocialHomes.Ai</span>
+    </div>
+    <span>socialhomes.ai &nbsp;|&nbsp; &copy; 2026 Yantra.Works Ltd.</span>
+  </div>
+</div>
+
+<!-- ============================================= -->
+<!-- PAGE 13: PERSONAS & TECHNOLOGY                -->
+<!-- ============================================= -->
+<div class="page">
+  <div class="section-num">11 &mdash; Role-Based Access &amp; Technology</div>
+  <h2 class="section-title">5 Personas. Enterprise Infrastructure.</h2>
+  <p class="section-desc" style="margin-bottom: 20px;">
+    Every user sees exactly what they need. Data is automatically scoped to each persona's 
+    responsibility level &mdash; from the COO's organisation-wide view to the operative's daily jobs.
+  </p>
+
+  <div class="persona-row">
+    <div class="persona-item">
+      <div class="persona-avatar" style="background: linear-gradient(135deg, #058995, #0AACBA);">C</div>
+      <h4>COO</h4>
+      <div class="scope">Org-Wide</div>
+      <p>Strategic KPIs, board dashboards, cross-portfolio analytics</p>
+    </div>
+    <div class="persona-item">
+      <div class="persona-avatar" style="background: linear-gradient(135deg, #2563eb, #058995);">H</div>
+      <h4>Head of Housing</h4>
+      <div class="scope">Service Area</div>
+      <p>Regional performance, team management, escalation oversight</p>
+    </div>
+    <div class="persona-item">
+      <div class="persona-avatar" style="background: linear-gradient(135deg, #7c3aed, #2563eb);">M</div>
+      <h4>Manager</h4>
+      <div class="scope">Team</div>
+      <p>Team workload, case assignment, performance monitoring</p>
+    </div>
+    <div class="persona-item">
+      <div class="persona-avatar" style="background: linear-gradient(135deg, #d97706, #EFAC92);">O</div>
+      <h4>Housing Officer</h4>
+      <div class="scope">Patch</div>
+      <p>Patch-level data, arrears worklist, case management</p>
+    </div>
+    <div class="persona-item">
+      <div class="persona-avatar" style="background: linear-gradient(135deg, #BE3358, #EFAC92);">P</div>
+      <h4>Operative</h4>
+      <div class="scope">Today's Jobs</div>
+      <p>Daily job list, property access, work completion</p>
+    </div>
+  </div>
+
+  <div style="margin-top: 28px;">
+    <div class="divider"></div>
+    <h3 style="font-size: 18px; font-weight: 800; margin-bottom: 14px;">Enterprise-Grade Technology</h3>
+  </div>
+
+  <div class="tech-grid">
+    <div class="tech-card">
+      <h4>Frontend</h4>
+      <ul>
+        <li>React 19 + TypeScript</li>
+        <li>Vite 7.2</li>
+        <li>Tailwind CSS 4</li>
+        <li>Recharts</li>
+        <li>Leaflet Maps</li>
+        <li>Three.js (3D)</li>
+      </ul>
+    </div>
+    <div class="tech-card">
+      <h4>Backend &amp; Data</h4>
+      <ul>
+        <li>Node.js 20 + Express</li>
+        <li>Google Cloud Firestore</li>
+        <li>Firebase Authentication</li>
+        <li>HACT v3.5 Data Model</li>
+        <li>REST API + Persona Scoping</li>
+      </ul>
+    </div>
+    <div class="tech-card">
+      <h4>Infrastructure</h4>
+      <ul>
+        <li>Google Cloud Run (London)</li>
+        <li>Auto-Scale 1&ndash;10 instances</li>
+        <li>CI/CD via Cloud Build</li>
+        <li>Cloud Armor WAF</li>
+        <li>UK-Only Data Residency</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="metrics">
+    <div class="metric"><div class="val">&lt;200ms</div><div class="lbl">API Response</div></div>
+    <div class="metric"><div class="val">99.9%</div><div class="lbl">Uptime SLA</div></div>
+    <div class="metric"><div class="val">SOC 2</div><div class="lbl">GCP Security</div></div>
+    <div class="metric"><div class="val">UK</div><div class="lbl">Data Residency</div></div>
+  </div>
+
+  <div class="page-footer">
+    <div class="logo-small">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 751 772"><path fill="#058995" d="M745.51,390.8l-95.41-91.94-41.32,42.88,48.94,47.16-250.45,254.19-1.31-194.04,12.47-12.74-.31-.3,143.2-143.64.08.08,42.88-42.58-.29-.29,1-1-41.76-41.63-.79.79L377.89,21.94l-1.41,1.4-.43-.44L10.05,385.9l.67.67-2.57,2.54,325.25,328.97-.16.16,12.35,12.17,30.65,31,.41-.4,2.02,1.99,324.99-329.84.55.53,41.32-42.88ZM345.09,452.5l1.28,189.95-251.12-253.99,92.74-91.98,144.76,141.66-1.03,1.03,13.37,13.33ZM375.98,394.78l-144.51-141.42,146.65-145.45,141.65,142.63-143.79,144.23Z"/></svg>
+      <span>SocialHomes.Ai</span>
+    </div>
+    <span>socialhomes.ai &nbsp;|&nbsp; &copy; 2026 Yantra.Works Ltd.</span>
+  </div>
+</div>
+
+<!-- ============================================= -->
+<!-- PAGE 14: CTA                                  -->
+<!-- ============================================= -->
+<div class="page cta-page">
+  <div class="cover-logo" style="margin-bottom: 48px;">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 751 772" style="width: 48px; height: 50px;">
+      <path fill="#058995" d="M745.51,390.8l-95.41-91.94-41.32,42.88,48.94,47.16-250.45,254.19-1.31-194.04,12.47-12.74-.31-.3,143.2-143.64.08.08,42.88-42.58-.29-.29,1-1-41.76-41.63-.79.79L377.89,21.94l-1.41,1.4-.43-.44L10.05,385.9l.67.67-2.57,2.54,325.25,328.97-.16.16,12.35,12.17,30.65,31,.41-.4,2.02,1.99,324.99-329.84.55.53,41.32-42.88ZM345.09,452.5l1.28,189.95-251.12-253.99,92.74-91.98,144.76,141.66-1.03,1.03,13.37,13.33ZM375.98,394.78l-144.51-141.42,146.65-145.45,141.65,142.63-143.79,144.23Z"/>
+    </svg>
+    <div>
+      <div class="brand" style="font-size: 24px; font-weight: 800;">SocialHomes<span style="color: #058995;">.Ai</span></div>
+      <div style="font-size: 9px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 3px;">by Yantra.Works</div>
+    </div>
+  </div>
+
+  <h2 class="cta-title" style="font-size: 32px; font-weight: 900; letter-spacing: -1px; margin-bottom: 14px;">
+    Ready to Transform Your<br><em>Housing Operations?</em>
+  </h2>
+
+  <p class="sub">
+    We're onboarding select housing providers for early access to the UK's first 
+    AI-native housing management system.
+  </p>
+
+  <a href="mailto:support@yantra.works?subject=SocialHomes.Ai%20-%20Beta%20Access%20Request" class="cta-btn">
+    Request Access
+  </a>
+
+  <p class="cta-contact">
+    or email <a href="mailto:support@yantra.works">support@yantra.works</a>
+  </p>
+
+  <div class="cta-details">
+    <div class="cta-detail">
+      <div class="label">Website</div>
+      <div class="value"><a href="https://socialhomes.ai">socialhomes.ai</a></div>
+    </div>
+    <div class="cta-detail">
+      <div class="label">Support</div>
+      <div class="value"><a href="mailto:support@yantra.works">support@yantra.works</a></div>
+    </div>
+    <div class="cta-detail">
+      <div class="label">Status</div>
+      <div class="value" style="color: var(--garnet);">Closed Beta</div>
+    </div>
+  </div>
+
+  <div class="cover-footer">
+    <p>&copy; 2026 Yantra.Works Ltd. All rights reserved. &nbsp;|&nbsp; Hosted on Google Cloud Platform (London, UK) &nbsp;|&nbsp; HACT v3.5 Compliant</p>
+  </div>
+</div>
+
+</body>
+</html>
