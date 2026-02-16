@@ -9,13 +9,52 @@ export class ApiError extends Error {
   }
 }
 
-export function errorHandler(err: Error, _req: Request, res: Response, _next: NextFunction) {
-  console.error(`[ERROR] ${err.name}: ${err.message}`);
-  if (err instanceof ApiError) {
-    res.status(err.statusCode).json({ error: err.message });
-  } else {
-    res.status(500).json({ error: 'Internal server error' });
+/**
+ * Central error handler with structured JSON logging.
+ *
+ * - Logs timestamp, requestId, HTTP method, path, status code, and message.
+ * - In non-production environments the stack trace is included in the log
+ *   AND in the response body for easier debugging.
+ * - In production, stack traces are never leaked to the client.
+ */
+export function errorHandler(err: Error, req: Request, res: Response, _next: NextFunction) {
+  const statusCode = err instanceof ApiError ? err.statusCode : 500;
+  const requestId = req.headers['x-request-id'] as string | undefined;
+  const isProduction = process.env.NODE_ENV === 'production';
+
+  // Structured log entry
+  const logEntry: Record<string, unknown> = {
+    timestamp: new Date().toISOString(),
+    level: 'error',
+    requestId: requestId || 'N/A',
+    method: req.method,
+    path: req.originalUrl,
+    statusCode,
+    errorName: err.name,
+    message: err.message,
+  };
+
+  if (!isProduction) {
+    logEntry.stack = err.stack;
   }
+
+  console.error(JSON.stringify(logEntry));
+
+  // Build client-facing response
+  const responseBody: Record<string, unknown> = {
+    error: err instanceof ApiError ? err.message : 'Internal server error',
+  };
+
+  if (requestId) {
+    responseBody.requestId = requestId;
+  }
+
+  // Include stack trace for non-production environments to aid debugging
+  if (!isProduction && err.stack) {
+    responseBody.stack = err.stack;
+  }
+
+  res.status(statusCode).json(responseBody);
 }
 
 export function notFound(entity: string, id: string): never {

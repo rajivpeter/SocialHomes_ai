@@ -15,6 +15,11 @@ import {
   mockIoTSensorData,
   mockGoCardlessMandate,
   mockNomisData,
+  mockRepairsMarketplace,
+  mockRegulatorySubmission,
+  mockSigningEnvelope,
+  mockReferencingResult,
+  mockLandRegistryTitle,
 } from '../services/mock-services.js';
 
 // GOV.UK Notify template library
@@ -282,6 +287,38 @@ aiRouter.get('/mock/direct-debit/:tenantId', async (req, res, next) => {
 // GET /api/v1/ai/mock/labour-market/:lsoaCode
 aiRouter.get('/mock/labour-market/:lsoaCode', (req, res) => {
   res.json(mockNomisData(req.params.lsoaCode));
+});
+
+// GET /api/v1/ai/mock/repairs-marketplace/:caseId
+aiRouter.get('/mock/repairs-marketplace/:caseId', (req, res) => {
+  res.json(mockRepairsMarketplace(req.params.caseId));
+});
+
+// GET /api/v1/ai/mock/regulatory/:type/:refId
+aiRouter.get('/mock/regulatory/:type/:refId', (req, res) => {
+  const validTypes = ['rsh-ida', 'core-lettings', 'core-sales', 'ombudsman'] as const;
+  const type = req.params.type as typeof validTypes[number];
+  if (!validTypes.includes(type)) {
+    return res.status(400).json({
+      error: `Invalid regulatory type: ${req.params.type}. Valid types are: ${validTypes.join(', ')}`,
+    });
+  }
+  res.json(mockRegulatorySubmission(type, req.params.refId));
+});
+
+// GET /api/v1/ai/mock/signing/:documentType/:tenantId
+aiRouter.get('/mock/signing/:documentType/:tenantId', (req, res) => {
+  res.json(mockSigningEnvelope(req.params.documentType, req.params.tenantId));
+});
+
+// GET /api/v1/ai/mock/referencing/:applicantId
+aiRouter.get('/mock/referencing/:applicantId', (req, res) => {
+  res.json(mockReferencingResult(req.params.applicantId));
+});
+
+// GET /api/v1/ai/mock/land-registry/:propertyId
+aiRouter.get('/mock/land-registry/:propertyId', (req, res) => {
+  res.json(mockLandRegistryTitle(req.params.propertyId));
 });
 
 // ================================================================

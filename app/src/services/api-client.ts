@@ -216,6 +216,11 @@ export const aiApi = {
   mockIotSensors: (propertyId: string) => request<any>(`/ai/mock/iot-sensors/${propertyId}`),
   mockDirectDebit: (tenantId: string) => request<any>(`/ai/mock/direct-debit/${tenantId}`),
   mockLabourMarket: (lsoaCode: string) => request<any>(`/ai/mock/labour-market/${lsoaCode}`),
+  mockRepairsMarketplace: (caseId: string) => request<any>(`/ai/mock/repairs-marketplace/${caseId}`),
+  mockRegulatory: (type: string, refId: string) => request<any>(`/ai/mock/regulatory/${type}/${refId}`),
+  mockSigning: (documentType: string, tenantId: string) => request<any>(`/ai/mock/signing/${documentType}/${tenantId}`),
+  mockReferencing: (applicantId: string) => request<any>(`/ai/mock/referencing/${applicantId}`),
+  mockLandRegistry: (propertyId: string) => request<any>(`/ai/mock/land-registry/${propertyId}`),
 
   // GOV.UK Notify Template Library
   notifyTemplates: () => request<{ templates: any[]; total: number }>('/ai/notify/templates'),
@@ -238,6 +243,10 @@ export const adminApi = {
   stats: () => request<any>('/admin/stats'),
   seed: (data: any) =>
     request<any>('/admin/seed', { method: 'POST', body: JSON.stringify(data) }),
+  integrations: () => request<any[]>('/admin/integrations'),
+  toggleIntegration: (id: string) => request<any>(`/admin/integrations/${id}/toggle`, { method: 'POST' }),
+  testIntegration: (id: string) => request<any>(`/admin/integrations/${id}/test`, { method: 'POST' }),
+  monitoring: () => request<any>('/admin/monitoring'),
 };
 
 // ---- Public Data ----

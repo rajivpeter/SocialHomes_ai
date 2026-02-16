@@ -32,6 +32,7 @@ import ReportsPage from '@/pages/reports/ReportsPage';
 import TsmReportPage from '@/pages/reports/TsmReportPage';
 import AiCentrePage from '@/pages/ai-centre/AiCentrePage';
 import AdminPage from '@/pages/admin/AdminPage';
+import IntegrationsPage from '@/pages/admin/IntegrationsPage';
 import TenantPortalPage from '@/pages/tenant-portal/TenantPortalPage';
 import LoginPage from '@/pages/auth/LoginPage';
 import DynamicReportPage from '@/pages/reports/DynamicReportPage';
@@ -136,7 +137,7 @@ export default function App() {
             <Route path="/admin/users" element={<AdminPage />} />
             <Route path="/admin/teams" element={<AdminPage />} />
             <Route path="/admin/workflows" element={<AdminPage />} />
-            <Route path="/admin/integrations" element={<AdminPage />} />
+            <Route path="/admin/integrations" element={<IntegrationsPage />} />
             <Route path="/admin/audit" element={<AdminPage />} />
             <Route path="/admin/system" element={<AdminPage />} />
           </Route>
