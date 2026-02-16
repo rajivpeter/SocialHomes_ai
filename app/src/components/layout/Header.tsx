@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '@/context/AppContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { Search, Bell, Sparkles, ChevronDown, User, LogOut, CircleHelp } from 'lucide-react';
+import { Search, Bell, Sparkles, ChevronDown, User, LogOut, BookOpen } from 'lucide-react';
 import type { Persona } from '@/types';
 import { getInitials } from '@/utils/format';
 import HelpDrawer from '@/components/shared/HelpDrawer';
@@ -56,6 +56,17 @@ export default function Header() {
 
       {/* BETA badge */}
       <span className="bg-gradient-to-r from-brand-garnet to-brand-garnet/80 text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider shadow-sm shadow-brand-garnet/20">BETA</span>
+
+      {/* Help — opens left drawer */}
+      <button
+        onClick={() => setShowHelp(!showHelp)}
+        className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg hover:bg-surface-hover transition-all duration-200 border border-transparent hover:border-brand-teal/20"
+        aria-label="User Guide"
+        title="User Guide"
+      >
+        <BookOpen size={15} className="text-brand-teal" />
+        <span className="text-[11px] font-medium text-text-secondary hidden sm:inline">Guide</span>
+      </button>
 
       {/* Global Search */}
       <form onSubmit={handleSearch} className="flex-1 max-w-xl mx-auto">
@@ -111,16 +122,6 @@ export default function Header() {
             </div>
           )}
         </div>
-
-        {/* Help */}
-        <button
-          onClick={() => setShowHelp(!showHelp)}
-          className="relative p-2 rounded-lg hover:bg-surface-hover transition-all duration-200"
-          aria-label="Help"
-          title="Help"
-        >
-          <CircleHelp size={18} className="text-text-secondary" />
-        </button>
 
         {/* AI Assist trigger */}
         <button
