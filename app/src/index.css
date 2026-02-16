@@ -298,6 +298,27 @@
   border-color: var(--color-border-default) !important;
 }
 
+/* ---- Leaflet popup dark-mode overrides ---- */
+.leaflet-popup-content-wrapper {
+  background: var(--color-surface-card) !important;
+  color: var(--color-text-primary) !important;
+  border-radius: 8px !important;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.4) !important;
+}
+.leaflet-popup-tip {
+  background: var(--color-surface-card) !important;
+}
+.leaflet-popup-close-button {
+  color: var(--color-text-muted) !important;
+}
+.leaflet-popup-close-button:hover {
+  color: var(--color-text-primary) !important;
+}
+.custom-marker {
+  background: transparent !important;
+  border: none !important;
+}
+
 /* ---- Status pill styles ---- */
 .status-pill {
   display: inline-flex;

@@ -422,7 +422,10 @@ export default function ExplorePage() {
     const marker = L.marker([lat, lng], { icon });
     // Add popup for Selenium detectability and user context
     const labels: Record<string, string> = { region: 'Region', la: 'Local Authority', estate: 'Estate', block: 'Block', unit: 'Unit', tenant: 'Tenant' };
-    marker.bindPopup(`<div style="font-size:13px;font-weight:600">${labels[type] || type}</div><div style="font-size:11px">${count} unit${count !== 1 ? 's' : ''}</div><div style="font-size:10px;color:#058995;cursor:pointer">Click to explore →</div>`);
+    const popupContent = `<div style="font-size:13px;font-weight:600">${labels[type] || type}</div><div style="font-size:11px">${count} unit${count !== 1 ? 's' : ''}</div><div style="font-size:10px;color:#058995;cursor:pointer">Click to explore →</div>`;
+    marker.bindPopup(popupContent);
+    marker.on('mouseover', () => { marker.openPopup(); });
+    marker.on('mouseout', () => { marker.closePopup(); });
     marker.on('click', onClick);
     return marker;
   };

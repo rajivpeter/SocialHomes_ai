@@ -9,8 +9,9 @@ casesRouter.use(authMiddleware);
 // GET /api/v1/cases?type=repair&status=open&handler=Sarah+Mitchell&priority=emergency
 casesRouter.get('/', async (req, res, next) => {
   try {
-    const { type, status, handler, priority, propertyId, tenantId, limit: limitStr } = req.query;
-    const limit = limitStr ? parseInt(limitStr as string, 10) : 200;
+    const { type, status, handler, priority, propertyId, tenantId, limit: limitStr, offset: offsetStr } = req.query;
+    const limit = limitStr ? parseInt(limitStr as string, 10) : 50;
+    const offset = offsetStr ? parseInt(offsetStr as string, 10) : 0;
 
     // Fetch all cases (no composite index needed), then filter + sort in memory.
     // With ~300 cases this is fast and avoids Firestore composite index requirements.
@@ -31,12 +32,19 @@ casesRouter.get('/', async (req, res, next) => {
       return dateB.localeCompare(dateA);
     });
 
-    // Apply limit
-    if (cases.length > limit) cases = cases.slice(0, limit);
+    const total = cases.length;
+    const totalPages = Math.ceil(total / limit);
+    const page = Math.floor(offset / limit) + 1;
+
+    // Apply pagination
+    cases = cases.slice(offset, offset + limit);
 
     res.json({
       items: cases,
-      total: cases.length,
+      total,
+      page,
+      pageSize: limit,
+      totalPages,
     });
   } catch (err) {
     next(err);

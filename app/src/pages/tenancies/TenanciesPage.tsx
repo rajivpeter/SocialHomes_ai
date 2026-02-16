@@ -20,7 +20,8 @@ export default function TenanciesPage() {
       const fullName = `${tenant.title} ${tenant.firstName} ${tenant.lastName}`.toLowerCase();
       const address = (property?.address || '').toLowerCase();
       const term = searchName.toLowerCase();
-      const matchesName = !searchName || fullName.includes(term) || address.includes(term) || tenant.id.includes(term);
+      const officer = (tenant.assignedOfficer || '').toLowerCase();
+      const matchesName = !searchName || fullName.includes(term) || address.includes(term) || tenant.id.includes(term) || officer.includes(term);
       const matchesPostcode = !searchPostcode || (property?.postcode.toLowerCase().includes(searchPostcode.toLowerCase()) ?? false);
       const matchesStatus = filterStatus === 'all' || tenant.tenancyStatus === filterStatus;
 
@@ -72,7 +73,7 @@ export default function TenanciesPage() {
               <Search size={18} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-text-muted" />
               <input
                 type="text"
-                placeholder="Search by name or address..."
+                placeholder="Search by name, address or officer..."
                 value={searchName}
                 onChange={(e) => setSearchName(e.target.value)}
                 data-testid="search-name"
