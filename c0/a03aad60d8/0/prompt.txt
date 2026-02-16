@@ -1,0 +1,885 @@
+Implement the following plan:
+
+# Pipeline Tab Rebuild — Horizontal Swimlane
+
+## Context
+The current PipelineTab uses stacked vertical cards which don't convey the pipeline flow visually. The user wants a horizontal swimlane with real-time activity, task dependencies, interactive drill-downs, and document previews.
+
+## Files to Change
+
+| # | File | Action |
+|---|------|--------|
+| 1 | `server/src/services/pipeline-parser.ts` | Add `blockedReason` + `dependencies` edge list |
+| 2 | `server/src/index.ts` | Add `GET /api/projects/:name/documents/:docPath` endpoint |
+| 3 | `app/src/types/index.ts` | Add `PipelineDependency`, `DocumentContent` types |
+| 4 | `app/src/services/api.ts` | Add `fetchDocumentContent()` |
+| 5 | `app/src/components/detail/PipelineTab.tsx` | **Complete rewrite** |
+
+## Step 1: Server — pipeline-parser.ts
+
+- At line ~266 where `status = 'blocked'`, compute `blockedReason` from which prerequisite agents still have incomplete tasks (e.g. "Waiting for BA, Claude Code")
+- Add `PipelineDependency` type: `{ from: string, to: string, status: 'satisfied' | 'blocking' }`
+- Compute dependency edges from `pipelineOrder` and return in `PipelineData.dependencies`
+
+## Step 2: Server — index.ts
+
+New endpoint for document content preview:
+```
+GET /api/projects/:name/documents/:docPath
+```
+- `path.basename()` to prevent directory traversal
+- Returns `{ name, content (max 100KB), sizeBytes, lastModified }`
+- 404 if file not found
+
+## Step 3: Frontend Types + API
+
+- Add `PipelineDependency` and `DocumentContent` interfaces to `types/index.ts`
+- Add `dependencies` field to existing `PipelineData` interface
+- Add `fetchDocumentContent(projectName, docPath)` to `api.ts`
+
+## Step 4: PipelineTab.tsx — Complete Rewrite
+
+### Layout (top to bottom):
+1. **PipelineHeader** — Overall progress bar + current phase (kept from existing)
+2. **Horizontal Swimlane** — `flex flex-row overflow-x-auto` with 6 agent columns + dependency arrows between them
+3. **AgentDetailDrawer** — Slides open below swimlane when a column is clicked (3-col grid: tasks | documents | live activity)
+4. **DocumentPreviewModal** — Fixed overlay for viewing file contents
+
+### Sub-components (all in same file):
+
+**ProgressRing** — SVG circular progress ring per agent (56px). Colour matches status. Shows percentage in centre.
+
+**AgentColumn** — 180px wide vertical card per agent:
+- Color-coded top bar (green=complete, teal=active, peach=blocked, gray=idle)
+- Agent icon + name + status badge
+- Circular progress ring
+- Task count (e.g. "8/8") with mini dot visualization (green=done, gray=todo)
+- Document count badge
+- LIVE indicator with animated ping (when agent has active Claude Code session)
+- Blocked reason text (if blocked, e.g. "Waiting for Fullstack")
+- Click to open detail drawer below
+
+**DependencyArrow** — Horizontal line + ArrowRight icon between columns. Green if upstream complete, peach if blocking.
+
+**AgentDetailDrawer** — 3-column responsive grid:
+- **Left: Tasks** — grouped by phase, checkmarks for DONE, priority badges
+- **Middle: Documents** — clickable rows with Eye icon, opens preview modal
+- **Right: Live Activity** — live event feed from agent-monitor API (5s polling), shows current tool, recent events, duration
+
+**DocumentPreviewModal** — Glass-card overlay (`fixed inset-0 z-50`), shows file content in `<pre>` monospace block. Close on click-outside or X button.
+
+### Data fetching:
+- `useQuery('pipeline', projectName)` — 30s refetch (default)
+- `useQuery('agents-project', projectName)` — 5s refetch for live sessions
+- `useQuery('doc-content', ...)` — on-demand when modal opens, 60s staleTime
+
+### State:
+- `selectedAgent: string | null` — which column drawer is open
+- `previewDoc: AgentDocument | null` — which document modal is open
+
+## Verification
+1. Restart server and Vite
+2. Open http://localhost:5174 → click socialhomes → Pipeline tab
+3. **6 agent columns** visible horizontally with arrows between them
+4. **Claude Code** = green/complete with 8/8 and full progress ring
+5. **Fullstack** = peach/blocked with "Waiting for BA, Claude Code" text
+6. Click an agent column → drawer opens below with tasks, docs, live activity
+7. Click a document → modal opens with file content
+8. TypeScript check: `cd app && npx tsc --noEmit`
+
+
+If you need specific details from before exiting plan mode (like exact code snippets, error messages, or content you generated), read the full transcript at: /home/rajiv/.claude/projects/-mnt-c--netapps-socialhomes/549e3cf8-d48c-4a1f-9d35-3ca566450dd1.jsonl
+
+---
+
+I dint see anhy difference did you deploy
+
+---
+
+what you are saying does not match what im seeing
+
+---
+
+[Image: source: /mnt/c/Users/Rajiv/Downloads/Screenshot 2026-02-15 140055.png]
+
+---
+
+this is what shows at the moment - is this correct? i seems wrong to me
+
+---
+
+[Image: source: /mnt/c/Users/Rajiv/Downloads/Screenshot 2026-02-15 143952.png]
+
+---
+
+its been stuck like this for ages, do these agents actually do anything? from the pipeline it looks like there is lots left to do but no agent seem to be progressing, so either the pipeline is wrong or the system isnt working
+
+---
+
+[Image: source: /mnt/c/Users/Rajiv/Downloads/Screenshot 2026-02-15 191229.png]
+
+---
+
+yes
+
+---
+
+This session is being continued from a previous conversation that ran out of context. The summary below covers the earlier portion of the conversation.
+
+Analysis:
+Let me chronologically analyze the entire conversation:
+
+1. **Initial Setup**: The user asked to implement a plan for "Pipeline Tab Rebuild — Horizontal Swimlane" for the mission-control project (though working directory is socialhomes).
+
+2. **File Discovery Phase**: I discovered that the files referenced in the plan (pipeline-parser.ts, PipelineTab.tsx, api.ts, types/index.ts) existed in `/mnt/c/.netapps/mission-control/` not in `/mnt/c/.netapps/socialhomes/`. The socialhomes project has its own separate server/app structure.
+
+3. **Implementation Phase - 5 files modified in mission-control**:
+   - pipeline-parser.ts: Added PipelineDependency type, blockedReason computation, dependency edges
+   - server/src/index.ts: Added document content endpoint
+   - app/src/types/index.ts: Added PipelineDependency, DocumentContent types
+   - app/src/services/api.ts: Added fetchDocumentContent function
+   - app/src/components/detail/PipelineTab.tsx: Complete rewrite with horizontal swimlane
+
+4. **Build errors**: Two TS errors in my code (unused liveAgentMap, unused i variable), fixed those. Pre-existing errors in AgentsPage.tsx and vite.config.ts.
+
+5. **User feedback #1**: "what you are saying does not match what im seeing" - Old layout still showing. Vite HMR didn't pick up the rewrite. I restarted Vite.
+
+6. **User feedback #2**: "is this correct? i seems wrong to me" - New layout was rendering but user had concerns about data accuracy and missing features. LIVE indicator showing on all agents (too broad matching), documents not fully captured.
+
+7. **Fixes applied**: 
+   - Expanded document scanner to capture TEST-REPORT*.md, README.md, and count source files per agent directory
+   - Fixed LIVE indicator to only show on Claude Code agent for default sessions
+
+8. **User feedback #3**: "its been stuck like this for ages, do these agents actually do anything?" - User wanted to understand why pipeline shows 15% with most agents blocked. I explained the pipeline accurately reflects that only Phase 0 is done, and the other agents need to be explicitly launched.
+
+9. **User said "yes" to kicking off Phase 1 work** - This shifted to implementing Phase 1 Fullstack tasks in the socialhomes project.
+
+10. **Phase 1 Implementation Started**:
+    - Created `server/src/services/external-api.ts` (fetchWithCache, rate limiting, audit logging)
+    - Added externalDataCache collection to firestore.ts
+    - Rewrote `server/src/routes/public-data.ts` with all Tier 1 API integrations (postcodes.io, UPRN, police crime, Open-Meteo weather + history, DEFRA flood, IMD, EPC)
+    - Background task retrieved Doc3 sections 7-8 for type definitions
+    - Was about to add TypeScript types to `app/src/types/index.ts` when the summary was requested
+
+Let me trace through all files and code carefully.
+
+Summary:
+1. Primary Request and Intent:
+   - **Original request**: Implement the "Pipeline Tab Rebuild — Horizontal Swimlane" plan for the mission-control project. This involved modifying 5 files: pipeline-parser.ts, server index.ts, frontend types, api.ts, and PipelineTab.tsx — all in `/mnt/c/.netapps/mission-control/`.
+   - **Follow-up request**: Fix data accuracy issues (document scanning too narrow, LIVE indicator showing on all agents incorrectly).
+   - **Latest request**: User asked to kick off Phase 1 (FOUNDATION) Fullstack agent work for the **socialhomes** project at `/mnt/c/.netapps/socialhomes/`. This involves creating external API infrastructure and integrating 5+ free public APIs (postcodes.io, UPRN, police crime, weather, flood, IMD).
+
+2. Key Technical Concepts:
+   - **Two separate projects**: `mission-control` (port 3001 server, port 5174 Vite) is a dev dashboard; `socialhomes` (port 8080 server) is the main housing management app
+   - **Pipeline visualization**: Parses EXECUTION-PLAN.md to extract agent roles, tasks, status, and renders horizontal swimlane
+   - **PipelineDependency edges**: Computed from pipeline order between adjacent agents, status is 'satisfied' or 'blocking'
+   - **blockedReason**: Computed by finding prerequisite agents with incomplete tasks (e.g., "Waiting for BA, Fullstack")
+   - **External API proxy pattern** (GP-1 through GP-6): All external calls go through server-side proxy with Firestore cache, rate limiting, audit logging, and simulated fallbacks
+   - **fetchWithCache**: Cache-through pattern checking Firestore `externalDataCache` collection before calling external APIs
+   - **Token bucket rate limiting**: In-memory per-source rate limiting
+   - **Tailwind CSS dark theme** with brand-teal, brand-peach, status-compliant, status-warning tokens
+   - **React Query** with configurable refetch intervals (30s pipeline, 5s agents, 60s staleTime for docs)
+
+3. Files and Code Sections:
+
+   **MISSION-CONTROL PROJECT FILES:**
+
+   - `/mnt/c/.netapps/mission-control/server/src/services/pipeline-parser.ts`
+     - Core pipeline data parser that reads EXECUTION-PLAN.md and computes agent statuses
+     - **Changes**: Added `PipelineDependency` interface, `blockedReason` computation in status logic, dependency edge generation between adjacent pipeline agents, expanded document scanner with TEST-REPORT, README patterns, recursive file counting per agent directory
+     - Key new type:
+     ```typescript
+     export interface PipelineDependency {
+       from: string;  // upstream agent name
+       to: string;    // downstream agent name
+       status: 'satisfied' | 'blocking';
+     }
+     ```
+     - blockedReason logic:
+     ```typescript
+     const incompletePrereqs = prereqAgents.filter(pa => {
+       const paTasks = agentTasks.get(pa.name) ?? [];
+       return paTasks.length > 0 && !paTasks.every(t => t.status === 'DONE');
+     });
+     if (incompletePrereqs.length === 0) {
+       status = 'idle';
+     } else {
+       status = 'blocked';
+       blockedReason = `Waiting for ${incompletePrereqs.map(pa => pa.name).join(', ')}`;
+     }
+     ```
+     - Dependency edge computation:
+     ```typescript
+     const dependencies: PipelineDependency[] = [];
+     for (let i = 0; i < agents.length - 1; i++) {
+       const upstream = agents[i]!;
+       const downstream = agents[i + 1]!;
+       const upstreamDone = upstream.status === 'complete' || upstream.totalTasks === 0;
+       dependencies.push({
+         from: upstream.role.name,
+         to: downstream.role.name,
+         status: upstreamDone ? 'satisfied' : 'blocking',
+       });
+     }
+     ```
+     - Expanded document scanner with catch-all for .md/.txt/.yaml and recursive `countFiles()` for source directories
+
+   - `/mnt/c/.netapps/mission-control/server/src/index.ts`
+     - Mission-control Express server
+     - **Changes**: Added `path`, `readFile`, `stat` imports; added `GET /api/projects/:name/documents/:docPath` endpoint with `path.basename()` traversal protection, 100KB max, returns `{ name, content, sizeBytes, lastModified }`
+
+   - `/mnt/c/.netapps/mission-control/app/src/types/index.ts`
+     - Frontend type definitions for mission-control
+     - **Changes**: Added `PipelineDependency` and `DocumentContent` interfaces, added `dependencies` field to `PipelineData`
+
+   - `/mnt/c/.netapps/mission-control/app/src/services/api.ts`
+     - API client for mission-control frontend
+     - **Changes**: Added `fetchDocumentContent(projectName, docPath)` function, imported `DocumentContent` type
+
+   - `/mnt/c/.netapps/mission-control/app/src/components/detail/PipelineTab.tsx`
+     - **Complete rewrite** — horizontal swimlane with sub-components:
+     - `ProgressRing` — SVG circular progress (56px) with percentage center text
+     - `AgentColumn` — 180px wide cards with color-coded top bar, icon, progress ring, task dot visualization, doc badge, LIVE ping, blocked reason
+     - `DependencyArrow` — green (satisfied) or peach (blocking) arrows
+     - `AgentDetailDrawer` — 3-column grid: tasks by phase | documents with Eye preview | live activity feed
+     - `DocumentPreviewModal` — glass-card overlay with `<pre>` monospace content
+     - Fixed LIVE indicator matching to only attribute default sessions to Claude Code:
+     ```typescript
+     function isAgentLive(agentName: string): boolean {
+       return (liveAgents ?? []).some(a => {
+         if (a.status !== 'active') return false;
+         if (agentName === 'Claude Code') return a.projectName === projectName;
+         return a.slug?.toLowerCase().includes(agentName.toLowerCase());
+       });
+     }
+     ```
+
+   **SOCIALHOMES PROJECT FILES (Phase 1 work):**
+
+   - `/mnt/c/.netapps/socialhomes/server/src/services/external-api.ts` — **NEW FILE**
+     - Core infrastructure for all external API integrations
+     - Provides: `fetchWithCache()`, token bucket `rateLimiter`, `logApiCall()` audit logging
+     - Uses Firestore `externalDataCache` collection for cache-through pattern
+     - Cache document ID format: `{source}:{lookupKey}` with TTL-based expiry
+     - Full implementation with CacheEntry and ExternalApiResult types
+
+   - `/mnt/c/.netapps/socialhomes/server/src/services/firestore.ts`
+     - **Changes**: Added `externalDataCache: db.collection('externalDataCache')` to collections
+
+   - `/mnt/c/.netapps/socialhomes/server/src/routes/public-data.ts` — **COMPLETE REWRITE**
+     - Replaced the 3-endpoint simulated file with full Tier 1 API integrations:
+     - `GET /postcode/:postcode` — postcodes.io lookup (90-day cache)
+     - `GET /postcode/validate/:postcode` — postcode validation
+     - `POST /postcodes/bulk` — bulk postcode lookup (max 100)
+     - `GET /uprn/:uprn` — UPRN lookup via uprn.uk (90-day cache)
+     - `GET /uprn/postcode/:postcode` — UPRN by postcode
+     - `GET /crime/:lat/:lng` — police crime data (24h cache)
+     - `GET /crime/postcode/:postcode` — crime by postcode with geocoding (multi-month)
+     - `GET /weather/:lat/:lng` — Open-Meteo forecast with hourly data (1h cache)
+     - `GET /weather/history/:lat/:lng` — historical weather archive (7-day cache)
+     - `GET /flood/:lat/:lng` — DEFRA flood warnings (1h cache)
+     - `GET /flood/postcode/:postcode` — flood by postcode with geocoding
+     - `GET /imd/:lsoaCode` — IMD deprivation data via ArcGIS (90-day cache)
+     - `GET /epc/:postcode` — EPC data (requires API key, simulated fallback)
+     - All routes use `fetchWithCache` with simulated fallbacks per GP-2
+
+   - `/mnt/c/.netapps/socialhomes/app/src/types/index.ts` — **PENDING EDIT**
+     - Need to add 14 new interfaces from Doc3 Section 7: CrimeIncident, DeprivationProfile, AreaDemographics, LabourMarket, FloodAlert, WeatherDetail, WeatherWarning, SensorReading, SensorAlert, UcStatus, DampRiskBreakdown, VulnerabilityAssessment
+     - Need to extend existing types: Property (ward, lsoa, lsoaCode, constituency, imdDecile, imdScore, floodRiskZone, etc.), Tenant (ucHousingElement, vulnerabilityScore, etc.), Estate (lsoaCodes, crimeCount30Days, crimeTrend), Communication (govuk-notify channel), ComplianceCertificate (contractor fields)
+
+   **Key reference files read:**
+   - `/mnt/c/.REDACTED.md` — Phase 0 complete (10 tasks), Phases 1-4 pending (55 tasks)
+   - `/mnt/c/.netapps/socialhomes/Doc3-Public-API-Integration-Requirements.txt` — Full API spec (2300 lines), read sections 1-7 covering all Tier 1 APIs, architecture, type definitions
+   - `/mnt/c/.netapps/socialhomes/app/src/services/api-client.ts` — Existing API client with `request<T>()` helper and sanitizeFirestoreTimestamps
+   - `/mnt/c/.netapps/socialhomes/app/src/hooks/useApi.ts` — React Query hooks with `withFallback()` pattern
+   - `/mnt/c/.netapps/mission-control/server/src/services/agent-monitor.ts` — Full agent session scanner used for LIVE indicators
+
+4. Errors and Fixes:
+   - **TS6133 unused variables**: `liveAgentMap` declared but never used, `i` in `.map((agent, i))` unused. Fixed by removing `liveAgentMap` entirely and changing to `.map((agent) => {`
+   - **Pre-existing TS errors** in AgentsPage.tsx (Icon type issue) and vite.config.ts (missing path/dirname) — not from our changes, left as-is
+   - **Vite HMR not picking up complete rewrite**: User reported old layout still showing after file was rewritten. Fixed by killing Vite process and restarting: `kill PIDs; npx vite --port 5174 --host`
+   - **LIVE indicator too broad**: All 6 agents showed LIVE because matching used `a.projectName === projectName` which matched any session. Fixed by restricting: only Claude Code matches on projectName; other agents must match on slug
+   - **Document scanner too narrow**: Only matched 11 hardcoded patterns, missing TEST-REPORT*.md, README.md, and source file counts. Fixed by expanding patterns, adding catch-all for .md/.txt/.yaml, and adding recursive source directory file counting
+
+5. Problem Solving:
+   - Identified that the plan's files targeted mission-control project, not socialhomes, by discovering all 5 files existed in mission-control
+   - Explained to user that pipeline data accurately reflects reality — only Phase 0 is done, other agents need explicit launching
+   - Successfully transitioned from mission-control Pipeline Tab work to socialhomes Phase 1 Fullstack implementation
+
+6. All User Messages:
+   - "Implement the following plan: # Pipeline Tab Rebuild — Horizontal Swimlane [detailed plan]"
+   - "I dint see anhy difference did you deploy"
+   - "this is what shows at the moment - is this correct? i seems wrong to me [screenshot of new horizontal layout]"
+   - User answered question: "Data is wrong, Missing features, you need to explain what each agent is doing; the app has developed a lot and it seems like its not showing wat each agent has done in terms of documents produced etc"
+   - "its been stuck like this for ages, do these agents actually do anything? from the pipeline it looks like there is lots left to do but no agent seem to be progressing, so either the pipeline is wrong or the system isnt working [screenshot]"
+   - "yes" (in response to "Would you like me to kick off Phase 1 work by starting the Fullstack agent tasks?")
+
+7. Pending Tasks:
+   - **Task 9** (in_progress): Integrate postcodes.io, UPRN, crime, weather, flood APIs — routes are WRITTEN but not yet TypeScript-verified or built
+   - **Task 10** (in_progress): Extend TypeScript types for external data — Need to add 14 new interfaces + extend 5 existing types in `app/src/types/index.ts`
+   - After types: Need to add corresponding frontend API functions to `api-client.ts` and React Query hooks to `useApi.ts`
+   - Need to run TypeScript check and build for socialhomes server + app
+   - Need to update EXECUTION-PLAN.md to mark tasks 1.1-1.7, 1.9 as DONE
+   - Task 1.8 (Load IMD CSV data to Firestore) not yet started
+   - Tasks 1.10-1.11 (Tester agent work) not started
+
+8. Current Work:
+   I was in the middle of Phase 1 Fullstack implementation for socialhomes. I had just:
+   1. Created `server/src/services/external-api.ts` (complete)
+   2. Updated `server/src/services/firestore.ts` with externalDataCache (complete)
+   3. Rewrote `server/src/routes/public-data.ts` with all Tier 1 API integrations (complete)
+   4. Retrieved Doc3 Section 7 type definitions via background agent (complete)
+   5. Was about to add the 14 new TypeScript interfaces to `app/src/types/index.ts`
+
+   The last thing I read was the end of `app/src/types/index.ts` (line 524, ending at Notification interface) to determine where to append the new types. The background task returned the full type definitions from Doc3 Section 7.
+
+9. Optional Next Step:
+   Add the 14 new TypeScript interfaces and existing type extensions to `/mnt/c/.netapps/socialhomes/app/src/types/index.ts` as specified in Doc3 Section 7. This is directly continuing the Phase 1 work the user approved with "yes". The types needed are: CrimeIncident, DeprivationProfile, AreaDemographics, LabourMarket, FloodAlert, WeatherDetail, WeatherWarning, SensorReading, SensorAlert, UcStatus, DampRiskBreakdown, VulnerabilityAssessment, plus extensions to Property, Tenant, Estate, Communication, and ComplianceCertificate interfaces. After types, run TypeScript check on both server and app.
+
+If you need specific details from before compaction (like exact code snippets, error messages, or content you generated), read the full transcript at: /home/rajiv/.claude/projects/-mnt-c--netapps-socialhomes/ba7d8c17-5512-40ee-b8be-8d66e8c531ce.jsonl
+Please continue the conversation from where we left off without asking the user any further questions. Continue with the last task that you were asked to work on.
+
+---
+
+<task-notification>
+<task-id>af34376</task-id>
+<status>completed</status>
+<summary>Agent "Read Doc3 sections 7-8 for types and routes" completed</summary>
+<result>Here is the full content of both sections:
+
+---
+
+## Section 7: DATA MODEL EXTENSIONS (lines 1917-2129)
+
+The following additions to `app/src/types/index.ts` are required:
+
+### 7.1 New Types
+
+```typescript
+// ---- External API: Crime ----
+export interface CrimeIncident {
+  externalId: string;
+  category: string;
+  lat: number;
+  lng: number;
+  streetName: string;
+  outcome?: string;
+  month: string;
+  source: 'police-api' | 'simulated';
+}
+
+// ---- External API: Deprivation ----
+export interface DeprivationProfile {
+  lsoaCode: string;
+  imdScore: number;
+  imdRank: number;
+  imdDecile: number;
+  incomeScore: number;
+  employmentScore: number;
+  educationScore: number;
+  healthScore: number;
+  crimeScore: number;
+  housingScore: number;
+  livingEnvironmentScore: number;
+  source: 'ons' | 'simulated';
+}
+
+// ---- External API: Area Demographics (Census) ----
+export interface AreaDemographics {
+  lsoaCode: string;
+  socialRentPct: number;
+  privateRentPct: number;
+  ownerOccupiedPct: number;
+  averageHouseholdSize: number;
+  over65Pct: number;
+  under18Pct: number;
+  limitedActivitiesPct: number;
+  source: 'census-2021' | 'simulated';
+}
+
+// ---- External API: Labour Market ----
+export interface LabourMarket {
+  laCode: string;
+  claimantCount: number;
+  claimantRate: number;
+  employmentRate: number;
+  jobDensity: number;
+  oowBenefitsRate: number;
+  period: string;
+  source: 'nomis' | 'simulated';
+}
+
+// ---- External API: Flood Risk ----
+export interface FloodAlert {
+  areaId: string;
+  severity: 'severe-warning' | 'warning' | 'alert' | 'none';
+  severityLevel: number;
+  description: string;
+  raisedAt: string;
+  message: string;
+  source: 'defra' | 'simulated';
+}
+
+// ---- External API: Weather (enhanced) ----
+export interface WeatherDetail {
+  date: string;
+  temperature: number;
+  humidity: number;
+  precipitation: number;
+  windSpeed: number;
+  windGust?: number;
+  dewPoint?: number;
+  weatherCode?: number;
+  dampRiskCondition: boolean; // true when temp<5 + humidity>80 + precip>0
+  source: 'open-meteo' | 'met-office' | 'simulated';
+}
+
+export interface WeatherWarning {
+  id: string;
+  severity: 'red' | 'amber' | 'yellow';
+  type: string; // 'rain', 'wind', 'snow', 'ice', 'fog', 'thunderstorm'
+  headline: string;
+  validFrom: string;
+  validTo: string;
+  affectedAreas: string[];
+  source: 'met-office' | 'simulated';
+}
+
+// ---- External API: IoT Sensors (mock) ----
+export interface SensorReading {
+  sensorId: string;
+  propertyId: string;
+  timestamp: string;
+  temperature: number;
+  humidity: number;
+  moisture: number;
+  co2Level?: number;
+  source: 'switchee' | 'aico' | 'homelync' | 'simulated';
+}
+
+export interface SensorAlert {
+  id: string;
+  sensorId: string;
+  propertyId: string;
+  type: 'high-humidity' | 'high-moisture' | 'low-temperature' | 'smoke' | 'co';
+  severity: 'critical' | 'warning' | 'info';
+  value: number;
+  threshold: number;
+  timestamp: string;
+  acknowledged: boolean;
+}
+
+// ---- External API: DWP Universal Credit (mock) ----
+export interface UcStatus {
+  tenantId: string;
+  ucStatus: 'claiming' | 'transitioning' | 'managed-migration' | 'none';
+  claimStartDate?: string;
+  nextPaymentDate?: string;
+  estimatedAmount?: number;
+  housingElement?: number;
+  apaInPlace: boolean;
+  managedPayment: boolean;
+  source: 'dwp' | 'simulated';
+}
+
+// ---- Composite: Damp Risk Breakdown ----
+export interface DampRiskBreakdown {
+  propertyId: string;
+  overallScore: number;
+  weatherFactor: number;
+  buildingFactor: number;
+  historyFactor: number;
+  sensorFactor: number;
+  occupancyFactor: number;
+  calculatedAt: string;
+  sources: string[];
+}
+
+// ---- Composite: Vulnerability Assessment ----
+export interface VulnerabilityAssessment {
+  tenantId: string;
+  overallScore: number;
+  deprivationFactor: number;
+  arrearsFactor: number;
+  healthFactor: number;
+  isolationFactor: number;
+  ageFactor: number;
+  dependentsFactor: number;
+  ucTransitionFactor: number;
+  autoFlags: string[];
+  calculatedAt: string;
+  sources: string[];
+}
+```
+
+### 7.2 Extensions to Existing Types
+
+```typescript
+// Property -- add fields:
+ward?: string;
+lsoa?: string;
+lsoaCode?: string;
+constituency?: string;
+imdDecile?: number;
+imdScore?: number;
+classificationCode?: string;
+localCustodianCode?: string;
+acquisitionPrice?: number;
+acquisitionDate?: string;
+floodRiskZone?: string;
+
+// Property.epc -- extend with:
+potentialRating?: string;
+potentialScore?: number;
+wallsDesc?: string;
+roofDesc?: string;
+windowsDesc?: string;
+heatingDesc?: string;
+co2Current?: number;
+heatingCostAnnual?: number;
+recommendations?: { description: string; estimatedSavings: number; indicativeCost: string; }[];
+
+// Tenant -- add fields:
+ucHousingElement?: number;
+apaActive?: boolean;
+managedPayment?: boolean;
+ucNextPayment?: string;
+vulnerabilityScore?: number;
+
+// Communication -- add fields:
+externalId?: string;
+deliveryStatus?: 'sending' | 'delivered' | 'permanent-failure' | 'temporary-failure';
+templateId?: string;
+channel: 'email' | 'phone' | 'letter' | 'sms' | 'portal' | 'govuk-notify';
+
+// ComplianceCertificate -- add fields:
+contractorRegNo?: string;
+contractorVerified?: boolean;
+contractorQuals?: string[];
+contractorRegExpiry?: string;
+
+// Estate -- add fields:
+lsoaCodes?: string[];
+crimeCount30Days?: number;
+crimeCountPrevious30Days?: number;
+crimeTrend?: 'up' | 'down' | 'stable';
+```
+
+---
+
+## Section 8: SERVER ROUTE SUMMARY (lines 2131-2215)
+
+### 8.1 Existing Routes (Enhanced)
+
+| Route File | Endpoint | Changes |
+|---|---|---|
+| `routes/public-data.ts` | `GET /weather/:lat/:lng` | Add hourly data, history |
+| `routes/public-data.ts` | `GET /epc/:postcode` | Add UPRN lookup, full cert |
+| `routes/public-data.ts` | `GET /imd/:laCode` | Replace with LSOA-based real data |
+
+### 8.2 New Routes in `routes/public-data.ts`
+
+```
+GET  /api/v1/public-data/crime/:lat/:lng
+GET  /api/v1/public-data/crime/postcode/:postcode
+GET  /api/v1/public-data/postcode/:postcode
+POST /api/v1/public-data/postcodes/bulk
+GET  /api/v1/public-data/postcode/validate/:postcode
+GET  /api/v1/public-data/uprn/:uprn
+GET  /api/v1/public-data/uprn/postcode/:postcode
+GET  /api/v1/public-data/weather/history/:lat/:lng
+GET  /api/v1/public-data/flood/:lat/:lng
+GET  /api/v1/public-data/flood/postcode/:postcode
+GET  /api/v1/public-data/imd/:lsoaCode                    (REPLACE existing)
+GET  /api/v1/public-data/imd/summary/:estateId
+GET  /api/v1/public-data/census/:lsoaCode
+GET  /api/v1/public-data/census/summary/:estateId
+GET  /api/v1/public-data/labour/:laCode
+GET  /api/v1/public-data/metoffice/forecast/:lat/:lng
+GET  /api/v1/public-data/metoffice/warnings
+GET  /api/v1/public-data/epc/uprn/:uprn
+GET  /api/v1/public-data/epc/certificate/:lmkKey
+GET  /api/v1/public-data/epc/recommendations/:lmkKey
+GET  /api/v1/public-data/os/search
+GET  /api/v1/public-data/os/uprn/:uprn
+GET  /api/v1/public-data/os/postcode/:postcode
+GET  /api/v1/public-data/gas-safe/:registrationNumber
+GET  /api/v1/public-data/electrical-safety/:registrationNumber
+GET  /api/v1/public-data/land-registry/:postcode
+```
+
+### 8.3 New Route File: `routes/notify.ts`
+
+```
+POST /api/v1/notify/email
+POST /api/v1/notify/sms
+POST /api/v1/notify/letter
+GET  /api/v1/notify/status/:notificationId
+GET  /api/v1/notify/templates
+```
+
+### 8.4 New Route File: `routes/mock.ts`
+
+```
+GET  /api/v1/mock/dwp/uc-status/:tenantId
+POST /api/v1/mock/dwp/apa-request
+GET  /api/v1/mock/dwp/managed-payment/:tenantId
+POST /api/v1/mock/payments/dd-setup
+POST /api/v1/mock/payments/dd-cancel
+GET  /api/v1/mock/payments/dd-status/:tenantId
+POST /api/v1/mock/payments/card-payment
+POST /api/v1/mock/regulatory/core-return
+POST /api/v1/mock/regulatory/tsm-submission
+GET  /api/v1/mock/regulatory/submission-status/:id
+POST /api/v1/mock/repairs-marketplace/create-job
+GET  /api/v1/mock/repairs-marketplace/contractors
+POST /api/v1/mock/repairs-marketplace/book-appointment
+GET  /api/v1/mock/repairs-marketplace/job-status/:id
+GET  /api/v1/mock/iot/sensors/:propertyId
+GET  /api/v1/mock/iot/readings/:sensorId
+POST /api/v1/mock/iot/alerts/acknowledge/:alertId
+POST /api/v1/mock/docusign/send-envelope
+GET  /api/v1/mock/docusign/envelope-status/:envelopeId
+POST /api/v1/mock/referencing/credit-check
+GET  /api/v1/mock/referencing/report/:applicationId
+```
+
+### 8.5 New AI Routes (extend `routes/ai.ts`)
+
+```
+GET  /api/v1/ai/damp-risk/:propertyId
+GET  /api/v1/ai/damp-risk/estate/:estateId
+POST /api/v1/ai/damp-risk/recalculate
+GET  /api/v1/ai/crime-context/:estateId
+GET  /api/v1/ai/crime-context/case/:asbCaseId
+GET  /api/v1/ai/vulnerability/:tenantId
+POST /api/v1/ai/vulnerability/scan
+GET  /api/v1/ai/benefits-check/:tenantId
+GET  /api/v1/ai/neighbourhood-briefing/:estateId
+GET  /api/v1/properties/:id/passport
+```
+
+---
+
+**Summary of the two sections:**
+
+- **Section 7** defines **14 new TypeScript interfaces** (`CrimeIncident`, `DeprivationProfile`, `AreaDemographics`, `LabourMarket`, `FloodAlert`, `WeatherDetail`, `WeatherWarning`, `SensorReading`, `SensorAlert`, `UcStatus`, `DampRiskBreakdown`, `VulnerabilityAssessment`) plus field extensions to 5 existing types (`Property`, `Property.epc`, `Tenant`, `Communication`, `ComplianceCertificate`, `Estate`). All new types belong in `app/src/types/index.ts`.
+
+- **Section 8** catalogues a total of **57 server endpoints** spread across 3 enhanced existing routes, 26 new public-data routes, 5 GOV.UK Notify routes in a new `routes/notify.ts`, 21 mock/simulated routes in a new `routes/mock.ts`, and 10 AI routes extending `routes/ai.ts`.</result>
+<usage>total_tokens: 19070
+tool_uses: 4
+duration_ms: 40998</usage>
+</task-notification>
+Full transcript available at: /tmp/claude-1000/-mnt-c--netapps-socialhomes/tasks/af34376.output
+
+---
+
+<task-notification>
+<task-id>b46b516</task-id>
+<output-file>/tmp/claude-1000/-mnt-c--netapps-socialhomes/tasks/b46b516.output</output-file>
+<status>completed</status>
+<summary>Background command "Build frontend app" completed (exit code 0)</summary>
+</task-notification>
+Read the output file to retrieve the result: /tmp/claude-1000/-mnt-c--netapps-socialhomes/tasks/b46b516.output
+
+---
+
+carry on until you complete phase 1; please make sure that the tester agent is testing everything throughly including regression and functional testing; also can we have a new agent acting in parrellel to ceate user manuals that need to be linked from each page
+
+---
+
+<task-notification>
+<task-id>aa312b0</task-id>
+<status>completed</status>
+<summary>Agent "Create user manual help system" completed</summary>
+<result>Here is a summary of all changes made.
+
+---
+
+## Files Created
+
+### 1. `/mnt/c/.netapps/socialhomes/app/src/data/help-content.ts` (896 lines)
+
+This file exports:
+- **`HelpSection` interface** -- defines the shape of help content per route (title, description, sections with heading/content, optional tips, optional relatedPages)
+- **`helpContent` record** -- a `Record<string, HelpSection>` mapping 20 route patterns to thorough help content:
+  - `/dashboard` -- KPI cards, charts, Big 6 grid, Awaab's Law cases, AI insights
+  - `/briefing` -- persona-specific briefing, weather, urgent items, patch snapshot
+  - `/explore` -- geographical hierarchy, Leaflet map, 3D visualisation, context panel
+  - `/tenancies` -- tenant list, detail view, rent account, vulnerability flags, household
+  - `/properties` -- portfolio view, compliance certificates, damp risk, maintenance history, void status
+  - `/repairs` -- backlog, priority/SLA definitions, Awaab's Law flagging, contractor info
+  - `/rent` -- collection performance, arrears management, tenant statements, UC impact
+  - `/compliance` -- Big 6 overview, Gas/EICR/Fire/Asbestos/Legionella/Lifts details
+  - `/compliance/awaabs-law` -- hazard categories, countdown timers, case workflow, regulatory reporting
+  - `/complaints` -- Complaint Handling Code, Stage 1/2, Housing Ombudsman, learning actions
+  - `/allocations` -- void pipeline stages, monitoring, waiting list, matching, cost tracking
+  - `/asb` -- ASB categories, escalation stages, evidence tracking, multi-agency, victim support
+  - `/communications` -- channels, bulk campaigns, GOV.UK Notify, sentiment analysis
+  - `/communications/templates` -- template library, creation, versioning, channel-specific formatting
+  - `/reports` -- categories, TSM, HCLIC/RSH, Awaab's Law reports, scheduling
+  - `/reports/tsm` -- TSM measures, HACT methodology, benchmarking, submission
+  - `/ai` -- 8 prediction models, natural language assistant, proactive insights, transparency
+  - `/admin` -- organisation setup, RBAC, teams, workflow automation, audit logs
+  - `/tenant-portal` -- self-service features, rent viewing, repair reporting, accessibility
+  - `/search` -- global search, filtering, quick actions
+- **`getHelpForRoute()` function** -- matches a pathname to help content using exact match first, then longest-prefix `startsWith` matching (so `/tenancies/ten-001` matches `/tenancies`, and `/compliance/awaabs-law` correctly matches before `/compliance`)
+
+All content uses correct UK social housing terminology (tenancies, housing officer, repairs, rent account, void, ASB, NOSP, etc.) and includes practical workflow guidance.
+
+### 2. `/mnt/c/.netapps/socialhomes/app/src/components/shared/HelpDrawer.tsx` (222 lines)
+
+A slide-in drawer component that:
+- **Slides from the right** using CSS `transform: translateX` with a 300ms ease-out transition
+- **420px wide** on desktop (`sm:w-[420px]`), full-width on mobile
+- **Matches the dark theme** using `bg-surface-card/95 backdrop-blur-xl border-l border-white/10 shadow-2xl`
+- **Decorative left edge glow** mirroring YantraAssist's right edge glow style
+- **Header** with BookOpen icon, title, description, and a search/filter input
+- **Filter box** at the top that filters sections and tips by text match in real time
+- **Content sections** rendered as dark cards with teal uppercase headings
+- **Tips box** with a highlighted teal-accented container and bullet points
+- **Related pages** at the bottom as clickable teal pill-buttons that navigate and close the drawer
+- **Backdrop** with `bg-black/40 backdrop-blur-sm` that closes on click
+- **Escape key** closes the drawer
+- **Auto-focuses** the filter input when opened
+- **Clears filter** when the route changes
+- **Falls back** to a "No help available" message with a muted icon for unrecognised routes
+- **Fixed positioning** at `z-50` with proper layering
+
+### File Modified
+
+### 3. `/mnt/c/.netapps/socialhomes/app/src/components/layout/Header.tsx`
+
+Changes:
+- Added `CircleHelp` to the lucide-react import
+- Added `HelpDrawer` component import
+- Added `showHelp` state variable
+- Added a help button (CircleHelp icon) between the notification bell and the Yantra Assist button, using identical styling (`p-2 rounded-lg hover:bg-surface-hover transition-all duration-200`) with `aria-label="Help"` and `title="Help"`
+- Rendered `<HelpDrawer open={showHelp} onClose={() => setShowHelp(false)} />` before the closing `</header>` tag
+
+### Verification
+
+TypeScript compilation (`tsc --noEmit`) passes with zero errors.</result>
+<usage>total_tokens: 55370
+tool_uses: 20
+duration_ms: 403246</usage>
+</task-notification>
+Full transcript available at: /tmp/claude-1000/-mnt-c--netapps-socialhomes/tasks/aa312b0.output
+
+---
+
+<task-notification>
+<task-id>ae17358</task-id>
+<status>completed</status>
+<summary>Agent "Create comprehensive test suite" completed</summary>
+<result>Here is a detailed summary of everything that was built.
+
+---
+
+## Test Suite Build Summary
+
+### Step 1: Vitest Installation and Configuration
+
+**Package updates** (`/mnt/c/.netapps/socialhomes/server/package.json`):
+- Added `vitest` and `@vitest/coverage-v8` as dev dependencies
+- Added `"test": "vitest run"` and `"test:watch": "vitest"` scripts
+
+**Config file** (`/mnt/c/.netapps/socialhomes/server/vitest.config.ts`):
+- Node environment, globals enabled, includes `src/**/*.test.ts`, V8 coverage provider
+
+---
+
+### Step 2: Server-Side Test Files (66 tests, all passing)
+
+#### File: `/mnt/c/.netapps/socialhomes/server/src/services/firestore.test.ts` -- 12 tests
+
+Tests the `serializeFirestoreData` function:
+- Converts Firestore `Timestamp` to ISO string
+- Converts native `Date` to ISO string
+- Handles arrays recursively
+- Handles nested objects recursively
+- Handles `null` values
+- Handles `undefined` values
+- Passes through primitive values unchanged
+- Converts `DocumentReference` to path string
+- Converts `GeoPoint` to `{latitude, longitude}` object
+- Handles deeply nested mixed structures
+- Handles objects with null fields inside arrays
+- Handles empty arrays and objects
+
+#### File: `/mnt/c/.netapps/socialhomes/server/src/services/external-api.test.ts` -- 15 tests
+
+Tests `fetchWithCache` (8 tests):
+- Returns cached data when cache is valid (not expired)
+- Calls fetchFn when cache is expired
+- Calls fetchFn when cache is empty (miss)
+- Returns simulated fallback on API failure
+- Throws error on API failure when no simulated data provided
+- Writes to cache after successful fetch
+- Includes latencyMs in result when fetching from API
+- Sanitises cache doc ID by replacing special characters
+
+Tests Rate Limiter (4 tests):
+- Allows tokens within limit
+- Denies when rate limit exhausted, returns simulated fallback
+- Throws when rate limit exhausted and no simulated fallback
+- Refills tokens over time (bucket starts full, drains, then rate limits)
+
+Tests `logApiCall` (3 tests):
+- Writes an audit entry to the auditLog collection
+- Includes error message in audit entry when provided
+- Does not throw when audit write fails
+
+#### File: `/mnt/c/.netapps/socialhomes/server/src/routes/public-data.test.ts` -- 39 tests
+
+Tests all 13 API endpoints with real Express HTTP requests using ephemeral test servers:
+
+| Endpoint | Tests |
+|----------|-------|
+| GET /postcode/:postcode | 4 tests: success, fallback, normalisation, schema |
+| GET /postcode/validate/:postcode | 3 tests: valid, invalid, fetch failure |
+| POST /postcodes/bulk | 4 tests: success, missing array, empty array, 100 limit |
+| GET /uprn/:uprn | 3 tests: success, fallback, schema |
+| GET /uprn/postcode/:postcode | 2 tests: success, fallback |
+| GET /crime/:lat/:lng | 3 tests: success, fallback, schema |
+| GET /crime/postcode/:postcode | 2 tests: route shadowing documented |
+| GET /weather/:lat/:lng | 3 tests: success, fallback, schema |
+| GET /weather/history/:lat/:lng | 3 tests: success, fallback, custom days |
+| GET /flood/:lat/:lng | 3 tests: success, fallback, empty alerts |
+| GET /flood/postcode/:postcode | 2 tests: route shadowing documented |
+| GET /imd/:lsoaCode | 4 tests: success, fallback, LSOA not found, schema |
+| GET /epc/:postcode | 3 tests: simulated data, realistic ratings, schema |
+
+---
+
+### Step 3: Selenium Regression Test
+
+**File: `/mnt/c/.netapps/socialhomes/tests/test_phase1_apis.py`** -- 7 test sections
+
+1. **API Health** (16 checks) -- Direct HTTP hits to all public-data endpoints, schema validation, source tracking
+2. **Regression** (28 checks) -- Visits all 16 main pages + 12 sub-pages, checks for React crashes
+3. **Data Integrity** (10 checks) -- Property detail fields, tabs, AI insights, tenant detail
+4. **Compliance** (12 checks) -- Big 6 categories, percentages, Awaab's Law, sub-page drill-down
+5. **Navigation** (28 checks) -- All 14 sidebar links exist and navigate correctly
+6. **Functional** (10 checks) -- Search, table rows, repair detail, persona, rent data, KPIs, charts
+7. **Existing APIs** (8 checks) -- Properties, tenants, cases, briefing, compliance, rent, reports, repairs
+
+---
+
+### Bug Discovered During Testing
+
+**ROUTE-BUG-001**: Express route ordering conflict in `/mnt/c/.netapps/socialhomes/server/src/routes/public-data.ts`:
+- `/crime/:lat/:lng` (line 188) is defined BEFORE `/crime/postcode/:postcode` (line 236)
+- `/flood/:lat/:lng` (line 372) is defined BEFORE `/flood/postcode/:postcode` (line 407)
+- Express matches routes in definition order, so the parametric `/:lat/:lng` catches requests meant for `/postcode/:postcode`
+- Result: `/crime/postcode/SE154QN` is routed as `lat="postcode"` and `lng="SE154QN"`, falling back to simulated data
+- Fix: Reorder routes so `/crime/postcode/:postcode` and `/flood/postcode/:postcode` are defined BEFORE their `/:lat/:lng` counterparts</result>
+<usage>total_tokens: 118475
+tool_uses: 44
+duration_ms: 840850</usage>
+</task-notification>
+Full transcript available at: /tmp/claude-1000/-mnt-c--netapps-socialhomes/tasks/ae17358.output
+
+---
+
+have you deployed this if not please do

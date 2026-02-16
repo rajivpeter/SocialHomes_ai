@@ -1,0 +1,51 @@
+{
+  "cli_version": "0.4.4",
+  "checkpoint_id": "c0a03aad60d8",
+  "strategy": "manual-commit",
+  "branch": "main",
+  "checkpoints_count": 2,
+  "files_touched": [
+    "EXECUTION-PLAN.md",
+    "app/src/components/shared/HelpDrawer.tsx",
+    "app/src/data/help-content.ts",
+    "app/src/services/api-client.ts",
+    "app/src/types/index.ts",
+    "docs/01-briefing.png",
+    "docs/02-dashboard.png",
+    "docs/03-tenancies.png",
+    "docs/04-properties.png",
+    "docs/05-repairs.png",
+    "docs/06-compliance.png",
+    "docs/07-complaints.png",
+    "docs/08-rent.png",
+    "docs/09-reports.png",
+    "docs/10-ai-centre.png",
+    "docs/SocialHomes-Ai-Brochure.html",
+    "server/package.json",
+    "server/src/routes/public-data.test.ts",
+    "server/src/routes/public-data.ts",
+    "server/src/scripts/seed-imd.ts",
+    "server/src/services/external-api.test.ts",
+    "server/src/services/external-api.ts",
+    "server/src/services/firestore.test.ts",
+    "server/src/services/firestore.ts",
+    "server/src/services/seed-data.ts",
+    "server/vitest.config.ts"
+  ],
+  "sessions": [
+    {
+      "metadata": "/c0/a03aad60d8/0/metadata.json",
+      "transcript": "/c0/a03aad60d8/0/full.jsonl",
+      "context": "/c0/a03aad60d8/0/context.md",
+      "content_hash": "/c0/a03aad60d8/0/content_hash.txt",
+      "prompt": "/c0/a03aad60d8/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 4937,
+    "cache_creation_tokens": 425565,
+    "cache_read_tokens": 12332432,
+    "output_tokens": 7222,
+    "api_call_count": 113
+  }
+}
