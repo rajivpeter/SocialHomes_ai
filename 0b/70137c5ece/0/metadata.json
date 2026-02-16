@@ -1,0 +1,37 @@
+{
+  "cli_version": "0.4.4",
+  "checkpoint_id": "0b70137c5ece",
+  "session_id": "ba7d8c17-5512-40ee-b8be-8d66e8c531ce",
+  "strategy": "manual-commit",
+  "created_at": "2026-02-16T08:55:57.739733556Z",
+  "branch": "main",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "app/src/components/layout/Header.tsx",
+    "app/src/components/shared/HelpDrawer.tsx",
+    "app/src/data/help-content.ts",
+    "docs/Proposal-Content-Draft.md",
+    "docs/ProposalSocialHomesAi.docx"
+  ],
+  "agent": "Claude Code",
+  "transcript_identifier_at_start": "5350de89-d202-4fe7-93f2-f16b2f3028e5",
+  "checkpoint_transcript_start": 1121,
+  "transcript_lines_at_start": 1121,
+  "token_usage": {
+    "input_tokens": 183,
+    "cache_creation_tokens": 160875,
+    "cache_read_tokens": 5455301,
+    "output_tokens": 2990,
+    "api_call_count": 62
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-02-16T08:55:52.915901829Z",
+    "agent_lines": 0,
+    "human_added": 2318,
+    "human_modified": 1252,
+    "human_removed": 0,
+    "total_committed": 3004,
+    "agent_percentage": 0
+  },
+  "transcript_path": ".claude/projects/-mnt-c--netapps-socialhomes/ba7d8c17-5512-40ee-b8be-8d66e8c531ce.jsonl"
+}
