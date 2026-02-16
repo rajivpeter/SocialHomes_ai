@@ -232,6 +232,24 @@ export const publicDataApi = {
   epc: (postcode: string) => request<any>(`/public-data/epc/${encodeURIComponent(postcode)}`),
 };
 
+// ---- Lettings (Viewings) ----
+export const lettingsApi = {
+  viewings: () => request<{ items: any[]; total: number }>('/lettings/viewings'),
+  createViewing: (data: any) =>
+    request<any>('/lettings/viewings', { method: 'POST', body: JSON.stringify(data) }),
+  updateViewing: (id: string, data: any) =>
+    request<any>(`/lettings/viewings/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+};
+
+// ---- Booking (Applications) ----
+export const bookingApi = {
+  applications: () => request<{ items: any[]; total: number }>('/booking/applications'),
+  apply: (data: any) =>
+    request<any>('/booking/apply', { method: 'POST', body: JSON.stringify(data) }),
+  updateApplication: (id: string, data: any) =>
+    request<any>(`/booking/applications/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+};
+
 // ---- Export ----
 export const exportApi = {
   hactProperty: (id: string) => request<any>(`/export/hact/property/${id}`),

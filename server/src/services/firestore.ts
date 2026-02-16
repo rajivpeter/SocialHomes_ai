@@ -73,6 +73,8 @@ export const collections = {
   applicants: db.collection('applicants'),
   tsmMeasures: db.collection('tsmMeasures'),
   externalDataCache: db.collection('externalDataCache'),
+  viewings: db.collection('viewings'),
+  applications: db.collection('applications'),
 };
 
 // ---- Helpers ----
@@ -138,6 +140,14 @@ export async function batchWrite(
     }
     await batch.commit();
   }
+}
+
+export async function addDoc(
+  collection: FirebaseFirestore.CollectionReference,
+  data: Record<string, any>,
+): Promise<string> {
+  const ref = await collection.add(data);
+  return ref.id;
 }
 
 export async function deleteDoc(

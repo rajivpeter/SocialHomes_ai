@@ -20,6 +20,8 @@ import { adminRouter } from './routes/admin.js';
 import { publicDataRouter } from './routes/public-data.js';
 import { exportRouter } from './routes/export.js';
 import { authRouter } from './routes/auth.js';
+import { lettingsRouter } from './routes/lettings.js';
+import { bookingRouter } from './routes/booking.js';
 import { errorHandler } from './middleware/error-handler.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -77,6 +79,8 @@ app.use('/api/v1/ai', aiRouter);
 app.use('/api/v1/admin', adminRouter);
 app.use('/api/v1/public-data', publicDataRouter);
 app.use('/api/v1/export', exportRouter);
+app.use('/api/v1/lettings', lettingsRouter);
+app.use('/api/v1/booking', bookingRouter);
 
 // ---- Convenience Route Aliases ----
 // Repairs and complaints are stored in the `cases` collection with a `type`

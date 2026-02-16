@@ -16,6 +16,8 @@ import {
   reportsApi,
   aiApi,
   publicDataApi,
+  lettingsApi,
+  bookingApi,
 } from '../services/api-client';
 
 // Static data imports for fallback
@@ -334,6 +336,53 @@ export function useUpdateCase() {
       queryClient.invalidateQueries({ queryKey: ['case', variables.id] });
       queryClient.invalidateQueries({ queryKey: ['cases'] });
     },
+  });
+}
+
+// ---- Lettings / Viewings ----
+export function useViewings() {
+  return useQuery({
+    queryKey: ['viewings'],
+    queryFn: () => lettingsApi.viewings().then(r => r.items),
+  });
+}
+
+export function useCreateViewing() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data: any) => lettingsApi.createViewing(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['viewings'] });
+    },
+  });
+}
+
+// ---- Booking / Applications ----
+export function useApplications() {
+  return useQuery({
+    queryKey: ['applications'],
+    queryFn: () => bookingApi.applications().then(r => r.items),
+  });
+}
+
+export function useCreateApplication() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data: any) => bookingApi.apply(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['applications'] });
+    },
+  });
+}
+
+// ---- Available Properties ----
+export function useAvailableProperties() {
+  return useQuery({
+    queryKey: ['properties', 'available'],
+    queryFn: () => withFallback(
+      () => propertiesApi.list({ isVoid: 'true' }).then(r => r.items),
+      staticProperties.filter(p => p.isVoid)
+    ),
   });
 }
 

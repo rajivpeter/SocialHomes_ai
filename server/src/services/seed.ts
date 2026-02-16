@@ -26,6 +26,8 @@ interface SeedData {
   voidProperties: any[];
   applicants: any[];
   rentTransactions: any[];
+  viewings: any[];
+  applications: any[];
 }
 
 function addHactCodesToProperty(property: any) {
@@ -138,7 +140,19 @@ export async function seedFirestore(data: SeedData) {
     await batchWrite(data.rentTransactions.map(r => ({ collection: collections.rentTransactions, id: r.id, data: r })));
   }
 
-  // 16. HACT Code Lists
+  // 16. Viewings
+  if (data.viewings && data.viewings.length > 0) {
+    console.log(`  → Seeding ${data.viewings.length} viewings...`);
+    await batchWrite(data.viewings.map(v => ({ collection: collections.viewings, id: v.id, data: v })));
+  }
+
+  // 17. Applications
+  if (data.applications && data.applications.length > 0) {
+    console.log(`  → Seeding ${data.applications.length} applications...`);
+    await batchWrite(data.applications.map(a => ({ collection: collections.applications, id: a.id, data: a })));
+  }
+
+  // 18. HACT Code Lists
   console.log('  → Seeding HACT code lists...');
   const codeListNames = getAllCodeListNames();
   await batchWrite(codeListNames.map(name => ({
@@ -217,6 +231,8 @@ if (isDirectRun) {
       console.log(`  Void Properties: ${data.voidProperties.length}`);
       console.log(`  Applicants: ${data.applicants.length}`);
       console.log(`  Rent Transactions: ${data.rentTransactions.length}`);
+      console.log(`  Viewings: ${data.viewings?.length || 0}`);
+      console.log(`  Applications: ${data.applications?.length || 0}`);
 
       if (shouldClear) {
         await clearCollections();

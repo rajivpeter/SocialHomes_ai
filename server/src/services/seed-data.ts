@@ -40,6 +40,8 @@ export interface SeedData {
   voidProperties: any[];
   applicants: any[];
   rentTransactions: any[];
+  viewings: any[];
+  applications: any[];
 }
 
 // ============================================================
@@ -243,6 +245,118 @@ const allTenants = [...(baseTenants as any[]), ...(expandedTenants as any[])];
 // Export: getSeedData()
 // ============================================================
 
+// ============================================================
+// Viewings (sample viewing bookings)
+// ============================================================
+
+const sampleViewings = [
+  {
+    id: 'view-001',
+    propertyId: 'prop-017',
+    propertyAddress: 'Flat 26, Riverside South, Riverside Crescent',
+    propertyPostcode: 'SE1 7PC',
+    name: 'David Chen',
+    email: 'david.chen@email.com',
+    phone: '07700 900100',
+    preferredDate: '2026-02-20',
+    preferredTime: 'morning',
+    message: 'Looking for a 2-bed flat near the river.',
+    status: 'confirmed',
+    createdAt: '2026-02-14T10:30:00.000Z',
+    updatedAt: '2026-02-14T14:00:00.000Z',
+  },
+  {
+    id: 'view-002',
+    propertyId: 'prop-023',
+    propertyAddress: '11 Elm Gardens',
+    propertyPostcode: 'SE13 6TH',
+    name: 'Sarah Williams',
+    email: 'sarah.w@email.com',
+    phone: '07700 900200',
+    preferredDate: '2026-02-22',
+    preferredTime: 'afternoon',
+    message: 'Family of 4 needs 3 bedrooms.',
+    status: 'pending',
+    createdAt: '2026-02-15T09:15:00.000Z',
+    updatedAt: '2026-02-15T09:15:00.000Z',
+  },
+  {
+    id: 'view-003',
+    propertyId: 'prop-028',
+    propertyAddress: '26 Birch Court Bungalow',
+    propertyPostcode: 'SE6 3AE',
+    name: 'Margaret Thompson',
+    email: 'margaret.t@email.com',
+    phone: '07700 900300',
+    preferredDate: '2026-02-25',
+    preferredTime: 'morning',
+    message: 'Interested in ground floor accessibility.',
+    status: 'pending',
+    createdAt: '2026-02-16T08:00:00.000Z',
+    updatedAt: '2026-02-16T08:00:00.000Z',
+  },
+  {
+    id: 'view-004',
+    propertyId: 'prop-035',
+    propertyAddress: '27 Maple Lane',
+    propertyPostcode: 'SE24 0JC',
+    name: 'James Okafor',
+    email: 'james.o@email.com',
+    phone: '07700 900400',
+    preferredDate: '2026-02-21',
+    preferredTime: 'evening',
+    message: '',
+    status: 'completed',
+    createdAt: '2026-02-10T16:45:00.000Z',
+    updatedAt: '2026-02-12T11:00:00.000Z',
+  },
+];
+
+// ============================================================
+// Applications (sample property applications)
+// ============================================================
+
+const sampleApplications = [
+  {
+    id: 'app-001',
+    propertyId: 'prop-017',
+    propertyAddress: 'Flat 26, Riverside South, Riverside Crescent',
+    propertyPostcode: 'SE1 7PC',
+    firstName: 'David',
+    lastName: 'Chen',
+    email: 'david.chen@email.com',
+    phone: '07700 900100',
+    currentAddress: '42 High Street, Bermondsey, SE1 3AB',
+    employmentStatus: 'employed',
+    annualIncome: 35000,
+    moveInDate: '2026-03-15',
+    householdSize: 2,
+    additionalInfo: 'Currently renting privately. No pets.',
+    status: 'under-review',
+    createdAt: '2026-02-14T15:00:00.000Z',
+    updatedAt: '2026-02-15T10:00:00.000Z',
+  },
+  {
+    id: 'app-002',
+    propertyId: 'prop-035',
+    propertyAddress: '27 Maple Lane',
+    propertyPostcode: 'SE24 0JC',
+    firstName: 'James',
+    lastName: 'Okafor',
+    email: 'james.o@email.com',
+    phone: '07700 900400',
+    currentAddress: '15 Brixton Road, SW9 6DE',
+    employmentStatus: 'employed',
+    annualIncome: 42000,
+    moveInDate: '2026-03-01',
+    householdSize: 3,
+    additionalInfo: 'Two children aged 5 and 8.',
+    status: 'submitted',
+    createdAt: '2026-02-12T14:30:00.000Z',
+    updatedAt: '2026-02-12T14:30:00.000Z',
+  },
+];
+
 export function getSeedData(): SeedData {
   return {
     organisation,
@@ -260,5 +374,7 @@ export function getSeedData(): SeedData {
     voidProperties: voidPropertiesData as any[],
     applicants: applicantsData as any[],
     rentTransactions: rentTransactionsData as any[],
+    viewings: sampleViewings,
+    applications: sampleApplications,
   };
 }

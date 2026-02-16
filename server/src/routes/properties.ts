@@ -31,6 +31,21 @@ propertiesRouter.get('/', async (req, res, next) => {
   }
 });
 
+// GET /api/v1/properties/available — properties available for viewing/renting
+propertiesRouter.get('/available', async (_req, res, next) => {
+  try {
+    const voidProps = await getDocs<PropertyDoc>(
+      collections.properties,
+      [{ field: 'isVoid', op: '==', value: true }],
+      undefined,
+      200,
+    );
+    res.json({ items: voidProps, total: voidProps.length });
+  } catch (err) {
+    next(err);
+  }
+});
+
 // GET /api/v1/properties/:id
 propertiesRouter.get('/:id', async (req, res, next) => {
   try {

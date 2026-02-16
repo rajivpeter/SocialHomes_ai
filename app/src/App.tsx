@@ -14,6 +14,8 @@ import TenanciesPage from '@/pages/tenancies/TenanciesPage';
 import TenancyDetailPage from '@/pages/tenancies/TenancyDetailPage';
 import PropertiesPage from '@/pages/properties/PropertiesPage';
 import PropertyDetailPage from '@/pages/properties/PropertyDetailPage';
+import ViewingBookingPage from '@/pages/properties/ViewingBookingPage';
+import ApplicationPage from '@/pages/properties/ApplicationPage';
 import RepairsPage from '@/pages/repairs/RepairsPage';
 import RepairDetailPage from '@/pages/repairs/RepairDetailPage';
 import RentPage from '@/pages/rent/RentPage';
@@ -99,6 +101,8 @@ export default function App() {
             <Route path="/tenancies/:id" element={<TenancyDetailPage />} />
             <Route path="/properties" element={<PropertiesPage />} />
             <Route path="/properties/:id" element={<PropertyDetailPage />} />
+            <Route path="/properties/:id/book-viewing" element={<ViewingBookingPage />} />
+            <Route path="/properties/:id/apply" element={<ApplicationPage />} />
             <Route path="/repairs" element={<RepairsPage />} />
             <Route path="/repairs/new" element={<RepairsPage />} />
             <Route path="/repairs/schedule" element={<RepairsPage />} />

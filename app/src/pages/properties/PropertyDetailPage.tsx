@@ -18,8 +18,11 @@ import {
   CheckCircle,
   AlertTriangle,
   Clock,
-  Gauge
+  Gauge,
+  Eye,
+  ClipboardList
 } from 'lucide-react';
+import PropertyMap from '@/components/shared/PropertyMap';
 
 export default function PropertyDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -139,6 +142,36 @@ export default function PropertyDetailPage() {
         {/* Tab Content */}
         {activeTab === 'overview' && (
           <div className="space-y-6 opacity-0 animate-fade-in-up" style={{ animationDelay: '150ms', animationFillMode: 'forwards' }}>
+            {/* Location Map */}
+            <div className="bg-surface-card rounded-lg border border-border-default p-6">
+              <h2 className="text-xl font-bold font-heading text-brand-peach mb-4">Location</h2>
+              <PropertyMap
+                lat={property.lat}
+                lng={property.lng}
+                address={property.address}
+                postcode={property.postcode}
+                height="300px"
+              />
+              {property.isVoid && (
+                <div className="flex gap-3 mt-4">
+                  <Link
+                    to={`/properties/${property.id}/book-viewing`}
+                    className="flex items-center gap-2 px-4 py-2 bg-brand-teal text-white rounded-lg hover:bg-brand-teal/90 transition-colors text-sm font-medium"
+                  >
+                    <Eye size={16} />
+                    Book a Viewing
+                  </Link>
+                  <Link
+                    to={`/properties/${property.id}/apply`}
+                    className="flex items-center gap-2 px-4 py-2 bg-brand-peach text-white rounded-lg hover:bg-brand-peach/90 transition-colors text-sm font-medium"
+                  >
+                    <ClipboardList size={16} />
+                    Apply for this Property
+                  </Link>
+                </div>
+              )}
+            </div>
+
             {/* Property Details */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <div className="bg-surface-card rounded-lg border border-border-default p-6">

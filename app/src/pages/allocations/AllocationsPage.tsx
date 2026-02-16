@@ -1,8 +1,9 @@
 import { useMemo } from 'react';
-import { Home, Users, Clock, AlertCircle } from 'lucide-react';
+import { Home, Users, Clock, AlertCircle, Eye, ClipboardList, Calendar } from 'lucide-react';
 import { voidProperties, applicants } from '@/data';
-import { useProperties } from '@/hooks/useApi';
+import { useProperties, useViewings, useApplications } from '@/hooks/useApi';
 import { formatCurrency, formatDate } from '@/utils/format';
+import StatusPill from '@/components/shared/StatusPill';
 import type { VoidStage } from '@/types';
 
 // Void stage labels
@@ -44,6 +45,8 @@ const getApplicantsByBand = () => {
 
 export default function AllocationsPage() {
   const { data: properties = [] } = useProperties();
+  const { data: viewings = [] } = useViewings();
+  const { data: applications = [] } = useApplications();
 
   // Get property addresses for voids
   const voidsWithAddresses = useMemo(() => {
@@ -225,6 +228,93 @@ export default function AllocationsPage() {
               ))}
             </div>
           </div>
+        </div>
+        {/* Viewing Bookings Section */}
+        <div className="bg-surface-card rounded-lg p-6 border border-border-default opacity-0 animate-fade-in-up" style={{ animationDelay: '600ms', animationFillMode: 'forwards' }}>
+          <div className="flex items-center gap-2 mb-4">
+            <Eye size={20} className="text-brand-teal" />
+            <h2 className="text-xl font-bold font-heading text-brand-peach">Viewing Bookings</h2>
+            <span className="ml-auto text-sm text-text-muted">{viewings.length} total</span>
+          </div>
+
+          {viewings.length > 0 ? (
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-border-default">
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-text-muted">Name</th>
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-text-muted">Property</th>
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-text-muted">Date</th>
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-text-muted">Time</th>
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-text-muted">Status</th>
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-text-muted">Submitted</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {viewings.map((v: any, index: number) => (
+                    <tr
+                      key={v.id}
+                      className="border-b border-border-default hover:bg-surface-elevated transition-colors opacity-0 animate-fade-in-up"
+                      style={{ animationDelay: `${650 + index * 30}ms`, animationFillMode: 'forwards' }}
+                    >
+                      <td className="py-3 px-4 font-medium text-text-primary">{v.name}</td>
+                      <td className="py-3 px-4 text-sm text-text-secondary">{v.propertyAddress}</td>
+                      <td className="py-3 px-4 text-sm text-text-secondary">{v.preferredDate}</td>
+                      <td className="py-3 px-4 text-sm text-text-secondary capitalize">{v.preferredTime}</td>
+                      <td className="py-3 px-4"><StatusPill status={v.status} size="sm" /></td>
+                      <td className="py-3 px-4 text-xs text-text-muted">{v.createdAt ? new Date(v.createdAt).toLocaleDateString('en-GB') : ''}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <div className="text-center py-8 text-text-muted text-sm">No viewing bookings yet</div>
+          )}
+        </div>
+
+        {/* Applications Section */}
+        <div className="bg-surface-card rounded-lg p-6 border border-border-default opacity-0 animate-fade-in-up" style={{ animationDelay: '700ms', animationFillMode: 'forwards' }}>
+          <div className="flex items-center gap-2 mb-4">
+            <ClipboardList size={20} className="text-brand-teal" />
+            <h2 className="text-xl font-bold font-heading text-brand-peach">Property Applications</h2>
+            <span className="ml-auto text-sm text-text-muted">{applications.length} total</span>
+          </div>
+
+          {applications.length > 0 ? (
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-border-default">
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-text-muted">Applicant</th>
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-text-muted">Property</th>
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-text-muted">Email</th>
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-text-muted">Household</th>
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-text-muted">Status</th>
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-text-muted">Submitted</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {applications.map((app: any, index: number) => (
+                    <tr
+                      key={app.id}
+                      className="border-b border-border-default hover:bg-surface-elevated transition-colors opacity-0 animate-fade-in-up"
+                      style={{ animationDelay: `${750 + index * 30}ms`, animationFillMode: 'forwards' }}
+                    >
+                      <td className="py-3 px-4 font-medium text-text-primary">{app.firstName} {app.lastName}</td>
+                      <td className="py-3 px-4 text-sm text-text-secondary">{app.propertyAddress}</td>
+                      <td className="py-3 px-4 text-sm text-text-secondary">{app.email}</td>
+                      <td className="py-3 px-4 text-sm text-text-secondary">{app.householdSize}</td>
+                      <td className="py-3 px-4"><StatusPill status={app.status} size="sm" /></td>
+                      <td className="py-3 px-4 text-xs text-text-muted">{app.createdAt ? new Date(app.createdAt).toLocaleDateString('en-GB') : ''}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <div className="text-center py-8 text-text-muted text-sm">No property applications yet</div>
+          )}
         </div>
       </div>
     </div>
