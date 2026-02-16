@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { useProperties, useTenants, useCases } from '@/hooks/useApi';
 import AiActionCard from '@/components/shared/AiActionCard';
 import StatusPill from '@/components/shared/StatusPill';
+import DampIntelligencePanel from '@/components/shared/DampIntelligencePanel';
 import { formatCurrency, formatDate, safeText } from '@/utils/format';
 import { usePropertyIntelligence } from '@/hooks/useEntityIntelligence';
 import {
@@ -422,32 +423,8 @@ export default function PropertyDetailPage() {
 
         {activeTab === 'damp-mould' && (
           <div className="space-y-6 opacity-0 animate-fade-in-up" style={{ animationDelay: '150ms', animationFillMode: 'forwards' }}>
-            {/* AI Risk Score */}
-            <div className="bg-surface-card rounded-lg border border-border-default p-6">
-              <h2 className="text-xl font-bold font-heading text-brand-peach mb-4">AI Damp & Mould Risk Score</h2>
-              <div className="flex items-center gap-6">
-                <div className={`p-6 rounded-lg border-2 ${getDampRiskBgColor(property.dampRisk)}`}>
-                  <div className={`text-5xl font-bold ${getDampRiskColor(property.dampRisk)}`}>
-                    {property.dampRisk}
-                  </div>
-                  <div className="text-xs text-text-muted mt-1">out of 100</div>
-                </div>
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Gauge size={20} className="text-status-ai" />
-                    <span className="text-sm font-medium text-text-primary">Risk Assessment</span>
-                  </div>
-                  <p className="text-sm text-text-muted leading-relaxed">
-                    {property.dampRisk < 30 
-                      ? 'Low risk - property shows minimal indicators of damp or mould issues.'
-                      : property.dampRisk < 60
-                      ? 'Moderate risk - some factors suggest potential damp or mould concerns. Regular monitoring recommended.'
-                      : 'High risk - multiple factors indicate elevated risk of damp or mould. Proactive inspection recommended.'
-                    }
-                  </p>
-                </div>
-              </div>
-            </div>
+            {/* AI Predictive Damp Intelligence Panel */}
+            <DampIntelligencePanel propertyId={property.id} />
 
             {/* Active Cases */}
             {dampCases.length > 0 ? (

@@ -188,6 +188,34 @@ export const aiApi = {
       method: 'POST',
       body: JSON.stringify({ query, persona }),
     }),
+
+  // Differentiator 1: Predictive Damp Intelligence
+  dampRisk: (propertyId: string) => request<any>(`/ai/damp-risk/${propertyId}`),
+  dampRiskEstate: (estateId: string) => request<any>(`/ai/damp-risk/estate/${estateId}`),
+
+  // Differentiator 2: Live Crime Context
+  crimeContext: (estateId: string, months?: number) =>
+    request<any>(`/ai/crime-context/${estateId}${buildQueryString({ months })}`),
+  crimeContextCase: (caseId: string) => request<any>(`/ai/crime-context/case/${caseId}`),
+
+  // Differentiator 3: Vulnerability Detection
+  vulnerability: (tenantId: string) => request<any>(`/ai/vulnerability/${tenantId}`),
+  vulnerabilityScan: () => request<any>('/ai/vulnerability/scan', { method: 'POST' }),
+
+  // Differentiator 4: Benefits Entitlement Engine
+  benefitsCheck: (tenantId: string) => request<any>(`/ai/benefits-check/${tenantId}`),
+
+  // Differentiator 5: Property Passport
+  propertyPassport: (propertyId: string) => request<any>(`/ai/property-passport/${propertyId}`),
+
+  // Differentiator 6: AI Neighbourhood Briefing
+  neighbourhoodBriefing: (estateId: string) => request<any>(`/ai/briefing/${estateId}`),
+
+  // Mock services
+  mockUcVerification: (tenantId: string) => request<any>(`/ai/mock/uc-verification/${tenantId}`),
+  mockIotSensors: (propertyId: string) => request<any>(`/ai/mock/iot-sensors/${propertyId}`),
+  mockDirectDebit: (tenantId: string) => request<any>(`/ai/mock/direct-debit/${tenantId}`),
+  mockLabourMarket: (lsoaCode: string) => request<any>(`/ai/mock/labour-market/${lsoaCode}`),
 };
 
 // ---- Admin ----

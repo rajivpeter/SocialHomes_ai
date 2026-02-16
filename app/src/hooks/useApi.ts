@@ -300,6 +300,82 @@ export function useAiDraftCommunication() {
   });
 }
 
+// ---- Differentiator 1: Damp Risk ----
+export function useDampRisk(propertyId: string) {
+  return useQuery({
+    queryKey: ['ai', 'damp-risk', propertyId],
+    queryFn: () => aiApi.dampRisk(propertyId),
+    enabled: !!propertyId,
+  });
+}
+
+export function useDampRiskEstate(estateId: string) {
+  return useQuery({
+    queryKey: ['ai', 'damp-risk-estate', estateId],
+    queryFn: () => aiApi.dampRiskEstate(estateId),
+    enabled: !!estateId,
+  });
+}
+
+// ---- Differentiator 2: Crime Context ----
+export function useCrimeContext(estateId: string) {
+  return useQuery({
+    queryKey: ['ai', 'crime-context', estateId],
+    queryFn: () => aiApi.crimeContext(estateId),
+    enabled: !!estateId,
+  });
+}
+
+export function useCrimeContextCase(caseId: string) {
+  return useQuery({
+    queryKey: ['ai', 'crime-context-case', caseId],
+    queryFn: () => aiApi.crimeContextCase(caseId),
+    enabled: !!caseId,
+  });
+}
+
+// ---- Differentiator 3: Vulnerability ----
+export function useVulnerability(tenantId: string) {
+  return useQuery({
+    queryKey: ['ai', 'vulnerability', tenantId],
+    queryFn: () => aiApi.vulnerability(tenantId),
+    enabled: !!tenantId,
+  });
+}
+
+export function useVulnerabilityScan() {
+  return useMutation({
+    mutationFn: () => aiApi.vulnerabilityScan(),
+  });
+}
+
+// ---- Differentiator 4: Benefits Check ----
+export function useBenefitsCheck(tenantId: string) {
+  return useQuery({
+    queryKey: ['ai', 'benefits-check', tenantId],
+    queryFn: () => aiApi.benefitsCheck(tenantId),
+    enabled: !!tenantId,
+  });
+}
+
+// ---- Differentiator 5: Property Passport ----
+export function usePropertyPassport(propertyId: string) {
+  return useQuery({
+    queryKey: ['ai', 'property-passport', propertyId],
+    queryFn: () => aiApi.propertyPassport(propertyId),
+    enabled: !!propertyId,
+  });
+}
+
+// ---- Differentiator 6: Neighbourhood Briefing ----
+export function useNeighbourhoodBriefing(estateId: string) {
+  return useQuery({
+    queryKey: ['ai', 'neighbourhood-briefing', estateId],
+    queryFn: () => aiApi.neighbourhoodBriefing(estateId),
+    enabled: !!estateId,
+  });
+}
+
 // ---- Public Data ----
 export function useEpcData(postcode: string) {
   return useQuery({

@@ -3,6 +3,20 @@ import { collections, getDocs, serializeFirestoreData } from '../services/firest
 import { authMiddleware } from '../middleware/auth.js';
 import type { CaseDoc, TenantDoc, PropertyDoc } from '../models/firestore-schemas.js';
 
+// Differentiator services
+import { predictDampRisk, predictEstateDampRisk } from '../services/damp-prediction.js';
+import { getEstateCrimeContext, getAsbCaseContext } from '../services/crime-context.js';
+import { assessVulnerability, scanAllTenants } from '../services/vulnerability-detection.js';
+import { checkBenefitsEntitlement } from '../services/benefits-engine.js';
+import { generateNeighbourhoodBriefing } from '../services/neighbourhood-briefing.js';
+import { generatePropertyPassport } from '../services/property-passport.js';
+import {
+  mockUcVerification,
+  mockIoTSensorData,
+  mockGoCardlessMandate,
+  mockNomisData,
+} from '../services/mock-services.js';
+
 export const aiRouter = Router();
 aiRouter.use(authMiddleware);
 
@@ -105,4 +119,158 @@ aiRouter.post('/chat', async (req, res, next) => {
   } catch (err) {
     next(err);
   }
+});
+
+// ================================================================
+// DIFFERENTIATOR 1: Predictive Damp Intelligence
+// ================================================================
+
+// GET /api/v1/ai/damp-risk/:propertyId
+aiRouter.get('/damp-risk/:propertyId', async (req, res, next) => {
+  try {
+    const prediction = await predictDampRisk(req.params.propertyId);
+    res.json(prediction);
+  } catch (err: any) {
+    if (err.message?.includes('not found')) return res.status(404).json({ error: err.message });
+    next(err);
+  }
+});
+
+// GET /api/v1/ai/damp-risk/estate/:estateId
+aiRouter.get('/damp-risk/estate/:estateId', async (req, res, next) => {
+  try {
+    const result = await predictEstateDampRisk(req.params.estateId);
+    res.json(result);
+  } catch (err: any) {
+    if (err.message?.includes('not found')) return res.status(404).json({ error: err.message });
+    next(err);
+  }
+});
+
+// ================================================================
+// DIFFERENTIATOR 2: Live Crime Context for ASB
+// ================================================================
+
+// GET /api/v1/ai/crime-context/:estateId
+aiRouter.get('/crime-context/:estateId', async (req, res, next) => {
+  try {
+    const months = parseInt(req.query.months as string) || 3;
+    const context = await getEstateCrimeContext(req.params.estateId, months);
+    res.json(context);
+  } catch (err: any) {
+    if (err.message?.includes('not found')) return res.status(404).json({ error: err.message });
+    next(err);
+  }
+});
+
+// GET /api/v1/ai/crime-context/case/:caseId
+aiRouter.get('/crime-context/case/:caseId', async (req, res, next) => {
+  try {
+    const context = await getAsbCaseContext(req.params.caseId);
+    res.json(context);
+  } catch (err: any) {
+    if (err.message?.includes('not found') || err.message?.includes('not an ASB'))
+      return res.status(404).json({ error: err.message });
+    next(err);
+  }
+});
+
+// ================================================================
+// DIFFERENTIATOR 3: Automatic Vulnerability Detection
+// ================================================================
+
+// GET /api/v1/ai/vulnerability/:tenantId
+aiRouter.get('/vulnerability/:tenantId', async (req, res, next) => {
+  try {
+    const assessment = await assessVulnerability(req.params.tenantId);
+    res.json(assessment);
+  } catch (err: any) {
+    if (err.message?.includes('not found')) return res.status(404).json({ error: err.message });
+    next(err);
+  }
+});
+
+// POST /api/v1/ai/vulnerability/scan
+aiRouter.post('/vulnerability/scan', async (_req, res, next) => {
+  try {
+    const scan = await scanAllTenants();
+    res.json(scan);
+  } catch (err) {
+    next(err);
+  }
+});
+
+// ================================================================
+// DIFFERENTIATOR 4: Benefits Entitlement Engine
+// ================================================================
+
+// GET /api/v1/ai/benefits-check/:tenantId
+aiRouter.get('/benefits-check/:tenantId', async (req, res, next) => {
+  try {
+    const assessment = await checkBenefitsEntitlement(req.params.tenantId);
+    res.json(assessment);
+  } catch (err: any) {
+    if (err.message?.includes('not found')) return res.status(404).json({ error: err.message });
+    next(err);
+  }
+});
+
+// ================================================================
+// DIFFERENTIATOR 5: Property Passport
+// ================================================================
+
+// GET /api/v1/ai/property-passport/:propertyId
+aiRouter.get('/property-passport/:propertyId', async (req, res, next) => {
+  try {
+    const passport = await generatePropertyPassport(req.params.propertyId);
+    res.json(passport);
+  } catch (err: any) {
+    if (err.message?.includes('not found')) return res.status(404).json({ error: err.message });
+    next(err);
+  }
+});
+
+// ================================================================
+// DIFFERENTIATOR 6: AI Neighbourhood Briefing
+// ================================================================
+
+// GET /api/v1/ai/briefing/:estateId
+aiRouter.get('/briefing/:estateId', async (req, res, next) => {
+  try {
+    const briefing = await generateNeighbourhoodBriefing(req.params.estateId);
+    res.json(briefing);
+  } catch (err: any) {
+    if (err.message?.includes('not found')) return res.status(404).json({ error: err.message });
+    next(err);
+  }
+});
+
+// ================================================================
+// MOCK SERVICES (Tier 3 — DWP UC, IoT, GoCardless, NOMIS)
+// ================================================================
+
+// GET /api/v1/ai/mock/uc-verification/:tenantId
+aiRouter.get('/mock/uc-verification/:tenantId', (req, res) => {
+  res.json(mockUcVerification(req.params.tenantId));
+});
+
+// GET /api/v1/ai/mock/iot-sensors/:propertyId
+aiRouter.get('/mock/iot-sensors/:propertyId', (req, res) => {
+  res.json(mockIoTSensorData(req.params.propertyId));
+});
+
+// GET /api/v1/ai/mock/direct-debit/:tenantId
+aiRouter.get('/mock/direct-debit/:tenantId', async (req, res, next) => {
+  try {
+    const tenant = await collections.tenants.doc(req.params.tenantId).get();
+    const weeklyRent = tenant.exists ? (tenant.data()?.weeklyCharge ?? 150) : 150;
+    res.json(mockGoCardlessMandate(req.params.tenantId, weeklyRent));
+  } catch (err) {
+    next(err);
+  }
+});
+
+// GET /api/v1/ai/mock/labour-market/:lsoaCode
+aiRouter.get('/mock/labour-market/:lsoaCode', (req, res) => {
+  res.json(mockNomisData(req.params.lsoaCode));
 });

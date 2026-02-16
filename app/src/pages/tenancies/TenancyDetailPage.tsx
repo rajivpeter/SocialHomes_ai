@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { 
-  Phone, Mail, MapPin, User, Calendar, AlertTriangle, 
+import {
+  Phone, Mail, MapPin, User, Calendar, AlertTriangle,
   FileText, Activity, Receipt, Scale, Clock, Home,
   MessageSquare, Wrench, AlertCircle, DollarSign, Droplets
 } from 'lucide-react';
@@ -11,6 +11,8 @@ import { useTenants, useProperties, useCases } from '@/hooks/useApi';
 import { activities as activitiesData, rentTransactionsSample } from '@/data';
 import AiActionCard from '@/components/shared/AiActionCard';
 import StatusPill from '@/components/shared/StatusPill';
+import VulnerabilityPanel from '@/components/shared/VulnerabilityPanel';
+import BenefitsPanel from '@/components/shared/BenefitsPanel';
 import { formatCurrency, formatDate, getCaseTypeColour, safeText } from '@/utils/format';
 
 export default function TenancyDetailPage() {
@@ -374,6 +376,12 @@ export default function TenancyDetailPage() {
                     </div>
                   </div>
                 )}
+
+                {/* AI Vulnerability Assessment */}
+                <VulnerabilityPanel tenantId={tenant.id} />
+
+                {/* AI Benefits Entitlement Check */}
+                <BenefitsPanel tenantId={tenant.id} />
               </div>
             )}
 

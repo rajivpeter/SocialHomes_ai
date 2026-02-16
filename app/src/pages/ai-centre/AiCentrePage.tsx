@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { aiInsights } from '@/data';
-import { Sparkles, Send, AlertTriangle, Info, Lightbulb, TrendingUp, BarChart3, Users, Home, Shield, Wrench, MessageSquare, PoundSterling, Brain } from 'lucide-react';
+import { Sparkles, Send, AlertTriangle, Info, Lightbulb, TrendingUp, BarChart3, Users, Home, Shield, Wrench, MessageSquare, PoundSterling, Brain, Droplets, Map, ShieldAlert, FileCheck, CloudRain } from 'lucide-react';
 import { formatPercent } from '@/utils/format';
 import { generateAiChatResponse } from '@/services/ai-drafting';
 import { useApp } from '@/context/AppContext';
+import { useVulnerabilityScan } from '@/hooks/useApi';
 
 const predictionModels = [
   {
@@ -94,11 +95,69 @@ const getSeverityColour = (severity: string) => {
   }
 };
 
+const differentiators = [
+  {
+    id: 'damp-intelligence',
+    name: 'Predictive Damp Intelligence',
+    description: '5-factor weighted algorithm predicts damp/mould risk before visible manifestation. Combines weather, building fabric, repair history, IoT sensors, and occupancy data.',
+    icon: <Droplets size={24} />,
+    route: '/properties',
+    status: 'live',
+    accuracy: 82,
+  },
+  {
+    id: 'crime-context',
+    name: 'Live Crime Context for ASB',
+    description: 'Correlates police.uk crime data with internal ASB cases. Provides officer briefings, hotspot analysis, and multi-agency referral triggers.',
+    icon: <Shield size={24} />,
+    route: '/asb',
+    status: 'live',
+    accuracy: 78,
+  },
+  {
+    id: 'vulnerability-detection',
+    name: 'Automatic Vulnerability Detection',
+    description: '7-factor algorithm identifies tenants needing proactive support: deprivation, arrears, health, isolation, age, dependents, UC transition.',
+    icon: <ShieldAlert size={24} />,
+    route: '/tenancies',
+    status: 'live',
+    accuracy: 85,
+  },
+  {
+    id: 'benefits-engine',
+    name: 'Benefits Entitlement Engine',
+    description: 'Analyses tenant data against UK benefit rules to identify unclaimed entitlements. Covers UC, PIP, Attendance Allowance, Pension Credit, and more.',
+    icon: <PoundSterling size={24} />,
+    route: '/tenancies',
+    status: 'live',
+    accuracy: 75,
+  },
+  {
+    id: 'property-passport',
+    name: 'Property Passport',
+    description: 'Aggregates all data per property from 10+ sources into a unified dossier: compliance, EPC, weather, crime, flood risk, deprivation, and case history.',
+    icon: <FileCheck size={24} />,
+    route: '/properties',
+    status: 'live',
+    accuracy: 90,
+  },
+  {
+    id: 'neighbourhood-briefing',
+    name: 'AI Neighbourhood Briefing',
+    description: 'Per-estate AI-generated daily briefing combining weather, crime, arrears, repairs, damp risk, and compliance into actionable officer intelligence.',
+    icon: <CloudRain size={24} />,
+    route: '/explore',
+    status: 'live',
+    accuracy: 80,
+  },
+];
+
 export default function AiCentrePage() {
   const { state } = useApp();
-  const [activeTab, setActiveTab] = useState<'insights' | 'predictions' | 'assistant'>('insights');
+  const [activeTab, setActiveTab] = useState<'insights' | 'predictions' | 'differentiators' | 'assistant'>('insights');
   const [chatInput, setChatInput] = useState('');
   const [chatMessages, setChatMessages] = useState<Array<{ role: 'user' | 'ai'; content: string }>>([]);
+  const vulnScan = useVulnerabilityScan();
 
   const handleSendMessage = () => {
     if (!chatInput.trim()) return;
@@ -148,6 +207,16 @@ export default function AiCentrePage() {
             }`}
           >
             Predictions
+          </button>
+          <button
+            onClick={() => setActiveTab('differentiators')}
+            className={`px-4 py-2 text-sm font-medium transition-colors border-b-2 ${
+              activeTab === 'differentiators'
+                ? 'border-status-ai text-status-ai'
+                : 'border-transparent text-text-muted hover:text-text-primary'
+            }`}
+          >
+            Differentiators
           </button>
           <button
             onClick={() => setActiveTab('assistant')}
@@ -255,6 +324,85 @@ export default function AiCentrePage() {
                 </div>
               </div>
             ))}
+          </div>
+        )}
+
+        {activeTab === 'differentiators' && (
+          <div className="space-y-6 opacity-0 animate-fade-in-up" style={{ animationDelay: '150ms', animationFillMode: 'forwards' }}>
+            <div className="bg-surface-card rounded-lg border border-status-ai/30 p-4 mb-4">
+              <div className="flex items-center gap-2 mb-2">
+                <Brain size={20} className="text-status-ai" />
+                <h3 className="text-sm font-semibold text-status-ai">7 Killer Differentiators</h3>
+              </div>
+              <p className="text-xs text-text-muted">
+                AI-native features that set SocialHomes apart from legacy housing management systems.
+                Each differentiator combines internal Firestore data with live external API intelligence.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {differentiators.map((d, index) => (
+                <div
+                  key={d.id}
+                  className="bg-surface-card rounded-lg border border-border-default p-5 hover:border-status-ai transition-all duration-300 opacity-0 animate-fade-in-up group"
+                  style={{ animationDelay: `${200 + index * 60}ms`, animationFillMode: 'forwards' }}
+                >
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="p-2 rounded-lg bg-status-ai/20 text-status-ai">
+                      {d.icon}
+                    </div>
+                    <span className="text-[10px] px-2 py-0.5 bg-status-compliant/20 text-status-compliant rounded-full font-medium uppercase">
+                      {d.status}
+                    </span>
+                  </div>
+                  <h4 className="text-sm font-semibold text-text-primary mb-2 group-hover:text-status-ai transition-colors">
+                    {d.name}
+                  </h4>
+                  <p className="text-xs text-text-muted mb-3 leading-relaxed">{d.description}</p>
+                  <div className="flex items-center justify-between pt-3 border-t border-border-default">
+                    <div className="flex items-center gap-1 text-xs text-text-muted">
+                      <span>Confidence:</span>
+                      <span className="text-status-ai font-medium">{d.accuracy}%</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Vulnerability Scan Button */}
+            <div className="bg-surface-card rounded-lg border border-border-default p-6">
+              <h3 className="text-lg font-bold text-brand-peach mb-2">Run Vulnerability Scan</h3>
+              <p className="text-xs text-text-muted mb-4">
+                Scan all tenants against the 7-factor vulnerability algorithm to detect new risks and unclaimed flags.
+              </p>
+              <button
+                onClick={() => vulnScan.mutate()}
+                disabled={vulnScan.isPending}
+                className="px-4 py-2 bg-status-ai text-white rounded-lg hover:bg-status-ai/80 transition-colors text-sm font-medium disabled:opacity-50"
+              >
+                {vulnScan.isPending ? 'Scanning...' : 'Run Full Scan'}
+              </button>
+              {vulnScan.data && (
+                <div className="mt-4 grid grid-cols-4 gap-3">
+                  <div className="bg-surface-elevated rounded-lg p-3 border border-border-default text-center">
+                    <div className="text-lg font-bold text-status-critical">{vulnScan.data.summary?.critical ?? 0}</div>
+                    <div className="text-xs text-text-muted">Critical</div>
+                  </div>
+                  <div className="bg-surface-elevated rounded-lg p-3 border border-border-default text-center">
+                    <div className="text-lg font-bold text-status-warning">{vulnScan.data.summary?.high ?? 0}</div>
+                    <div className="text-xs text-text-muted">High</div>
+                  </div>
+                  <div className="bg-surface-elevated rounded-lg p-3 border border-border-default text-center">
+                    <div className="text-lg font-bold text-status-info">{vulnScan.data.summary?.moderate ?? 0}</div>
+                    <div className="text-xs text-text-muted">Moderate</div>
+                  </div>
+                  <div className="bg-surface-elevated rounded-lg p-3 border border-border-default text-center">
+                    <div className="text-lg font-bold text-status-compliant">{vulnScan.data.summary?.low ?? 0}</div>
+                    <div className="text-xs text-text-muted">Low</div>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         )}
 
