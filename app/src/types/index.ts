@@ -59,6 +59,11 @@ export interface Estate {
   arrears: number;
   asbCases: number;
   repairsBacklog: number;
+  // External API enrichment fields
+  lsoaCodes?: string[];
+  crimeCount30Days?: number;
+  crimeCountPrevious30Days?: number;
+  crimeTrend?: 'up' | 'down' | 'stable';
 }
 
 export interface Block {
@@ -127,7 +132,20 @@ export interface Property {
   isVoid: boolean;
   voidSince?: string;
   compliance: ComplianceStatus;
-  epc: { rating: string; sapScore: number; expiryDate: string; };
+  epc: {
+    rating: string;
+    sapScore: number;
+    expiryDate: string;
+    potentialRating?: string;
+    potentialScore?: number;
+    wallsDesc?: string;
+    roofDesc?: string;
+    windowsDesc?: string;
+    heatingDesc?: string;
+    co2Current?: number;
+    heatingCostAnnual?: number;
+    recommendations?: { description: string; estimatedSavings: number; indicativeCost: string; }[];
+  };
   gasSafety?: { date: string; expiryDate: string; status: 'valid' | 'expiring' | 'expired'; engineer: string; };
   eicr?: { date: string; expiryDate: string; status: 'valid' | 'expiring' | 'expired'; observations: number; };
   asbestos?: { acms: number; lastSurvey: string; riskLevel: 'low' | 'medium' | 'high'; };
@@ -139,6 +157,18 @@ export interface Property {
   weeklyRent: number;
   serviceCharge: number;
   accessibility?: string[];
+  // External API enrichment fields
+  ward?: string;
+  lsoa?: string;
+  lsoaCode?: string;
+  constituency?: string;
+  imdDecile?: number;
+  imdScore?: number;
+  classificationCode?: string;
+  localCustodianCode?: string;
+  acquisitionPrice?: number;
+  acquisitionDate?: string;
+  floodRiskZone?: string;
 }
 
 export interface ComplianceStatus {
@@ -187,6 +217,12 @@ export interface Tenant {
   arrearsRisk: number; // AI score 0-100
   lastContact?: string;
   contactCount30Days: number;
+  // External API enrichment fields
+  ucHousingElement?: number;
+  apaActive?: boolean;
+  managedPayment?: boolean;
+  ucNextPayment?: string;
+  vulnerabilityScore?: number;
 }
 
 export interface HouseholdMember {
@@ -374,6 +410,10 @@ export interface ComplianceCertificate {
   contractor: string;
   reference: string;
   notes?: string;
+  contractorRegNo?: string;
+  contractorVerified?: boolean;
+  contractorQuals?: string[];
+  contractorRegExpiry?: string;
 }
 
 // ---- Allocations / Voids ----
@@ -408,7 +448,7 @@ export interface Communication {
   tenantId?: string;
   propertyId?: string;
   caseRef?: string;
-  channel: 'email' | 'phone' | 'letter' | 'sms' | 'portal';
+  channel: 'email' | 'phone' | 'letter' | 'sms' | 'portal' | 'govuk-notify';
   direction: 'inbound' | 'outbound';
   subject: string;
   content: string;
@@ -417,6 +457,9 @@ export interface Communication {
   sentiment?: 'positive' | 'neutral' | 'negative' | 'urgent';
   aiCategory?: string;
   aiPriority?: 'high' | 'medium' | 'low';
+  externalId?: string;
+  deliveryStatus?: 'sending' | 'delivered' | 'permanent-failure' | 'temporary-failure';
+  templateId?: string;
 }
 
 // ---- AI ----
@@ -520,4 +563,159 @@ export interface Notification {
   read: boolean;
   entityType?: string;
   entityId?: string;
+}
+
+// ---- External API: Crime ----
+export interface CrimeIncident {
+  externalId: string;
+  category: string;
+  lat: number;
+  lng: number;
+  streetName: string;
+  outcome?: string;
+  month: string;
+  source: 'police-api' | 'simulated';
+}
+
+// ---- External API: Deprivation ----
+export interface DeprivationProfile {
+  lsoaCode: string;
+  imdScore: number;
+  imdRank: number;
+  imdDecile: number;
+  incomeScore: number;
+  employmentScore: number;
+  educationScore: number;
+  healthScore: number;
+  crimeScore: number;
+  housingScore: number;
+  livingEnvironmentScore: number;
+  source: 'ons' | 'simulated';
+}
+
+// ---- External API: Area Demographics (Census) ----
+export interface AreaDemographics {
+  lsoaCode: string;
+  socialRentPct: number;
+  privateRentPct: number;
+  ownerOccupiedPct: number;
+  averageHouseholdSize: number;
+  over65Pct: number;
+  under18Pct: number;
+  limitedActivitiesPct: number;
+  source: 'census-2021' | 'simulated';
+}
+
+// ---- External API: Labour Market ----
+export interface LabourMarket {
+  laCode: string;
+  claimantCount: number;
+  claimantRate: number;
+  employmentRate: number;
+  jobDensity: number;
+  oowBenefitsRate: number;
+  period: string;
+  source: 'nomis' | 'simulated';
+}
+
+// ---- External API: Flood Risk ----
+export interface FloodAlert {
+  areaId: string;
+  severity: 'severe-warning' | 'warning' | 'alert' | 'none';
+  severityLevel: number;
+  description: string;
+  raisedAt: string;
+  message: string;
+  source: 'defra' | 'simulated';
+}
+
+// ---- External API: Weather (enhanced) ----
+export interface WeatherDetail {
+  date: string;
+  temperature: number;
+  humidity: number;
+  precipitation: number;
+  windSpeed: number;
+  windGust?: number;
+  dewPoint?: number;
+  weatherCode?: number;
+  dampRiskCondition: boolean;
+  source: 'open-meteo' | 'met-office' | 'simulated';
+}
+
+export interface WeatherWarning {
+  id: string;
+  severity: 'red' | 'amber' | 'yellow';
+  type: string;
+  headline: string;
+  validFrom: string;
+  validTo: string;
+  affectedAreas: string[];
+  source: 'met-office' | 'simulated';
+}
+
+// ---- External API: IoT Sensors (mock) ----
+export interface SensorReading {
+  sensorId: string;
+  propertyId: string;
+  timestamp: string;
+  temperature: number;
+  humidity: number;
+  moisture: number;
+  co2Level?: number;
+  source: 'switchee' | 'aico' | 'homelync' | 'simulated';
+}
+
+export interface SensorAlert {
+  id: string;
+  sensorId: string;
+  propertyId: string;
+  type: 'high-humidity' | 'high-moisture' | 'low-temperature' | 'smoke' | 'co';
+  severity: 'critical' | 'warning' | 'info';
+  value: number;
+  threshold: number;
+  timestamp: string;
+  acknowledged: boolean;
+}
+
+// ---- External API: DWP Universal Credit (mock) ----
+export interface UcStatus {
+  tenantId: string;
+  ucStatus: 'claiming' | 'transitioning' | 'managed-migration' | 'none';
+  claimStartDate?: string;
+  nextPaymentDate?: string;
+  estimatedAmount?: number;
+  housingElement?: number;
+  apaInPlace: boolean;
+  managedPayment: boolean;
+  source: 'dwp' | 'simulated';
+}
+
+// ---- Composite: Damp Risk Breakdown ----
+export interface DampRiskBreakdown {
+  propertyId: string;
+  overallScore: number;
+  weatherFactor: number;
+  buildingFactor: number;
+  historyFactor: number;
+  sensorFactor: number;
+  occupancyFactor: number;
+  calculatedAt: string;
+  sources: string[];
+}
+
+// ---- Composite: Vulnerability Assessment ----
+export interface VulnerabilityAssessment {
+  tenantId: string;
+  overallScore: number;
+  deprivationFactor: number;
+  arrearsFactor: number;
+  healthFactor: number;
+  isolationFactor: number;
+  ageFactor: number;
+  dependentsFactor: number;
+  ucTransitionFactor: number;
+  autoFlags: string[];
+  calculatedAt: string;
+  sources: string[];
 }

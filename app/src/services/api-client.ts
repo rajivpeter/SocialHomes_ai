@@ -203,9 +203,33 @@ export const adminApi = {
 
 // ---- Public Data ----
 export const publicDataApi = {
-  epc: (postcode: string) => request<any>(`/public-data/epc/${encodeURIComponent(postcode)}`),
-  imd: (laCode: string) => request<any>(`/public-data/imd/${encodeURIComponent(laCode)}`),
+  // Postcode
+  postcode: (postcode: string) => request<any>(`/public-data/postcode/${encodeURIComponent(postcode)}`),
+  postcodeValidate: (postcode: string) => request<any>(`/public-data/postcode/validate/${encodeURIComponent(postcode)}`),
+  postcodesBulk: (postcodes: string[]) =>
+    request<any>('/public-data/postcodes/bulk', { method: 'POST', body: JSON.stringify({ postcodes }) }),
+
+  // UPRN
+  uprn: (uprn: string) => request<any>(`/public-data/uprn/${encodeURIComponent(uprn)}`),
+  uprnByPostcode: (postcode: string) => request<any>(`/public-data/uprn/postcode/${encodeURIComponent(postcode)}`),
+
+  // Crime
+  crime: (lat: number, lng: number) => request<any>(`/public-data/crime/${lat}/${lng}`),
+  crimeByPostcode: (postcode: string) => request<any>(`/public-data/crime/postcode/${encodeURIComponent(postcode)}`),
+
+  // Weather
   weather: (lat: number, lng: number) => request<any>(`/public-data/weather/${lat}/${lng}`),
+  weatherHistory: (lat: number, lng: number) => request<any>(`/public-data/weather/history/${lat}/${lng}`),
+
+  // Flood
+  flood: (lat: number, lng: number) => request<any>(`/public-data/flood/${lat}/${lng}`),
+  floodByPostcode: (postcode: string) => request<any>(`/public-data/flood/postcode/${encodeURIComponent(postcode)}`),
+
+  // IMD / Deprivation
+  imd: (lsoaCode: string) => request<any>(`/public-data/imd/${encodeURIComponent(lsoaCode)}`),
+
+  // EPC
+  epc: (postcode: string) => request<any>(`/public-data/epc/${encodeURIComponent(postcode)}`),
 };
 
 // ---- Export ----

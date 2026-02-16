@@ -14,6 +14,9 @@ server/dist/
 .env.*.local
 *.local
 
+# Service account keys (NEVER commit)
+**/google-credentials*.json
+
 # IDE
 .vscode/
 .idea/

@@ -2,9 +2,10 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '@/context/AppContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { Search, Bell, Sparkles, ChevronDown, User, LogOut } from 'lucide-react';
+import { Search, Bell, Sparkles, ChevronDown, User, LogOut, CircleHelp } from 'lucide-react';
 import type { Persona } from '@/types';
 import { getInitials } from '@/utils/format';
+import HelpDrawer from '@/components/shared/HelpDrawer';
 
 const personas: { id: Persona; label: string; description: string }[] = [
   { id: 'coo', label: 'Chief Operating Officer', description: 'Strategic portfolio view' },
@@ -21,6 +22,7 @@ export default function Header() {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showPersona, setShowPersona] = useState(false);
   const [searchValue, setSearchValue] = useState('');
+  const [showHelp, setShowHelp] = useState(false);
 
   const handleLogout = async () => {
     await signOut();
@@ -109,6 +111,16 @@ export default function Header() {
             </div>
           )}
         </div>
+
+        {/* Help */}
+        <button
+          onClick={() => setShowHelp(!showHelp)}
+          className="relative p-2 rounded-lg hover:bg-surface-hover transition-all duration-200"
+          aria-label="Help"
+          title="Help"
+        >
+          <CircleHelp size={18} className="text-text-secondary" />
+        </button>
 
         {/* AI Assist trigger */}
         <button
@@ -205,6 +217,9 @@ export default function Header() {
           onClick={() => { setShowNotifications(false); setShowPersona(false); }}
         />
       )}
+
+      {/* Help Drawer */}
+      <HelpDrawer open={showHelp} onClose={() => setShowHelp(false)} />
     </header>
   );
 }

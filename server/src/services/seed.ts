@@ -1,16 +1,14 @@
 // ============================================================
 // Firestore Seed Script
-// Reads static data from app/src/data/ and writes to Firestore
-// Run: npm run seed
+// Seeds all collections with comprehensive mock data.
+//
+// Usage:
+//   npm run seed              # Seed (additive — won't overwrite)
+//   npm run seed -- --clear   # Wipe all collections first, then seed
 // ============================================================
 
 import { db, collections, batchWrite } from './firestore.js';
 import { appToHact, getAllCodeListNames, getCodeList } from '../models/hact-codes.js';
-
-// We read the compiled static data from the API route handlers which
-// re-export the data. For seeding, we use a direct JSON approach.
-// The seed data is exported as a JSON file by a build step, or we
-// read it inline.
 
 interface SeedData {
   organisation: any;
@@ -153,5 +151,82 @@ export async function seedFirestore(data: SeedData) {
   console.log(`✅ Firestore seed complete in ${elapsed}s`);
 }
 
-// If run directly, seed from the admin API endpoint
-// The actual data loading happens server-side via the /api/v1/admin/seed endpoint
+// ---- CLI Entry Point ----
+// Run directly: npm run seed
+// With clear: npm run seed -- --clear
+
+async function clearCollections() {
+  const collectionNames = Object.keys(collections) as Array<keyof typeof collections>;
+  console.log('🗑️  Clearing all collections...');
+
+  for (const name of collectionNames) {
+    const col = collections[name];
+    const snapshot = await col.limit(500).get();
+    if (snapshot.empty) continue;
+
+    const batch = db.batch();
+    snapshot.docs.forEach(doc => batch.delete(doc.ref));
+    await batch.commit();
+    console.log(`  → Cleared ${snapshot.size} docs from ${name}`);
+
+    // Handle collections with more than 500 docs
+    if (snapshot.size === 500) {
+      let more = true;
+      while (more) {
+        const next = await col.limit(500).get();
+        if (next.empty) { more = false; break; }
+        const b = db.batch();
+        next.docs.forEach(doc => b.delete(doc.ref));
+        await b.commit();
+        console.log(`  → Cleared ${next.size} more docs from ${name}`);
+        if (next.size < 500) more = false;
+      }
+    }
+  }
+  console.log('✅ All collections cleared');
+}
+
+const isDirectRun = process.argv[1]?.endsWith('seed.ts') ||
+                    process.argv[1]?.endsWith('seed.js') ||
+                    process.argv[1]?.includes('tsx');
+
+if (isDirectRun) {
+  const args = process.argv.slice(2);
+  const shouldClear = args.includes('--clear');
+
+  (async () => {
+    try {
+      // Dynamic path prevents tsc from following into seed-data.ts
+      // (which imports from app/ with incompatible tsconfig)
+      const seedDataModule = './seed-data.js';
+      const { getSeedData } = await import(seedDataModule);
+      const data = getSeedData();
+
+      console.log('📊 Seed data summary:');
+      console.log(`  Regions: ${data.regions.length}`);
+      console.log(`  Local Authorities: ${data.localAuthorities.length}`);
+      console.log(`  Estates: ${data.estates.length}`);
+      console.log(`  Blocks: ${data.blocks.length}`);
+      console.log(`  Properties: ${data.properties.length}`);
+      console.log(`  Tenants: ${data.tenants.length}`);
+      console.log(`  Cases: ${data.cases.length}`);
+      console.log(`  Activities: ${data.activities.length}`);
+      console.log(`  Communications: ${data.communications.length}`);
+      console.log(`  Notifications: ${data.notifications.length}`);
+      console.log(`  TSM Measures: ${data.tsmMeasures.length}`);
+      console.log(`  Void Properties: ${data.voidProperties.length}`);
+      console.log(`  Applicants: ${data.applicants.length}`);
+      console.log(`  Rent Transactions: ${data.rentTransactions.length}`);
+
+      if (shouldClear) {
+        await clearCollections();
+      }
+
+      await seedFirestore(data);
+      process.exit(0);
+    } catch (err) {
+      console.error('❌ Seed failed:', err);
+      process.exit(1);
+    }
+  })();
+}

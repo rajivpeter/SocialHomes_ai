@@ -26,19 +26,20 @@
 
 ### Goal: Core external API infrastructure + free API integrations
 
-| # | Task | Priority | Complexity | Agent |
-|---|------|----------|------------|-------|
-| 1.1 | Create `server/src/services/external-api.ts` — shared caching, rate limiting, audit logging | P1 | Medium | Fullstack |
-| 1.2 | Create `externalDataCache` Firestore collection + TTL management | P1 | Medium | Fullstack |
-| 1.3 | Integrate postcodes.io — postcode lookup, LSOA, lat/long | P1 | Low | Fullstack |
-| 1.4 | Integrate Open UPRN (uprn.uk) — UPRN lookup | P1 | Low | Fullstack |
-| 1.5 | Integrate data.police.uk — street-level crime, ASB data | P1 | Medium | Fullstack |
-| 1.6 | Integrate Open-Meteo API — enhanced weather (hourly + historical) | P1 | Low | Fullstack |
-| 1.7 | Integrate DEFRA Flood Risk API — flood warnings per property | P1 | Low | Fullstack |
-| 1.8 | Load IMD data (ONS CSV → Firestore) | P1 | Medium | Fullstack |
-| 1.9 | Extend TypeScript types (11 new interfaces + property/tenant extensions) | P1 | Medium | Fullstack |
-| 1.10 | Unit tests for all Tier 1 API integrations | P1 | Medium | Tester |
-| 1.11 | Selenium test update for new UI elements | P1 | Medium | Tester |
+| # | Task | Priority | Complexity | Agent | Status |
+|---|------|----------|------------|-------|--------|
+| 1.1 | Create `server/src/services/external-api.ts` — shared caching, rate limiting, audit logging | P1 | Medium | Fullstack | DONE |
+| 1.2 | Create `externalDataCache` Firestore collection + TTL management | P1 | Medium | Fullstack | DONE |
+| 1.3 | Integrate postcodes.io — postcode lookup, LSOA, lat/long | P1 | Low | Fullstack | DONE |
+| 1.4 | Integrate Open UPRN (uprn.uk) — UPRN lookup | P1 | Low | Fullstack | DONE |
+| 1.5 | Integrate data.police.uk — street-level crime, ASB data | P1 | Medium | Fullstack | DONE |
+| 1.6 | Integrate Open-Meteo API — enhanced weather (hourly + historical) | P1 | Low | Fullstack | DONE |
+| 1.7 | Integrate DEFRA Flood Risk API — flood warnings per property | P1 | Low | Fullstack | DONE |
+| 1.8 | Load IMD data (ONS CSV → Firestore) | P1 | Medium | Fullstack | DONE |
+| 1.9 | Extend TypeScript types (14 new interfaces + property/tenant/estate extensions) | P1 | Medium | Fullstack | DONE |
+| 1.10 | Unit tests for all Tier 1 API integrations (66 tests, 3 files) | P1 | Medium | Tester | DONE |
+| 1.11 | Selenium regression test for Phase 1 APIs | P1 | Medium | Tester | DONE |
+| 1.12 | Contextual user manual help system (20 pages, HelpDrawer) | P1 | Medium | Documentation | DONE |
 
 ### Deliverables:
 - All Tier 1 (free, no-key) APIs live with real data

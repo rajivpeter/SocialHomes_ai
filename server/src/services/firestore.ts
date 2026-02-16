@@ -5,9 +5,7 @@ const projectId = process.env.GOOGLE_CLOUD_PROJECT || process.env.FIRESTORE_PROJ
 
 export const db = new Firestore({
   projectId,
-  // On Cloud Run: auto-authenticates via metadata server
-  // Locally: uses GOOGLE_APPLICATION_CREDENTIALS or emulator
-  ...(process.env.FIRESTORE_EMULATOR_HOST ? {} : {}),
+  ignoreUndefinedProperties: true,
 });
 
 /**
@@ -74,6 +72,7 @@ export const collections = {
   voidProperties: db.collection('voidProperties'),
   applicants: db.collection('applicants'),
   tsmMeasures: db.collection('tsmMeasures'),
+  externalDataCache: db.collection('externalDataCache'),
 };
 
 // ---- Helpers ----
