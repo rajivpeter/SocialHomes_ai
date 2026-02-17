@@ -1,7 +1,7 @@
 # SocialHomes.Ai — Dev Fix List
-## Updated: 2026-02-16 from Comprehensive Selenium Test Suite V5
+## Updated: 2026-02-17 from Comprehensive Selenium Test Suite V5
 
-**Test Summary:** 329 tests | 326 PASS | 0 FAIL | 3 WARN | 99.1% pass rate
+**Test Summary:** 332 tests | 331 PASS | 0 FAIL | 1 WARN | 99.7% pass rate
 
 ---
 
@@ -28,6 +28,7 @@
 - **Status:** RESOLVED — Popups now show on hover (mouseover/mouseout), click still drills down
 - **Fix:** Changed popup trigger from click to mouseover; added dark-mode popup CSS overrides
 - **Files:** `ExplorePage.tsx` (marker events), `index.css` (popup styles)
+- **Note:** EX-05 test still uses click (WARN) — popup works correctly via hover in production
 
 ### ~~WARN-002: Tenancies Search Not Filtering~~ FIXED
 - **Status:** RESOLVED — Search now matches name, address, tenant ID, AND assigned officer
@@ -41,26 +42,30 @@
 
 ---
 
-## WHAT'S WORKING WELL (326/329 tests passing)
+## WHAT'S WORKING WELL (331/332 tests passing)
 
 - Login/Authentication: Flawless (Firebase email + Google sign-in)
-- All 14 sidebar navigation links: Present and clickable
-- Header: Logo, persona, search, notifications all present
-- Dashboard: All KPIs (Properties, Tenancies, Repairs, Compliance, Arrears, Void), charts, activity, compliance overview
-- Tenancies: 68 rows, all headers, row click → detail works, all tabs work
-- Properties: 75 rows, detail page with EPC/rent/type/beds/AI, tabs work
-- Repairs: 200 rows, all stats, detail with full workflow, action buttons
-- Complaints: 34 complaints, detail page with timeline, AI actions, deadlines
-- ASB: 12 cases, detail page with workflow elements
-- Rent & Income: Financial data, charts, worklist, UC tracking, sub-routes
-- Compliance: All Big 6 types, percentages, detail pages, Awaab's Law
-- Communications: 5 messages, AI analysis, actions (Reply/Forward/Archive)
-- Reports: All 27 reports load with data, TSM report works
-- AI Centre: Insights, Predictions, Assistant — all sub-routes work
-- Admin: All 7 sub-pages load with content
-- Tenant Portal: Self-service landing with action buttons
+- All 14 sidebar navigation links: Present and clickable (29/29 tests)
+- Header: Logo, persona, search, notifications all present (4/4)
+- Dashboard: All KPIs (Properties, Tenancies, Repairs, Compliance, Arrears, Void), charts, activity, compliance overview (12/12)
+- Briefing: Personalized greeting, AI alerts, action buttons, all sections (8/8)
+- Tenancies: 68 rows, all headers, row click → detail works, all tabs, AI features (16/16)
+- Properties: 75 rows, map, detail page with EPC/rent/type/beds/AI, tabs (14/14)
+- Repairs: 200 rows, all stats, detail with full workflow, action buttons, filters (114/114)
+- Complaints: 34 complaints, detail page with timeline, AI actions, deadlines, ombudsman (12/12)
+- ASB: 12 cases, detail page with workflow elements (6/6)
+- Rent & Income: Financial data, charts, worklist, UC tracking, tenant link navigation, sub-routes (11/11)
+- Compliance: All Big 6 types, percentages, detail pages, Awaab's Law (15/15)
+- Communications: 5 messages, AI analysis, actions (Reply/Forward/Archive), templates (13/13)
+- Reports: All 27 reports load with data, TSM report works (30/30)
+- AI Centre: Insights, Predictions, Assistant — all sub-routes work (7/7)
+- Admin: All 7 sub-pages load with content (8/8)
+- Tenant Portal: Self-service landing with action buttons, form inputs (4/4)
+- Yantra Assist: AI chat trigger visible, panel opens with input (2/2)
 - Mobile responsive: Dashboard renders on mobile viewport
+- Breadcrumbs: Present and functional
 - **Firestore Database:** All data served from live Firestore (15 collections, 460+ documents)
+- **Live URL:** https://socialhomes-587984201316.europe-west2.run.app
 
 ---
 

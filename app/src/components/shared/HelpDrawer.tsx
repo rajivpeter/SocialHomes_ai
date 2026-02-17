@@ -166,10 +166,10 @@ export default function HelpDrawer({ open, onClose }: HelpDrawerProps) {
 
       {/* LEFT Drawer — SOLID opaque background */}
       <div
-        className={`fixed top-0 left-0 h-full w-full sm:w-[540px] z-50 flex flex-col transition-transform duration-300 ease-out ${
+        className={`fixed top-0 left-0 h-full w-full md:w-1/2 z-50 flex flex-col transition-transform duration-300 ease-out ${
           open ? 'translate-x-0' : '-translate-x-full'
         }`}
-        style={{ backgroundColor: '#0a1929' }}
+        style={{ backgroundColor: '#0a1929', minWidth: '320px' }}
       >
         {/* Right edge accent */}
         <div className="absolute right-0 top-0 bottom-0 w-[2px] bg-gradient-to-b from-brand-teal/50 via-brand-teal/20 to-transparent" />
