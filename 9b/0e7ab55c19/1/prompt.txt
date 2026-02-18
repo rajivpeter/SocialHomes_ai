@@ -1,0 +1,1 @@
+Analyze the project "socialhomes" and create comprehensive specification documents (Doc1, Doc2, Doc3) in docs/requirements/. Then populate EXECUTION-PLAN.md with detailed tasks for all 5 phases. Read any existing description or requirements files first.
