@@ -223,30 +223,9 @@ export default function HelpDrawer({ open, onClose }: HelpDrawerProps) {
         </div>
         </div>
 
-        {/* Table of Contents — quick jump */}
-        {help && filteredTopics.length > 3 && !filterText && (
-          <div className="px-5 py-3 border-b border-[#1a3a4a] shrink-0" style={{ backgroundColor: '#091520' }}>
-            <div className="flex items-center gap-1.5 mb-2">
-              <Info size={11} className="text-gray-500" />
-              <span className="text-[10px] font-bold uppercase tracking-widest text-gray-500">Contents</span>
-            </div>
-            <div className="flex flex-wrap gap-1.5">
-              {filteredTopics.map(t => (
-                <button
-                  key={t.id}
-                  onClick={() => scrollToTopic(t.id)}
-                  className="text-[11px] text-brand-teal hover:text-white bg-[#0a3d4a] hover:bg-[#0d4d5a] px-2.5 py-1 rounded-md transition-colors font-medium"
-                >
-                  {t.title}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Content — scrollable */}
-        <div className="flex-1 overflow-y-auto p-5">
-        <div className="max-w-4xl mx-auto space-y-3">
+        {/* Content — scrollable (TOC, topics, tips, related guides all scroll together) */}
+        <div className="flex-1 overflow-y-auto p-5" style={{ backgroundColor: '#0a1929' }}>
+        <div className="max-w-4xl mx-auto space-y-4">
           {!help ? (
             <div className="text-center py-16">
               <BookOpen size={40} className="mx-auto text-gray-600 mb-4" />
@@ -257,10 +236,31 @@ export default function HelpDrawer({ open, onClose }: HelpDrawerProps) {
             </div>
           ) : (
             <>
-              {/* Topic sections — first 3 expanded by default */}
+              {/* Table of Contents — inside scroll area */}
+              {filteredTopics.length > 3 && !filterText && (
+                <div className="pb-3 mb-1 border-b border-[#1a3a4a]">
+                  <div className="flex items-center gap-1.5 mb-2">
+                    <Info size={11} className="text-gray-500" />
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-gray-500">Contents</span>
+                  </div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {filteredTopics.map(t => (
+                      <button
+                        key={t.id}
+                        onClick={() => scrollToTopic(t.id)}
+                        className="text-[11px] text-brand-teal hover:text-white bg-[#0a3d4a] hover:bg-[#0d4d5a] px-2.5 py-1 rounded-md transition-colors font-medium"
+                      >
+                        {t.title}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Topic sections — all collapsed by default, user expands what they need */}
               {filteredTopics.length > 0 ? (
-                filteredTopics.map((topic, idx) => (
-                  <TopicSection key={topic.id} topic={topic} defaultOpen={idx < 3} />
+                filteredTopics.map((topic) => (
+                  <TopicSection key={topic.id} topic={topic} defaultOpen={false} />
                 ))
               ) : filterText ? (
                 <div className="text-center py-8">
@@ -287,31 +287,31 @@ export default function HelpDrawer({ open, onClose }: HelpDrawerProps) {
                   </ul>
                 </div>
               )}
+
+              {/* Related Pages — inside scroll area */}
+              {help.relatedPages && help.relatedPages.length > 0 && (
+                <div className="pt-3 mt-1 border-t border-[#1a3a4a]">
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-gray-500 block mb-2">
+                    Related Guides
+                  </span>
+                  <div className="flex flex-wrap gap-2">
+                    {help.relatedPages.map((page, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => { navigate(page.path); }}
+                        className="flex items-center gap-1.5 text-[12px] text-brand-teal hover:text-white bg-[#0a3d4a] hover:bg-[#0d4d5a] px-3 py-1.5 rounded-lg transition-colors font-medium"
+                      >
+                        {page.label}
+                        <ArrowRight size={11} />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
             </>
           )}
         </div>
         </div>
-
-        {/* Related Pages footer */}
-        {help?.relatedPages && help.relatedPages.length > 0 && (
-          <div className="shrink-0 px-5 py-4 border-t border-[#1a3a4a]" style={{ backgroundColor: '#0c1e30' }}>
-            <span className="text-[10px] font-bold uppercase tracking-widest text-gray-500 block mb-2">
-              Related Guides
-            </span>
-            <div className="flex flex-wrap gap-2">
-              {help.relatedPages.map((page, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => { navigate(page.path); }}
-                  className="flex items-center gap-1.5 text-[12px] text-brand-teal hover:text-white bg-[#0a3d4a] hover:bg-[#0d4d5a] px-3 py-1.5 rounded-lg transition-colors font-medium"
-                >
-                  {page.label}
-                  <ArrowRight size={11} />
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
       </div>
     </>
   );

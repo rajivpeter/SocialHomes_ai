@@ -1,0 +1,767 @@
+================================================================================
+  Doc3 — SocialHomes.Ai API & Integration Requirements
+  Version: 2.0  |  Date: 2026-02-18
+  Author: Business Analyst Agent  |  Studio: Yantra Works
+================================================================================
+
+1. API OVERVIEW
+================================================================================
+
+1.1 API Strategy
+    SocialHomes.Ai uses a server-side proxy pattern for ALL external API
+    integrations. The React frontend communicates exclusively with the Express
+    backend, which handles external calls, caching, rate limiting, and
+    graceful degradation.
+
+1.2 Integration Tiers
+
+    TIER 1 — Free, No API Key Required
+    Publicly available APIs with no registration needed.
+    Status: LIVE with real data
+
+    TIER 2 — Free, Registration Required
+    APIs requiring account creation or key registration.
+    Status: LIVE with real data (where keys available) + simulated fallbacks
+
+    TIER 3 — Subscription/Paid APIs
+    Commercial APIs requiring contracts or paid subscriptions.
+    Status: MOCK endpoints with realistic simulated data
+
+1.3 Current Integration Count
+    Total: 20 integrations
+    - Tier 1: 3 live
+    - Tier 2: 6 live (with simulated fallbacks)
+    - Tier 3: 5 mock services + 6 planned
+
+
+2. TIER 1 INTEGRATIONS (Free, No Key)
+================================================================================
+
+2.1 Police.uk — Street-Level Crime Data
+    Status: LIVE
+    Base URL: https://data.police.uk/api
+    Documentation: https://data.police.uk/docs/
+
+    Endpoints Used:
+    - GET /crimes-street/all-crime?lat={lat}&lng={lng}&date={YYYY-MM}
+    - GET /crimes-at-location?location_id={id}
+    - GET /outcomes-at-location?location_id={id}
+
+    Server Route: GET /api/v1/public-data/police/:postcode
+    Cache TTL: 24 hours
+    Rate Limit: 15 req/sec (fair-use)
+    Fallback: Simulated crime data matching postcode area
+
+    Used By:
+    - D2: Live Crime Context for ASB (crime-context.ts)
+    - Explore page crime data layer
+    - ASB case correlation
+    - Neighbourhood Briefing crime section
+
+    Data Returned:
+    - Crime category (anti-social-behaviour, burglary, criminal-damage, etc.)
+    - Month, location (lat/lng), outcome status
+    - 12-month historical data per location
+
+2.2 Open-Meteo — Weather Forecasting
+    Status: LIVE
+    Base URL: https://api.open-meteo.com/v1
+    Documentation: https://open-meteo.com/en/docs
+
+    Endpoints Used:
+    - GET /forecast?latitude={lat}&longitude={lng}&hourly=temperature_2m,
+          relative_humidity_2m,precipitation,weathercode,windspeed_10m
+          &daily=temperature_2m_max,temperature_2m_min,precipitation_sum
+          &timezone=Europe/London
+
+    Server Route: GET /api/v1/public-data/weather/:lat/:lng
+    Cache TTL: 1 hour
+    Rate Limit: 10,000 req/day (no key needed)
+    Fallback: Static weather for London SE
+
+    Used By:
+    - D1: Predictive Damp Intelligence (weather factor 0.25 weight)
+    - AI Morning Briefing (weather section)
+    - Neighbourhood Briefing (environmental context)
+    - Property impact assessment
+
+    Data Returned:
+    - Hourly: temperature, humidity, precipitation, wind speed, weather code
+    - Daily: max/min temperature, precipitation sum
+    - 7-day forecast + current conditions
+
+2.3 DEFRA Flood Risk API
+    Status: LIVE
+    Base URL: https://environment.data.gov.uk/flood-monitoring
+    Documentation: https://environment.data.gov.uk/flood-monitoring/doc/reference
+
+    Endpoints Used:
+    - GET /id/floods?lat={lat}&long={lng}&dist=3
+    - GET /id/stations?lat={lat}&long={lng}&dist=3
+
+    Server Route: GET /api/v1/public-data/flood-risk/:postcode
+    Cache TTL: 1 hour
+    Rate Limit: No formal limit
+    Fallback: "No active warnings" with zone classification
+
+    Used By:
+    - Property Passport (flood risk section)
+    - Neighbourhood Briefing (environmental alerts)
+    - Property detail page (risk indicators)
+
+    Data Returned:
+    - Active flood warnings/alerts
+    - Flood risk zone classification
+    - Nearest monitoring station readings
+
+
+3. TIER 2 INTEGRATIONS (Registration Required)
+================================================================================
+
+3.1 Postcodes.io — Postcode Lookup
+    Status: LIVE
+    Base URL: https://api.postcodes.io
+    Documentation: https://postcodes.io/docs
+    Registration: None (open API)
+
+    Endpoints Used:
+    - GET /postcodes/{postcode}
+    - GET /postcodes/{postcode}/nearest
+    - POST /postcodes (bulk lookup)
+
+    Server Route: GET /api/v1/public-data/postcode/:postcode
+    Cache TTL: 7 days
+    Rate Limit: Generous (no formal limit)
+    Fallback: Static mapping for SE London postcodes
+
+    Data Returned:
+    - Latitude, longitude
+    - LSOA code and name (for IMD/Census/NOMIS)
+    - Ward, parliamentary constituency
+    - Local authority, region
+    - Country, European electoral region
+
+    Used By:
+    - All location-dependent lookups
+    - LSOA resolution for Census/NOMIS/IMD
+    - Property geocoding
+
+3.2 EPC Open Data
+    Status: LIVE (with simulated fallback)
+    Base URL: https://epc.opendatacommunities.org/api/v1
+    Documentation: https://epc.opendatacommunities.org/docs/api
+    Registration: API key via MHCLG portal
+
+    Endpoints Used:
+    - GET /domestic/search?uprn={uprn}
+    - GET /domestic/certificate/{lmk-key}
+
+    Server Route: GET /api/v1/public-data/epc/:uprn
+    Cache TTL: 30 days
+    Rate Limit: 1,000 req/month (free tier)
+    Fallback: Generated EPC data matching property attributes
+
+    Data Returned:
+    - Current energy rating (A–G) and score
+    - Potential rating
+    - Environmental impact rating
+    - Floor area, wall/roof type
+    - Heating type, hot water system
+    - Recommendations for improvement
+    - Certificate expiry date
+
+    Used By:
+    - Property Passport (energy section)
+    - Compliance page (EPC tracking)
+    - Property detail page
+    - D1: Damp prediction (building factor input)
+
+3.3 Census 2021 (ONS via NOMIS)
+    Status: LIVE (with simulated fallback)
+    Base URL: https://www.nomisweb.co.uk/api/v01
+    Documentation: https://www.nomisweb.co.uk/api/v01/help
+
+    Datasets Used:
+    - NM_2072_1 — Population by age/sex (Census 2021)
+    - NM_2021_1 — Accommodation type (Census 2021)
+
+    Server Route: GET /api/v1/public-data/census/:lsoaCode
+    Cache TTL: 90 days
+    Rate Limit: 100,000 req/month
+    Fallback: Simulated demographics for Southwark LSOA areas
+
+    Data Returned:
+    - Population count and density
+    - Age distribution (0–15, 16–64, 65+)
+    - Household composition
+    - Accommodation type breakdown
+    - Ethnicity distribution
+
+    Used By:
+    - Neighbourhood Briefing (demographics section)
+    - Property Passport (area context)
+    - D3: Vulnerability Detection (deprivation context)
+
+3.4 NOMIS — Labour Market Statistics
+    Status: LIVE (with simulated fallback)
+    Base URL: https://www.nomisweb.co.uk/api/v01
+    Documentation: https://www.nomisweb.co.uk/api/v01/help
+
+    Datasets Used:
+    - NM_162_1 — JSA claimant count by age/sex
+    - NM_17_5  — Annual Population Survey (employment/unemployment)
+
+    Server Route: GET /api/v1/public-data/nomis/:lsoaCode
+    Cache TTL: 30 days
+    Rate Limit: 100,000 req/month
+    Fallback: Simulated labour market data for SE London
+
+    Data Returned:
+    - Employment rate, unemployment rate
+    - Economic activity breakdown
+    - Claimant count (JSA/UC)
+    - Occupation types
+    - Qualification levels
+
+    Used By:
+    - D5: Benefits Entitlement Engine (employment context)
+    - Neighbourhood Briefing (economic section)
+    - D3: Vulnerability Detection (economic deprivation factor)
+
+3.5 Gas Safe Register
+    Status: LIVE (with simulated fallback)
+    Base URL: https://www.gassaferegister.co.uk/api
+    Documentation: Restricted (via partnership application)
+
+    Endpoint Pattern:
+    - GET /engineer/{registrationNumber}
+
+    Server Route: GET /api/v1/public-data/gas-safe/:registrationNumber
+    Cache TTL: 24 hours
+    Rate Limit: 100 req/hour
+    Fallback: Simulated verification with valid/expired/suspended status
+
+    Data Returned:
+    - Engineer name and company
+    - Registration status (valid/expired/suspended)
+    - Qualifications (boiler, cooker, fire, etc.)
+    - Registration number and expiry date
+
+    Used By:
+    - Repair detail page (contractor verification badge)
+    - Compliance management (contractor vetting)
+
+3.6 Electrical Safety Register (NICEIC)
+    Status: LIVE (with simulated fallback)
+    Base URL: https://www.niceic.com/api
+    Documentation: Via partnership application
+
+    Endpoint Pattern:
+    - GET /contractor/{registrationNumber}
+
+    Server Route: GET /api/v1/public-data/electrical-safety/:registrationNumber
+    Cache TTL: 24 hours
+    Rate Limit: 100 req/hour
+    Fallback: Simulated verification with valid/expired/suspended status
+
+    Data Returned:
+    - Contractor name and company
+    - Registration status (valid/expired/suspended)
+    - Scheme (NICEIC Approved Contractor / Competent Person)
+    - Registration number and expiry date
+
+    Used By:
+    - Repair detail page (contractor verification badge — blue)
+    - Compliance management (electrical contractor vetting)
+
+
+4. TIER 3 INTEGRATIONS (Mock/Subscription)
+================================================================================
+
+4.1 DWP Universal Credit Verification
+    Status: MOCK
+    Mock Function: mockUcVerification(tenantId)
+    Server Route: GET /api/v1/ai/mock/uc-verification/:tenantId
+
+    Mock Response:
+    - UC claim status (active/pending/none)
+    - Housing element amount
+    - Payment frequency and next payment date
+    - Managed payment status (direct to landlord)
+    - Alternative Payment Arrangement (APA) eligibility
+
+    Used By:
+    - D5: Benefits Entitlement Engine
+    - Rent management (UC tracking)
+    - Arrears prevention (early warning)
+
+4.2 IoT Sensor Integration (Switchee/Aico)
+    Status: MOCK
+    Mock Function: mockIotSensors(propertyId)
+    Server Route: GET /api/v1/ai/mock/iot-sensors/:propertyId
+
+    Mock Response:
+    - Temperature readings (per room: living, bedroom, kitchen, bathroom)
+    - Humidity readings (per room)
+    - CO2 levels
+    - Smoke/CO detector status (OK/alert/battery-low)
+    - Heating system status (on/off/hours today)
+    - Alerts (high humidity, low temperature, CO detected)
+
+    Used By:
+    - D1: Predictive Damp Intelligence (sensor factor 0.20 weight)
+    - Property detail page (live sensor data)
+    - Compliance monitoring (smoke/CO detector status)
+
+4.3 GoCardless — Direct Debit
+    Status: MOCK
+    Mock Function: mockDirectDebit(tenantId)
+    Server Route: GET /api/v1/ai/mock/direct-debit/:tenantId
+
+    Mock Response:
+    - Mandate status (active/pending/cancelled)
+    - Bank details (last 4 digits only)
+    - Next collection date and amount
+    - Payment history (last 12 months)
+    - Failed payment reasons
+
+    Used By:
+    - Rent management (payment processing)
+    - Arrears management (DD failure tracking)
+    - Tenant detail (payment method)
+
+4.4 Plentific/Fixflo — Repairs Marketplace
+    Status: MOCK
+    Mock Function: mockRepairsMarketplace(caseId)
+    Server Route: GET /api/v1/ai/mock/repairs-marketplace/:caseId
+
+    Mock Response:
+    - Contractor quotes (3 quotes with price/availability)
+    - Dispatch confirmation
+    - Appointment scheduling
+    - Job completion notification
+    - Satisfaction survey trigger
+
+    Used By:
+    - Repairs management (contractor dispatch)
+    - Cost management (competitive quotes)
+
+4.5 DocuSign — Digital Signing
+    Status: MOCK
+    Mock Function: mockSigningEnvelope(documentType, tenantId)
+    Server Route: POST /api/v1/ai/mock/signing
+
+    Mock Response:
+    - Envelope ID and status (sent/delivered/signed/declined)
+    - Document type (tenancy-agreement, section-21, gas-cert, atp)
+    - Recipients with signing status
+    - Completion date
+    - Signed document URL
+
+    Used By:
+    - Tenancy sign-up workflow
+    - Compliance certificate signing
+    - Legal document execution
+
+4.6 Experian/TransUnion — Tenant Referencing
+    Status: MOCK
+    Mock Function: mockReferencingResult(applicantId)
+    Server Route: GET /api/v1/ai/mock/referencing/:applicantId
+
+    Mock Response:
+    - Credit score (300–850)
+    - Affordability assessment (pass/refer/fail)
+    - CCJ count and value
+    - Previous addresses (last 3 years)
+    - Employment verification
+    - Recommendation (accept/refer/decline)
+
+    Used By:
+    - Allocations (applicant vetting)
+    - Lettings workflow (pre-tenancy checks)
+
+4.7 Land Registry — Title Data
+    Status: MOCK
+    Mock Function: mockLandRegistryTitle(propertyId)
+    Server Route: GET /api/v1/ai/mock/land-registry/:propertyId
+
+    Mock Response:
+    - Title number
+    - Tenure type (freehold/leasehold)
+    - Price paid and date
+    - Registered owner
+    - Lease details (start, term, ground rent)
+    - Restrictions and charges
+
+    Used By:
+    - Property Passport (ownership section)
+    - Property detail page
+
+4.8 RSH/CORE/Ombudsman — Regulatory Submissions
+    Status: MOCK
+    Mock Function: mockRegulatorySubmission(type, refId)
+    Server Route: POST /api/v1/ai/mock/regulatory
+
+    Submission Types:
+    - IDA (Individual Data Return)
+    - CORE lettings
+    - CORE sales
+    - Ombudsman escalation
+    - Compliance score return
+
+    Used By:
+    - Reports module (regulatory submissions)
+    - Compliance management
+
+
+5. SEVEN KILLER DIFFERENTIATOR SERVICES
+================================================================================
+
+5.1 D1: Predictive Damp Intelligence
+    Service: server/src/services/damp-prediction.ts
+    API Route: GET /api/v1/ai/damp-risk/:propertyId
+
+    Algorithm: 5-Factor Weighted Score (0–100)
+    ┌─────────────────────┬────────┬────────────────────────────────┐
+    │ Factor              │ Weight │ Data Sources                   │
+    ├─────────────────────┼────────┼────────────────────────────────┤
+    │ Weather conditions  │  0.25  │ Open-Meteo (humidity, rain)    │
+    │ Building attributes │  0.25  │ Property data (age, type, EPC) │
+    │ Repair history      │  0.20  │ Case data (damp/mould reports) │
+    │ IoT sensors         │  0.20  │ Switchee/Aico (temp, humidity) │
+    │ Occupancy patterns  │  0.10  │ Tenant data (household size)   │
+    └─────────────────────┴────────┴────────────────────────────────┘
+
+    Output:
+    - Overall risk score (0–100)
+    - Risk level: low (0–25), moderate (26–50), high (51–75), critical (76–100)
+    - Factor breakdown with individual scores
+    - Proactive recommendations
+    - Awaab's Law compliance status
+
+5.2 D2: Live Crime Context for ASB
+    Service: server/src/services/crime-context.ts
+    API Route: GET /api/v1/ai/crime-context/:estateId
+
+    Algorithm:
+    - Fetch Police.uk data for estate location (12-month window)
+    - Categorize by type (ASB, violence, drugs, criminal damage, etc.)
+    - Correlate with internal ASB cases
+    - Identify hotspots and trends
+    - Generate estate safety score
+
+    Output:
+    - Crime summary by category (last 12 months)
+    - Monthly trend (rising/stable/declining)
+    - Hotspot locations within estate
+    - Correlation with internal ASB cases
+    - Recommended patrol priorities
+
+5.3 D3: Automatic Vulnerability Detection
+    Service: server/src/services/vulnerability-detection.ts
+    API Route: GET /api/v1/ai/vulnerability/:tenantId
+
+    Algorithm: 7-Factor Weighted Score (0–100)
+    ┌──────────────────────────┬────────┬──────────────────────────┐
+    │ Factor                   │ Weight │ Data Sources             │
+    ├──────────────────────────┼────────┼──────────────────────────┤
+    │ IMD deprivation          │  0.20  │ IMD data (decile)        │
+    │ Arrears history          │  0.20  │ Rent account (balance)   │
+    │ Health flags             │  0.15  │ Tenant vulnerability     │
+    │ Social isolation         │  0.15  │ Household composition    │
+    │ Age risk (elderly/young) │  0.10  │ Tenant DOB              │
+    │ Dependents               │  0.10  │ Household members        │
+    │ UC transition            │  0.10  │ UC status                │
+    └──────────────────────────┴────────┴──────────────────────────┘
+
+    Output:
+    - Vulnerability score (0–100)
+    - Risk level: low / moderate / high / critical
+    - Detected flags (e.g., elderly, mental-health, financial-hardship)
+    - Recommended support actions
+    - Referral suggestions (social services, CAB, food bank)
+
+5.4 D4: Property Passport
+    Service: server/src/services/property-passport.ts
+    API Route: GET /api/v1/ai/property-passport/:propertyId
+
+    Aggregation Sources:
+    - Property data (Firestore)
+    - EPC certificate (Tier 2 API)
+    - Compliance certificates (Firestore)
+    - Repair history (Firestore cases)
+    - Damp risk score (D1 service)
+    - Flood risk (DEFRA API)
+    - Crime context (D2 service)
+    - Census demographics (NOMIS API)
+    - Land Registry title (mock)
+
+    Output:
+    - Comprehensive property dossier
+    - Current condition assessment
+    - Compliance status summary
+    - Energy efficiency profile
+    - Neighbourhood context
+    - Investment recommendations
+
+5.5 D5: Benefits Entitlement Engine
+    Service: server/src/services/benefits-engine.ts
+    API Route: GET /api/v1/ai/benefits-check/:tenantId
+
+    Rules Engine (UK 2025/26):
+    - Universal Credit (standard allowance, housing element, child element)
+    - Personal Independence Payment (PIP)
+    - Attendance Allowance
+    - Pension Credit (guarantee, savings)
+    - Council Tax Reduction
+    - Discretionary Housing Payment
+    - Warm Home Discount
+    - Free school meals
+
+    Input:
+    - Tenant age, household composition
+    - Employment status, income
+    - Disability/health conditions
+    - Current benefit claims
+
+    Output:
+    - List of potential entitlements
+    - Estimated weekly/monthly amounts
+    - Claim status (claimed/unclaimed/check-eligibility)
+    - Total unclaimed benefits estimate
+    - Next steps for each entitlement
+
+5.6 D6: AI Neighbourhood Briefing
+    Service: server/src/services/neighbourhood-briefing.ts
+    API Route: GET /api/v1/ai/briefing/:estateId
+
+    Data Sources Combined:
+    - Weather forecast (Open-Meteo)
+    - Crime data (Police.uk)
+    - Active cases (Firestore)
+    - Compliance status (Firestore)
+    - Census demographics (NOMIS)
+    - Damp risk aggregation (D1)
+    - ASB incidents (Firestore + Police)
+
+    Output:
+    - 6 summary cards (weather, crime, cases, compliance, demographics, risk)
+    - Officer briefing text (AI-generated narrative)
+    - Action items prioritized by urgency
+    - Trend comparisons (this week vs last)
+
+5.7 D7: IoT Sensor Integration
+    Service: server/src/services/mock-services.ts
+    API Route: GET /api/v1/ai/mock/iot-sensors/:propertyId
+
+    Supported Devices:
+    - Switchee smart thermostat (temperature, humidity, heating usage)
+    - Aico smoke/CO detectors (status, battery, alerts)
+    - Third-party humidity sensors
+
+    Status: MOCK (ready for real Switchee/Aico API integration)
+
+
+6. GOV.UK NOTIFY INTEGRATION
+================================================================================
+
+6.1 Overview
+    Service: server/src/services/govuk-notify.ts
+    Status: Template library defined (24 templates)
+    Integration: Ready for GOV.UK Notify API key
+
+6.2 Template Categories (7)
+
+    CATEGORY 1: Rent Arrears (4 templates)
+    - arrears-mild: Friendly reminder (1–2 weeks behind)
+    - arrears-moderate: Formal notice (3–4 weeks)
+    - arrears-severe: Pre-action warning (5+ weeks)
+    - arrears-arrangement: Payment plan confirmation
+
+    CATEGORY 2: Repairs (4 templates)
+    - repair-acknowledged: Repair reported acknowledgement
+    - repair-appointment: Appointment booking confirmation
+    - repair-completed: Completion notification + satisfaction link
+    - repair-follow-up: Post-repair follow-up
+
+    CATEGORY 3: ASB (3 templates)
+    - asb-reported: ASB report acknowledgement
+    - asb-warning: Warning letter to perpetrator
+    - asb-update: Case update to victim/reporter
+
+    CATEGORY 4: Compliance (3 templates)
+    - compliance-access: Access request for inspection
+    - compliance-reminder: Appointment reminder
+    - compliance-certificate: Certificate available notification
+
+    CATEGORY 5: Tenancy (4 templates)
+    - tenancy-welcome: New tenant welcome pack
+    - tenancy-renewal: Renewal offer
+    - tenancy-end: End of tenancy notification
+    - tenancy-annual-visit: Annual visit scheduling
+
+    CATEGORY 6: Damp & Mould (3 templates)
+    - damp-report-ack: Report acknowledged
+    - damp-inspection: Inspection scheduled
+    - damp-works: Works ordered notification (Awaab's Law timeline)
+
+    CATEGORY 7: General (3 templates)
+    - general-update: Generic case update
+    - general-survey: Satisfaction survey invitation
+    - general-information: Information request
+
+6.3 Template Rendering
+    - Personalisation fields use ((field)) syntax
+    - Rendered server-side via /api/v1/ai/notify/render
+    - Supports: ((tenant_name)), ((property_address)), ((case_ref)),
+      ((amount)), ((date)), ((officer_name)), etc.
+
+
+7. CACHING ARCHITECTURE
+================================================================================
+
+7.1 Cache Collection: externalDataCache
+    Stored in Firestore with TTL-based expiration.
+    Cache key format: "{source}:{params}" (e.g., "police:SE17+1RY")
+
+7.2 Cache-Through Pattern
+    1. Check Firestore cache for key
+    2. If found AND not expired → return cached data
+    3. If missing OR expired → fetch from external API
+    4. Store result in cache with TTL
+    5. Return data to caller
+
+7.3 TTL Configuration
+
+    | Source              | TTL       | Key Format                 |
+    |---------------------|-----------|----------------------------|
+    | police              | 24 hours  | police:{postcode}          |
+    | weather             | 1 hour    | weather:{lat},{lng}        |
+    | flood-risk          | 1 hour    | flood:{postcode}           |
+    | postcode            | 7 days    | postcode:{postcode}        |
+    | epc                 | 30 days   | epc:{uprn}                 |
+    | census              | 90 days   | census:{lsoaCode}          |
+    | nomis               | 30 days   | nomis:{lsoaCode}           |
+    | gas-safe            | 24 hours  | gas-safe:{regNumber}       |
+    | electrical-safety   | 24 hours  | electrical:{regNumber}     |
+    | imd                 | 90 days   | imd:{lsoaCode}             |
+
+7.4 Cache Management
+    - Automatic TTL enforcement on read
+    - Manual cache invalidation via admin API
+    - Cache hit rate tracked in metrics
+    - No cache warming (fetch-on-demand only)
+
+
+8. RATE LIMITING
+================================================================================
+
+8.1 Internal Rate Limits (per client IP)
+
+    | Tier    | Routes              | Limit        | Window  |
+    |---------|---------------------|--------------|---------|
+    | API     | /api/v1/*           | 100 req/min  | Sliding |
+    | Auth    | /api/v1/auth/*      | 10 req/min   | Sliding |
+    | AI      | /api/v1/ai/*        | 30 req/min   | Sliding |
+    | Admin   | /api/v1/admin/*     | 20 req/min   | Sliding |
+
+8.2 External API Rate Limits
+    Token bucket pattern per API source.
+    Global fair-use: 15 req/sec across all external APIs.
+
+    | API               | Limit             | Enforced By       |
+    |-------------------|-------------------|-------------------|
+    | Police.uk         | 15 req/sec        | Fair-use + cache  |
+    | Open-Meteo        | 10,000 req/day    | No key needed     |
+    | DEFRA             | No formal limit   | Fair-use          |
+    | Postcodes.io      | No formal limit   | Fair-use          |
+    | EPC Open Data     | 1,000 req/month   | API key + cache   |
+    | NOMIS             | 100,000 req/month | Fair-use          |
+    | Gas Safe          | 100 req/hour      | Fair-use + cache  |
+    | Electrical Safety | 100 req/hour      | Fair-use + cache  |
+
+
+9. ERROR HANDLING & GRACEFUL DEGRADATION
+================================================================================
+
+9.1 External API Error Handling
+    - Timeout: 10 seconds per external request
+    - Retry: 1 retry with exponential backoff (2s)
+    - On failure: Return simulated fallback data
+    - Flag: Response includes { source: 'live' | 'simulated' }
+
+9.2 Simulated Fallback Strategy
+    Every external API has a corresponding simulated data generator.
+    Simulated data is:
+    - Realistic for the requested entity/location
+    - Consistent across requests (deterministic seeding)
+    - Flagged clearly in the response
+
+9.3 Circuit Breaker Pattern (Planned)
+    - Track failure count per API source
+    - Open circuit after 5 consecutive failures
+    - Half-open after 60 seconds (single test request)
+    - Close circuit on successful test
+    Status: Not yet implemented (deferred)
+
+
+10. API SECURITY
+================================================================================
+
+10.1 Authentication
+    All /api/v1/* routes require Firebase Bearer token.
+    Exception: /health (public health check)
+
+10.2 Request Validation
+    - JSON body limit: 1MB
+    - Content-Type: application/json enforced
+    - Query parameter sanitization
+    - Path parameter validation
+
+10.3 Response Security
+    - No sensitive data in error responses (production)
+    - CORS restricted to allowed origins
+    - Request ID correlation (X-Request-ID)
+    - Security headers on all responses
+
+10.4 API Key Management
+    - No API keys in source code
+    - All keys in Google Secret Manager
+    - Environment variable injection at runtime
+    - Key rotation support via Secret Manager versioning
+
+
+11. FUTURE INTEGRATION ROADMAP
+================================================================================
+
+11.1 Phase 5 — Real-Time & Advanced (Planned)
+
+    | Integration           | Priority | Complexity | Description                     |
+    |-----------------------|----------|------------|---------------------------------|
+    | Switchee API (real)   | P2       | Medium     | Replace IoT mock with real API  |
+    | Aico API (real)       | P2       | Medium     | Real smoke/CO detector data     |
+    | DWP UC API (real)     | P1       | High       | Real UC verification (DWP ISP)  |
+    | GoCardless API (real) | P2       | Medium     | Real direct debit processing    |
+    | DocuSign API (real)   | P2       | Medium     | Real digital signing            |
+    | Plentific API (real)  | P3       | Medium     | Real contractor marketplace     |
+    | Vertex AI / Gemini    | P1       | High       | LLM for Yantra Assist           |
+    | Cloud Pub/Sub         | P2       | Medium     | Event-driven architecture       |
+    | WebSocket (Socket.io) | P2       | Medium     | Real-time notifications         |
+    | Stripe/GoCardless     | P3       | Medium     | Online rent payment             |
+
+11.2 Phase 6 — Enterprise Integrations (Future)
+
+    | Integration           | Priority | Complexity | Description                     |
+    |-----------------------|----------|------------|---------------------------------|
+    | Microsoft 365         | P3       | Medium     | Email, calendar, Teams          |
+    | Salesforce CRM        | P3       | High       | Tenant relationship management  |
+    | Power BI              | P3       | Medium     | Advanced analytics/dashboards   |
+    | Twilio                | P3       | Medium     | SMS/WhatsApp messaging          |
+    | NHS Digital           | P3       | High       | Health data integration         |
+    | Companies House       | P3       | Low        | Contractor verification         |
+
+
+================================================================================
+  End of Doc3 — SocialHomes.Ai API & Integration Requirements
+  Yantra Works | 2026-02-18
+================================================================================

@@ -40,6 +40,7 @@ export default function Header() {
   };
 
   return (
+    <>
     <header
       className="fixed top-0 right-0 h-14 bg-surface-dark/80 backdrop-blur-xl border-b border-border-default z-30 flex items-center px-5 gap-4"
       style={{ left: state.sidebarCollapsed ? 64 : 280 }}
@@ -219,8 +220,10 @@ export default function Header() {
         />
       )}
 
-      {/* Help Drawer */}
-      <HelpDrawer open={showHelp} onClose={() => setShowHelp(false)} />
     </header>
+
+    {/* Help Drawer — rendered outside <header> to avoid backdrop-blur containing block */}
+    <HelpDrawer open={showHelp} onClose={() => setShowHelp(false)} />
+    </>
   );
 }
