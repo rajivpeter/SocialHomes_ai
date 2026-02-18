@@ -166,16 +166,15 @@ export default function HelpDrawer({ open, onClose }: HelpDrawerProps) {
 
       {/* LEFT Drawer — SOLID opaque background */}
       <div
-        className={`fixed top-0 left-0 h-full w-full md:w-1/2 z-50 flex flex-col transition-transform duration-300 ease-out ${
+        className={`fixed inset-0 z-50 flex flex-col transition-transform duration-300 ease-out ${
           open ? 'translate-x-0' : '-translate-x-full'
         }`}
-        style={{ backgroundColor: '#0a1929', minWidth: '320px' }}
+        style={{ backgroundColor: '#0a1929' }}
       >
-        {/* Right edge accent */}
-        <div className="absolute right-0 top-0 bottom-0 w-[2px] bg-gradient-to-b from-brand-teal/50 via-brand-teal/20 to-transparent" />
 
         {/* Header */}
         <div className="p-5 border-b border-[#1a3a4a] shrink-0" style={{ backgroundColor: '#0c1e30' }}>
+          <div className="max-w-4xl mx-auto">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-3">
               <div className="p-2 rounded-lg bg-brand-teal/15">
@@ -222,6 +221,7 @@ export default function HelpDrawer({ open, onClose }: HelpDrawerProps) {
             </div>
           )}
         </div>
+        </div>
 
         {/* Table of Contents — quick jump */}
         {help && filteredTopics.length > 3 && !filterText && (
@@ -245,7 +245,8 @@ export default function HelpDrawer({ open, onClose }: HelpDrawerProps) {
         )}
 
         {/* Content — scrollable */}
-        <div className="flex-1 overflow-y-auto p-5 space-y-3">
+        <div className="flex-1 overflow-y-auto p-5">
+        <div className="max-w-4xl mx-auto space-y-3">
           {!help ? (
             <div className="text-center py-16">
               <BookOpen size={40} className="mx-auto text-gray-600 mb-4" />
@@ -288,6 +289,7 @@ export default function HelpDrawer({ open, onClose }: HelpDrawerProps) {
               )}
             </>
           )}
+        </div>
         </div>
 
         {/* Related Pages footer */}
