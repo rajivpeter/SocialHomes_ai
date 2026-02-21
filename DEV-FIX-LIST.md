@@ -1,5 +1,5 @@
 # SocialHomes.Ai — Dev Fix List
-## Updated: 2026-02-20 from Comprehensive Selenium Test Suite V5
+## Updated: 2026-02-21
 
 **Test Summary:** 331 tests | 330 PASS | 0 FAIL | 1 WARN | 99.7% pass rate
 
@@ -78,9 +78,19 @@
 
 ---
 
-## KNOWN USER-REPORTED ISSUES — INVESTIGATING
+## USER-REPORTED ISSUES — ALL RESOLVED
 
-_Awaiting details on which pages are showing errors._
+### ~~BUG-005: Property Detail Page Crashes (React Error #310)~~ FIXED
+- **Status:** RESOLVED — `/properties/100023456001` renders fully with map, details, EPC, all tabs
+- **Root Cause:** React Rules of Hooks violation — `usePropertyIntelligence()` hook was called AFTER a conditional `if (!property) return` early exit, causing React to see different hook counts on re-renders
+- **Fix:** Moved `usePropertyIntelligence(property)` call before the early return guard
+- **Files:** `app/src/pages/properties/PropertyDetailPage.tsx`
+
+### ~~BUG-006: Repair Detail Page Crashes (React Error #310)~~ FIXED
+- **Status:** RESOLVED — `/repairs/rep-001` renders fully with AI estimates, timeline, case details, activity feed
+- **Root Cause:** Same Rules of Hooks violation — `useRepairIntelligence()` and `useState()` called after conditional early return
+- **Fix:** Moved `useRepairIntelligence(repair)` and `useState` calls before the `if (!repair) return` guard
+- **Files:** `app/src/pages/repairs/RepairDetailPage.tsx`
 
 ---
 

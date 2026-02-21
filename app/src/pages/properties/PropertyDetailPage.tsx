@@ -26,7 +26,6 @@ import {
 import PropertyMap from '@/components/shared/PropertyMap';
 
 export default function PropertyDetailPage() {
-  console.log('[BUILD-MARKER-2026-02-21] PropertyDetailPage loaded - hooks fix applied');
   const { id } = useParams<{ id: string }>();
   const [activeTab, setActiveTab] = useState<'overview' | 'compliance' | 'stock-condition' | 'damp-mould' | 'works-history' | 'documents'>('overview');
 
