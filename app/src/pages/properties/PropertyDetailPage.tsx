@@ -38,6 +38,9 @@ export default function PropertyDetailPage() {
   const propertyCases = property ? allCases.filter((c: any) => c.propertyId === property.id) : [];
   const dampCases = propertyCases.filter(c => c.type === 'damp-mould' && c.status !== 'closed');
 
+  // Hook must be called before any conditional return (Rules of Hooks)
+  const intel = usePropertyIntelligence(property);
+
   if (!property) {
     return (
       <div className="space-y-6">
@@ -100,7 +103,6 @@ export default function PropertyDetailPage() {
   };
 
   const aiActions = generateAiActions();
-  const intel = usePropertyIntelligence(property);
 
   return (
     <div className="space-y-6">

@@ -26,6 +26,10 @@ export default function RepairDetailPage() {
   const tenant = repair ? tenants.find((t: any) => t.id === repair.tenantId) : null;
   const repairActivities = repair ? activitiesData.filter(a => a.caseId === repair.id) : [];
 
+  // Hooks must be called before any conditional return (Rules of Hooks)
+  const intel = useRepairIntelligence(repair);
+  const [activeModal, setActiveModal] = useState<string | null>(null);
+
   if (!repair) {
     return (
       <div className="space-y-6">
@@ -121,9 +125,6 @@ export default function RepairDetailPage() {
   };
 
   const aiActions = generateAiActions();
-  const intel = useRepairIntelligence(repair);
-
-  const [activeModal, setActiveModal] = useState<string | null>(null);
 
   const assignFields: ActionField[] = [
     { id: 'ref', label: 'Reference', type: 'readonly', defaultValue: repair.reference },

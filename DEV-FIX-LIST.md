@@ -1,7 +1,7 @@
 # SocialHomes.Ai — Dev Fix List
-## Updated: 2026-02-17 from Comprehensive Selenium Test Suite V5
+## Updated: 2026-02-20 from Comprehensive Selenium Test Suite V5
 
-**Test Summary:** 332 tests | 331 PASS | 0 FAIL | 1 WARN | 99.7% pass rate
+**Test Summary:** 331 tests | 330 PASS | 0 FAIL | 1 WARN | 99.7% pass rate
 
 ---
 
@@ -42,7 +42,16 @@
 
 ---
 
-## WHAT'S WORKING WELL (331/332 tests passing)
+## UI IMPROVEMENTS
+
+### Help/Guide Drawer — Full-Screen Layout
+- **Status:** COMPLETE — Guides now open full-screen for easier reading
+- **Fix:** Changed drawer from half-width (`md:w-1/2`) to `fixed inset-0`; added `max-w-4xl mx-auto` content wrapper; TOC and Related Guides moved into scroll area; all topics collapsed by default
+- **Files:** `HelpDrawer.tsx`
+
+---
+
+## WHAT'S WORKING WELL (330/331 tests passing)
 
 - Login/Authentication: Flawless (Firebase email + Google sign-in)
 - All 14 sidebar navigation links: Present and clickable (29/29 tests)
@@ -51,7 +60,7 @@
 - Briefing: Personalized greeting, AI alerts, action buttons, all sections (8/8)
 - Tenancies: 68 rows, all headers, row click → detail works, all tabs, AI features (16/16)
 - Properties: 75 rows, map, detail page with EPC/rent/type/beds/AI, tabs (14/14)
-- Repairs: 200 rows, all stats, detail with full workflow, action buttons, filters (114/114)
+- Repairs: 200 rows, all stats, detail with full workflow, action buttons, filters (113/113)
 - Complaints: 34 complaints, detail page with timeline, AI actions, deadlines, ombudsman (12/12)
 - ASB: 12 cases, detail page with workflow elements (6/6)
 - Rent & Income: Financial data, charts, worklist, UC tracking, tenant link navigation, sub-routes (11/11)
@@ -69,4 +78,10 @@
 
 ---
 
-## ALL ISSUES RESOLVED — PRODUCTION READY
+## KNOWN USER-REPORTED ISSUES — INVESTIGATING
+
+_Awaiting details on which pages are showing errors._
+
+---
+
+## ALL AUTOMATED TESTS PASSING — 99.7%
