@@ -1,0 +1,786 @@
+[
+  {
+    "type": "zombie_detected",
+    "agent": "ba",
+    "phaseNumber": 1,
+    "action": "Zombie: Business Analyst",
+    "details": "Business Analyst (PID 7575) detected as zombie process",
+    "outcome": "failure",
+    "metadata": {
+      "pid": 7575
+    },
+    "id": "m_1771980277584_gqjzh",
+    "timestamp": "2026-02-25T00:44:37.584Z",
+    "parentId": null
+  },
+  {
+    "type": "retry",
+    "agent": "ba",
+    "phaseNumber": 1,
+    "action": "Retry Business Analyst",
+    "details": "Retrying Business Analyst (attempt 1)",
+    "outcome": "pending",
+    "metadata": {
+      "attempt": 1
+    },
+    "id": "m_1771980277590_9upau",
+    "timestamp": "2026-02-25T00:44:37.590Z",
+    "parentId": null
+  },
+  {
+    "type": "agent_spawn",
+    "agent": "ba",
+    "phaseNumber": 1,
+    "action": "Business Analyst started",
+    "details": "Agent Business Analyst spawned",
+    "outcome": "pending",
+    "id": "m_1771980277611_5bezx",
+    "timestamp": "2026-02-25T00:44:37.611Z",
+    "parentId": null
+  },
+  {
+    "type": "agent_error",
+    "agent": "ba",
+    "phaseNumber": 1,
+    "action": "Business Analyst failed",
+    "details": "Agent Business Analyst exited with error",
+    "outcome": "failure",
+    "metadata": {
+      "error": "Agent Business Analyst exited with error"
+    },
+    "id": "m_1771980277649_goc4j",
+    "timestamp": "2026-02-25T00:44:37.649Z",
+    "parentId": "m_1771980277611_5bezx"
+  },
+  {
+    "type": "escalation",
+    "agent": "ba",
+    "phaseNumber": 1,
+    "action": "Escalated Business Analyst",
+    "details": "Asking Rajiv: Business Analyst failed after 2 attempts. Last error: Exit code 127, signal: null",
+    "outcome": "warning",
+    "id": "m_1771980307563_94ly9",
+    "timestamp": "2026-02-25T00:45:07.563Z",
+    "parentId": "m_1771980277649_goc4j"
+  },
+  {
+    "type": "retry",
+    "agent": "ba",
+    "phaseNumber": 1,
+    "action": "Retry Business Analyst",
+    "details": "Retrying Business Analyst (attempt 1)",
+    "outcome": "pending",
+    "metadata": {
+      "attempt": 1
+    },
+    "id": "m_1772010191711_3nki9",
+    "timestamp": "2026-02-25T09:03:11.711Z",
+    "parentId": null
+  },
+  {
+    "type": "agent_spawn",
+    "agent": "ba",
+    "phaseNumber": 1,
+    "action": "Business Analyst started",
+    "details": "Agent Business Analyst spawned",
+    "outcome": "pending",
+    "id": "m_1772010191738_mcz1o",
+    "timestamp": "2026-02-25T09:03:11.738Z",
+    "parentId": null
+  },
+  {
+    "type": "zombie_detected",
+    "agent": "ba",
+    "phaseNumber": 1,
+    "action": "Zombie: Business Analyst",
+    "details": "Business Analyst (PID 810777) detected as zombie process",
+    "outcome": "failure",
+    "metadata": {
+      "pid": 810777
+    },
+    "id": "m_1772011476739_9zbwn",
+    "timestamp": "2026-02-25T09:24:36.739Z",
+    "parentId": null
+  },
+  {
+    "type": "retry",
+    "agent": "ba",
+    "phaseNumber": 1,
+    "action": "Retry Business Analyst",
+    "details": "Retrying Business Analyst (attempt 1)",
+    "outcome": "pending",
+    "metadata": {
+      "attempt": 1
+    },
+    "id": "m_1772011476743_09cuw",
+    "timestamp": "2026-02-25T09:24:36.743Z",
+    "parentId": null
+  },
+  {
+    "type": "agent_spawn",
+    "agent": "ba",
+    "phaseNumber": 1,
+    "action": "Business Analyst started",
+    "details": "Agent Business Analyst spawned",
+    "outcome": "pending",
+    "id": "m_1772011476765_xoymt",
+    "timestamp": "2026-02-25T09:24:36.765Z",
+    "parentId": null
+  },
+  {
+    "type": "agent_error",
+    "agent": "ba",
+    "phaseNumber": 1,
+    "action": "Business Analyst failed",
+    "details": "Agent Business Analyst exited with error",
+    "outcome": "failure",
+    "metadata": {
+      "error": "Agent Business Analyst exited with error"
+    },
+    "id": "m_1772012297701_1xkv6",
+    "timestamp": "2026-02-25T09:38:17.701Z",
+    "parentId": "m_1772011476765_xoymt"
+  },
+  {
+    "type": "escalation",
+    "agent": "ba",
+    "phaseNumber": 1,
+    "action": "Escalated Business Analyst",
+    "details": "Asking Rajiv: Business Analyst failed after 2 attempts. Last error: Exit code 1, signal: null",
+    "outcome": "warning",
+    "id": "m_1772012317357_15b0p",
+    "timestamp": "2026-02-25T09:38:37.357Z",
+    "parentId": "m_1772012297701_1xkv6"
+  },
+  {
+    "type": "retry",
+    "agent": "ba",
+    "phaseNumber": 1,
+    "action": "Retry Business Analyst",
+    "details": "Retrying Business Analyst (attempt 1)",
+    "outcome": "pending",
+    "metadata": {
+      "attempt": 1
+    },
+    "id": "m_1772031829043_qip2d",
+    "timestamp": "2026-02-25T15:03:49.043Z",
+    "parentId": null
+  },
+  {
+    "type": "agent_spawn",
+    "agent": "ba",
+    "phaseNumber": 1,
+    "action": "Business Analyst started",
+    "details": "Agent Business Analyst spawned",
+    "outcome": "pending",
+    "id": "m_1772031829087_7ythy",
+    "timestamp": "2026-02-25T15:03:49.087Z",
+    "parentId": null
+  },
+  {
+    "type": "zombie_detected",
+    "agent": "ba",
+    "phaseNumber": 1,
+    "action": "Zombie: Business Analyst",
+    "details": "Business Analyst (PID 1349446) detected as zombie process",
+    "outcome": "failure",
+    "metadata": {
+      "pid": 1349446
+    },
+    "id": "m_1772033995079_8lyvm",
+    "timestamp": "2026-02-25T15:39:55.079Z",
+    "parentId": null
+  },
+  {
+    "type": "retry",
+    "agent": "ba",
+    "phaseNumber": 1,
+    "action": "Retry Business Analyst",
+    "details": "Retrying Business Analyst (attempt 1)",
+    "outcome": "pending",
+    "metadata": {
+      "attempt": 1
+    },
+    "id": "m_1772033995084_4rufe",
+    "timestamp": "2026-02-25T15:39:55.084Z",
+    "parentId": null
+  },
+  {
+    "type": "agent_spawn",
+    "agent": "ba",
+    "phaseNumber": 1,
+    "action": "Business Analyst started",
+    "details": "Agent Business Analyst spawned",
+    "outcome": "pending",
+    "id": "m_1772033995105_xe8w6",
+    "timestamp": "2026-02-25T15:39:55.105Z",
+    "parentId": null
+  },
+  {
+    "type": "agent_error",
+    "agent": "ba",
+    "phaseNumber": 1,
+    "action": "Business Analyst failed",
+    "details": "Agent Business Analyst exited with error",
+    "outcome": "failure",
+    "metadata": {
+      "error": "Agent Business Analyst exited with error"
+    },
+    "id": "m_1772034738255_2lwgk",
+    "timestamp": "2026-02-25T15:52:18.255Z",
+    "parentId": "m_1772033995105_xe8w6"
+  },
+  {
+    "type": "escalation",
+    "agent": "ba",
+    "phaseNumber": 1,
+    "action": "Escalated Business Analyst",
+    "details": "Asking Rajiv: Business Analyst failed after 2 attempts. Last error: Exit code 1, signal: null",
+    "outcome": "warning",
+    "id": "m_1772034745776_l2509",
+    "timestamp": "2026-02-25T15:52:25.776Z",
+    "parentId": "m_1772034738255_2lwgk"
+  },
+  {
+    "type": "retry",
+    "agent": "ba",
+    "phaseNumber": 1,
+    "action": "Retry Business Analyst",
+    "details": "Retrying Business Analyst (attempt 1)",
+    "outcome": "pending",
+    "metadata": {
+      "attempt": 1
+    },
+    "id": "m_1772046207416_pwczd",
+    "timestamp": "2026-02-25T19:03:27.416Z",
+    "parentId": null
+  },
+  {
+    "type": "agent_spawn",
+    "agent": "ba",
+    "phaseNumber": 1,
+    "action": "Business Analyst started",
+    "details": "Agent Business Analyst spawned",
+    "outcome": "pending",
+    "id": "m_1772046207446_a0jmh",
+    "timestamp": "2026-02-25T19:03:27.446Z",
+    "parentId": null
+  },
+  {
+    "type": "retry",
+    "agent": "ba",
+    "phaseNumber": 1,
+    "action": "Retry Business Analyst",
+    "details": "Retrying Business Analyst (attempt 1)",
+    "outcome": "pending",
+    "metadata": {
+      "attempt": 1
+    },
+    "id": "m_1772052093898_g93lx",
+    "timestamp": "2026-02-25T20:41:33.898Z",
+    "parentId": null
+  },
+  {
+    "type": "agent_spawn",
+    "agent": "ba",
+    "phaseNumber": 1,
+    "action": "Business Analyst started",
+    "details": "Agent Business Analyst spawned",
+    "outcome": "pending",
+    "id": "m_1772052093908_gbevi",
+    "timestamp": "2026-02-25T20:41:33.908Z",
+    "parentId": null
+  },
+  {
+    "type": "agent_error",
+    "agent": "ba",
+    "phaseNumber": 1,
+    "action": "Business Analyst failed",
+    "details": "Agent Business Analyst exited with error",
+    "outcome": "failure",
+    "metadata": {
+      "error": "Agent Business Analyst exited with error"
+    },
+    "id": "m_1772052394391_wqkif",
+    "timestamp": "2026-02-25T20:46:34.391Z",
+    "parentId": "m_1772052093908_gbevi"
+  },
+  {
+    "type": "escalation",
+    "agent": "ba",
+    "phaseNumber": 1,
+    "action": "Escalated Business Analyst",
+    "details": "Asking Rajiv: Business Analyst failed after 2 attempts. Last error: Ollama streaming failed: fetch failed",
+    "outcome": "warning",
+    "id": "m_1772052409844_vhz6x",
+    "timestamp": "2026-02-25T20:46:49.844Z",
+    "parentId": "m_1772052394391_wqkif"
+  },
+  {
+    "type": "retry",
+    "agent": "ba",
+    "phaseNumber": 1,
+    "action": "Retry Business Analyst",
+    "details": "Retrying Business Analyst (attempt 1)",
+    "outcome": "pending",
+    "metadata": {
+      "attempt": 1
+    },
+    "id": "m_1772091200261_mtjzl",
+    "timestamp": "2026-02-26T07:33:20.261Z",
+    "parentId": null
+  },
+  {
+    "type": "agent_spawn",
+    "agent": "ba",
+    "phaseNumber": 1,
+    "action": "Business Analyst started",
+    "details": "Agent Business Analyst spawned",
+    "outcome": "pending",
+    "id": "m_1772091200319_udsei",
+    "timestamp": "2026-02-26T07:33:20.319Z",
+    "parentId": null
+  },
+  {
+    "type": "retry",
+    "agent": "ba",
+    "phaseNumber": 1,
+    "action": "Retry Business Analyst",
+    "details": "Retrying Business Analyst (attempt 1)",
+    "outcome": "pending",
+    "metadata": {
+      "attempt": 1
+    },
+    "id": "m_1772096336726_biica",
+    "timestamp": "2026-02-26T08:58:56.726Z",
+    "parentId": null
+  },
+  {
+    "type": "agent_spawn",
+    "agent": "ba",
+    "phaseNumber": 1,
+    "action": "Business Analyst started",
+    "details": "Agent Business Analyst spawned",
+    "outcome": "pending",
+    "id": "m_1772096336734_enwvh",
+    "timestamp": "2026-02-26T08:58:56.734Z",
+    "parentId": null
+  },
+  {
+    "type": "retry",
+    "agent": "ba",
+    "phaseNumber": 1,
+    "action": "Retry Business Analyst",
+    "details": "Retrying Business Analyst (attempt 1)",
+    "outcome": "pending",
+    "metadata": {
+      "attempt": 1
+    },
+    "id": "m_1772096969275_02e0l",
+    "timestamp": "2026-02-26T09:09:29.275Z",
+    "parentId": null
+  },
+  {
+    "type": "agent_spawn",
+    "agent": "ba",
+    "phaseNumber": 1,
+    "action": "Business Analyst started",
+    "details": "Agent Business Analyst spawned",
+    "outcome": "pending",
+    "id": "m_1772096969281_nc0ua",
+    "timestamp": "2026-02-26T09:09:29.281Z",
+    "parentId": null
+  },
+  {
+    "type": "agent_error",
+    "agent": "ba",
+    "phaseNumber": 1,
+    "action": "Business Analyst failed",
+    "details": "Agent Business Analyst exited with error",
+    "outcome": "failure",
+    "metadata": {
+      "error": "Agent Business Analyst exited with error"
+    },
+    "id": "m_1772097269612_dh66d",
+    "timestamp": "2026-02-26T09:14:29.612Z",
+    "parentId": "m_1772096969281_nc0ua"
+  },
+  {
+    "type": "escalation",
+    "agent": "ba",
+    "phaseNumber": 1,
+    "action": "Escalated Business Analyst",
+    "details": "Asking Rajiv: Business Analyst failed after 2 attempts. Last error: Ollama streaming failed: fetch failed",
+    "outcome": "warning",
+    "id": "m_1772097270217_4alcq",
+    "timestamp": "2026-02-26T09:14:30.217Z",
+    "parentId": "m_1772097269612_dh66d"
+  },
+  {
+    "type": "retry",
+    "agent": "ba",
+    "phaseNumber": 1,
+    "action": "Retry Business Analyst",
+    "details": "Retrying Business Analyst (attempt 1)",
+    "outcome": "pending",
+    "metadata": {
+      "attempt": 1
+    },
+    "id": "m_1772133285180_oq58u",
+    "timestamp": "2026-02-26T19:14:45.180Z",
+    "parentId": null
+  },
+  {
+    "type": "agent_spawn",
+    "agent": "ba",
+    "phaseNumber": 1,
+    "action": "Business Analyst started",
+    "details": "Agent Business Analyst spawned",
+    "outcome": "pending",
+    "id": "m_1772133285188_xntlj",
+    "timestamp": "2026-02-26T19:14:45.188Z",
+    "parentId": null
+  },
+  {
+    "type": "agent_error",
+    "agent": "ba",
+    "phaseNumber": 1,
+    "action": "Business Analyst failed",
+    "details": "Agent Business Analyst exited with error",
+    "outcome": "failure",
+    "metadata": {
+      "error": "Agent Business Analyst exited with error"
+    },
+    "id": "m_1772133585614_ppwsx",
+    "timestamp": "2026-02-26T19:19:45.614Z",
+    "parentId": "m_1772133285188_xntlj"
+  },
+  {
+    "type": "escalation",
+    "agent": "ba",
+    "phaseNumber": 1,
+    "action": "Escalated Business Analyst",
+    "details": "Asking Rajiv: Business Analyst failed after 2 attempts. Last error: Ollama streaming failed: fetch failed",
+    "outcome": "warning",
+    "id": "m_1772133588226_mqb5j",
+    "timestamp": "2026-02-26T19:19:48.226Z",
+    "parentId": "m_1772133585614_ppwsx"
+  },
+  {
+    "type": "retry",
+    "agent": "ba",
+    "phaseNumber": 1,
+    "action": "Retry Business Analyst",
+    "details": "Retrying Business Analyst (attempt 1)",
+    "outcome": "pending",
+    "metadata": {
+      "attempt": 1
+    },
+    "id": "m_1772133690890_favdx",
+    "timestamp": "2026-02-26T19:21:30.890Z",
+    "parentId": null
+  },
+  {
+    "type": "agent_spawn",
+    "agent": "ba",
+    "phaseNumber": 1,
+    "action": "Business Analyst started",
+    "details": "Agent Business Analyst spawned",
+    "outcome": "pending",
+    "id": "m_1772133690902_33l2j",
+    "timestamp": "2026-02-26T19:21:30.902Z",
+    "parentId": null
+  },
+  {
+    "type": "agent_error",
+    "agent": "ba",
+    "phaseNumber": 1,
+    "action": "Business Analyst failed",
+    "details": "Agent Business Analyst exited with error",
+    "outcome": "failure",
+    "metadata": {
+      "error": "Agent Business Analyst exited with error"
+    },
+    "id": "m_1772133991443_ax0x1",
+    "timestamp": "2026-02-26T19:26:31.443Z",
+    "parentId": "m_1772133690902_33l2j"
+  },
+  {
+    "type": "escalation",
+    "agent": "ba",
+    "phaseNumber": 1,
+    "action": "Escalated Business Analyst",
+    "details": "Asking Rajiv: Business Analyst failed after 2 attempts. Last error: Ollama streaming failed: fetch failed",
+    "outcome": "warning",
+    "id": "m_1772134021155_vyzb9",
+    "timestamp": "2026-02-26T19:27:01.155Z",
+    "parentId": "m_1772133991443_ax0x1"
+  },
+  {
+    "type": "retry",
+    "agent": "ba",
+    "phaseNumber": 1,
+    "action": "Retry Business Analyst",
+    "details": "Retrying Business Analyst (attempt 1)",
+    "outcome": "pending",
+    "metadata": {
+      "attempt": 1
+    },
+    "id": "m_1772134072706_xen6y",
+    "timestamp": "2026-02-26T19:27:52.706Z",
+    "parentId": null
+  },
+  {
+    "type": "agent_spawn",
+    "agent": "ba",
+    "phaseNumber": 1,
+    "action": "Business Analyst started",
+    "details": "Agent Business Analyst spawned",
+    "outcome": "pending",
+    "id": "m_1772134072718_hdnuf",
+    "timestamp": "2026-02-26T19:27:52.718Z",
+    "parentId": null
+  },
+  {
+    "type": "agent_error",
+    "agent": "ba",
+    "phaseNumber": 1,
+    "action": "Business Analyst failed",
+    "details": "Agent Business Analyst exited with error",
+    "outcome": "failure",
+    "metadata": {
+      "error": "Agent Business Analyst exited with error"
+    },
+    "id": "m_1772134373075_xf1sq",
+    "timestamp": "2026-02-26T19:32:53.075Z",
+    "parentId": "m_1772134072718_hdnuf"
+  },
+  {
+    "type": "escalation",
+    "agent": "ba",
+    "phaseNumber": 1,
+    "action": "Escalated Business Analyst",
+    "details": "Asking Rajiv: Business Analyst failed after 2 attempts. Last error: Ollama streaming failed: fetch failed",
+    "outcome": "warning",
+    "id": "m_1772134374846_juede",
+    "timestamp": "2026-02-26T19:32:54.846Z",
+    "parentId": "m_1772134373075_xf1sq"
+  },
+  {
+    "type": "retry",
+    "agent": "ba",
+    "phaseNumber": 1,
+    "action": "Retry Business Analyst",
+    "details": "Retrying Business Analyst (attempt 1)",
+    "outcome": "pending",
+    "metadata": {
+      "attempt": 1
+    },
+    "id": "m_1772134719704_8b8wl",
+    "timestamp": "2026-02-26T19:38:39.704Z",
+    "parentId": null
+  },
+  {
+    "type": "agent_spawn",
+    "agent": "ba",
+    "phaseNumber": 1,
+    "action": "Business Analyst started",
+    "details": "Agent Business Analyst spawned",
+    "outcome": "pending",
+    "id": "m_1772134719716_l79zq",
+    "timestamp": "2026-02-26T19:38:39.716Z",
+    "parentId": null
+  },
+  {
+    "type": "agent_error",
+    "agent": "ba",
+    "phaseNumber": 1,
+    "action": "Business Analyst failed",
+    "details": "Agent Business Analyst exited with error",
+    "outcome": "failure",
+    "metadata": {
+      "error": "Agent Business Analyst exited with error"
+    },
+    "id": "m_1772135020293_u4uuz",
+    "timestamp": "2026-02-26T19:43:40.293Z",
+    "parentId": "m_1772134719716_l79zq"
+  },
+  {
+    "type": "retry",
+    "agent": "ba",
+    "phaseNumber": 1,
+    "action": "Retry Business Analyst",
+    "details": "Retrying Business Analyst (attempt 1)",
+    "outcome": "pending",
+    "metadata": {
+      "attempt": 1
+    },
+    "id": "m_1772135072442_ky85b",
+    "timestamp": "2026-02-26T19:44:32.442Z",
+    "parentId": null
+  },
+  {
+    "type": "agent_spawn",
+    "agent": "ba",
+    "phaseNumber": 1,
+    "action": "Business Analyst started",
+    "details": "Agent Business Analyst spawned",
+    "outcome": "pending",
+    "id": "m_1772135072460_s20i6",
+    "timestamp": "2026-02-26T19:44:32.460Z",
+    "parentId": null
+  },
+  {
+    "type": "retry",
+    "agent": "ba",
+    "phaseNumber": 1,
+    "action": "Retry Business Analyst",
+    "details": "Retrying Business Analyst (attempt 1)",
+    "outcome": "pending",
+    "metadata": {
+      "attempt": 1
+    },
+    "id": "m_1772135121873_lpyg4",
+    "timestamp": "2026-02-26T19:45:21.873Z",
+    "parentId": null
+  },
+  {
+    "type": "agent_spawn",
+    "agent": "ba",
+    "phaseNumber": 1,
+    "action": "Business Analyst started",
+    "details": "Agent Business Analyst spawned",
+    "outcome": "pending",
+    "id": "m_1772135121883_jia6z",
+    "timestamp": "2026-02-26T19:45:21.883Z",
+    "parentId": null
+  },
+  {
+    "type": "agent_error",
+    "agent": "ba",
+    "phaseNumber": 1,
+    "action": "Business Analyst failed",
+    "details": "Agent Business Analyst exited with error",
+    "outcome": "failure",
+    "metadata": {
+      "error": "Agent Business Analyst exited with error"
+    },
+    "id": "m_1772135422197_u32lx",
+    "timestamp": "2026-02-26T19:50:22.197Z",
+    "parentId": "m_1772135121883_jia6z"
+  },
+  {
+    "type": "retry",
+    "agent": "ba",
+    "phaseNumber": 1,
+    "action": "Retry Business Analyst",
+    "details": "Retrying Business Analyst (attempt 2)",
+    "outcome": "pending",
+    "metadata": {
+      "attempt": 2
+    },
+    "id": "m_1772135451837_p3w6h",
+    "timestamp": "2026-02-26T19:50:51.837Z",
+    "parentId": "m_1772135422197_u32lx"
+  },
+  {
+    "type": "agent_spawn",
+    "agent": "ba",
+    "phaseNumber": 1,
+    "action": "Business Analyst started",
+    "details": "Agent Business Analyst spawned",
+    "outcome": "pending",
+    "id": "m_1772135451848_hpuj7",
+    "timestamp": "2026-02-26T19:50:51.848Z",
+    "parentId": null
+  },
+  {
+    "type": "agent_error",
+    "agent": "ba",
+    "phaseNumber": 1,
+    "action": "Business Analyst failed",
+    "details": "Agent Business Analyst exited with error",
+    "outcome": "failure",
+    "metadata": {
+      "error": "Agent Business Analyst exited with error"
+    },
+    "id": "m_1772135752194_yxy53",
+    "timestamp": "2026-02-26T19:55:52.194Z",
+    "parentId": "m_1772135451848_hpuj7"
+  },
+  {
+    "type": "retry",
+    "agent": "ba",
+    "phaseNumber": 1,
+    "action": "Retry Business Analyst",
+    "details": "Retrying Business Analyst (attempt 3)",
+    "outcome": "pending",
+    "metadata": {
+      "attempt": 3
+    },
+    "id": "m_1772135781551_oiicg",
+    "timestamp": "2026-02-26T19:56:21.551Z",
+    "parentId": "m_1772135752194_yxy53"
+  },
+  {
+    "type": "agent_spawn",
+    "agent": "ba",
+    "phaseNumber": 1,
+    "action": "Business Analyst started",
+    "details": "Agent Business Analyst spawned",
+    "outcome": "pending",
+    "id": "m_1772135781559_h173m",
+    "timestamp": "2026-02-26T19:56:21.559Z",
+    "parentId": null
+  },
+  {
+    "type": "agent_error",
+    "agent": "ba",
+    "phaseNumber": 1,
+    "action": "Business Analyst failed",
+    "details": "Agent Business Analyst exited with error",
+    "outcome": "failure",
+    "metadata": {
+      "error": "Agent Business Analyst exited with error"
+    },
+    "id": "m_1772136081952_icvyr",
+    "timestamp": "2026-02-26T20:01:21.952Z",
+    "parentId": "m_1772135781559_h173m"
+  },
+  {
+    "type": "retry",
+    "agent": "ba",
+    "phaseNumber": 1,
+    "action": "Retry Business Analyst",
+    "details": "Retrying Business Analyst (attempt 4)",
+    "outcome": "pending",
+    "metadata": {
+      "attempt": 4
+    },
+    "id": "m_1772136111371_ehylj",
+    "timestamp": "2026-02-26T20:01:51.371Z",
+    "parentId": "m_1772136081952_icvyr"
+  },
+  {
+    "type": "agent_spawn",
+    "agent": "ba",
+    "phaseNumber": 1,
+    "action": "Business Analyst started",
+    "details": "Agent Business Analyst spawned",
+    "outcome": "pending",
+    "id": "m_1772136111381_p6wq9",
+    "timestamp": "2026-02-26T20:01:51.381Z",
+    "parentId": null
+  },
+  {
+    "type": "agent_complete",
+    "agent": "ba",
+    "phaseNumber": 1,
+    "action": "Business Analyst completed",
+    "details": "Agent Business Analyst finished successfully",
+    "outcome": "success",
+    "id": "m_1772136837968_yksk5",
+    "timestamp": "2026-02-26T20:13:57.968Z",
+    "parentId": "m_1772136111381_p6wq9"
+  }
+]

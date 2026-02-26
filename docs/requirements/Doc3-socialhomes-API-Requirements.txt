@@ -1,767 +1,789 @@
 ================================================================================
   Doc3 — SocialHomes.Ai API & Integration Requirements
-  Version: 2.0  |  Date: 2026-02-18
+  Version: 7.0  |  Date: 2026-02-26
   Author: Business Analyst Agent  |  Studio: Yantra Works
 ================================================================================
 
-1. API OVERVIEW
+TABLE OF CONTENTS
+================================================================================
+  1.  API Overview & Strategy
+  2.  Tier 1 Integrations (Free, No Key)
+  3.  Tier 2 Integrations (Free, Registration Required)
+  4.  Tier 3 Integrations (Mock Services)
+  5.  Seven Killer Differentiator Services
+  6.  GOV.UK Notify Integration (24 Templates)
+  7.  Caching Architecture
+  8.  Rate Limiting Strategy
+  9.  Error Handling & Fallback
+  10. Security Requirements
+  11. Internal API Endpoint Registry (50+)
+  12. Future Roadmap
+
+
+1. API OVERVIEW & STRATEGY
 ================================================================================
 
-1.1 API Strategy
-    SocialHomes.Ai uses a server-side proxy pattern for ALL external API
-    integrations. The React frontend communicates exclusively with the Express
-    backend, which handles external calls, caching, rate limiting, and
-    graceful degradation.
+1.1 Guiding Principles
 
-1.2 Integration Tiers
+    GP-1  Server-side proxy only — the React client NEVER calls external
+          APIs directly. All external calls route through /api/v1/public-data/*
+          or /api/v1/ai/* endpoints.
 
-    TIER 1 — Free, No API Key Required
-    Publicly available APIs with no registration needed.
-    Status: LIVE with real data
+    GP-2  Graceful degradation — every external call has a simulated fallback.
+          If an API is down or unregistered, the system continues with
+          synthetic data marked source: "simulated".
 
-    TIER 2 — Free, Registration Required
-    APIs requiring account creation or key registration.
-    Status: LIVE with real data (where keys available) + simulated fallbacks
+    GP-3  Caching — external data is cached in Firestore externalDataCache
+          collection with TTL metadata.
 
-    TIER 3 — Subscription/Paid APIs
-    Commercial APIs requiring contracts or paid subscriptions.
-    Status: MOCK endpoints with realistic simulated data
+    GP-4  Audit trail — every external API call is logged to auditLog
+          collection with action: "external-api-call".
 
-1.3 Current Integration Count
-    Total: 20 integrations
-    - Tier 1: 3 live
-    - Tier 2: 6 live (with simulated fallbacks)
-    - Tier 3: 5 mock services + 6 planned
+    GP-5  Rate limiting — server-side rate limiting per API. Never exceed
+          published fair-use limits. Token bucket pattern in memory.
+
+    GP-6  Cost control — Tier 1 and Tier 2 APIs are free. No paid API calls
+          without explicit admin opt-in via /admin/integrations.
+
+1.2 Integration Count Summary
+
+    | Tier | Count | Status                         |
+    |------|-------|--------------------------------|
+    | 1    | 3     | LIVE with real data             |
+    | 2    | 6     | LIVE with simulated fallbacks   |
+    | 3    | 9     | MOCK with realistic data        |
+    | AI   | 7     | Internal computation services   |
+    | Total| 25    |                                 |
+
+1.3 Server-Side Proxy Pattern
+
+    Client (React)
+      --> GET /api/v1/public-data/{source}/{params}
+      --> Express route handler (server/src/routes/public-data.ts)
+        --> Check Firestore cache (externalDataCache collection)
+        --> If cache valid: return cached data with source: "cached"
+        --> If cache expired or missing:
+          --> Call external API
+          --> Transform response to internal schema
+          --> Write to Firestore cache with TTL
+          --> Return data with source: "{api-name}"
+        --> If external call fails:
+          --> Return simulated data with source: "simulated"
+          --> Log error to auditLog
+
+1.4 Shared Service: server/src/services/external-api.ts
+
+    Functions:
+    - fetchWithCache(source, key, ttl, fetchFn) — cache-through helper
+    - rateLimiter(source, maxPerMinute) — token bucket
+    - buildAuditEntry(source, endpoint, status, latency) — audit logging
+    - simulatedFallback(source, key) — synthetic data generator
 
 
-2. TIER 1 INTEGRATIONS (Free, No Key)
+2. TIER 1 INTEGRATIONS (Free, No Key Required)
 ================================================================================
 
 2.1 Police.uk — Street-Level Crime Data
-    Status: LIVE
-    Base URL: https://data.police.uk/api
-    Documentation: https://data.police.uk/docs/
+    Status:         LIVE
+    Base URL:       https://data.police.uk/api
+    Auth:           None
+    Rate Limit:     15 req/sec (fair use)
+    Documentation:  https://data.police.uk/docs/
+    Cache TTL:      24 hours per postcode per month
+    Fallback:       Simulated crime data matching postcode area
 
     Endpoints Used:
     - GET /crimes-street/all-crime?lat={lat}&lng={lng}&date={YYYY-MM}
-    - GET /crimes-at-location?location_id={id}
-    - GET /outcomes-at-location?location_id={id}
+    - GET /crimes-street/anti-social-behaviour?lat={lat}&lng={lng}&date={YYYY-MM}
+    - GET /crimes-at-location?location_id={id}&date={YYYY-MM}
+    - GET /outcomes-at-location?lat={lat}&lng={lng}&date={YYYY-MM}
 
-    Server Route: GET /api/v1/public-data/police/:postcode
-    Cache TTL: 24 hours
-    Rate Limit: 15 req/sec (fair-use)
-    Fallback: Simulated crime data matching postcode area
-
-    Used By:
-    - D2: Live Crime Context for ASB (crime-context.ts)
-    - Explore page crime data layer
-    - ASB case correlation
-    - Neighbourhood Briefing crime section
+    Server Route:
+    - GET /api/v1/public-data/police/:postcode
 
     Data Returned:
     - Crime category (anti-social-behaviour, burglary, criminal-damage, etc.)
-    - Month, location (lat/lng), outcome status
+    - Month, location (lat/lng), street name
+    - Outcome status, persistent ID
     - 12-month historical data per location
 
+    Used By:
+    - D2: Live Crime Context for ASB (crime-context.ts)
+    - Explore page crime data layer toggle
+    - ASB case detail — nearby incidents card
+    - Neighbourhood Briefing — crime section
+    - Dashboard ASB KPI enrichment
+
+    Dependencies: postcodes.io (for postcode-to-latlong conversion)
+
 2.2 Open-Meteo — Weather Forecasting
-    Status: LIVE
-    Base URL: https://api.open-meteo.com/v1
-    Documentation: https://open-meteo.com/en/docs
+    Status:         LIVE
+    Base URL:       https://api.open-meteo.com/v1
+    Auth:           None
+    Rate Limit:     10,000 req/day
+    Documentation:  https://open-meteo.com/en/docs
+    Cache TTL:      1 hour (forecast), 7 days (historical)
+    Fallback:       Static weather for London SE
 
     Endpoints Used:
-    - GET /forecast?latitude={lat}&longitude={lng}&hourly=temperature_2m,
-          relative_humidity_2m,precipitation,weathercode,windspeed_10m
-          &daily=temperature_2m_max,temperature_2m_min,precipitation_sum
-          &timezone=Europe/London
+    - GET /forecast?latitude={lat}&longitude={lng}
+          &daily=temperature_2m_max,temperature_2m_min,precipitation_sum,
+                 relative_humidity_2m_mean,wind_speed_10m_max
+          &hourly=temperature_2m,relative_humidity_2m,dew_point_2m,
+                  surface_pressure,precipitation
+          &timezone=Europe/London&forecast_days=7
+    - GET /archive?latitude={lat}&longitude={lng}
+          &start_date={YYYY-MM-DD}&end_date={YYYY-MM-DD}
+          &daily=temperature_2m_mean,precipitation_sum,relative_humidity_2m_mean
 
-    Server Route: GET /api/v1/public-data/weather/:lat/:lng
-    Cache TTL: 1 hour
-    Rate Limit: 10,000 req/day (no key needed)
-    Fallback: Static weather for London SE
-
-    Used By:
-    - D1: Predictive Damp Intelligence (weather factor 0.25 weight)
-    - AI Morning Briefing (weather section)
-    - Neighbourhood Briefing (environmental context)
-    - Property impact assessment
+    Server Route:
+    - GET /api/v1/public-data/weather/:lat/:lng
 
     Data Returned:
-    - Hourly: temperature, humidity, precipitation, wind speed, weather code
+    - Hourly: temperature, humidity, precipitation, dew point, wind speed
     - Daily: max/min temperature, precipitation sum
     - 7-day forecast + current conditions
+    - 90-day historical archive
+
+    Used By:
+    - D1: Predictive Damp Intelligence (weather factor, weight 0.25)
+    - AI Morning Briefing (weather section)
+    - D6: Neighbourhood Briefing (environmental context)
+    - Property detail page weather widget
+    - Awaab's Law damp risk assessment
+
+    Dependencies: postcodes.io (for lat/lng if only postcode known)
 
 2.3 DEFRA Flood Risk API
-    Status: LIVE
-    Base URL: https://environment.data.gov.uk/flood-monitoring
-    Documentation: https://environment.data.gov.uk/flood-monitoring/doc/reference
+    Status:         LIVE
+    Base URL:       https://environment.data.gov.uk/flood-monitoring
+    Auth:           None
+    Rate Limit:     Fair use
+    Documentation:  https://environment.data.gov.uk/flood-monitoring/doc/reference
+    Cache TTL:      1 hour
+    Fallback:       No active warnings (empty array)
 
     Endpoints Used:
-    - GET /id/floods?lat={lat}&long={lng}&dist=3
-    - GET /id/stations?lat={lat}&long={lng}&dist=3
+    - GET /id/floods?lat={lat}&long={lng}&dist=5
+    - GET /id/floodAreas?lat={lat}&long={lng}&dist=3
+    - GET /id/stations?lat={lat}&long={lng}&dist=5
 
-    Server Route: GET /api/v1/public-data/flood-risk/:postcode
-    Cache TTL: 1 hour
-    Rate Limit: No formal limit
-    Fallback: "No active warnings" with zone classification
-
-    Used By:
-    - Property Passport (flood risk section)
-    - Neighbourhood Briefing (environmental alerts)
-    - Property detail page (risk indicators)
+    Server Route:
+    - GET /api/v1/public-data/flood/:lat/:lng
 
     Data Returned:
-    - Active flood warnings/alerts
-    - Flood risk zone classification
-    - Nearest monitoring station readings
+    - Active flood warnings with severity levels
+    - Flood area descriptions
+    - River level station readings
+
+    Used By:
+    - Property detail page — flood risk badge
+    - Explore page — flood zone overlay
+    - Briefing page — active flood warnings
+    - Property Passport — environmental risk section
 
 
-3. TIER 2 INTEGRATIONS (Registration Required)
+3. TIER 2 INTEGRATIONS (Free, Registration Required)
 ================================================================================
 
-3.1 Postcodes.io — Postcode Lookup
-    Status: LIVE
-    Base URL: https://api.postcodes.io
-    Documentation: https://postcodes.io/docs
-    Registration: None (open API)
+3.1 Postcodes.io — Postcode Lookup & Geography
+    Status:         LIVE
+    Base URL:       https://api.postcodes.io
+    Auth:           None (despite being Tier 2, no key needed)
+    Rate Limit:     Fair use
+    Documentation:  https://postcodes.io/docs
+    Cache TTL:      90 days
+    Fallback:       Manual lat/lng from property record
 
     Endpoints Used:
-    - GET /postcodes/{postcode}
-    - GET /postcodes/{postcode}/nearest
-    - POST /postcodes (bulk lookup)
+    - GET /postcodes/:postcode
+    - POST /postcodes (bulk lookup, max 100)
+    - GET /postcodes/:postcode/validate
 
-    Server Route: GET /api/v1/public-data/postcode/:postcode
-    Cache TTL: 7 days
-    Rate Limit: Generous (no formal limit)
-    Fallback: Static mapping for SE London postcodes
+    Server Routes:
+    - GET /api/v1/public-data/postcode/:postcode
+    - POST /api/v1/public-data/postcodes/bulk
 
     Data Returned:
-    - Latitude, longitude
-    - LSOA code and name (for IMD/Census/NOMIS)
-    - Ward, parliamentary constituency
-    - Local authority, region
-    - Country, European electoral region
+    - Latitude, longitude (authoritative)
+    - Admin district (Local Authority), admin ward
+    - LSOA code and name, MSOA
+    - Parliamentary constituency
+    - ONS codes for all areas
 
     Used By:
-    - All location-dependent lookups
-    - LSOA resolution for Census/NOMIS/IMD
-    - Property geocoding
+    - Prerequisite for Police API, IMD, Census, Flood risk
+    - Property creation — postcode validation + auto-populate
+    - Reports — ward/constituency grouping
+    - Allocations — local connection verification
 
-3.2 EPC Open Data
-    Status: LIVE (with simulated fallback)
-    Base URL: https://epc.opendatacommunities.org/api/v1
-    Documentation: https://epc.opendatacommunities.org/docs/api
-    Registration: API key via MHCLG portal
+3.2 Open UPRN (uprn.uk)
+    Status:         LIVE
+    Base URL:       https://uprn.uk
+    Auth:           None (Open Government Licence)
+    Cache TTL:      90 days
+    Fallback:       Unverified UPRN (no external check)
 
     Endpoints Used:
+    - GET /postcode/{postcode}.json
+    - GET /{uprn}.json
+
+    Server Routes:
+    - GET /api/v1/public-data/uprn/:uprn
+
+    Data Returned:
+    - UPRN validation, postcode, lat/lng, country, class description
+
+    Used By:
+    - Property creation — UPRN validation badge
+    - Property Passport — authoritative coordinates
+    - Compliance — linking certificates to verified UPRNs
+
+3.3 EPC Register API
+    Status:         LIVE (with simulated fallback when no key)
+    Base URL:       https://epc.opendatacommunities.org/api/v1
+    Auth:           Basic auth with registered API key
+    Env Variable:   EPC_API_KEY
+    Cache TTL:      30 days
+    Fallback:       Simulated EPC data from property record
+
+    Endpoints Used:
+    - GET /domestic/search?postcode={postcode}&size=100
     - GET /domestic/search?uprn={uprn}
     - GET /domestic/certificate/{lmk-key}
+    - GET /domestic/recommendations/{lmk-key}
 
-    Server Route: GET /api/v1/public-data/epc/:uprn
-    Cache TTL: 30 days
-    Rate Limit: 1,000 req/month (free tier)
-    Fallback: Generated EPC data matching property attributes
-
-    Data Returned:
-    - Current energy rating (A–G) and score
-    - Potential rating
-    - Environmental impact rating
-    - Floor area, wall/roof type
-    - Heating type, hot water system
-    - Recommendations for improvement
-    - Certificate expiry date
-
-    Used By:
-    - Property Passport (energy section)
-    - Compliance page (EPC tracking)
-    - Property detail page
-    - D1: Damp prediction (building factor input)
-
-3.3 Census 2021 (ONS via NOMIS)
-    Status: LIVE (with simulated fallback)
-    Base URL: https://www.nomisweb.co.uk/api/v01
-    Documentation: https://www.nomisweb.co.uk/api/v01/help
-
-    Datasets Used:
-    - NM_2072_1 — Population by age/sex (Census 2021)
-    - NM_2021_1 — Accommodation type (Census 2021)
-
-    Server Route: GET /api/v1/public-data/census/:lsoaCode
-    Cache TTL: 90 days
-    Rate Limit: 100,000 req/month
-    Fallback: Simulated demographics for Southwark LSOA areas
+    Server Route:
+    - GET /api/v1/public-data/epc/:postcode
 
     Data Returned:
-    - Population count and density
-    - Age distribution (0–15, 16–64, 65+)
-    - Household composition
-    - Accommodation type breakdown
-    - Ethnicity distribution
+    - Energy rating (A-G), SAP score, potential rating
+    - Building fabric: walls, roof, windows, heating descriptions
+    - CO2 emissions, heating costs
+    - Improvement recommendations with estimated savings
 
     Used By:
-    - Neighbourhood Briefing (demographics section)
-    - Property Passport (area context)
-    - D3: Vulnerability Detection (deprivation context)
+    - D1: Predictive Damp Intelligence (building fabric factor)
+    - D5: Property Passport (EPC section)
+    - Property detail — expanded Energy Performance panel
+    - Compliance — EPC compliance summary
+    - Reports — carbon emissions, retrofit planning
 
-3.4 NOMIS — Labour Market Statistics
-    Status: LIVE (with simulated fallback)
-    Base URL: https://www.nomisweb.co.uk/api/v01
-    Documentation: https://www.nomisweb.co.uk/api/v01/help
+3.4 NOMIS/Census (ONS)
+    Status:         LIVE (with simulated fallback)
+    Base URL:       https://www.nomisweb.co.uk/api/v01
+    Auth:           None (API key optional for higher limits)
+    Cache TTL:      7 days (labour market), 90 days (Census)
+    Fallback:       Simulated demographic data
 
-    Datasets Used:
-    - NM_162_1 — JSA claimant count by age/sex
-    - NM_17_5  — Annual Population Survey (employment/unemployment)
+    Endpoints Used (Census 2021):
+    - NM_2072_1: Tenure by household (TS054)
+    - NM_2021_1: Household size (TS011)
+    - Age structure (TS009), Ethnic group (TS021), Disability (TS038)
 
-    Server Route: GET /api/v1/public-data/nomis/:lsoaCode
-    Cache TTL: 30 days
-    Rate Limit: 100,000 req/month
-    Fallback: Simulated labour market data for SE London
+    Endpoints Used (Labour Market):
+    - NM_17_5: Claimant count by LA
+    - NM_162_1: Employment rate
+    - NM_30_1: Job density
+
+    Server Routes:
+    - GET /api/v1/public-data/census/:lsoaCode
+    - GET /api/v1/public-data/nomis/:lsoaCode
 
     Data Returned:
-    - Employment rate, unemployment rate
-    - Economic activity breakdown
-    - Claimant count (JSA/UC)
-    - Occupation types
-    - Qualification levels
+    - Census: tenure mix, household size, age profile, disability prevalence
+    - Labour: employment rate, claimant count, job density, OOW benefits rate
 
     Used By:
-    - D5: Benefits Entitlement Engine (employment context)
-    - Neighbourhood Briefing (economic section)
-    - D3: Vulnerability Detection (economic deprivation factor)
+    - D3: Automatic Vulnerability Detection (deprivation context)
+    - D4: Benefits Entitlement Engine (employment data)
+    - D6: Neighbourhood Briefing (demographic section)
+    - Reports — community profiling
 
 3.5 Gas Safe Register
-    Status: LIVE (with simulated fallback)
-    Base URL: https://www.gassaferegister.co.uk/api
-    Documentation: Restricted (via partnership application)
+    Status:         LIVE (with simulated fallback)
+    Base URL:       Gas Safe verification endpoint
+    Cache TTL:      30 days
+    Fallback:       Simulated verification result
 
-    Endpoint Pattern:
-    - GET /engineer/{registrationNumber}
-
-    Server Route: GET /api/v1/public-data/gas-safe/:registrationNumber
-    Cache TTL: 24 hours
-    Rate Limit: 100 req/hour
-    Fallback: Simulated verification with valid/expired/suspended status
+    Server Route:
+    - GET /api/v1/public-data/gas-safe/:registrationNumber
 
     Data Returned:
-    - Engineer name and company
-    - Registration status (valid/expired/suspended)
-    - Qualifications (boiler, cooker, fire, etc.)
-    - Registration number and expiry date
+    - Registration validity, business name, registration number
+    - Appliance categories authorised
 
     Used By:
-    - Repair detail page (contractor verification badge)
-    - Compliance management (contractor vetting)
+    - Repair detail page — Gas Safe contractor verification badge (green)
+    - Compliance — contractor verification
 
 3.6 Electrical Safety Register (NICEIC)
-    Status: LIVE (with simulated fallback)
-    Base URL: https://www.niceic.com/api
-    Documentation: Via partnership application
+    Status:         LIVE (with simulated fallback)
+    Base URL:       Electrical Safety verification endpoint
+    Cache TTL:      30 days
+    Fallback:       Simulated verification result
 
-    Endpoint Pattern:
-    - GET /contractor/{registrationNumber}
-
-    Server Route: GET /api/v1/public-data/electrical-safety/:registrationNumber
-    Cache TTL: 24 hours
-    Rate Limit: 100 req/hour
-    Fallback: Simulated verification with valid/expired/suspended status
+    Server Route:
+    - GET /api/v1/public-data/electrical-safety/:registrationNumber
 
     Data Returned:
-    - Contractor name and company
-    - Registration status (valid/expired/suspended)
-    - Scheme (NICEIC Approved Contractor / Competent Person)
-    - Registration number and expiry date
+    - Registration validity, company name, scheme
 
     Used By:
-    - Repair detail page (contractor verification badge — blue)
-    - Compliance management (electrical contractor vetting)
+    - Repair detail page — NICEIC contractor verification badge (blue)
+    - Compliance — contractor verification
 
 
-4. TIER 3 INTEGRATIONS (Mock/Subscription)
+4. TIER 3 INTEGRATIONS (Mock Services)
 ================================================================================
 
-4.1 DWP Universal Credit Verification
-    Status: MOCK
-    Mock Function: mockUcVerification(tenantId)
-    Server Route: GET /api/v1/ai/mock/uc-verification/:tenantId
+    All Tier 3 APIs are implemented as mock services in
+    server/src/services/mock-services.ts returning realistic simulated data.
+    They are designed to be wired to real APIs when subscriptions are obtained.
 
-    Mock Response:
-    - UC claim status (active/pending/none)
-    - Housing element amount
-    - Payment frequency and next payment date
-    - Managed payment status (direct to landlord)
-    - Alternative Payment Arrangement (APA) eligibility
+4.1 DWP Universal Credit
+    Mock Function:  mockUcVerification(tenantId)
+    Server Route:   GET /api/v1/ai/mock/uc-verification/:tenantId
+    Returns:        UC claim status, payment dates, APA eligibility
+    Used By:        Benefits Engine, Arrears prediction, Tenant context
 
-    Used By:
-    - D5: Benefits Entitlement Engine
-    - Rent management (UC tracking)
-    - Arrears prevention (early warning)
+4.2 IoT Sensors (Switchee/Aico/HomeLync)
+    Mock Function:  mockIotSensors(propertyId)
+    Server Route:   GET /api/v1/ai/mock/iot-sensors/:propertyId
+    Returns:        Temperature, humidity, moisture readings, alerts
+    Used By:        Damp Prediction (sensor factor, weight 0.20)
 
-4.2 IoT Sensor Integration (Switchee/Aico)
-    Status: MOCK
-    Mock Function: mockIotSensors(propertyId)
-    Server Route: GET /api/v1/ai/mock/iot-sensors/:propertyId
+4.3 GoCardless / Allpay (Direct Debit)
+    Mock Function:  mockDirectDebit(tenantId)
+    Server Route:   GET /api/v1/ai/mock/direct-debit/:tenantId
+    Returns:        DD mandate status, payment schedule, failure history
+    Used By:        Rent & Income, payment tracking
 
-    Mock Response:
-    - Temperature readings (per room: living, bedroom, kitchen, bathroom)
-    - Humidity readings (per room)
-    - CO2 levels
-    - Smoke/CO detector status (OK/alert/battery-low)
-    - Heating system status (on/off/hours today)
-    - Alerts (high humidity, low temperature, CO detected)
+4.4 Plentific / Fixflo (Repairs Marketplace)
+    Mock Function:  mockRepairsMarketplace(caseId)
+    Server Route:   GET /api/v1/ai/mock/repairs-marketplace/:id
+    Returns:        Contractor quotes, scheduling, dispatch, satisfaction
+    Used By:        Repair case management, contractor selection
 
-    Used By:
-    - D1: Predictive Damp Intelligence (sensor factor 0.20 weight)
-    - Property detail page (live sensor data)
-    - Compliance monitoring (smoke/CO detector status)
+4.5 RSH / CORE / Ombudsman (Regulatory)
+    Mock Function:  mockRegulatorySubmission(type, refId)
+    Server Route:   GET /api/v1/ai/mock/regulatory/:type/:ref
+    Returns:        IDA returns, CORE lettings/sales, ombudsman escalations
+    Used By:        Reports, compliance tracking
 
-4.3 GoCardless — Direct Debit
-    Status: MOCK
-    Mock Function: mockDirectDebit(tenantId)
-    Server Route: GET /api/v1/ai/mock/direct-debit/:tenantId
+4.6 DocuSign (Digital Signing)
+    Mock Function:  mockSigningEnvelope(documentType, tenantId)
+    Server Route:   GET /api/v1/ai/mock/signing/:type/:id
+    Returns:        Envelope status, recipients, signing URLs
+    Used By:        Tenancy agreements, Section 21, compliance certificates
 
-    Mock Response:
-    - Mandate status (active/pending/cancelled)
-    - Bank details (last 4 digits only)
-    - Next collection date and amount
-    - Payment history (last 12 months)
-    - Failed payment reasons
+4.7 Experian / TransUnion (Referencing)
+    Mock Function:  mockReferencingResult(applicantId)
+    Server Route:   GET /api/v1/ai/mock/referencing/:id
+    Returns:        Credit score, affordability, CCJs, previous addresses
+    Used By:        Allocations — applicant referencing
 
-    Used By:
-    - Rent management (payment processing)
-    - Arrears management (DD failure tracking)
-    - Tenant detail (payment method)
+4.8 Land Registry
+    Mock Function:  mockLandRegistryTitle(propertyId)
+    Server Route:   GET /api/v1/ai/mock/land-registry/:id
+    Returns:        Title number, freehold/leasehold, price paid, lease details
+    Used By:        Property Passport, asset management
 
-4.4 Plentific/Fixflo — Repairs Marketplace
-    Status: MOCK
-    Mock Function: mockRepairsMarketplace(caseId)
-    Server Route: GET /api/v1/ai/mock/repairs-marketplace/:caseId
-
-    Mock Response:
-    - Contractor quotes (3 quotes with price/availability)
-    - Dispatch confirmation
-    - Appointment scheduling
-    - Job completion notification
-    - Satisfaction survey trigger
-
-    Used By:
-    - Repairs management (contractor dispatch)
-    - Cost management (competitive quotes)
-
-4.5 DocuSign — Digital Signing
-    Status: MOCK
-    Mock Function: mockSigningEnvelope(documentType, tenantId)
-    Server Route: POST /api/v1/ai/mock/signing
-
-    Mock Response:
-    - Envelope ID and status (sent/delivered/signed/declined)
-    - Document type (tenancy-agreement, section-21, gas-cert, atp)
-    - Recipients with signing status
-    - Completion date
-    - Signed document URL
-
-    Used By:
-    - Tenancy sign-up workflow
-    - Compliance certificate signing
-    - Legal document execution
-
-4.6 Experian/TransUnion — Tenant Referencing
-    Status: MOCK
-    Mock Function: mockReferencingResult(applicantId)
-    Server Route: GET /api/v1/ai/mock/referencing/:applicantId
-
-    Mock Response:
-    - Credit score (300–850)
-    - Affordability assessment (pass/refer/fail)
-    - CCJ count and value
-    - Previous addresses (last 3 years)
-    - Employment verification
-    - Recommendation (accept/refer/decline)
-
-    Used By:
-    - Allocations (applicant vetting)
-    - Lettings workflow (pre-tenancy checks)
-
-4.7 Land Registry — Title Data
-    Status: MOCK
-    Mock Function: mockLandRegistryTitle(propertyId)
-    Server Route: GET /api/v1/ai/mock/land-registry/:propertyId
-
-    Mock Response:
-    - Title number
-    - Tenure type (freehold/leasehold)
-    - Price paid and date
-    - Registered owner
-    - Lease details (start, term, ground rent)
-    - Restrictions and charges
-
-    Used By:
-    - Property Passport (ownership section)
-    - Property detail page
-
-4.8 RSH/CORE/Ombudsman — Regulatory Submissions
-    Status: MOCK
-    Mock Function: mockRegulatorySubmission(type, refId)
-    Server Route: POST /api/v1/ai/mock/regulatory
-
-    Submission Types:
-    - IDA (Individual Data Return)
-    - CORE lettings
-    - CORE sales
-    - Ombudsman escalation
-    - Compliance score return
-
-    Used By:
-    - Reports module (regulatory submissions)
-    - Compliance management
+4.9 NOMIS Extended (Labour Market)
+    Mock Function:  mockLabourMarket(lsoaCode)
+    Server Route:   GET /api/v1/ai/mock/labour-market/:code
+    Returns:        Detailed employment data, sector breakdown, wage data
+    Used By:        Benefits Engine, arrears context
 
 
 5. SEVEN KILLER DIFFERENTIATOR SERVICES
 ================================================================================
 
+    These services combine internal data with external API data to produce
+    intelligence no competitor housing system can match.
+
 5.1 D1: Predictive Damp Intelligence
-    Service: server/src/services/damp-prediction.ts
-    API Route: GET /api/v1/ai/damp-risk/:propertyId
+    Service:        server/src/services/damp-prediction.ts (17KB)
+    Algorithm:      5-factor weighted scoring (0-100)
 
-    Algorithm: 5-Factor Weighted Score (0–100)
-    ┌─────────────────────┬────────┬────────────────────────────────┐
-    │ Factor              │ Weight │ Data Sources                   │
-    ├─────────────────────┼────────┼────────────────────────────────┤
-    │ Weather conditions  │  0.25  │ Open-Meteo (humidity, rain)    │
-    │ Building attributes │  0.25  │ Property data (age, type, EPC) │
-    │ Repair history      │  0.20  │ Case data (damp/mould reports) │
-    │ IoT sensors         │  0.20  │ Switchee/Aico (temp, humidity) │
-    │ Occupancy patterns  │  0.10  │ Tenant data (household size)   │
-    └─────────────────────┴────────┴────────────────────────────────┘
+    Factor Weights:
+    | Factor    | Weight | Source                | Key Inputs                    |
+    |-----------|--------|-----------------------|-------------------------------|
+    | Weather   | 0.25   | Open-Meteo            | Temp, humidity, precipitation |
+    | Building  | 0.25   | EPC, internal data    | Construction, insulation, age |
+    | History   | 0.20   | Internal repairs       | Previous damp repairs, freq   |
+    | Sensor    | 0.20   | IoT mock              | Humidity, temp, moisture      |
+    | Occupancy | 0.10   | Internal tenant data   | Household size, ventilation   |
 
-    Output:
-    - Overall risk score (0–100)
-    - Risk level: low (0–25), moderate (26–50), high (51–75), critical (76–100)
-    - Factor breakdown with individual scores
-    - Proactive recommendations
-    - Awaab's Law compliance status
+    Output:         Risk score 0-100 + factor breakdown + recommendations
+    API:            GET /api/v1/ai/damp-risk/:propertyId
+                    GET /api/v1/ai/damp-risk/estate/:estateId
+    Frontend:       DampIntelligencePanel component
 
 5.2 D2: Live Crime Context for ASB
-    Service: server/src/services/crime-context.ts
-    API Route: GET /api/v1/ai/crime-context/:estateId
+    Service:        server/src/services/crime-context.ts (11KB)
+    Algorithm:      Police.uk data correlation with internal ASB cases
 
-    Algorithm:
-    - Fetch Police.uk data for estate location (12-month window)
-    - Categorize by type (ASB, violence, drugs, criminal damage, etc.)
-    - Correlate with internal ASB cases
-    - Identify hotspots and trends
-    - Generate estate safety score
+    Features:
+    - Crime heatmap overlay on estate maps
+    - Hotspot analysis (density within 500m radius)
+    - Correlation between police reports and internal ASB cases
+    - Multi-agency referral recommendations
 
-    Output:
-    - Crime summary by category (last 12 months)
-    - Monthly trend (rising/stable/declining)
-    - Hotspot locations within estate
-    - Correlation with internal ASB cases
-    - Recommended patrol priorities
+    Output:         Crime summary, hotspot map data, correlation matches
+    API:            GET /api/v1/ai/crime-context/:estateId
+                    GET /api/v1/ai/crime-context/case/:caseId
+    Frontend:       Crime data layer on Explore page
 
 5.3 D3: Automatic Vulnerability Detection
-    Service: server/src/services/vulnerability-detection.ts
-    API Route: GET /api/v1/ai/vulnerability/:tenantId
+    Service:        server/src/services/vulnerability-detection.ts (16KB)
+    Algorithm:      7-factor scoring
 
-    Algorithm: 7-Factor Weighted Score (0–100)
-    ┌──────────────────────────┬────────┬──────────────────────────┐
-    │ Factor                   │ Weight │ Data Sources             │
-    ├──────────────────────────┼────────┼──────────────────────────┤
-    │ IMD deprivation          │  0.20  │ IMD data (decile)        │
-    │ Arrears history          │  0.20  │ Rent account (balance)   │
-    │ Health flags             │  0.15  │ Tenant vulnerability     │
-    │ Social isolation         │  0.15  │ Household composition    │
-    │ Age risk (elderly/young) │  0.10  │ Tenant DOB              │
-    │ Dependents               │  0.10  │ Household members        │
-    │ UC transition            │  0.10  │ UC status                │
-    └──────────────────────────┴────────┴──────────────────────────┘
+    Factors:
+    | Factor       | Weight | Source           | Key Inputs                   |
+    |--------------|--------|------------------|------------------------------|
+    | Deprivation  | --     | IMD/ONS          | IMD decile, domain scores    |
+    | Arrears      | --     | Internal         | Payment pattern, amount      |
+    | Health       | --     | Census/flags     | Disability, health indicators|
+    | Isolation    | --     | Internal         | Contact frequency, no-access |
+    | Age          | --     | Internal         | Elderly, young tenant        |
+    | Dependents   | --     | Internal         | Children, household size     |
+    | UC Transition| --     | DWP mock         | UC claim, transition stage   |
 
-    Output:
-    - Vulnerability score (0–100)
-    - Risk level: low / moderate / high / critical
-    - Detected flags (e.g., elderly, mental-health, financial-hardship)
-    - Recommended support actions
-    - Referral suggestions (social services, CAB, food bank)
+    Output:         Overall score + factor scores + detected flags + actions
+    API:            GET /api/v1/ai/vulnerability/:tenantId
+                    POST /api/v1/ai/vulnerability/scan (org-wide)
+    Frontend:       VulnerabilityPanel component
 
-5.4 D4: Property Passport
-    Service: server/src/services/property-passport.ts
-    API Route: GET /api/v1/ai/property-passport/:propertyId
+5.4 D4: Benefits Entitlement Engine
+    Service:        server/src/services/benefits-engine.ts (11KB)
+    Algorithm:      UK 2025/26 benefit rules analysis
 
-    Aggregation Sources:
-    - Property data (Firestore)
-    - EPC certificate (Tier 2 API)
-    - Compliance certificates (Firestore)
-    - Repair history (Firestore cases)
-    - Damp risk score (D1 service)
-    - Flood risk (DEFRA API)
-    - Crime context (D2 service)
-    - Census demographics (NOMIS API)
-    - Land Registry title (mock)
-
-    Output:
-    - Comprehensive property dossier
-    - Current condition assessment
-    - Compliance status summary
-    - Energy efficiency profile
-    - Neighbourhood context
-    - Investment recommendations
-
-5.5 D5: Benefits Entitlement Engine
-    Service: server/src/services/benefits-engine.ts
-    API Route: GET /api/v1/ai/benefits-check/:tenantId
-
-    Rules Engine (UK 2025/26):
-    - Universal Credit (standard allowance, housing element, child element)
+    Benefits Checked:
+    - Universal Credit (housing element, childcare, carer, disability)
+    - Housing Benefit (legacy)
     - Personal Independence Payment (PIP)
     - Attendance Allowance
-    - Pension Credit (guarantee, savings)
+    - Pension Credit (Guarantee, Savings)
     - Council Tax Reduction
-    - Discretionary Housing Payment
     - Warm Home Discount
-    - Free school meals
+    - Winter Fuel Payment
+    - Free School Meals
 
-    Input:
-    - Tenant age, household composition
-    - Employment status, income
-    - Disability/health conditions
-    - Current benefit claims
+    Output:         Entitlement list with status, amounts, unclaimed totals
+    API:            GET /api/v1/ai/benefits-check/:tenantId
+    Frontend:       BenefitsPanel component
 
-    Output:
-    - List of potential entitlements
-    - Estimated weekly/monthly amounts
-    - Claim status (claimed/unclaimed/check-eligibility)
-    - Total unclaimed benefits estimate
-    - Next steps for each entitlement
+5.5 D5: Property Passport
+    Service:        server/src/services/property-passport.ts (11KB)
+    Algorithm:      Multi-source property dossier aggregation
+
+    Sources Aggregated:
+    - EPC certificate data (energy, fabric, heating)
+    - Gas Safe registration / EICR status
+    - UPRN verification
+    - Flood risk zone
+    - IMD deprivation score
+    - Crime statistics
+    - Weather forecast
+    - Internal compliance, repairs, stock condition data
+
+    Output:         Comprehensive property intelligence document
+    API:            GET /api/v1/ai/property-passport/:propertyId
+    Frontend:       Property detail page
 
 5.6 D6: AI Neighbourhood Briefing
-    Service: server/src/services/neighbourhood-briefing.ts
-    API Route: GET /api/v1/ai/briefing/:estateId
+    Service:        server/src/services/neighbourhood-briefing.ts (14KB)
+    Algorithm:      Per-estate daily intelligence combining all sources
 
-    Data Sources Combined:
-    - Weather forecast (Open-Meteo)
-    - Crime data (Police.uk)
-    - Active cases (Firestore)
-    - Compliance status (Firestore)
-    - Census demographics (NOMIS)
-    - Damp risk aggregation (D1)
-    - ASB incidents (Firestore + Police)
+    Sections:
+    - Weather outlook (damp risk, frost, storms)
+    - Crime context (recent incidents, trends)
+    - Demographics (area profile)
+    - Labour market (unemployment, claimant trends)
+    - Internal KPIs (repairs, arrears, compliance, voids)
+    - Action items (recommended officer actions)
 
-    Output:
-    - 6 summary cards (weather, crime, cases, compliance, demographics, risk)
-    - Officer briefing text (AI-generated narrative)
-    - Action items prioritized by urgency
-    - Trend comparisons (this week vs last)
+    Output:         6 summary cards + officer briefing + action items
+    API:            GET /api/v1/ai/briefing/:estateId
+    Frontend:       NeighbourhoodBriefingPanel component
 
-5.7 D7: IoT Sensor Integration
-    Service: server/src/services/mock-services.ts
-    API Route: GET /api/v1/ai/mock/iot-sensors/:propertyId
-
-    Supported Devices:
-    - Switchee smart thermostat (temperature, humidity, heating usage)
-    - Aico smoke/CO detectors (status, battery, alerts)
-    - Third-party humidity sensors
-
-    Status: MOCK (ready for real Switchee/Aico API integration)
+5.7 D7: GOV.UK Notify Integration
+    Service:        server/src/services/govuk-notify.ts (45KB)
+    See Section 6 for full template library.
 
 
-6. GOV.UK NOTIFY INTEGRATION
+6. GOV.UK NOTIFY INTEGRATION (24 Templates)
 ================================================================================
 
 6.1 Overview
-    Service: server/src/services/govuk-notify.ts
-    Status: Template library defined (24 templates)
-    Integration: Ready for GOV.UK Notify API key
+    Platform:       GOV.UK Notify (https://notifications.service.gov.uk)
+    Channels:       Email, SMS, Letter
+    Templates:      24 across 7 categories
+    Personalisation: ((field)) syntax for dynamic content
+    Tone options:   Supportive, Formal, Urgent, Legally Required
 
-6.2 Template Categories (7)
+6.2 Template Categories
 
-    CATEGORY 1: Rent Arrears (4 templates)
-    - arrears-mild: Friendly reminder (1–2 weeks behind)
-    - arrears-moderate: Formal notice (3–4 weeks)
-    - arrears-severe: Pre-action warning (5+ weeks)
-    - arrears-arrangement: Payment plan confirmation
+    | Category     | Count | Templates                                      |
+    |--------------|-------|------------------------------------------------|
+    | Rent/Arrears | 5     | Friendly reminder, formal warning, NOSP,       |
+    |              |       | payment arrangement, UC support                |
+    | Repairs      | 4     | Appointment booking, completion confirmation,  |
+    |              |       | delay notification, satisfaction follow-up      |
+    | ASB          | 3     | Warning letter, ABC agreement, CPN notice      |
+    | Compliance   | 3     | Gas safety appointment, EICR appointment,      |
+    |              |       | no-access escalation                           |
+    | Tenancy      | 3     | Welcome letter, annual review, end of tenancy  |
+    | Damp/Mould   | 3     | Inspection appointment, advice letter,         |
+    |              |       | Awaab's Law update                             |
+    | General      | 3     | General enquiry response, service update,      |
+    |              |       | annual report                                  |
 
-    CATEGORY 2: Repairs (4 templates)
-    - repair-acknowledged: Repair reported acknowledgement
-    - repair-appointment: Appointment booking confirmation
-    - repair-completed: Completion notification + satisfaction link
-    - repair-follow-up: Post-repair follow-up
+6.3 API Routes
+    GET  /api/v1/ai/notify/templates            All templates
+    GET  /api/v1/ai/notify/templates/:category   Templates by category
+    GET  /api/v1/ai/notify/template/:id          Single template
+    POST /api/v1/ai/notify/render                Render with personalisation
 
-    CATEGORY 3: ASB (3 templates)
-    - asb-reported: ASB report acknowledgement
-    - asb-warning: Warning letter to perpetrator
-    - asb-update: Case update to victim/reporter
-
-    CATEGORY 4: Compliance (3 templates)
-    - compliance-access: Access request for inspection
-    - compliance-reminder: Appointment reminder
-    - compliance-certificate: Certificate available notification
-
-    CATEGORY 5: Tenancy (4 templates)
-    - tenancy-welcome: New tenant welcome pack
-    - tenancy-renewal: Renewal offer
-    - tenancy-end: End of tenancy notification
-    - tenancy-annual-visit: Annual visit scheduling
-
-    CATEGORY 6: Damp & Mould (3 templates)
-    - damp-report-ack: Report acknowledged
-    - damp-inspection: Inspection scheduled
-    - damp-works: Works ordered notification (Awaab's Law timeline)
-
-    CATEGORY 7: General (3 templates)
-    - general-update: Generic case update
-    - general-survey: Satisfaction survey invitation
-    - general-information: Information request
-
-6.3 Template Rendering
-    - Personalisation fields use ((field)) syntax
-    - Rendered server-side via /api/v1/ai/notify/render
-    - Supports: ((tenant_name)), ((property_address)), ((case_ref)),
-      ((amount)), ((date)), ((officer_name)), etc.
+6.4 Personalisation Fields
+    Common fields: ((name)), ((address)), ((reference)), ((date)),
+    ((officer_name)), ((officer_phone)), ((organisation_name))
+    Financial: ((balance)), ((amount)), ((weekly_rent))
+    Repairs: ((appointment_date)), ((appointment_time)), ((trade))
+    Legal: ((notice_period)), ((court_date)), ((compliance_date))
 
 
 7. CACHING ARCHITECTURE
 ================================================================================
 
-7.1 Cache Collection: externalDataCache
-    Stored in Firestore with TTL-based expiration.
-    Cache key format: "{source}:{params}" (e.g., "police:SE17+1RY")
+7.1 Firestore Cache Collection: externalDataCache
+    Document ID:    {source}:{lookup-key}
+    Fields:
+    - source: string (API identifier)
+    - lookupKey: string (postcode, UPRN, lat/lng, LSOA)
+    - data: map (cached response payload)
+    - fetchedAt: timestamp
+    - ttlSeconds: number
+    - expiresAt: timestamp
+    - httpStatus: number
+    - latencyMs: number
 
-7.2 Cache-Through Pattern
-    1. Check Firestore cache for key
-    2. If found AND not expired → return cached data
-    3. If missing OR expired → fetch from external API
-    4. Store result in cache with TTL
-    5. Return data to caller
+7.2 TTL Policy
 
-7.3 TTL Configuration
+    | Source              | TTL         | Rationale                        |
+    |---------------------|-------------|----------------------------------|
+    | Weather (forecast)  | 1 hour      | Weather changes frequently       |
+    | Weather (historical)| 7 days      | Historical data stable            |
+    | Flood warnings      | 1 hour      | Active warnings change            |
+    | Crime data          | 24 hours    | Monthly police.uk releases        |
+    | Postcodes           | 90 days     | Postcodes rarely change           |
+    | UPRN data           | 90 days     | Address data very stable          |
+    | EPC certificates    | 30 days     | Change only on re-lodgement       |
+    | IMD/Census          | 90 days     | Updated every 4-5 years           |
+    | Labour market       | 7 days      | Monthly ONS releases              |
+    | Gas Safe            | 30 days     | Registration status stable        |
+    | Electrical Safety   | 30 days     | Registration status stable        |
 
-    | Source              | TTL       | Key Format                 |
-    |---------------------|-----------|----------------------------|
-    | police              | 24 hours  | police:{postcode}          |
-    | weather             | 1 hour    | weather:{lat},{lng}        |
-    | flood-risk          | 1 hour    | flood:{postcode}           |
-    | postcode            | 7 days    | postcode:{postcode}        |
-    | epc                 | 30 days   | epc:{uprn}                 |
-    | census              | 90 days   | census:{lsoaCode}          |
-    | nomis               | 30 days   | nomis:{lsoaCode}           |
-    | gas-safe            | 24 hours  | gas-safe:{regNumber}       |
-    | electrical-safety   | 24 hours  | electrical:{regNumber}     |
-    | imd                 | 90 days   | imd:{lsoaCode}             |
-
-7.4 Cache Management
-    - Automatic TTL enforcement on read
-    - Manual cache invalidation via admin API
-    - Cache hit rate tracked in metrics
-    - No cache warming (fetch-on-demand only)
+7.3 Cache Strategy
+    - Cache-through: check cache first, fetch on miss
+    - Stale data: return cached data even if expired, refresh in background
+    - Cache warming: planned for Phase 5 (task 5.2.6)
 
 
-8. RATE LIMITING
+8. RATE LIMITING STRATEGY
 ================================================================================
 
-8.1 Internal Rate Limits (per client IP)
+8.1 Internal Rate Limiting (per-client)
+    - API routes: 100 requests/minute
+    - Auth routes: 10 requests/minute
+    - AI routes: 30 requests/minute
+    - Admin routes: 20 requests/minute
+    - Implementation: Sliding window, token bucket pattern
 
-    | Tier    | Routes              | Limit        | Window  |
-    |---------|---------------------|--------------|---------|
-    | API     | /api/v1/*           | 100 req/min  | Sliding |
-    | Auth    | /api/v1/auth/*      | 10 req/min   | Sliding |
-    | AI      | /api/v1/ai/*        | 30 req/min   | Sliding |
-    | Admin   | /api/v1/admin/*     | 20 req/min   | Sliding |
-
-8.2 External API Rate Limits
-    Token bucket pattern per API source.
-    Global fair-use: 15 req/sec across all external APIs.
-
-    | API               | Limit             | Enforced By       |
-    |-------------------|-------------------|-------------------|
-    | Police.uk         | 15 req/sec        | Fair-use + cache  |
-    | Open-Meteo        | 10,000 req/day    | No key needed     |
-    | DEFRA             | No formal limit   | Fair-use          |
-    | Postcodes.io      | No formal limit   | Fair-use          |
-    | EPC Open Data     | 1,000 req/month   | API key + cache   |
-    | NOMIS             | 100,000 req/month | Fair-use          |
-    | Gas Safe          | 100 req/hour      | Fair-use + cache  |
-    | Electrical Safety | 100 req/hour      | Fair-use + cache  |
+8.2 External API Rate Limiting (per-source)
+    | Source       | Limit          | Implementation              |
+    |--------------|----------------|-----------------------------|
+    | Police.uk    | 15 req/sec     | Token bucket, queue excess  |
+    | Open-Meteo   | 10,000/day     | Daily counter               |
+    | DEFRA        | Fair use       | 1 req/sec soft limit        |
+    | Postcodes.io | Fair use       | 1 req/sec soft limit        |
+    | EPC Register | Fair use       | 1 req/sec soft limit        |
+    | NOMIS        | Fair use       | 1 req/sec soft limit        |
 
 
-9. ERROR HANDLING & GRACEFUL DEGRADATION
+9. ERROR HANDLING & FALLBACK
 ================================================================================
 
-9.1 External API Error Handling
-    - Timeout: 10 seconds per external request
-    - Retry: 1 retry with exponential backoff (2s)
-    - On failure: Return simulated fallback data
-    - Flag: Response includes { source: 'live' | 'simulated' }
+9.1 Error Response Format
+    {
+      error: string           // Human-readable message
+      code: string            // Machine-readable code
+      requestId: string       // X-Request-ID for correlation
+      // No stack traces in production
+    }
 
-9.2 Simulated Fallback Strategy
-    Every external API has a corresponding simulated data generator.
-    Simulated data is:
-    - Realistic for the requested entity/location
-    - Consistent across requests (deterministic seeding)
-    - Flagged clearly in the response
+9.2 Fallback Strategy
+    Every external API integration has a simulated fallback:
+    1. Primary: call real API
+    2. On failure (timeout, 4xx, 5xx): return simulated data
+    3. Simulated data marked with source: "simulated"
+    4. Error logged to auditLog
+    5. Admin dashboard shows integration health status
 
-9.3 Circuit Breaker Pattern (Planned)
-    - Track failure count per API source
-    - Open circuit after 5 consecutive failures
-    - Half-open after 60 seconds (single test request)
-    - Close circuit on successful test
-    Status: Not yet implemented (deferred)
+9.3 Circuit Breaker (Phase 5 — task 5.2.5)
+    Planned: per-source failure tracking with state machine
+    States: closed → open (after 5 failures) → half-open (after 60s)
+    Currently: simple try/catch with fallback
 
 
-10. API SECURITY
+10. SECURITY REQUIREMENTS
 ================================================================================
 
-10.1 Authentication
-    All /api/v1/* routes require Firebase Bearer token.
-    Exception: /health (public health check)
+10.1 API Authentication
+    - All /api/v1/* routes require Firebase JWT token
+    - Token verified on every request via auth middleware
+    - Exception: /health, /api/v1/auth/seed-users
 
-10.2 Request Validation
-    - JSON body limit: 1MB
-    - Content-Type: application/json enforced
-    - Query parameter sanitization
-    - Path parameter validation
+10.2 External API Key Management
+    - API keys stored in Google Secret Manager
+    - Injected as environment variables on Cloud Run
+    - Never exposed to frontend client
+    - Admin can toggle integrations via /admin/integrations
 
-10.3 Response Security
-    - No sensitive data in error responses (production)
-    - CORS restricted to allowed origins
-    - Request ID correlation (X-Request-ID)
-    - Security headers on all responses
-
-10.4 API Key Management
-    - No API keys in source code
-    - All keys in Google Secret Manager
-    - Environment variable injection at runtime
-    - Key rotation support via Secret Manager versioning
+10.3 Data Security
+    - PII never sent to external APIs unnecessarily
+    - Cached data inherits sensitivity of source
+    - Audit log captures all external API calls
+    - CORS restricts which origins can call the API
 
 
-11. FUTURE INTEGRATION ROADMAP
+11. INTERNAL API ENDPOINT REGISTRY (50+ Endpoints)
 ================================================================================
 
-11.1 Phase 5 — Real-Time & Advanced (Planned)
+    Full endpoint listing organised by route module:
 
-    | Integration           | Priority | Complexity | Description                     |
-    |-----------------------|----------|------------|---------------------------------|
-    | Switchee API (real)   | P2       | Medium     | Replace IoT mock with real API  |
-    | Aico API (real)       | P2       | Medium     | Real smoke/CO detector data     |
-    | DWP UC API (real)     | P1       | High       | Real UC verification (DWP ISP)  |
-    | GoCardless API (real) | P2       | Medium     | Real direct debit processing    |
-    | DocuSign API (real)   | P2       | Medium     | Real digital signing            |
-    | Plentific API (real)  | P3       | Medium     | Real contractor marketplace     |
-    | Vertex AI / Gemini    | P1       | High       | LLM for Yantra Assist           |
-    | Cloud Pub/Sub         | P2       | Medium     | Event-driven architecture       |
-    | WebSocket (Socket.io) | P2       | Medium     | Real-time notifications         |
-    | Stripe/GoCardless     | P3       | Medium     | Online rent payment             |
+    AUTH (3 endpoints):
+    POST  /api/v1/auth/seed-users
+    POST  /api/v1/auth/profile
+    GET   /api/v1/auth/me
 
-11.2 Phase 6 — Enterprise Integrations (Future)
+    PROPERTIES (4 endpoints):
+    GET   /api/v1/properties
+    GET   /api/v1/properties/available
+    GET   /api/v1/properties/:id
+    PATCH /api/v1/properties/:id
 
-    | Integration           | Priority | Complexity | Description                     |
-    |-----------------------|----------|------------|---------------------------------|
-    | Microsoft 365         | P3       | Medium     | Email, calendar, Teams          |
-    | Salesforce CRM        | P3       | High       | Tenant relationship management  |
-    | Power BI              | P3       | Medium     | Advanced analytics/dashboards   |
-    | Twilio                | P3       | Medium     | SMS/WhatsApp messaging          |
-    | NHS Digital           | P3       | High       | Health data integration         |
-    | Companies House       | P3       | Low        | Contractor verification         |
+    TENANTS (3 endpoints):
+    GET   /api/v1/tenants
+    GET   /api/v1/tenants/:id
+    PATCH /api/v1/tenants/:id
+
+    CASES (5 endpoints):
+    GET   /api/v1/cases
+    GET   /api/v1/cases/:id
+    POST  /api/v1/cases
+    PATCH /api/v1/cases/:id
+    GET   /api/v1/cases/:id/activities
+
+    AI SERVICES (24 endpoints):
+    POST  /api/v1/ai/draft-communication
+    POST  /api/v1/ai/entity-intelligence
+    POST  /api/v1/ai/neighbourhood-context
+    POST  /api/v1/ai/property-intelligence
+    POST  /api/v1/ai/tenant-context
+    POST  /api/v1/ai/chat
+    GET   /api/v1/ai/damp-risk/:propertyId
+    GET   /api/v1/ai/damp-risk/estate/:estateId
+    GET   /api/v1/ai/crime-context/:estateId
+    GET   /api/v1/ai/crime-context/case/:caseId
+    GET   /api/v1/ai/vulnerability/:tenantId
+    POST  /api/v1/ai/vulnerability/scan
+    GET   /api/v1/ai/benefits-check/:tenantId
+    GET   /api/v1/ai/property-passport/:propertyId
+    GET   /api/v1/ai/briefing/:estateId
+    GET   /api/v1/ai/notify/templates
+    GET   /api/v1/ai/notify/templates/:category
+    GET   /api/v1/ai/notify/template/:id
+    POST  /api/v1/ai/notify/render
+    GET   /api/v1/ai/mock/uc-verification/:tenantId
+    GET   /api/v1/ai/mock/iot-sensors/:propertyId
+    GET   /api/v1/ai/mock/direct-debit/:tenantId
+    GET   /api/v1/ai/mock/labour-market/:lsoaCode
+    GET   /api/v1/ai/mock/repairs-marketplace/:caseId
+    GET   /api/v1/ai/mock/regulatory/:type/:refId
+    GET   /api/v1/ai/mock/signing/:type/:tenantId
+    GET   /api/v1/ai/mock/referencing/:applicantId
+    GET   /api/v1/ai/mock/land-registry/:propertyId
+
+    PUBLIC DATA (11 endpoints):
+    GET   /api/v1/public-data/police/:postcode
+    GET   /api/v1/public-data/weather/:lat/:lng
+    GET   /api/v1/public-data/flood/:lat/:lng
+    GET   /api/v1/public-data/postcode/:postcode
+    POST  /api/v1/public-data/postcodes/bulk
+    GET   /api/v1/public-data/epc/:postcode
+    GET   /api/v1/public-data/imd/:lsoaCode
+    GET   /api/v1/public-data/census/:lsoaCode
+    GET   /api/v1/public-data/nomis/:lsoaCode
+    GET   /api/v1/public-data/gas-safe/:regNo
+    GET   /api/v1/public-data/electrical-safety/:regNo
+
+    ADMIN (4 endpoints):
+    GET   /api/v1/admin/integrations
+    POST  /api/v1/admin/integrations/:id/toggle
+    POST  /api/v1/admin/integrations/:id/test
+    GET   /api/v1/admin/monitoring
+
+    OTHER ROUTES:
+    GET   /api/v1/explore/*          (drill-down hierarchy)
+    GET   /api/v1/briefing/*         (AI briefing generation)
+    GET   /api/v1/compliance/*       (compliance tracking)
+    GET   /api/v1/rent/*             (financial tracking)
+    GET   /api/v1/reports/*          (report generation)
+    GET   /api/v1/export/*           (HACT data export)
+    GET   /api/v1/lettings/*         (lettings & allocations)
+    POST  /api/v1/booking/*          (viewing/appointment)
+    GET   /health                    (health check)
+
+
+12. FUTURE ROADMAP
+================================================================================
+
+12.1 Phase 5 API Enhancements
+    - Vertex AI integration for Yantra Assist chat (5.2.1, 5.2.2)
+    - WebSocket for real-time notifications (5.2.3, 5.2.4)
+    - AI communication drafting with LLM (5.2.11)
+    - AI repair intake with NLP (5.2.14)
+    - Bulk operations API (5.2.9)
+    - Audit log query API with full-text search (5.2.10)
+    - File upload service with Cloud Storage (5.2.15)
+    - GDPR data export pipeline (5.2.16)
+    - Circuit breaker pattern (5.2.5)
+    - Cache warming service (5.2.6)
+    - Scheduled task runner (5.2.7)
+
+12.2 Phase 6 Enterprise Integrations (planned)
+    - Real DWP/UC API (replacing mock)
+    - Real GOV.UK Notify sending (replacing template render)
+    - Real IoT sensor APIs (Switchee, Aico)
+    - Payment processing (GoCardless, Allpay)
+    - Regulatory submissions (RSH CORE, Ombudsman)
+    - Open Banking for income verification
+    - Companies House for contractor checks
+    - HM Land Registry API for title verification
+
+12.3 OpenAPI/Swagger Specification (Phase 5 — task 5.1.7)
+    Planned: Full OpenAPI 3.0 spec for all 50+ endpoints
+    - Request/response schemas
+    - Authentication documentation
+    - Example payloads
+    - Error codes
+    - Rate limit documentation
 
 
 ================================================================================
-  End of Doc3 — SocialHomes.Ai API & Integration Requirements
-  Yantra Works | 2026-02-18
+  End of Document
+  Doc3 — SocialHomes.Ai API & Integration Requirements v7.0
+  Yantra Works | 2026-02-26
 ================================================================================

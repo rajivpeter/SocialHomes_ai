@@ -1,0 +1,61 @@
+{
+  "createdAt": "2026-02-18T11:37:03.993Z",
+  "pipeline": {
+    "status": "running",
+    "mode": "supervised",
+    "currentAgent": "ba",
+    "startedAt": "2026-02-26T19:45:21.876Z"
+  },
+  "agents": {
+    "ba": {
+      "status": "completed",
+      "pid": null,
+      "startedAt": "2026-02-26T20:01:51.375Z",
+      "completedAt": "2026-02-26T20:13:57.957Z",
+      "exitCode": 0,
+      "model": "dolphin"
+    },
+    "fullstack": {
+      "status": "idle",
+      "pid": null,
+      "startedAt": null,
+      "completedAt": null,
+      "exitCode": null
+    },
+    "frontend": {
+      "status": "idle",
+      "pid": null,
+      "startedAt": null,
+      "completedAt": null,
+      "exitCode": null
+    },
+    "tester": {
+      "status": "idle",
+      "pid": null,
+      "startedAt": null,
+      "completedAt": null,
+      "exitCode": null
+    },
+    "devops": {
+      "status": "idle",
+      "pid": null,
+      "startedAt": null,
+      "completedAt": null,
+      "exitCode": null
+    },
+    "uiux": {
+      "status": "idle",
+      "pid": null,
+      "startedAt": null,
+      "completedAt": null,
+      "exitCode": null
+    },
+    "security": {
+      "status": "idle",
+      "pid": null,
+      "startedAt": null,
+      "completedAt": null,
+      "exitCode": null
+    }
+  }
+}
