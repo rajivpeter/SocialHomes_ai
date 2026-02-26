@@ -1,0 +1,33 @@
+{
+  "cli_version": "0.4.4",
+  "checkpoint_id": "9b0e7ab55c19",
+  "session_id": "e4d2a73b-3d53-4b3b-bc97-1e8a3fa219a6",
+  "strategy": "manual-commit",
+  "created_at": "2026-02-26T20:14:21.16496164Z",
+  "branch": "main",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "EXECUTION-PLAN.md",
+    "docs/requirements/Doc1-socialhomes-Base-Specification.txt",
+    "docs/requirements/Doc2-socialhomes-Technical-Architecture.txt",
+    "docs/requirements/Doc3-socialhomes-API-Requirements.txt"
+  ],
+  "agent": "Claude Code",
+  "token_usage": {
+    "input_tokens": 19,
+    "cache_creation_tokens": 101784,
+    "cache_read_tokens": 756558,
+    "output_tokens": 167,
+    "api_call_count": 11
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-02-26T20:14:20.099552744Z",
+    "agent_lines": 787,
+    "human_added": 1821,
+    "human_modified": 0,
+    "human_removed": 0,
+    "total_committed": 2608,
+    "agent_percentage": 30.17638036809816
+  },
+  "transcript_path": ".claude/projects/-mnt-c--netapps-socialhomes/e4d2a73b-3d53-4b3b-bc97-1e8a3fa219a6.jsonl"
+}
