@@ -16,18 +16,20 @@
       "model": "dolphin"
     },
     "fullstack": {
-      "status": "idle",
-      "pid": null,
-      "startedAt": null,
+      "status": "running",
+      "pid": 365967,
+      "startedAt": "2026-02-26T20:18:52.027Z",
       "completedAt": null,
-      "exitCode": null
+      "exitCode": null,
+      "model": "claude"
     },
     "frontend": {
-      "status": "idle",
-      "pid": null,
-      "startedAt": null,
+      "status": "running",
+      "pid": 366152,
+      "startedAt": "2026-02-26T20:19:21.689Z",
       "completedAt": null,
-      "exitCode": null
+      "exitCode": null,
+      "model": "claude"
     },
     "tester": {
       "status": "idle",
@@ -44,11 +46,12 @@
       "exitCode": null
     },
     "uiux": {
-      "status": "idle",
+      "status": "completed",
       "pid": null,
-      "startedAt": null,
-      "completedAt": null,
-      "exitCode": null
+      "startedAt": "2026-02-26T20:19:51.945Z",
+      "completedAt": "2026-02-26T20:25:35.947Z",
+      "exitCode": 0,
+      "model": "dolphin"
     },
     "security": {
       "status": "idle",

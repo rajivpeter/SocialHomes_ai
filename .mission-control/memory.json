@@ -782,5 +782,191 @@
     "id": "m_1772136837968_yksk5",
     "timestamp": "2026-02-26T20:13:57.968Z",
     "parentId": "m_1772136111381_p6wq9"
+  },
+  {
+    "type": "phase_start",
+    "phase": "Analysis",
+    "phaseNumber": 1,
+    "action": "Phase 1: Analysis",
+    "details": "Starting phase \"Analysis\": Business Analyst",
+    "outcome": "pending",
+    "id": "m_1772136861261_ruc53",
+    "timestamp": "2026-02-26T20:14:21.261Z",
+    "parentId": null
+  },
+  {
+    "type": "agent_spawn",
+    "agent": "fullstack",
+    "phaseNumber": 2,
+    "action": "Fullstack Developer started",
+    "details": "Agent Fullstack Developer spawned",
+    "outcome": "pending",
+    "id": "m_1772136861289_yryny",
+    "timestamp": "2026-02-26T20:14:21.289Z",
+    "parentId": null
+  },
+  {
+    "type": "agent_spawn",
+    "agent": "frontend",
+    "phaseNumber": 2,
+    "action": "Frontend Developer started",
+    "details": "Agent Frontend Developer spawned",
+    "outcome": "pending",
+    "id": "m_1772136861319_d5mnb",
+    "timestamp": "2026-02-26T20:14:21.319Z",
+    "parentId": null
+  },
+  {
+    "type": "agent_spawn",
+    "agent": "uiux",
+    "phaseNumber": 2,
+    "action": "UI/UX Designer started",
+    "details": "Agent UI/UX Designer spawned",
+    "outcome": "pending",
+    "id": "m_1772136861338_s07m5",
+    "timestamp": "2026-02-26T20:14:21.338Z",
+    "parentId": null
+  },
+  {
+    "type": "agent_error",
+    "agent": "fullstack",
+    "phaseNumber": 2,
+    "action": "Fullstack Developer failed",
+    "details": "Agent Fullstack Developer exited with error",
+    "outcome": "failure",
+    "metadata": {
+      "error": "Agent Fullstack Developer exited with error"
+    },
+    "id": "m_1772137124175_rskjr",
+    "timestamp": "2026-02-26T20:18:44.175Z",
+    "parentId": "m_1772136861289_yryny"
+  },
+  {
+    "type": "agent_error",
+    "agent": "frontend",
+    "phaseNumber": 2,
+    "action": "Frontend Developer failed",
+    "details": "Agent Frontend Developer exited with error",
+    "outcome": "failure",
+    "metadata": {
+      "error": "Agent Frontend Developer exited with error"
+    },
+    "id": "m_1772137124178_hn75e",
+    "timestamp": "2026-02-26T20:18:44.178Z",
+    "parentId": "m_1772136861319_d5mnb"
+  },
+  {
+    "type": "zombie_detected",
+    "agent": "fullstack",
+    "phaseNumber": 2,
+    "action": "Zombie: Fullstack Developer",
+    "details": "Fullstack Developer (PID 365280) detected as zombie process",
+    "outcome": "failure",
+    "metadata": {
+      "pid": 365280
+    },
+    "id": "m_1772137131998_tpw02",
+    "timestamp": "2026-02-26T20:18:51.998Z",
+    "parentId": null
+  },
+  {
+    "type": "retry",
+    "agent": "fullstack",
+    "phaseNumber": 2,
+    "action": "Retry Fullstack Developer",
+    "details": "Retrying Fullstack Developer (attempt 1)",
+    "outcome": "pending",
+    "metadata": {
+      "attempt": 1
+    },
+    "id": "m_1772137132003_vj11h",
+    "timestamp": "2026-02-26T20:18:52.003Z",
+    "parentId": "m_1772137124175_rskjr"
+  },
+  {
+    "type": "agent_spawn",
+    "agent": "fullstack",
+    "phaseNumber": 2,
+    "action": "Fullstack Developer started",
+    "details": "Agent Fullstack Developer spawned",
+    "outcome": "pending",
+    "id": "m_1772137132033_h9iy4",
+    "timestamp": "2026-02-26T20:18:52.033Z",
+    "parentId": null
+  },
+  {
+    "type": "agent_error",
+    "agent": "uiux",
+    "phaseNumber": 2,
+    "action": "UI/UX Designer failed",
+    "details": "Agent UI/UX Designer exited with error",
+    "outcome": "failure",
+    "metadata": {
+      "error": "Agent UI/UX Designer exited with error"
+    },
+    "id": "m_1772137161612_8pcqp",
+    "timestamp": "2026-02-26T20:19:21.612Z",
+    "parentId": "m_1772136861338_s07m5"
+  },
+  {
+    "type": "retry",
+    "agent": "frontend",
+    "phaseNumber": 2,
+    "action": "Retry Frontend Developer",
+    "details": "Retrying Frontend Developer (attempt 1)",
+    "outcome": "pending",
+    "metadata": {
+      "attempt": 1
+    },
+    "id": "m_1772137161661_p6p0x",
+    "timestamp": "2026-02-26T20:19:21.661Z",
+    "parentId": "m_1772137124178_hn75e"
+  },
+  {
+    "type": "agent_spawn",
+    "agent": "frontend",
+    "phaseNumber": 2,
+    "action": "Frontend Developer started",
+    "details": "Agent Frontend Developer spawned",
+    "outcome": "pending",
+    "id": "m_1772137161700_kmqp2",
+    "timestamp": "2026-02-26T20:19:21.700Z",
+    "parentId": null
+  },
+  {
+    "type": "retry",
+    "agent": "uiux",
+    "phaseNumber": 2,
+    "action": "Retry UI/UX Designer",
+    "details": "Retrying UI/UX Designer (attempt 1)",
+    "outcome": "pending",
+    "metadata": {
+      "attempt": 1
+    },
+    "id": "m_1772137191942_idmtp",
+    "timestamp": "2026-02-26T20:19:51.942Z",
+    "parentId": "m_1772137161612_8pcqp"
+  },
+  {
+    "type": "agent_spawn",
+    "agent": "uiux",
+    "phaseNumber": 2,
+    "action": "UI/UX Designer started",
+    "details": "Agent UI/UX Designer spawned",
+    "outcome": "pending",
+    "id": "m_1772137191951_6k8jy",
+    "timestamp": "2026-02-26T20:19:51.951Z",
+    "parentId": null
+  },
+  {
+    "type": "agent_complete",
+    "agent": "uiux",
+    "phaseNumber": 2,
+    "action": "UI/UX Designer completed",
+    "details": "Agent UI/UX Designer finished successfully",
+    "outcome": "success",
+    "id": "m_1772137535960_0kix8",
+    "timestamp": "2026-02-26T20:25:35.960Z",
+    "parentId": "m_1772137191951_6k8jy"
   }
 ]
