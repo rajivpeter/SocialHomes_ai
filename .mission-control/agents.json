@@ -52,13 +52,11 @@
       "model": "dolphin"
     },
     "security": {
-      "status": "running",
-      "pid": 482677,
+      "status": "completed",
+      "pid": null,
       "startedAt": "2026-02-27T20:00:48.298Z",
-      "completedAt": null,
-      "exitCode": null,
-      "model": "claude",
-      "sessionId": "681092f8-79c4-4939-80f1-f28bf571ebcf"
+      "completedAt": "2026-02-27T20:40:17.154Z",
+      "exitCode": 0
     }
   }
 }
