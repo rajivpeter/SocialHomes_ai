@@ -15,7 +15,7 @@
 | 2 | Intelligence | 3-4 | DONE | 14/14 |
 | 3 | Enrichment | 5-6 | DONE | 14/17 (3 deferred) |
 | 4 | Completion | 7-8 | DONE | 11/14 (3 deferred) |
-| **5** | **Evolution** | **9-14** | **IN PROGRESS** | **3/50** |
+| **5** | **Evolution** | **9-14** | **IN PROGRESS** | **37/50** |
 
 ---
 
@@ -129,7 +129,7 @@
 
 ---
 
-## PHASE 5: EVOLUTION (Sprints 9-14, Weeks 17-28) — IN PROGRESS (3/50)
+## PHASE 5: EVOLUTION (Sprints 9-14, Weeks 17-28) — IN PROGRESS (37/50)
 
 ### Goal: Real AI, real-time features, advanced testing, production scaling, SaaS readiness
 
@@ -148,13 +148,13 @@ Phase 5 is organized into 5 sub-phases matching the agent structure:
 |---|------|----------|------------|-------|--------|
 | 5.1.1 | Create comprehensive BA specification docs in `docs/requirements/` (Doc1, Doc2, Doc3) v7.0 | P0 | L | BA | DONE |
 | 5.1.2 | Update EXECUTION-PLAN.md with Phase 5 detailed tasks (v7.0) | P0 | M | BA | DONE |
-| 5.1.3 | Define Vertex AI / Gemini integration architecture for Yantra Assist — design prompt templates, context injection, token management, streaming response pattern, model selection (Gemini Pro vs Flash), safety settings, grounding with housing data | P1 | L | Fullstack | TODO |
-| 5.1.4 | Design WebSocket (Socket.io) architecture for real-time notifications — connection management, room-based subscriptions (per-user, per-estate, per-org), reconnection strategy, message format, authentication handshake via Firebase token | P1 | M | Fullstack | TODO |
-| 5.1.5 | Design event-driven architecture using Cloud Pub/Sub — define topics (case-created, case-updated, compliance-expiring, arrears-threshold, damp-alert), subscriptions, dead letter queues, message schemas for async workflows | P2 | L | Fullstack | TODO |
-| 5.1.6 | Define multi-tenant data isolation strategy for SaaS deployment — organisation-scoped Firestore queries, tenant context middleware, data partitioning, branding customisation, per-org configuration, billing model design | P2 | XL | Fullstack | TODO |
+| 5.1.3 | Define Vertex AI / Gemini integration architecture for Yantra Assist — design prompt templates, context injection, token management, streaming response pattern, model selection (Gemini Pro vs Flash), safety settings, grounding with housing data | P1 | L | Fullstack | DONE |
+| 5.1.4 | Design WebSocket (Socket.io) architecture for real-time notifications — connection management, room-based subscriptions (per-user, per-estate, per-org), reconnection strategy, message format, authentication handshake via Firebase token | P1 | M | Fullstack | DONE |
+| 5.1.5 | Design event-driven architecture using Cloud Pub/Sub — define topics (case-created, case-updated, compliance-expiring, arrears-threshold, damp-alert), subscriptions, dead letter queues, message schemas for async workflows | P2 | L | Fullstack | DONE |
+| 5.1.6 | Define multi-tenant data isolation strategy for SaaS deployment — organisation-scoped Firestore queries, tenant context middleware, data partitioning, branding customisation, per-org configuration, billing model design | P2 | XL | Fullstack | DONE |
 | 5.1.7 | Create API reference documentation (OpenAPI/Swagger spec) for all 50+ endpoints — request/response schemas, authentication docs, example payloads, error codes, rate limit documentation | P2 | L | BA | TODO |
-| 5.1.8 | Design Firestore data migration strategy — version schema changes, backward compatibility, migration scripts, rollback procedures, zero-downtime migration patterns | P2 | M | Fullstack | TODO |
-| 5.1.9 | Design AI model versioning and A/B testing framework — model registry, feature flags for AI features, confidence threshold tuning, model performance tracking, feedback loop architecture | P2 | L | Fullstack | TODO |
+| 5.1.8 | Design Firestore data migration strategy — version schema changes, backward compatibility, migration scripts, rollback procedures, zero-downtime migration patterns | P2 | M | Fullstack | DONE |
+| 5.1.9 | Design AI model versioning and A/B testing framework — model registry, feature flags for AI features, confidence threshold tuning, model performance tracking, feedback loop architecture | P2 | L | Fullstack | DONE |
 
 ---
 
@@ -162,22 +162,22 @@ Phase 5 is organized into 5 sub-phases matching the agent structure:
 
 | # | Task | Priority | Complexity | Agent | Status |
 |---|------|----------|------------|-------|--------|
-| 5.2.1 | Integrate Vertex AI (Gemini Pro) for Yantra Assist — server-side SDK, streaming responses via Server-Sent Events, context window management (property/tenant/case data injection), conversation history with Firestore persistence, token counting and budget enforcement | P1 | XL | Fullstack | TODO |
-| 5.2.2 | Build AI prompt engineering layer — context-aware system prompts per entity type (tenant, property, case, compliance, rent), few-shot examples for housing domain, safety guardrails (PII masking, hallucination prevention), persona-scoped response formatting | P1 | L | Fullstack | TODO |
-| 5.2.3 | Implement WebSocket server (Socket.io) — connection lifecycle, authentication handshake with Firebase JWT, room management (per-user, per-estate, per-org), heartbeat, graceful disconnect, Cloud Run sticky sessions configuration | P1 | L | Fullstack | TODO |
-| 5.2.4 | Build notification dispatch service — orchestrate GOV.UK Notify email/SMS (API key integration), in-app WebSocket push, notification queue (Firestore-based), delivery tracking, retry logic (3 retries with backoff), notification preferences enforcement | P1 | L | Fullstack | TODO |
-| 5.2.5 | Implement circuit breaker pattern for external API resilience — per-source failure tracking, state machine (closed/open/half-open), configurable thresholds (5 failures to open, 60s half-open), fallback activation, metrics integration, admin dashboard visibility | P2 | M | Fullstack | TODO |
-| 5.2.6 | Add cache warming service — scheduled pre-fetch for frequently accessed estate data (weather, crime, demographics), Cloud Scheduler trigger (every 2 hours for weather, daily for crime), background job runner with Firestore lock to prevent duplicates | P2 | M | Fullstack | TODO |
-| 5.2.7 | Build scheduled task runner (Cloud Scheduler / cron) — compliance reminders (30/14/7 days before certificate expiry), daily briefing pre-computation, weekly TSM metric refresh, monthly regulatory report generation, arrears escalation triggers | P2 | M | Fullstack | TODO |
-| 5.2.8 | Implement Firestore real-time listeners for case updates — server-side onSnapshot subscriptions on cases collection, change detection (status transitions, SLA breaches), WebSocket broadcast to connected clients, optimistic locking for concurrent edits | P2 | M | Fullstack | TODO |
-| 5.2.9 | Add bulk operations API — batch case status updates (bulk close resolved repairs), bulk communication send (all tenants in estate), batch compliance certificate upload, batch arrears action (PAP letters), progress tracking via WebSocket | P2 | M | Fullstack | TODO |
-| 5.2.10 | Build audit log query API — filtering by entity/user/action/date range, full-text search, pagination, CSV export for GDPR SAR requests, aggregation queries (actions per user per day), retention policy enforcement (auto-delete after 7 years) | P2 | M | Fullstack | TODO |
-| 5.2.11 | Implement AI communication drafting with Vertex AI — replace rule-based template drafts with LLM-generated personalised emails, tone selection (supportive/formal/urgent/legal), legal compliance check against Housing Ombudsman Code, template suggestion based on case context | P1 | L | Fullstack | TODO |
-| 5.2.12 | Add tenant activity scoring — calculate contact frequency, case history patterns, payment behaviour, engagement score (0-100), correlation with vulnerability score, proactive outreach triggers for disengaged tenants | P2 | M | Fullstack | TODO |
-| 5.2.13 | Implement real-time Awaab's Law compliance engine — automatic deadline calculation on damp/mould case creation, SLA breach detection with automatic escalation, proactive notification chain (tenant, officer, manager, regulator), compliance audit trail | P1 | L | Fullstack | TODO |
-| 5.2.14 | Build AI-powered repair intake service — free-text description analysis with Vertex AI, automatic SOR code suggestion, priority assignment, trade identification, asbestos flag check, recurring pattern detection, cost estimation, Awaab's Law flag | P2 | L | Fullstack | TODO |
-| 5.2.15 | Build file upload service — photo attachment for repairs (before/after), document uploads for compliance certificates, tenant document storage, Cloud Storage integration, image resize/compression, virus scanning, presigned URLs for secure access | P2 | M | Fullstack | TODO |
-| 5.2.16 | Implement GDPR data export pipeline — automated SAR request processing, tenant data collation across all collections, PII redaction for non-subject data, PDF generation with cover letter, right-to-erasure cascade across collections | P2 | M | Fullstack | TODO |
+| 5.2.1 | Integrate Vertex AI (Gemini Pro) for Yantra Assist — server-side SDK, streaming responses via Server-Sent Events, context window management (property/tenant/case data injection), conversation history with Firestore persistence, token counting and budget enforcement | P1 | XL | Fullstack | DONE |
+| 5.2.2 | Build AI prompt engineering layer — context-aware system prompts per entity type (tenant, property, case, compliance, rent), few-shot examples for housing domain, safety guardrails (PII masking, hallucination prevention), persona-scoped response formatting | P1 | L | Fullstack | DONE |
+| 5.2.3 | Implement WebSocket server (Socket.io) — connection lifecycle, authentication handshake with Firebase JWT, room management (per-user, per-estate, per-org), heartbeat, graceful disconnect, Cloud Run sticky sessions configuration | P1 | L | Fullstack | DONE |
+| 5.2.4 | Build notification dispatch service — orchestrate GOV.UK Notify email/SMS (API key integration), in-app WebSocket push, notification queue (Firestore-based), delivery tracking, retry logic (3 retries with backoff), notification preferences enforcement | P1 | L | Fullstack | DONE |
+| 5.2.5 | Implement circuit breaker pattern for external API resilience — per-source failure tracking, state machine (closed/open/half-open), configurable thresholds (5 failures to open, 60s half-open), fallback activation, metrics integration, admin dashboard visibility | P2 | M | Fullstack | DONE |
+| 5.2.6 | Add cache warming service — scheduled pre-fetch for frequently accessed estate data (weather, crime, demographics), Cloud Scheduler trigger (every 2 hours for weather, daily for crime), background job runner with Firestore lock to prevent duplicates | P2 | M | Fullstack | DONE |
+| 5.2.7 | Build scheduled task runner (Cloud Scheduler / cron) — compliance reminders (30/14/7 days before certificate expiry), daily briefing pre-computation, weekly TSM metric refresh, monthly regulatory report generation, arrears escalation triggers | P2 | M | Fullstack | DONE |
+| 5.2.8 | Implement Firestore real-time listeners for case updates — server-side onSnapshot subscriptions on cases collection, change detection (status transitions, SLA breaches), WebSocket broadcast to connected clients, optimistic locking for concurrent edits | P2 | M | Fullstack | DONE |
+| 5.2.9 | Add bulk operations API — batch case status updates (bulk close resolved repairs), bulk communication send (all tenants in estate), batch compliance certificate upload, batch arrears action (PAP letters), progress tracking via WebSocket | P2 | M | Fullstack | DONE |
+| 5.2.10 | Build audit log query API — filtering by entity/user/action/date range, full-text search, pagination, CSV export for GDPR SAR requests, aggregation queries (actions per user per day), retention policy enforcement (auto-delete after 7 years) | P2 | M | Fullstack | DONE |
+| 5.2.11 | Implement AI communication drafting with Vertex AI — replace rule-based template drafts with LLM-generated personalised emails, tone selection (supportive/formal/urgent/legal), legal compliance check against Housing Ombudsman Code, template suggestion based on case context | P1 | L | Fullstack | DONE |
+| 5.2.12 | Add tenant activity scoring — calculate contact frequency, case history patterns, payment behaviour, engagement score (0-100), correlation with vulnerability score, proactive outreach triggers for disengaged tenants | P2 | M | Fullstack | DONE |
+| 5.2.13 | Implement real-time Awaab's Law compliance engine — automatic deadline calculation on damp/mould case creation, SLA breach detection with automatic escalation, proactive notification chain (tenant, officer, manager, regulator), compliance audit trail | P1 | L | Fullstack | DONE |
+| 5.2.14 | Build AI-powered repair intake service — free-text description analysis with Vertex AI, automatic SOR code suggestion, priority assignment, trade identification, asbestos flag check, recurring pattern detection, cost estimation, Awaab's Law flag | P2 | L | Fullstack | DONE |
+| 5.2.15 | Build file upload service — photo attachment for repairs (before/after), document uploads for compliance certificates, tenant document storage, Cloud Storage integration, image resize/compression, virus scanning, presigned URLs for secure access | P2 | M | Fullstack | DONE |
+| 5.2.16 | Implement GDPR data export pipeline — automated SAR request processing, tenant data collation across all collections, PII redaction for non-subject data, PDF generation with cover letter, right-to-erasure cascade across collections | P2 | M | Fullstack | DONE |
 
 ---
 
@@ -185,18 +185,18 @@ Phase 5 is organized into 5 sub-phases matching the agent structure:
 
 | # | Task | Priority | Complexity | Agent | Status |
 |---|------|----------|------------|-------|--------|
-| 5.3.1 | Build Yantra Assist conversational UI — chat panel with streaming text display (SSE), message history with Firestore persistence, context indicator showing current entity, typing animation, copy/share responses, suggested follow-up questions, markdown rendering | P1 | L | Frontend | TODO |
-| 5.3.2 | Implement real-time notification bell with WebSocket — notification dropdown in header, unread count badge (animated), mark-as-read on click, notification categories (case/compliance/arrears/system), click-to-navigate to source entity, sound alert option | P1 | M | Frontend | TODO |
-| 5.3.3 | Build notification preferences page — per-channel toggles (email/SMS/in-app/portal), frequency settings (immediate/daily digest/weekly summary), category subscriptions (repairs/complaints/compliance/arrears/ASB), quiet hours configuration | P2 | M | Frontend | TODO |
-| 5.3.4 | Add interactive chart drill-downs — clickable chart elements on dashboard drill into filtered list views (click repair bar -> filtered repairs list), Recharts onClick handlers, breadcrumb-aware navigation, chart-to-table transition animation | P2 | M | Frontend | TODO |
-| 5.3.5 | Build workflow builder UI — visual drag-and-drop for admin workflow engine, trigger selection (case created, SLA approaching, arrears threshold), condition builder (if type=repair AND priority=emergency), action configuration (send email, create task, assign case), flow preview and test mode | P2 | XL | Frontend | TODO |
-| 5.3.6 | Implement dark/light theme toggle — Tailwind CSS custom property swap, system preference detection (prefers-color-scheme), manual override with localStorage persistence, smooth 300ms transition animation, ensure all 40+ pages render correctly in both modes | P3 | M | Frontend | TODO |
-| 5.3.7 | Add progressive loading and performance optimisation — React.lazy() + Suspense boundaries on heavy pages (Explore 3D, AI Centre), skeleton screens matching page layout, intersection observer for below-fold content, image lazy loading, route-level code splitting | P2 | M | Frontend | TODO |
-| 5.3.8 | Build mobile-responsive layout adaptations — collapsible sidebar (hamburger menu on tablet/mobile), stacked KPI cards on mobile, touch-friendly map controls (pinch zoom), responsive data tables (horizontal scroll or card view), bottom navigation bar on mobile | P2 | L | Frontend | TODO |
-| 5.3.9 | Add real-time case status indicators — WebSocket-driven StatusPill components that update live without page refresh, optimistic UI updates on case actions, conflict resolution for concurrent edits (last-write-wins with notification), case lock indicator when another user is editing | P2 | M | Frontend | TODO |
-| 5.3.10 | Build tenant portal enhancements — responsive design for mobile-first tenant access, repair wizard (step-by-step with photo upload), rent balance check with payment history chart, document viewer (tenancy agreement, gas cert), accessibility improvements for diverse user base | P2 | L | Frontend | TODO |
-| 5.3.11 | Build admin user management page — CRUD for user accounts, role assignment from 10 predefined roles, team assignment, patch allocation, bulk import from CSV, password reset, account deactivation, last login tracking, session management | P2 | M | Frontend | TODO |
-| 5.3.12 | Build GDPR compliance dashboard — SAR request tracker (received/processing/complete), data retention policy viewer, consent management interface, Data Processing Register view, right-to-erasure request workflow, export audit trail | P2 | M | Frontend | TODO |
+| 5.3.1 | Build Yantra Assist conversational UI — chat panel with streaming text display (SSE), message history with Firestore persistence, context indicator showing current entity, typing animation, copy/share responses, suggested follow-up questions, markdown rendering | P1 | L | Frontend | DONE |
+| 5.3.2 | Implement real-time notification bell with WebSocket — notification dropdown in header, unread count badge (animated), mark-as-read on click, notification categories (case/compliance/arrears/system), click-to-navigate to source entity, sound alert option | P1 | M | Frontend | DONE |
+| 5.3.3 | Build notification preferences page — per-channel toggles (email/SMS/in-app/portal), frequency settings (immediate/daily digest/weekly summary), category subscriptions (repairs/complaints/compliance/arrears/ASB), quiet hours configuration | P2 | M | Frontend | DONE |
+| 5.3.4 | Add interactive chart drill-downs — clickable chart elements on dashboard drill into filtered list views (click repair bar -> filtered repairs list), Recharts onClick handlers, breadcrumb-aware navigation, chart-to-table transition animation | P2 | M | Frontend | DONE |
+| 5.3.5 | Build workflow builder UI — visual drag-and-drop for admin workflow engine, trigger selection (case created, SLA approaching, arrears threshold), condition builder (if type=repair AND priority=emergency), action configuration (send email, create task, assign case), flow preview and test mode | P2 | XL | Frontend | DONE |
+| 5.3.6 | Implement dark/light theme toggle — Tailwind CSS custom property swap, system preference detection (prefers-color-scheme), manual override with localStorage persistence, smooth 300ms transition animation, ensure all 40+ pages render correctly in both modes | P3 | M | Frontend | DONE |
+| 5.3.7 | Add progressive loading and performance optimisation — React.lazy() + Suspense boundaries on heavy pages (Explore 3D, AI Centre), skeleton screens matching page layout, intersection observer for below-fold content, image lazy loading, route-level code splitting | P2 | M | Frontend | DONE |
+| 5.3.8 | Build mobile-responsive layout adaptations — collapsible sidebar (hamburger menu on tablet/mobile), stacked KPI cards on mobile, touch-friendly map controls (pinch zoom), responsive data tables (horizontal scroll or card view), bottom navigation bar on mobile | P2 | L | Frontend | DONE |
+| 5.3.9 | Add real-time case status indicators — WebSocket-driven StatusPill components that update live without page refresh, optimistic UI updates on case actions, conflict resolution for concurrent edits (last-write-wins with notification), case lock indicator when another user is editing | P2 | M | Frontend | DONE |
+| 5.3.10 | Build tenant portal enhancements — responsive design for mobile-first tenant access, repair wizard (step-by-step with photo upload), rent balance check with payment history chart, document viewer (tenancy agreement, gas cert), accessibility improvements for diverse user base | P2 | L | Frontend | DONE |
+| 5.3.11 | Build admin user management page — CRUD for user accounts, role assignment from 10 predefined roles, team assignment, patch allocation, bulk import from CSV, password reset, account deactivation, last login tracking, session management | P2 | M | Frontend | DONE |
+| 5.3.12 | Build GDPR compliance dashboard — SAR request tracker (received/processing/complete), data retention policy viewer, consent management interface, Data Processing Register view, right-to-erasure request workflow, export audit trail | P2 | M | Frontend | DONE |
 
 ---
 
@@ -327,10 +327,10 @@ Items deferred from earlier phases, now included in Phase 5:
 |-------|-------------|----|----|----|----|
 | **BA** | 3 | 2 (DONE) | 0 | 1 | 0 |
 | **Fullstack** | 23 | 0 | 8 | 15 | 0 |
-| **Frontend** | 12 | 0 | 2 | 9 | 1 |
+| **Frontend** | 12 (ALL DONE) | 0 | 2 | 9 | 1 |
 | **Tester** | 8 | 0 | 4 | 4 | 0 |
 | **DevOps** | 9 | 0 | 3 | 6 | 0 |
-| **TOTAL** | **50** (DONE: 3, TODO: 47) |
+| **TOTAL** | **50** (DONE: 37, TODO: 13) |
 
 ### Recommended Execution Order (Critical Path)
 

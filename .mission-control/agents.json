@@ -4,7 +4,7 @@
     "status": "running",
     "mode": "supervised",
     "currentAgent": "ba",
-    "startedAt": "2026-02-26T19:45:21.876Z"
+    "startedAt": "2026-02-27T08:36:24.454Z"
   },
   "agents": {
     "ba": {
@@ -17,19 +17,18 @@
     },
     "fullstack": {
       "status": "running",
-      "pid": 365967,
-      "startedAt": "2026-02-26T20:18:52.027Z",
+      "pid": 417747,
+      "startedAt": "2026-02-27T08:36:24.454Z",
       "completedAt": null,
       "exitCode": null,
       "model": "claude"
     },
     "frontend": {
-      "status": "running",
-      "pid": 366152,
-      "startedAt": "2026-02-26T20:19:21.689Z",
-      "completedAt": null,
-      "exitCode": null,
-      "model": "claude"
+      "status": "completed",
+      "pid": null,
+      "startedAt": "2026-02-27T08:36:54.472Z",
+      "completedAt": "2026-02-27T09:16:08.595Z",
+      "exitCode": 0
     },
     "tester": {
       "status": "idle",

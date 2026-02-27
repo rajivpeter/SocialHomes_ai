@@ -23,6 +23,12 @@ import { exportRouter } from './routes/export.js';
 import { authRouter } from './routes/auth.js';
 import { lettingsRouter } from './routes/lettings.js';
 import { bookingRouter } from './routes/booking.js';
+import { notificationsRouter } from './routes/notifications.js';
+import { scheduledTasksRouter } from './routes/scheduled-tasks.js';
+import { bulkOperationsRouter } from './routes/bulk-operations.js';
+import { auditRouter } from './routes/audit.js';
+import { gdprRouter } from './routes/gdpr.js';
+import { filesRouter } from './routes/files.js';
 import { errorHandler } from './middleware/error-handler.js';
 import { metricsMiddleware } from './middleware/metrics.js';
 import { getHealthStatus } from './services/monitoring.js';
@@ -136,6 +142,14 @@ app.use('/api/v1/public-data', apiLimiter, publicDataRouter);
 app.use('/api/v1/export', apiLimiter, exportRouter);
 app.use('/api/v1/lettings', apiLimiter, lettingsRouter);
 app.use('/api/v1/booking', apiLimiter, bookingRouter);
+
+// Phase 5 routes
+app.use('/api/v1/notifications', apiLimiter, notificationsRouter);
+app.use('/api/v1/scheduled-tasks', adminLimiter, scheduledTasksRouter);
+app.use('/api/v1/bulk', adminLimiter, bulkOperationsRouter);
+app.use('/api/v1/audit', apiLimiter, auditRouter);
+app.use('/api/v1/gdpr', adminLimiter, gdprRouter);
+app.use('/api/v1/files', apiLimiter, filesRouter);
 
 // ---- Convenience Route Aliases ----
 // Repairs and complaints are stored in the `cases` collection with a `type`

@@ -3,6 +3,14 @@ import { collections, getDocs, serializeFirestoreData } from '../services/firest
 import { authMiddleware } from '../middleware/auth.js';
 import type { CaseDoc, TenantDoc, PropertyDoc } from '../models/firestore-schemas.js';
 
+// Phase 5 services
+import { generateAiResponse, streamAiResponse } from '../services/vertex-ai.js';
+import { buildDraftingPrompt, checkLegalCompliance } from '../services/ai-prompts.js';
+import type { CommunicationTone } from '../services/ai-prompts.js';
+import { calculateTenantActivityScore, scanAllTenantActivity } from '../services/tenant-activity-scoring.js';
+import { assessAwaabsLawCase, scanAwaabsLawCases } from '../services/awaabs-law.js';
+import { analyseRepairDescription, checkRecurringPatterns } from '../services/repair-intake.js';
+
 // Differentiator services
 import { predictDampRisk, predictEstateDampRisk } from '../services/damp-prediction.js';
 import { getEstateCrimeContext, getAsbCaseContext } from '../services/crime-context.js';
@@ -372,5 +380,217 @@ aiRouter.post('/notify/render', (req, res) => {
       return res.status(404).json({ error: err.message });
     }
     return res.status(500).json({ error: 'Failed to render template' });
+  }
+});
+
+// ================================================================
+// PHASE 5: AI-Enhanced Chat (Vertex AI)
+// ================================================================
+
+// POST /api/v1/ai/chat/v2 — Vertex AI enhanced chat
+aiRouter.post('/chat/v2', async (req, res, next) => {
+  try {
+    const { query, conversationId, entityType, entityId } = req.body;
+    if (!query) return res.status(400).json({ error: 'query is required' });
+    const persona = req.user?.persona || 'housing-officer';
+
+    // Build context from entity if provided
+    let entityData: Record<string, unknown> | undefined;
+    if (entityType && entityId) {
+      const collectionMap: Record<string, FirebaseFirestore.CollectionReference> = {
+        property: collections.properties,
+        tenant: collections.tenants,
+        case: collections.cases,
+        estate: collections.estates,
+      };
+      const col = collectionMap[entityType];
+      if (col) {
+        const doc = await col.doc(entityId).get();
+        if (doc.exists) entityData = serializeFirestoreData(doc.data()) as Record<string, unknown>;
+      }
+    }
+
+    const response = await generateAiResponse(query, {
+      entityType: entityType || 'general',
+      entityId,
+      entityData,
+      persona,
+    }, conversationId);
+
+    res.json(response);
+  } catch (err) {
+    next(err);
+  }
+});
+
+// GET /api/v1/ai/chat/stream — SSE streaming endpoint
+aiRouter.get('/chat/stream', async (req, res, next) => {
+  try {
+    const query = req.query.query as string;
+    const conversationId = req.query.conversationId as string;
+    const entityType = (req.query.entityType as string) || 'general';
+    const persona = req.user?.persona || 'housing-officer';
+
+    if (!query) return res.status(400).json({ error: 'query parameter is required' });
+
+    // Set SSE headers
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+    res.flushHeaders();
+
+    const stream = streamAiResponse(query, {
+      entityType: entityType as any,
+      persona,
+    }, conversationId);
+
+    for await (const event of stream) {
+      res.write(`data: ${JSON.stringify(event)}\n\n`);
+    }
+
+    res.write('data: [DONE]\n\n');
+    res.end();
+  } catch (err) {
+    next(err);
+  }
+});
+
+// ================================================================
+// PHASE 5: AI Communication Drafting (Task 5.2.11)
+// ================================================================
+
+// POST /api/v1/ai/draft-communication/v2 — AI-enhanced drafting
+aiRouter.post('/draft-communication/v2', async (req, res, next) => {
+  try {
+    const { tenantId, communicationType, tone, caseRef } = req.body;
+    if (!tenantId) return res.status(400).json({ error: 'tenantId is required' });
+
+    const tenantDoc = await collections.tenants.doc(tenantId).get();
+    if (!tenantDoc.exists) return res.status(404).json({ error: 'Tenant not found' });
+    const tenant = serializeFirestoreData(tenantDoc.data()) as TenantDoc;
+
+    let caseData: CaseDoc | undefined;
+    if (caseRef) {
+      const caseSnapshot = await collections.cases.where('reference', '==', caseRef).limit(1).get();
+      if (!caseSnapshot.empty) caseData = serializeFirestoreData(caseSnapshot.docs[0].data()) as CaseDoc;
+    }
+
+    const propDoc = await collections.properties.doc(tenant.propertyId).get();
+    const property = propDoc.exists ? serializeFirestoreData(propDoc.data()) as PropertyDoc : undefined;
+
+    // Build prompt and generate via Vertex AI
+    const persona = req.user?.persona || 'housing-officer';
+    const draftTone: CommunicationTone = tone || 'formal';
+
+    const prompt = buildDraftingPrompt({
+      tenant,
+      property,
+      caseData,
+      communicationType: communicationType || 'general-update',
+      tone: draftTone,
+      persona,
+    });
+
+    const aiResponse = await generateAiResponse(prompt, {
+      entityType: 'tenant',
+      entityId: tenantId,
+      persona,
+    }, undefined, 'drafting');
+
+    // Legal compliance check
+    const complianceCheck = checkLegalCompliance(aiResponse.response, communicationType);
+
+    res.json({
+      draft: aiResponse.response,
+      metadata: {
+        tenantId,
+        tenantName: `${tenant.title} ${tenant.firstName} ${tenant.lastName}`,
+        communicationType,
+        tone: draftTone,
+        model: aiResponse.metadata.model,
+        confidence: 0.88,
+        generatedAt: new Date().toISOString(),
+        legalComplianceCheck: complianceCheck,
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// ================================================================
+// PHASE 5: Tenant Activity Scoring (Task 5.2.12)
+// ================================================================
+
+// GET /api/v1/ai/activity-score/:tenantId
+aiRouter.get('/activity-score/:tenantId', async (req, res, next) => {
+  try {
+    const score = await calculateTenantActivityScore(req.params.tenantId);
+    res.json(score);
+  } catch (err: any) {
+    if (err.message?.includes('not found')) return res.status(404).json({ error: err.message });
+    next(err);
+  }
+});
+
+// POST /api/v1/ai/activity-score/scan
+aiRouter.post('/activity-score/scan', async (_req, res, next) => {
+  try {
+    const result = await scanAllTenantActivity();
+    res.json(result);
+  } catch (err) {
+    next(err);
+  }
+});
+
+// ================================================================
+// PHASE 5: Awaab's Law Compliance Engine (Task 5.2.13)
+// ================================================================
+
+// GET /api/v1/ai/awaabs-law/:caseId
+aiRouter.get('/awaabs-law/:caseId', async (req, res, next) => {
+  try {
+    const assessment = await assessAwaabsLawCase(req.params.caseId);
+    res.json(assessment);
+  } catch (err: any) {
+    if (err.message?.includes('not found') || err.message?.includes('not a damp')) {
+      return res.status(404).json({ error: err.message });
+    }
+    next(err);
+  }
+});
+
+// GET /api/v1/ai/awaabs-law — scan all Awaab's Law cases
+aiRouter.get('/awaabs-law', async (_req, res, next) => {
+  try {
+    const scan = await scanAwaabsLawCases();
+    res.json(scan);
+  } catch (err) {
+    next(err);
+  }
+});
+
+// ================================================================
+// PHASE 5: AI Repair Intake (Task 5.2.14)
+// ================================================================
+
+// POST /api/v1/ai/repair-intake — analyse repair description
+aiRouter.post('/repair-intake', async (req, res, next) => {
+  try {
+    const { description, propertyId } = req.body;
+    if (!description) return res.status(400).json({ error: 'description is required' });
+
+    const analysis = analyseRepairDescription(description, propertyId);
+
+    // Check for recurring patterns if property ID is provided
+    if (propertyId && analysis.suggestedSorCode !== 'GN999') {
+      const recurring = await checkRecurringPatterns(propertyId, analysis.suggestedSorCode);
+      analysis.recurringPattern = recurring.isRecurring;
+      analysis.recurringDetails = recurring.details;
+    }
+
+    res.json(analysis);
+  } catch (err) {
+    next(err);
   }
 });

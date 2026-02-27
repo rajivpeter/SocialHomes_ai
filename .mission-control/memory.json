@@ -968,5 +968,116 @@
     "id": "m_1772137535960_0kix8",
     "timestamp": "2026-02-26T20:25:35.960Z",
     "parentId": "m_1772137191951_6k8jy"
+  },
+  {
+    "type": "agent_error",
+    "agent": "fullstack",
+    "phaseNumber": 2,
+    "action": "Fullstack Developer failed",
+    "details": "Agent Fullstack Developer exited with error",
+    "outcome": "failure",
+    "metadata": {
+      "error": "Agent Fullstack Developer exited with error"
+    },
+    "id": "m_1772137947333_yj5e3",
+    "timestamp": "2026-02-26T20:32:27.333Z",
+    "parentId": "m_1772137132033_h9iy4"
+  },
+  {
+    "type": "escalation",
+    "agent": "fullstack",
+    "phaseNumber": 2,
+    "action": "Escalated Fullstack Developer",
+    "details": "Asking Rajiv: Fullstack Developer failed after 2 attempts. Last error: Exit code 1, signal: null",
+    "outcome": "warning",
+    "id": "m_1772137971635_4ywie",
+    "timestamp": "2026-02-26T20:32:51.635Z",
+    "parentId": "m_1772137947333_yj5e3"
+  },
+  {
+    "type": "agent_error",
+    "agent": "frontend",
+    "phaseNumber": 2,
+    "action": "Frontend Developer failed",
+    "details": "Agent Frontend Developer exited with error",
+    "outcome": "failure",
+    "metadata": {
+      "error": "Agent Frontend Developer exited with error"
+    },
+    "id": "m_1772137978930_gne8h",
+    "timestamp": "2026-02-26T20:32:58.930Z",
+    "parentId": "m_1772137161700_kmqp2"
+  },
+  {
+    "type": "escalation",
+    "agent": "frontend",
+    "phaseNumber": 2,
+    "action": "Escalated Frontend Developer",
+    "details": "Asking Rajiv: Frontend Developer failed after 2 attempts. Last error: Exit code 1, signal: null",
+    "outcome": "warning",
+    "id": "m_1772138001503_1g4bd",
+    "timestamp": "2026-02-26T20:33:21.503Z",
+    "parentId": "m_1772137978930_gne8h"
+  },
+  {
+    "type": "retry",
+    "agent": "fullstack",
+    "phaseNumber": 2,
+    "action": "Retry Fullstack Developer",
+    "details": "Retrying Fullstack Developer (attempt 1)",
+    "outcome": "pending",
+    "metadata": {
+      "attempt": 1
+    },
+    "id": "m_1772181384409_es3nz",
+    "timestamp": "2026-02-27T08:36:24.409Z",
+    "parentId": null
+  },
+  {
+    "type": "agent_spawn",
+    "agent": "fullstack",
+    "phaseNumber": 2,
+    "action": "Fullstack Developer started",
+    "details": "Agent Fullstack Developer spawned",
+    "outcome": "pending",
+    "id": "m_1772181384461_qj6x5",
+    "timestamp": "2026-02-27T08:36:24.461Z",
+    "parentId": null
+  },
+  {
+    "type": "retry",
+    "agent": "frontend",
+    "phaseNumber": 2,
+    "action": "Retry Frontend Developer",
+    "details": "Retrying Frontend Developer (attempt 1)",
+    "outcome": "pending",
+    "metadata": {
+      "attempt": 1
+    },
+    "id": "m_1772181414456_rf0ys",
+    "timestamp": "2026-02-27T08:36:54.456Z",
+    "parentId": null
+  },
+  {
+    "type": "agent_spawn",
+    "agent": "frontend",
+    "phaseNumber": 2,
+    "action": "Frontend Developer started",
+    "details": "Agent Frontend Developer spawned",
+    "outcome": "pending",
+    "id": "m_1772181414476_32xps",
+    "timestamp": "2026-02-27T08:36:54.476Z",
+    "parentId": null
+  },
+  {
+    "type": "agent_complete",
+    "agent": "frontend",
+    "phaseNumber": 2,
+    "action": "Frontend Developer completed",
+    "details": "Agent Frontend Developer finished successfully",
+    "outcome": "success",
+    "id": "m_1772183768606_gw5lm",
+    "timestamp": "2026-02-27T09:16:08.606Z",
+    "parentId": "m_1772181414476_32xps"
   }
 ]

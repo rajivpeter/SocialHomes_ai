@@ -2,10 +2,12 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '@/context/AppContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { Search, Bell, Sparkles, ChevronDown, User, LogOut, BookOpen } from 'lucide-react';
+import { Search, Sparkles, ChevronDown, User, LogOut, BookOpen, Menu } from 'lucide-react';
 import type { Persona } from '@/types';
 import { getInitials } from '@/utils/format';
 import HelpDrawer from '@/components/shared/HelpDrawer';
+import NotificationBell from '@/components/shared/NotificationBell';
+import ThemeToggle from '@/components/shared/ThemeToggle';
 
 const personas: { id: Persona; label: string; description: string }[] = [
   { id: 'coo', label: 'Chief Operating Officer', description: 'Strategic portfolio view' },
@@ -19,7 +21,6 @@ export default function Header() {
   const { state, dispatch } = useApp();
   const { user: authUser, signOut } = useAuth();
   const navigate = useNavigate();
-  const [showNotifications, setShowNotifications] = useState(false);
   const [showPersona, setShowPersona] = useState(false);
   const [searchValue, setSearchValue] = useState('');
   const [showHelp, setShowHelp] = useState(false);
@@ -28,8 +29,6 @@ export default function Header() {
     await signOut();
     navigate('/login', { replace: true });
   };
-
-  const unreadCount = state.notifications.filter(n => !n.read).length;
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -42,11 +41,20 @@ export default function Header() {
   return (
     <>
     <header
-      className="fixed top-0 right-0 h-14 bg-surface-dark/80 backdrop-blur-xl border-b border-border-default z-30 flex items-center px-5 gap-4"
+      className="fixed top-0 right-0 h-14 bg-surface-dark/80 backdrop-blur-xl border-b border-border-default z-30 flex items-center px-3 sm:px-5 gap-2 sm:gap-4"
       style={{ left: state.sidebarCollapsed ? 64 : 280 }}
     >
       {/* Subtle bottom glow line */}
       <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-brand-teal/15 to-transparent" />
+
+      {/* Mobile menu button */}
+      <button
+        onClick={() => dispatch({ type: 'TOGGLE_SIDEBAR' })}
+        className="lg:hidden p-2 rounded-lg hover:bg-surface-hover text-text-muted"
+        aria-label="Toggle menu"
+      >
+        <Menu size={18} />
+      </button>
 
       {/* Branding (mobile) */}
       <div className="lg:hidden flex items-center gap-2">
@@ -56,17 +64,17 @@ export default function Header() {
       </div>
 
       {/* BETA badge */}
-      <span className="bg-gradient-to-r from-brand-garnet to-brand-garnet/80 text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider shadow-sm shadow-brand-garnet/20">BETA</span>
+      <span className="hidden sm:inline bg-gradient-to-r from-brand-garnet to-brand-garnet/80 text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider shadow-sm shadow-brand-garnet/20">BETA</span>
 
       {/* Help — opens left drawer */}
       <button
         onClick={() => setShowHelp(!showHelp)}
-        className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg hover:bg-surface-hover transition-all duration-200 border border-transparent hover:border-brand-teal/20"
+        className="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg hover:bg-surface-hover transition-all duration-200 border border-transparent hover:border-brand-teal/20"
         aria-label="User Guide"
         title="User Guide"
       >
         <BookOpen size={15} className="text-brand-teal" />
-        <span className="text-[11px] font-medium text-text-secondary hidden sm:inline">Guide</span>
+        <span className="text-[11px] font-medium text-text-secondary hidden md:inline">Guide</span>
       </button>
 
       {/* Global Search */}
@@ -84,45 +92,12 @@ export default function Header() {
       </form>
 
       {/* Right side */}
-      <div className="flex items-center gap-2">
-        {/* Notifications */}
-        <div className="relative">
-          <button
-            onClick={() => setShowNotifications(!showNotifications)}
-            className="relative p-2 rounded-lg hover:bg-surface-hover transition-all duration-200"
-          >
-            <Bell size={18} className="text-text-secondary" />
-            {unreadCount > 0 && (
-              <span className="absolute -top-0.5 -right-0.5 bg-brand-garnet text-white text-[9px] font-bold rounded-full w-4 h-4 flex items-center justify-center shadow-sm shadow-brand-garnet/40">
-                {unreadCount}
-              </span>
-            )}
-          </button>
-          {showNotifications && (
-            <div className="absolute right-0 top-12 w-80 glass-card-elevated rounded-xl shadow-2xl animate-slide-in-down max-h-96 overflow-y-auto z-50">
-              <div className="p-3 border-b border-border-default">
-                <h3 className="text-sm font-semibold text-text-primary">Notifications</h3>
-              </div>
-              {state.notifications.map(n => (
-                <div
-                  key={n.id}
-                  onClick={() => { dispatch({ type: 'MARK_NOTIFICATION_READ', payload: n.id }); setShowNotifications(false); }}
-                  className={`p-3 border-b border-border-subtle cursor-pointer hover:bg-surface-hover transition-colors ${!n.read ? 'bg-surface-card/40' : ''}`}
-                >
-                  <div className="flex items-start gap-2.5">
-                    <span className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${
-                      n.type === 'urgent' ? 'bg-status-critical shadow-sm shadow-status-critical/50' : n.type === 'warning' ? 'bg-status-warning' : n.type === 'ai' ? 'bg-status-ai' : 'bg-status-info'
-                    }`} />
-                    <div>
-                      <div className="text-sm text-text-primary font-medium">{n.title}</div>
-                      <div className="text-xs text-text-muted mt-0.5">{n.message}</div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+      <div className="flex items-center gap-1 sm:gap-2">
+        {/* Theme toggle */}
+        <ThemeToggle />
+
+        {/* Notifications — enhanced with WebSocket-ready bell */}
+        <NotificationBell />
 
         {/* AI Assist trigger */}
         <button
@@ -139,7 +114,7 @@ export default function Header() {
         </button>
 
         {/* Divider */}
-        <div className="w-px h-6 bg-border-default mx-1" />
+        <div className="w-px h-6 bg-border-default mx-0.5 hidden sm:block" />
 
         {/* User / Persona */}
         <div className="relative">
@@ -154,7 +129,7 @@ export default function Header() {
               <div className="text-sm text-text-primary leading-tight font-medium">{state.user.name}</div>
               <div className="text-[10px] text-text-muted">{state.user.role}</div>
             </div>
-            <ChevronDown size={14} className="text-text-muted" />
+            <ChevronDown size={14} className="text-text-muted hidden sm:block" />
           </button>
 
           {showPersona && (
@@ -213,10 +188,10 @@ export default function Header() {
       </div>
 
       {/* Click outside to close */}
-      {(showNotifications || showPersona) && (
+      {showPersona && (
         <div
           className="fixed inset-0 z-40"
-          onClick={() => { setShowNotifications(false); setShowPersona(false); }}
+          onClick={() => setShowPersona(false)}
         />
       )}
 

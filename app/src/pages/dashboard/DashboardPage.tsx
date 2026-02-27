@@ -50,6 +50,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
             {entry.name}: {typeof entry.value === 'number' ? entry.value.toFixed(1) : entry.value}{entry.name.includes('Collect') || entry.name.includes('Target') ? '%' : ''}
           </p>
         ))}
+        <p className="text-[10px] text-text-muted mt-2 border-t border-border-default pt-1">Click to drill down →</p>
       </div>
     );
   }
@@ -84,6 +85,28 @@ export default function DashboardPage() {
     manager: 'Area Manager',
     'housing-officer': 'Housing Officer',
     operative: 'Repairs Operative',
+  };
+
+  // 5.3.4: Chart drill-down handlers
+  const handleRentChartClick = (data: any) => {
+    if (data?.activePayload?.[0]?.payload) {
+      const month = data.activePayload[0].payload.month;
+      navigate(`/rent/accounts?month=${month}`);
+    }
+  };
+
+  const handleRepairsBarClick = (data: any) => {
+    if (data?.activePayload) {
+      const month = data.activePayload[0]?.payload?.month;
+      // Find which priority segment was clicked based on the dataKey
+      const priorities = ['emergency', 'urgent', 'routine', 'planned'];
+      const clickedPriority = data.activePayload.find((p: any) => priorities.includes(p.dataKey))?.dataKey || '';
+      if (clickedPriority) {
+        navigate(`/repairs?priority=${clickedPriority}&month=${month}`);
+      } else {
+        navigate(`/repairs?month=${month}`);
+      }
+    }
   };
 
   const quickActions = [
@@ -154,33 +177,39 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="bg-surface-card rounded-xl p-6 border border-border-default opacity-0 animate-fade-in-up relative overflow-hidden" style={{ animationDelay: '400ms', animationFillMode: 'forwards' }}>
           <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-brand-teal to-brand-blue" />
-          <h2 className="text-lg font-bold font-heading text-brand-peach mb-4 tracking-tight">Rent Collection Trend</h2>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-bold font-heading text-brand-peach tracking-tight">Rent Collection Trend</h2>
+            <button onClick={() => navigate('/rent')} className="text-[10px] text-brand-teal hover:text-brand-teal/80 transition-colors uppercase tracking-wider font-semibold">View All →</button>
+          </div>
           <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={rentData}>
+            <LineChart data={rentData} onClick={handleRentChartClick} style={{ cursor: 'pointer' }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#1E2A38" />
               <XAxis dataKey="month" stroke="#5E7082" tick={{ fill: '#5E7082', fontSize: 12 }} />
               <YAxis stroke="#5E7082" tick={{ fill: '#5E7082', fontSize: 12 }} domain={[90, 100]} />
               <Tooltip content={<CustomTooltip />} />
               <Legend wrapperStyle={{ paddingTop: '20px' }} iconType="line" />
-              <Line type="monotone" dataKey="collected" stroke="#058995" strokeWidth={2} name="Collected" dot={{ fill: '#058995', r: 4, strokeWidth: 0 }} />
+              <Line type="monotone" dataKey="collected" stroke="#058995" strokeWidth={2} name="Collected" dot={{ fill: '#058995', r: 4, strokeWidth: 0 }} activeDot={{ r: 6, fill: '#058995', stroke: '#fff', strokeWidth: 2 }} />
               <Line type="monotone" dataKey="target" stroke="#EFAC92" strokeWidth={2} strokeDasharray="5 5" name="Target (97%)" dot={{ fill: '#EFAC92', r: 4, strokeWidth: 0 }} />
             </LineChart>
           </ResponsiveContainer>
         </div>
         <div className="bg-surface-card rounded-xl p-6 border border-border-default opacity-0 animate-fade-in-up relative overflow-hidden" style={{ animationDelay: '450ms', animationFillMode: 'forwards' }}>
           <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-brand-peach to-brand-garnet" />
-          <h2 className="text-lg font-bold font-heading text-brand-peach mb-4 tracking-tight">Repairs by Priority</h2>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-bold font-heading text-brand-peach tracking-tight">Repairs by Priority</h2>
+            <button onClick={() => navigate('/repairs')} className="text-[10px] text-brand-teal hover:text-brand-teal/80 transition-colors uppercase tracking-wider font-semibold">View All →</button>
+          </div>
           <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={repairsData}>
+            <BarChart data={repairsData} onClick={handleRepairsBarClick} style={{ cursor: 'pointer' }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#1E2A38" />
               <XAxis dataKey="month" stroke="#5E7082" tick={{ fill: '#5E7082', fontSize: 12 }} />
               <YAxis stroke="#5E7082" tick={{ fill: '#5E7082', fontSize: 12 }} />
               <Tooltip content={<CustomTooltip />} />
               <Legend wrapperStyle={{ paddingTop: '20px' }} />
-              <Bar dataKey="emergency" stackId="a" fill="#BE3358" name="Emergency" />
-              <Bar dataKey="urgent" stackId="a" fill="#EFAC92" name="Urgent" />
-              <Bar dataKey="routine" stackId="a" fill="#5BA4AA" name="Routine" />
-              <Bar dataKey="planned" stackId="a" fill="#058995" name="Planned" radius={[3, 3, 0, 0]} />
+              <Bar dataKey="emergency" stackId="a" fill="#BE3358" name="Emergency" cursor="pointer" />
+              <Bar dataKey="urgent" stackId="a" fill="#EFAC92" name="Urgent" cursor="pointer" />
+              <Bar dataKey="routine" stackId="a" fill="#5BA4AA" name="Routine" cursor="pointer" />
+              <Bar dataKey="planned" stackId="a" fill="#058995" name="Planned" radius={[3, 3, 0, 0]} cursor="pointer" />
             </BarChart>
           </ResponsiveContainer>
         </div>
