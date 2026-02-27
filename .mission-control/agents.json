@@ -16,12 +16,11 @@
       "model": "dolphin"
     },
     "fullstack": {
-      "status": "running",
-      "pid": 417747,
+      "status": "completed",
+      "pid": null,
       "startedAt": "2026-02-27T08:36:24.454Z",
-      "completedAt": null,
-      "exitCode": null,
-      "model": "claude"
+      "completedAt": "2026-02-27T09:16:42.228Z",
+      "exitCode": 0
     },
     "frontend": {
       "status": "completed",
