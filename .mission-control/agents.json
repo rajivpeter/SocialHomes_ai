@@ -4,7 +4,7 @@
     "status": "running",
     "mode": "supervised",
     "currentAgent": "ba",
-    "startedAt": "2026-02-27T08:36:24.454Z"
+    "startedAt": "2026-02-27T19:57:48.157Z"
   },
   "agents": {
     "ba": {
@@ -30,11 +30,11 @@
       "exitCode": 0
     },
     "tester": {
-      "status": "idle",
+      "status": "completed",
       "pid": null,
-      "startedAt": null,
-      "completedAt": null,
-      "exitCode": null
+      "startedAt": "2026-02-27T19:57:48.157Z",
+      "completedAt": "2026-02-27T20:30:07.880Z",
+      "exitCode": 0
     },
     "devops": {
       "status": "idle",
@@ -52,11 +52,13 @@
       "model": "dolphin"
     },
     "security": {
-      "status": "idle",
-      "pid": null,
-      "startedAt": null,
+      "status": "running",
+      "pid": 482677,
+      "startedAt": "2026-02-27T20:00:48.298Z",
       "completedAt": null,
-      "exitCode": null
+      "exitCode": null,
+      "model": "claude",
+      "sessionId": "681092f8-79c4-4939-80f1-f28bf571ebcf"
     }
   }
 }

@@ -1090,5 +1090,205 @@
     "id": "m_1772183802239_ue06v",
     "timestamp": "2026-02-27T09:16:42.239Z",
     "parentId": "m_1772181384461_qj6x5"
+  },
+  {
+    "type": "phase_start",
+    "phase": "Development",
+    "phaseNumber": 2,
+    "action": "Phase 2: Development",
+    "details": "Starting phase \"Development\": Fullstack Developer, Frontend Developer, UI/UX Designer",
+    "outcome": "pending",
+    "id": "m_1772183814392_r6dwz",
+    "timestamp": "2026-02-27T09:16:54.392Z",
+    "parentId": null
+  },
+  {
+    "type": "retry",
+    "agent": "tester",
+    "phaseNumber": 3,
+    "action": "Retry QA Tester",
+    "details": "Retrying QA Tester (attempt 1)",
+    "outcome": "pending",
+    "metadata": {
+      "attempt": 1
+    },
+    "id": "m_1772183844519_lfr2c",
+    "timestamp": "2026-02-27T09:17:24.519Z",
+    "parentId": null
+  },
+  {
+    "type": "escalation",
+    "agent": "tester",
+    "phaseNumber": 3,
+    "action": "Escalated QA Tester",
+    "details": "Asking Rajiv: QA Tester failed after 2 attempts. Last error: Project socialhomes is paused: Budget threshold exceeded ($5.52 / $5.00)",
+    "outcome": "warning",
+    "id": "m_1772183874385_7ijtt",
+    "timestamp": "2026-02-27T09:17:54.385Z",
+    "parentId": null
+  },
+  {
+    "type": "retry",
+    "agent": "security",
+    "phaseNumber": 3,
+    "action": "Retry Cyber Security",
+    "details": "Retrying Cyber Security (attempt 1)",
+    "outcome": "pending",
+    "metadata": {
+      "attempt": 1
+    },
+    "id": "m_1772183904328_i6mtg",
+    "timestamp": "2026-02-27T09:18:24.328Z",
+    "parentId": null
+  },
+  {
+    "type": "escalation",
+    "agent": "security",
+    "phaseNumber": 3,
+    "action": "Escalated Cyber Security",
+    "details": "Asking Rajiv: Cyber Security failed after 2 attempts. Last error: Project socialhomes is paused: Budget threshold exceeded ($5.52 / $5.00)",
+    "outcome": "warning",
+    "id": "m_1772183934243_824a7",
+    "timestamp": "2026-02-27T09:18:54.243Z",
+    "parentId": null
+  },
+  {
+    "type": "retry",
+    "agent": "tester",
+    "phaseNumber": 3,
+    "action": "Retry QA Tester",
+    "details": "Retrying QA Tester (attempt 1)",
+    "outcome": "pending",
+    "metadata": {
+      "attempt": 1
+    },
+    "id": "m_1772218789832_nfloa",
+    "timestamp": "2026-02-27T18:59:49.832Z",
+    "parentId": null
+  },
+  {
+    "type": "agent_spawn",
+    "agent": "tester",
+    "phaseNumber": 3,
+    "action": "QA Tester started",
+    "details": "Agent QA Tester spawned",
+    "outcome": "pending",
+    "id": "m_1772218789858_ieytp",
+    "timestamp": "2026-02-27T18:59:49.858Z",
+    "parentId": null
+  },
+  {
+    "type": "retry",
+    "agent": "security",
+    "phaseNumber": 3,
+    "action": "Retry Cyber Security",
+    "details": "Retrying Cyber Security (attempt 1)",
+    "outcome": "pending",
+    "metadata": {
+      "attempt": 1
+    },
+    "id": "m_1772218820096_cbwuu",
+    "timestamp": "2026-02-27T19:00:20.096Z",
+    "parentId": null
+  },
+  {
+    "type": "agent_spawn",
+    "agent": "security",
+    "phaseNumber": 3,
+    "action": "Cyber Security started",
+    "details": "Agent Cyber Security spawned",
+    "outcome": "pending",
+    "id": "m_1772218820123_fis21",
+    "timestamp": "2026-02-27T19:00:20.123Z",
+    "parentId": null
+  },
+  {
+    "type": "zombie_detected",
+    "agent": "tester",
+    "phaseNumber": 3,
+    "action": "Zombie: QA Tester",
+    "details": "QA Tester (PID 463218) detected as zombie process",
+    "outcome": "failure",
+    "metadata": {
+      "pid": 463218
+    },
+    "id": "m_1772222268130_malcp",
+    "timestamp": "2026-02-27T19:57:48.130Z",
+    "parentId": null
+  },
+  {
+    "type": "retry",
+    "agent": "tester",
+    "phaseNumber": 3,
+    "action": "Retry QA Tester",
+    "details": "Retrying QA Tester (attempt 1)",
+    "outcome": "pending",
+    "metadata": {
+      "attempt": 1
+    },
+    "id": "m_1772222268138_a0ny2",
+    "timestamp": "2026-02-27T19:57:48.138Z",
+    "parentId": null
+  },
+  {
+    "type": "agent_spawn",
+    "agent": "tester",
+    "phaseNumber": 3,
+    "action": "QA Tester started",
+    "details": "Agent QA Tester spawned",
+    "outcome": "pending",
+    "id": "m_1772222268163_l5fsn",
+    "timestamp": "2026-02-27T19:57:48.163Z",
+    "parentId": null
+  },
+  {
+    "type": "zombie_detected",
+    "agent": "security",
+    "phaseNumber": 3,
+    "action": "Zombie: Cyber Security",
+    "details": "Cyber Security (PID 463448) detected as zombie process",
+    "outcome": "failure",
+    "metadata": {
+      "pid": 463448
+    },
+    "id": "m_1772222448275_spj5a",
+    "timestamp": "2026-02-27T20:00:48.275Z",
+    "parentId": null
+  },
+  {
+    "type": "retry",
+    "agent": "security",
+    "phaseNumber": 3,
+    "action": "Retry Cyber Security",
+    "details": "Retrying Cyber Security (attempt 1)",
+    "outcome": "pending",
+    "metadata": {
+      "attempt": 1
+    },
+    "id": "m_1772222448280_ipzlm",
+    "timestamp": "2026-02-27T20:00:48.280Z",
+    "parentId": null
+  },
+  {
+    "type": "agent_spawn",
+    "agent": "security",
+    "phaseNumber": 3,
+    "action": "Cyber Security started",
+    "details": "Agent Cyber Security spawned",
+    "outcome": "pending",
+    "id": "m_1772222448305_98gsi",
+    "timestamp": "2026-02-27T20:00:48.305Z",
+    "parentId": null
+  },
+  {
+    "type": "agent_complete",
+    "agent": "tester",
+    "phaseNumber": 3,
+    "action": "QA Tester completed",
+    "details": "Agent QA Tester finished successfully",
+    "outcome": "success",
+    "id": "m_1772224207892_fnjya",
+    "timestamp": "2026-02-27T20:30:07.892Z",
+    "parentId": "m_1772222268163_l5fsn"
   }
 ]

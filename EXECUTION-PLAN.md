@@ -15,7 +15,7 @@
 | 2 | Intelligence | 3-4 | DONE | 14/14 |
 | 3 | Enrichment | 5-6 | DONE | 14/17 (3 deferred) |
 | 4 | Completion | 7-8 | DONE | 11/14 (3 deferred) |
-| **5** | **Evolution** | **9-14** | **IN PROGRESS** | **37/50** |
+| **5** | **Evolution** | **9-14** | **IN PROGRESS** | **45/50** |
 
 ---
 
@@ -129,7 +129,7 @@
 
 ---
 
-## PHASE 5: EVOLUTION (Sprints 9-14, Weeks 17-28) — IN PROGRESS (37/50)
+## PHASE 5: EVOLUTION (Sprints 9-14, Weeks 17-28) — IN PROGRESS (45/50)
 
 ### Goal: Real AI, real-time features, advanced testing, production scaling, SaaS readiness
 
@@ -204,14 +204,14 @@ Phase 5 is organized into 5 sub-phases matching the agent structure:
 
 | # | Task | Priority | Complexity | Agent | Status |
 |---|------|----------|------------|-------|--------|
-| 5.4.1 | Build comprehensive Selenium regression suite covering all 40+ routes — page load verification, CRUD operations on cases/tenants/properties, navigation flows (sidebar, breadcrumbs, search), error states (network failure, auth expiry), screenshot on failure | P1 | XL | Tester | TODO |
-| 5.4.2 | Write unit tests for all 7 AI services — damp-prediction.ts (5-factor edge cases), crime-context.ts (data correlation), vulnerability-detection.ts (7-factor scoring boundaries), benefits-engine.ts (UK benefit rules), property-passport.ts (aggregation), neighbourhood-briefing.ts (multi-source), govuk-notify.ts (template rendering) | P1 | L | Tester | TODO |
-| 5.4.3 | Write integration tests for external API proxy routes — mock HTTP servers for Police.uk/Open-Meteo/DEFRA/NOMIS, test cache-through pattern (cache miss -> API call -> cache hit), verify fallback behaviour on timeout/error, test rate limiting enforcement | P1 | L | Tester | TODO |
-| 5.4.4 | Perform load testing — Artillery or k6 scripts for 100 concurrent users, measure P95 latency across key endpoints (properties list, case detail, AI damp risk), identify bottlenecks (Firestore query limits, external API rate limits), test Cloud Run auto-scaling (0 -> 10 instances) | P2 | M | Tester | TODO |
-| 5.4.5 | Perform accessibility audit — aXe or Lighthouse automated scan on all 40+ pages, fix all critical/serious violations, achieve >90 Lighthouse accessibility score, test with screen reader (NVDA/VoiceOver), keyboard-only navigation test for all workflows | P2 | M | Tester | TODO |
-| 5.4.6 | Set up CI test pipeline — GitHub Actions workflow running TypeScript check + unit tests + integration tests on every PR, Cloud Build step for E2E tests on staging, test report generation (JUnit XML), code coverage reporting, fail-on-error with status checks | P1 | M | Tester | TODO |
-| 5.4.7 | Create test data factory — parameterised builder functions for all entity types (createProperty(), createTenant(), createCase()), consistent seed data for test isolation, Firestore emulator integration for local testing, cleanup utilities | P2 | M | Tester | TODO |
-| 5.4.8 | Security testing — OWASP Top 10 verification, SQL injection prevention (N/A for Firestore but verify query construction), XSS testing on all input fields, CSRF token verification, authentication bypass testing, rate limit bypass testing, CSP violation testing | P1 | M | Tester | TODO |
+| 5.4.1 | Build comprehensive Selenium regression suite covering all 40+ routes — page load verification, CRUD operations on cases/tenants/properties, navigation flows (sidebar, breadcrumbs, search), error states (network failure, auth expiry), screenshot on failure | P1 | XL | Tester | DONE |
+| 5.4.2 | Write unit tests for all 7 AI services — damp-prediction.ts (5-factor edge cases), crime-context.ts (data correlation), vulnerability-detection.ts (7-factor scoring boundaries), benefits-engine.ts (UK benefit rules), property-passport.ts (aggregation), neighbourhood-briefing.ts (multi-source), govuk-notify.ts (template rendering) | P1 | L | Tester | DONE |
+| 5.4.3 | Write integration tests for external API proxy routes — mock HTTP servers for Police.uk/Open-Meteo/DEFRA/NOMIS, test cache-through pattern (cache miss -> API call -> cache hit), verify fallback behaviour on timeout/error, test rate limiting enforcement | P1 | L | Tester | DONE |
+| 5.4.4 | Perform load testing — Artillery or k6 scripts for 100 concurrent users, measure P95 latency across key endpoints (properties list, case detail, AI damp risk), identify bottlenecks (Firestore query limits, external API rate limits), test Cloud Run auto-scaling (0 -> 10 instances) | P2 | M | Tester | DONE |
+| 5.4.5 | Perform accessibility audit — aXe or Lighthouse automated scan on all 40+ pages, fix all critical/serious violations, achieve >90 Lighthouse accessibility score, test with screen reader (NVDA/VoiceOver), keyboard-only navigation test for all workflows | P2 | M | Tester | DONE |
+| 5.4.6 | Set up CI test pipeline — GitHub Actions workflow running TypeScript check + unit tests + integration tests on every PR, Cloud Build step for E2E tests on staging, test report generation (JUnit XML), code coverage reporting, fail-on-error with status checks | P1 | M | Tester | DONE |
+| 5.4.7 | Create test data factory — parameterised builder functions for all entity types (createProperty(), createTenant(), createCase()), consistent seed data for test isolation, Firestore emulator integration for local testing, cleanup utilities | P2 | M | Tester | DONE |
+| 5.4.8 | Security testing — OWASP Top 10 verification, SQL injection prevention (N/A for Firestore but verify query construction), XSS testing on all input fields, CSRF token verification, authentication bypass testing, rate limit bypass testing, CSP violation testing | P1 | M | Tester | DONE |
 
 ---
 
@@ -299,7 +299,7 @@ Phase 5 is organized into 5 sub-phases matching the agent structure:
 | WebSocket connection stability | > 99.9% uptime |
 | Load test (100 concurrent users) | P95 < 1s, 0 errors |
 | Selenium test coverage | > 95% of routes |
-| Unit test coverage (services) | > 80% line coverage |
+| Unit test coverage (services) | > 80% line coverage | 99 tests, 7/7 services |
 | Staging deployment frequency | Every PR |
 | Database backup frequency | Daily automated |
 | Lighthouse accessibility score | > 90 on all pages |
@@ -328,9 +328,9 @@ Items deferred from earlier phases, now included in Phase 5:
 | **BA** | 3 | 2 (DONE) | 0 | 1 | 0 |
 | **Fullstack** | 23 | 0 | 8 | 15 | 0 |
 | **Frontend** | 12 (ALL DONE) | 0 | 2 | 9 | 1 |
-| **Tester** | 8 | 0 | 4 | 4 | 0 |
+| **Tester** | 8 (ALL DONE) | 0 | 4 | 4 | 0 |
 | **DevOps** | 9 | 0 | 3 | 6 | 0 |
-| **TOTAL** | **50** (DONE: 37, TODO: 13) |
+| **TOTAL** | **50** (DONE: 45, TODO: 5) |
 
 ### Recommended Execution Order (Critical Path)
 
