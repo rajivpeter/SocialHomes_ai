@@ -1,0 +1,41 @@
+{
+  "cli_version": "0.4.4",
+  "checkpoint_id": "a3e5564d36e0",
+  "session_id": "81b173a5-bfde-461a-befd-be8238f865b8",
+  "strategy": "manual-commit",
+  "created_at": "2026-02-27T20:30:23.102652438Z",
+  "branch": "main",
+  "checkpoints_count": 1,
+  "files_touched": [
+    ".mission-control/security-system-prompt.txt",
+    ".mission-control/security-task-prompt.txt",
+    "DEV-FIX-LIST.md",
+    "EXECUTION-PLAN.md",
+    "SESSION-HISTORY.md",
+    "app/public/yantra-logo-teal.svg",
+    "app/public/yantra-logo.svg",
+    "docs/security-audit.md",
+    "tests/conftest.py",
+    "tests/pytest.ini",
+    "tests/test_data_factory.py",
+    "tests/test_regression.py"
+  ],
+  "agent": "Claude Code",
+  "token_usage": {
+    "input_tokens": 81,
+    "cache_creation_tokens": 115386,
+    "cache_read_tokens": 6109803,
+    "output_tokens": 40340,
+    "api_call_count": 72
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-02-27T20:30:22.048505367Z",
+    "agent_lines": 1059,
+    "human_added": 3544,
+    "human_modified": 19,
+    "human_removed": 0,
+    "total_committed": 4622,
+    "agent_percentage": 22.912159238424927
+  },
+  "transcript_path": ".claude/projects/-mnt-c--netapps-socialhomes/81b173a5-bfde-461a-befd-be8238f865b8.jsonl"
+}
