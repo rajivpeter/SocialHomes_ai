@@ -1,0 +1,173 @@
+Read EXECUTION-PLAN.md and implement all tasks assigned to the fullstack agent. Focus on server/src/ — routes, services, models, types. Verify TypeScript compiles with "cd server && npm run build".
+
+---
+
+This session is being continued from a previous conversation that ran out of context. The summary below covers the earlier portion of the conversation.
+
+Analysis:
+Let me chronologically analyze the conversation:
+
+1. **Initial Setup**: The user asked to read EXECUTION-PLAN.md and implement all tasks assigned to the fullstack agent, focusing on server/src/ — routes, services, models, types, and verify TypeScript compiles.
+
+2. **Reading Phase**: I read EXECUTION-PLAN.md and SESSION-HISTORY.md to understand the project context. The execution plan showed Phase 5 with 23 fullstack tasks (5.1.3-5.1.9 architecture tasks, 5.2.1-5.2.16 implementation tasks).
+
+3. **Exploration Phase**: Used an Explore agent to thoroughly understand the server/src/ directory structure, including all existing patterns for routes, services, middleware, models, types, and the main index.ts entry point.
+
+4. **Key Files Read**: Read index.ts, firestore.ts, external-api.ts, firestore-schemas.ts, ai.ts, auth.ts, monitoring.ts, error-handler.ts, and package.json to understand existing patterns.
+
+5. **Implementation Phase**: Created 22 new files total:
+   - 3 type definition files
+   - 13 service files  
+   - 6 route files
+   - Modified 2 existing files (ai.ts and index.ts)
+
+6. **Build Errors**: First build had 8 TypeScript errors:
+   - audit-log.ts: Property access on untyped objects → Fixed with `as Record<string, any>` and `(item as any)`
+   - awaabs-law.ts: Type comparison issue with 'breached' → Fixed by creating intermediate variable with explicit type
+   - bulk-operations.ts: Record<string, unknown> incompatible with UpdateData → Fixed with `as any`
+   - circuit-breaker.ts: Missing required properties on auto-register → Fixed by spreading DEFAULT_CONFIG
+   - gdpr-export.ts: CaseDoc/ActivityDoc not assignable to Record<string, unknown> → Fixed with `as unknown as Record<string, unknown>`
+
+7. **Second build** had 2 remaining errors (UpdateData generic type) → Fixed by changing `as FirebaseFirestore.UpdateData` to `as any`
+
+8. **Third build**: 0 errors ✅
+
+9. **Post-build**: Updated EXECUTION-PLAN.md (3/50 → 25/50), updated SESSION-HISTORY.md with Session 12 details.
+
+The user only sent two messages - the initial system/startup message and the task instruction. No user feedback was received during implementation.
+
+Summary:
+1. Primary Request and Intent:
+   The user explicitly requested: "Read EXECUTION-PLAN.md and implement all tasks assigned to the fullstack agent. Focus on server/src/ — routes, services, models, types. Verify TypeScript compiles with 'cd server && npm run build'."
+   
+   This meant implementing all 22 Phase 5 fullstack tasks from EXECUTION-PLAN.md:
+   - 6 architecture/design tasks (5.1.3, 5.1.4, 5.1.5, 5.1.6, 5.1.8, 5.1.9)
+   - 16 backend implementation tasks (5.2.1 through 5.2.16)
+   - Verify TypeScript compiles with 0 errors
+   - Update EXECUTION-PLAN.md task statuses to DONE
+   - Update SESSION-HISTORY.md per project conventions
+
+2. Key Technical Concepts:
+   - Express.js + TypeScript with ESM modules (type: "module", .js extensions in imports)
+   - Google Firestore for data persistence (collections, getDocs, setDoc, batchWrite patterns)
+   - Vertex AI / Gemini integration (REST API, streaming SSE, conversation history)
+   - WebSocket (Socket.io) with optional dependency pattern (dynamic import, no-op fallback)
+   - Circuit breaker pattern (closed/open/half-open state machine)
+   - Notification dispatch (multi-channel: in-app, email, SMS, portal with Firestore queue)
+   - Cache warming with Firestore distributed locks
+   - Awaab's Law compliance (UK social housing regulation with strict timelines)
+   - GDPR data export/erasure pipeline (SAR requests, anonymisation vs deletion)
+   - SOR code matching for repair intake (26 Schedule of Rates codes with keyword scoring)
+   - Tenant activity scoring (5-factor weighted algorithm, 0-100 engagement score)
+   - Bulk operations with batch processing (Firestore 500-op batch limit)
+   - Audit log with CSV export and 7-year retention policy
+   - File upload service (validation, presigned URLs, Cloud Storage integration pattern)
+
+3. Files and Code Sections:
+
+   **Files Read (for context/patterns):**
+   - `/mnt/c/.REDACTED.md` — Master plan with all 50 Phase 5 tasks, identifying 22 fullstack tasks
+   - `/mnt/c/.netapps/socialhomes/SESSION-HISTORY.md` — 11 prior sessions of context
+   - `/mnt/c/.netapps/socialhomes/server/src/index.ts` — Main Express app entry point (middleware stack, route registration, SPA fallback)
+   - `/mnt/c/.netapps/socialhomes/server/src/services/firestore.ts` — Core Firestore helpers (serializeFirestoreData, getDocs, setDoc, batchWrite, collections map with 20 collections)
+   - `/mnt/c/.netapps/socialhomes/server/src/services/external-api.ts` — Cache-through fetch pattern (fetchWithCache with token bucket rate limiter)
+   - `/mnt/c/.netapps/socialhomes/server/src/models/firestore-schemas.ts` — All Firestore doc interfaces (PropertyDoc, TenantDoc, CaseDoc, etc.)
+   - `/mnt/c/.netapps/socialhomes/server/src/routes/ai.ts` — Existing AI routes (differentiators, mocks, GOV.UK Notify)
+   - `/mnt/c/.netapps/socialhomes/server/src/middleware/auth.ts` — AuthUser interface, dual-mode auth (Firebase JWT + X-Persona)
+   - `/mnt/c/.netapps/socialhomes/server/src/services/monitoring.ts` — Metrics singleton, health check
+   - `/mnt/c/.netapps/socialhomes/server/src/middleware/error-handler.ts` — ApiError class, structured error logging
+   - `/mnt/c/.netapps/socialhomes/server/package.json` — Dependencies (express 4.21.2, firebase-admin 13.6.1, typescript ~5.7.0)
+
+   **Files Created (22 new):**
+
+   - `server/src/types/vertex-ai.ts` — Architecture for Vertex AI (tasks 5.1.3). Model configs (GeminiModel type, MODEL_PRESETS for chat/drafting/analysis/summary), ConversationContext, ChatMessage, ConversationDoc, StreamEvent, TokenBudget (TOKEN_BUDGETS), AiChatResponse, AiDraftResponse, RepairIntakeResult, PiiMaskingConfig.
+
+   - `server/src/types/websocket.ts` — WebSocket architecture (task 5.1.4). SocketAuthPayload, RoomType ('user'|'estate'|'org'|'case'|'role'), NotificationCategory (8 types), WebSocketMessage, NotificationPreference, ConnectionInfo, ReconnectionConfig, ServerToClientEvents/ClientToServerEvents interfaces.
+
+   - `server/src/types/events.ts` — Event-driven + multi-tenant + migration + AI versioning (tasks 5.1.5, 5.1.6, 5.1.8, 5.1.9). PubSubTopic (12 topics), PubSubMessage, event payloads (CaseCreated, ComplianceExpiring, ArrearsThreshold, DampAlert, SlaBreach), TenantContext (multi-tenant with branding/features/limits/billing), OrganisationConfig, MigrationScript/Registry/Operation, AiModelVersion, AbTestConfig/Variant, FeatureFlag, AiModelFeedback.
+
+   - `server/src/services/vertex-ai.ts` — Vertex AI integration (task 5.2.1). Key functions: `estimateTokens()`, `maskPii()`, `buildContextString()`, `getConversation()`, `createConversation()`, `addMessage()`, `generateAiResponse()` (main function with AI_ENABLED flag and rule-based fallback), `callVertexAi()` (REST API call with Google Auth), `getSystemPrompt()`, `generateFallbackResponse()` (comprehensive rule-based responses for 6 topics), `streamAiResponse()` (async generator for SSE).
+
+   - `server/src/services/ai-prompts.ts` — Prompt engineering (task 5.2.2). `ENTITY_SYSTEM_PROMPTS` (7 entity types), `PERSONA_CONFIGS` (5 personas with detail level/focus/tone), `FEW_SHOT_EXAMPLES` (arrears, damp, complaint), `buildSystemPrompt()`, `buildPromptWithFewShot()`, `buildDraftingPrompt()` (with vulnerability awareness), `checkLegalCompliance()` (validates draft against Housing Ombudsman requirements).
+
+   - `server/src/services/circuit-breaker.ts` — Circuit breaker pattern (task 5.2.5). `registerCircuitBreaker()`, `withCircuitBreaker<T>()` (generic wrapper with fallback), `getCircuitBreakerStatus()`, `getAllCircuitBreakerStatuses()`, `resetCircuitBreaker()`. Pre-registers 7 circuits: police.uk, open-meteo, defra-flood, postcodes.io, uprn.uk, nomis, vertex-ai.
+
+   - `server/src/services/websocket.ts` — Socket.io server (task 5.2.3). Optional dependency via dynamic import. `initWebSocket()`, `handleConnection()` (auth, room subscription, heartbeat), `sendToUser()`, `sendToEstate()`, `sendToRole()`, `broadcast()`, `emitCaseUpdate()`, `emitComplianceAlert()`, `emitSlaBreach()`, Firestore notification persistence.
+
+   - `server/src/services/notification-dispatch.ts` — Notification dispatch (task 5.2.4). `dispatchNotification()`, `dispatchBulkNotification()`, `dispatchRoleNotification()`, `dispatchEstateNotification()`, queue management, channel resolution (respects preferences, quiet hours), `deliverInApp/Email/Sms/Portal()`, `setUserPreferences()`, `getNotificationHistory()`, `getUnreadCount()`, `markAllRead()`, `getQueueStatus()`.
+
+   - `server/src/services/cache-warming.ts` — Cache warming (task 5.2.6). Firestore distributed lock (`acquireLock`/`releaseLock` with 5min TTL), `warmWeatherCache()` (Open-Meteo), `warmCrimeCache()` (Police.uk), `warmDemographicsCache()` (Postcodes.io), `runCacheWarming()` (orchestrator with batching), `getLastWarmingStatus()`.
+
+   - `server/src/services/scheduled-tasks.ts` — Scheduled task runner (task 5.2.7). 7 tasks in registry: compliance-reminders, arrears-escalation, sla-breach-check, cache-warming, tsm-refresh, monthly-regulatory, daily-briefing. `runComplianceReminders()` (30/14/7 day thresholds), `runArrearsEscalation()` (4/8/12 week thresholds), `runSlaBreachCheck()`, `runTsmRefresh()` (14 TSM metrics), `runScheduledTask()`, `getScheduledTasks()`, `toggleTask()`.
+
+   - `server/src/services/firestore-listeners.ts` — Real-time listeners (task 5.2.8). `startCasesListener()` (onSnapshot for case create/modify with notification dispatch), `startComplianceListener()` (property compliance changes), case lock management (`acquireCaseLock`/`releaseCaseLock`/`getCaseLock` with 5min expiry), `startAllListeners()`, `stopAllListeners()`, `getListenerStatus()`.
+
+   - `server/src/services/bulk-operations.ts` — Bulk operations (task 5.2.9). `bulkUpdateCaseStatus()`, `bulkSendCommunication()`, `bulkUploadCompliance()`, `bulkArrearsAction()`. Progress tracking with `BulkOperationResult` (operationId, succeeded/failed counts, errors). 500-op Firestore batch chunking.
+
+   - `server/src/services/audit-log.ts` — Audit log query API (task 5.2.10). `queryAuditLog()` (filtering, pagination, in-memory text search), `aggregateAuditLog()` (by type/user/day), `exportAuditLogCsv()`, `enforceRetentionPolicy()` (7 years default), `writeAuditEntry()`.
+
+   - `server/src/services/tenant-activity-scoring.ts` — Tenant activity scoring (task 5.2.12). 5-factor weighted: contactFrequency (0.25), caseHistory (0.20), paymentBehaviour (0.30), communicationResponsiveness (0.15), serviceUsage (0.10). `calculateTenantActivityScore()`, `scanAllTenantActivity()`. Risk levels: engaged/moderate/disengaged/at-risk. Vulnerability correlation.
+
+   - `server/src/services/awaabs-law.ts` — Awaab's Law compliance (task 5.2.13). Timeline rules: emergency (1/1/7 days), category-1 (7/14/28), category-2 (14/21/42), precautionary (14/28/56). `calculateTimeline()`, `assessAwaabsLawCase()` (with escalation 0-3), `scanAwaabsLawCases()`, `determineHazardCategory()`, `getRequiredActions()`.
+
+   - `server/src/services/repair-intake.ts` — AI repair intake (task 5.2.14). 26 SOR codes across plumbing (5), heating (4), electrical (4), carpentry (5), damp (4), roofing (2), general (2). `analyseRepairDescription()` (keyword scoring, Awaab's Law flag, asbestos check, vulnerability detection), `checkRecurringPatterns()`.
+
+   - `server/src/services/file-upload.ts` — File upload (task 5.2.15). `validateUpload()` (10MB limit, MIME type whitelist), `registerUpload()`, `getEntityFiles()`, `getFile()`, `deleteFile()`, `generatePresignedUrl()`, `getStorageUsage()`. Demo mode (Firestore metadata only).
+
+   - `server/src/services/gdpr-export.ts` — GDPR pipeline (task 5.2.16). `createSarRequest()`, `updateSarStatus()`, `getSarRequests()`, `exportTenantData()` (collates 7 collections), `processErasureRequest()` (anonymise tenant + cases + activities, delete comms + files, retain rent/audit for legal), `getRetentionPolicies()` (9 collection retention rules).
+
+   - `server/src/routes/notifications.ts` — 7 endpoints: GET /, GET /unread-count, POST /mark-all-read, GET /preferences, PUT /preferences, GET /queue-status, GET /websocket-status.
+
+   - `server/src/routes/scheduled-tasks.ts` — 7 endpoints: GET /, POST /:taskId/run, PATCH /:taskId/toggle, POST /cache-warming, GET /cache-warming/status, GET /circuit-breakers, POST /circuit-breakers/:name/reset, GET /listeners.
+
+   - `server/src/routes/bulk-operations.ts` — 6 endpoints: POST /cases/status, POST /communications, POST /compliance, POST /arrears-action, GET /operations/:id, GET /operations.
+
+   - `server/src/routes/audit.ts` — 4 endpoints: GET /, GET /aggregate, GET /export (CSV), POST /retention-cleanup.
+
+   - `server/src/routes/gdpr.ts` — 6 endpoints: GET /sar, POST /sar, PATCH /sar/:id, GET /export/:tenantId, POST /erasure/:tenantId, GET /retention-policies.
+
+   - `server/src/routes/files.ts` — 6 endpoints: POST /upload, GET /entity/:entityType/:entityId, GET /:fileId, DELETE /:fileId, POST /presigned-url, GET /storage/usage.
+
+   **Files Modified (2):**
+
+   - `server/src/routes/ai.ts` — Added imports for Phase 5 services (vertex-ai, ai-prompts, tenant-activity-scoring, awaabs-law, repair-intake). Added 8 new endpoints: POST /chat/v2 (Vertex AI), GET /chat/stream (SSE), POST /draft-communication/v2 (AI drafting), GET /activity-score/:tenantId, POST /activity-score/scan, GET /awaabs-law/:caseId, GET /awaabs-law (scan all), POST /repair-intake.
+
+   - `server/src/index.ts` — Added 6 new route imports (notifications, scheduled-tasks, bulk-operations, audit, gdpr, files). Wired to Express app with appropriate rate limiters (apiLimiter for notifications/audit/files, adminLimiter for scheduled-tasks/bulk/gdpr).
+
+4. Errors and Fixes:
+   - **audit-log.ts TS2339** (Property 'action'/'user' does not exist on type '{ timestamp: any }'): The `.map()` return type was inferred too narrowly. Fixed by casting `doc.data() as Record<string, any>` and accessing properties with `(item as any).action` and `(item as any).user`.
+   
+   - **awaabs-law.ts TS2367** (Comparison between non-overlapping types — 'breached' vs union type): The `currentPhase` variable was typed as the union without 'breached', so comparing it to 'breached' was flagged. Fixed by creating a separate `finalPhase` variable with explicit `AwaabsLawTimeline['currentPhase']` type annotation using a ternary.
+   
+   - **bulk-operations.ts TS2345** (Record<string, unknown> not assignable to Firestore UpdateData): Firestore's `batch.update()` expects specific parameter types. First fix attempted `as FirebaseFirestore.UpdateData` but that required a generic type argument (TS2314). Final fix: used `as any` cast (2 occurrences, using `replace_all: true`).
+   
+   - **circuit-breaker.ts TS2345** (Missing required properties on auto-register): `registerCircuitBreaker({ name })` didn't satisfy the `CircuitBreakerConfig` interface which required failureThreshold, successThreshold, timeout, monitorWindowMs. Fixed by spreading DEFAULT_CONFIG: `registerCircuitBreaker({ name, ...DEFAULT_CONFIG })`.
+   
+   - **gdpr-export.ts TS2345** (CaseDoc/ActivityDoc not assignable to Record<string, unknown>): TypeScript interfaces don't have index signatures. Fixed with double cast: `as unknown as Record<string, unknown>` (2 occurrences).
+   
+   No user feedback was received on any errors — all were self-diagnosed and fixed.
+
+5. Problem Solving:
+   - Successfully implemented all 22 fullstack tasks in a single session
+   - Resolved all 8 TypeScript compilation errors across 3 build attempts (8 → 2 → 0)
+   - Designed Socket.io as optional dependency using dynamic import with no-op fallback mode
+   - Vertex AI integration designed with AI_ENABLED flag and comprehensive rule-based fallback for demo/dev mode
+   - GDPR erasure designed to anonymise (not delete) data subject to regulatory retention requirements
+   - All services follow existing codebase patterns (async/await, Firestore helpers, error handling with next(err))
+
+6. All User Messages:
+   - "Read EXECUTION-PLAN.md and implement all tasks assigned to the fullstack agent. Focus on server/src/ — routes, services, models, types. Verify TypeScript compiles with 'cd server && npm run build'."
+
+7. Pending Tasks:
+   - No pending fullstack tasks — all 22 assigned tasks are complete
+   - Changes have NOT been committed (SESSION-HISTORY notes "pending — awaiting user instruction to commit")
+   - The EXECUTION-PLAN.md shows 25/50 Phase 5 tasks done (remaining 25 are Frontend: 12, Tester: 8, DevOps: 8, BA: 1)
+
+8. Current Work:
+   The final action completed was updating SESSION-HISTORY.md with the Session 12 entry documenting all work done. The TypeScript build passes with 0 errors. EXECUTION-PLAN.md has been updated from 3/50 to 25/50 with all fullstack tasks marked DONE. All files are created and modified but not yet committed to git.
+
+9. Optional Next Step:
+   The logical next step would be to commit the changes to git, as the user's original request has been fully completed (all fullstack tasks implemented, TypeScript compiles). However, per project conventions, commits should only be made when explicitly requested by the user. The user should be informed that all 22 fullstack tasks are complete, TypeScript compiles with 0 errors, and changes are ready to commit.
+
+If you need specific details from before compaction (like exact code snippets, error messages, or content you generated), read the full transcript at: /home/rajiv/.REDACTED.jsonl
+Please continue the conversation from where we left off without asking the user any further questions. Continue with the last task that you were asked to work on.

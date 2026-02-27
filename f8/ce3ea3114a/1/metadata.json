@@ -1,16 +1,14 @@
 {
   "cli_version": "0.4.4",
   "checkpoint_id": "f8ce3ea3114a",
+  "session_id": "bbadb6fe-c0c0-4035-a72b-909168309cc8",
   "strategy": "manual-commit",
+  "created_at": "2026-02-27T09:16:37.488045643Z",
   "branch": "main",
-  "checkpoints_count": 2,
+  "checkpoints_count": 1,
   "files_touched": [
     "EXECUTION-PLAN.md",
     "SESSION-HISTORY.md",
-    "app/src/App.tsx",
-    "app/src/components/layout/Header.tsx",
-    "app/src/components/layout/Layout.tsx",
-    "app/src/components/layout/YantraAssist.tsx",
     "app/src/components/shared/NotificationBell.tsx",
     "app/src/components/shared/SkeletonLoader.tsx",
     "app/src/components/shared/StatusPillLive.tsx",
@@ -19,8 +17,6 @@
     "app/src/pages/admin/NotificationPreferencesPage.tsx",
     "app/src/pages/admin/UserManagementPage.tsx",
     "app/src/pages/admin/WorkflowBuilderPage.tsx",
-    "app/src/pages/dashboard/DashboardPage.tsx",
-    "app/src/pages/tenant-portal/TenantPortalPage.tsx",
     "server/src/index.ts",
     "server/src/routes/ai.ts",
     "server/src/routes/audit.ts",
@@ -48,27 +44,22 @@
     "server/src/types/vertex-ai.ts",
     "server/src/types/websocket.ts"
   ],
-  "sessions": [
-    {
-      "metadata": "/f8/ce3ea3114a/0/metadata.json",
-      "transcript": "/f8/ce3ea3114a/0/full.jsonl",
-      "context": "/f8/ce3ea3114a/0/context.md",
-      "content_hash": "/f8/ce3ea3114a/0/content_hash.txt",
-      "prompt": "/f8/ce3ea3114a/0/prompt.txt"
-    },
-    {
-      "metadata": "/f8/ce3ea3114a/1/metadata.json",
-      "transcript": "/f8/ce3ea3114a/1/full.jsonl",
-      "context": "/f8/ce3ea3114a/1/context.md",
-      "content_hash": "/f8/ce3ea3114a/1/content_hash.txt",
-      "prompt": "/f8/ce3ea3114a/1/prompt.txt"
-    }
-  ],
+  "agent": "Claude Code",
   "token_usage": {
-    "input_tokens": 127,
-    "cache_creation_tokens": 401483,
-    "cache_read_tokens": 9396474,
-    "output_tokens": 124923,
-    "api_call_count": 91
-  }
+    "input_tokens": 66,
+    "cache_creation_tokens": 177627,
+    "cache_read_tokens": 5814972,
+    "output_tokens": 77451,
+    "api_call_count": 48
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-02-27T09:16:36.420822445Z",
+    "agent_lines": 7907,
+    "human_added": 1464,
+    "human_modified": 18,
+    "human_removed": 0,
+    "total_committed": 9389,
+    "agent_percentage": 84.21557141335605
+  },
+  "transcript_path": ".claude/projects/-mnt-c--netapps-socialhomes/bbadb6fe-c0c0-4035-a72b-909168309cc8.jsonl"
 }
