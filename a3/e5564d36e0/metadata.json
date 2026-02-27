@@ -1,0 +1,30 @@
+{
+  "cli_version": "0.4.4",
+  "checkpoint_id": "a3e5564d36e0",
+  "strategy": "manual-commit",
+  "branch": "main",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "EXECUTION-PLAN.md",
+    "SESSION-HISTORY.md",
+    "app/public/yantra-logo-teal.svg",
+    "app/public/yantra-logo.svg",
+    "docs/security-audit.md"
+  ],
+  "sessions": [
+    {
+      "metadata": "/a3/e5564d36e0/0/metadata.json",
+      "transcript": "/a3/e5564d36e0/0/full.jsonl",
+      "context": "/a3/e5564d36e0/0/context.md",
+      "content_hash": "/a3/e5564d36e0/0/content_hash.txt",
+      "prompt": "/a3/e5564d36e0/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 40,
+    "cache_creation_tokens": 78139,
+    "cache_read_tokens": 1499947,
+    "output_tokens": 18699,
+    "api_call_count": 22
+  }
+}
