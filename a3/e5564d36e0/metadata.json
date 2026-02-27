@@ -3,8 +3,9 @@
   "checkpoint_id": "a3e5564d36e0",
   "strategy": "manual-commit",
   "branch": "main",
-  "checkpoints_count": 2,
+  "checkpoints_count": 3,
   "files_touched": [
+    ".github/workflows/ci.yml",
     ".mission-control/security-system-prompt.txt",
     ".mission-control/security-task-prompt.txt",
     "DEV-FIX-LIST.md",
@@ -13,6 +14,8 @@
     "app/public/yantra-logo-teal.svg",
     "app/public/yantra-logo.svg",
     "docs/security-audit.md",
+    "server/src/routes/api-integration.test.ts",
+    "server/src/services/ai-services.test.ts",
     "tests/conftest.py",
     "tests/pytest.ini",
     "tests/test_data_factory.py",
@@ -32,13 +35,20 @@
       "context": "/a3/e5564d36e0/1/context.md",
       "content_hash": "/a3/e5564d36e0/1/content_hash.txt",
       "prompt": "/a3/e5564d36e0/1/prompt.txt"
+    },
+    {
+      "metadata": "/a3/e5564d36e0/2/metadata.json",
+      "transcript": "/a3/e5564d36e0/2/full.jsonl",
+      "context": "/a3/e5564d36e0/2/context.md",
+      "content_hash": "/a3/e5564d36e0/2/content_hash.txt",
+      "prompt": "/a3/e5564d36e0/2/prompt.txt"
     }
   ],
   "token_usage": {
-    "input_tokens": 121,
-    "cache_creation_tokens": 193525,
-    "cache_read_tokens": 7609750,
-    "output_tokens": 59039,
-    "api_call_count": 94
+    "input_tokens": 171,
+    "cache_creation_tokens": 311810,
+    "cache_read_tokens": 10923511,
+    "output_tokens": 79230,
+    "api_call_count": 126
   }
 }

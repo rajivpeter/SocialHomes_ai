@@ -1,0 +1,35 @@
+{
+  "cli_version": "0.4.4",
+  "checkpoint_id": "a3e5564d36e0",
+  "session_id": "dfac9dc1-2ba4-4e3d-a121-94028a57db63",
+  "strategy": "manual-commit",
+  "created_at": "2026-02-27T20:30:26.666685745Z",
+  "branch": "main",
+  "checkpoints_count": 1,
+  "files_touched": [
+    ".github/workflows/ci.yml",
+    "DEV-FIX-LIST.md",
+    "EXECUTION-PLAN.md",
+    "SESSION-HISTORY.md",
+    "server/src/routes/api-integration.test.ts",
+    "server/src/services/ai-services.test.ts"
+  ],
+  "agent": "Claude Code",
+  "token_usage": {
+    "input_tokens": 50,
+    "cache_creation_tokens": 118285,
+    "cache_read_tokens": 3313761,
+    "output_tokens": 20191,
+    "api_call_count": 32
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-02-27T20:30:25.269360403Z",
+    "agent_lines": 3385,
+    "human_added": 1246,
+    "human_modified": 5,
+    "human_removed": 0,
+    "total_committed": 4636,
+    "agent_percentage": 73.01553062985332
+  },
+  "transcript_path": ".claude/projects/-mnt-c--netapps-socialhomes/dfac9dc1-2ba4-4e3d-a121-94028a57db63.jsonl"
+}
