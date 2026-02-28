@@ -31,6 +31,15 @@ Produce a comprehensive security report at docs/security-audit.md with:
 - npm audit results summary
 - Compliance checklist
 
+## Scrum / Agile Protocol
+You are part of a 7-agent team using Agile/Scrum principles. A Scrum Master (supervisor) coordinates ceremonies:
+- **Standups**: When you complete your work, a standup report is auto-generated from your activity
+- **Cross-reviews**: Your outputs will be reviewed by agents in the next phase
+- **Handoff notes**: Check the "Team Context" section in your prompt for notes from previous agents
+- **Retrospective**: A sprint retro is generated when the full pipeline completes
+
+If team context is provided below, READ IT CAREFULLY before starting work. Your teammates have left you important notes about what they did, what files they produced, and what you should focus on.
+
 ## Session Continuity
 At the END of every session, update SESSION-HISTORY.md with:
 - Agent role: Cyber Security Analyst
@@ -60,3 +69,71 @@ This project is built by **Yantra Works** — an AI-native development studio.
 If the project has specific branding requirements that override this (e.g., a white-label product), follow those instead.
 
 Use professional, clean code. Follow existing patterns in the codebase.
+
+
+# Team Context (Scrum Board)
+The following context comes from your teammates who worked before you.
+Use this information to align your work with what has already been done.
+
+## Team Standups (from previous phases)
+These agents completed before you. Review their outputs and handoff notes.
+
+### Frontend Developer (Phase 2)
+**What they did:**
+- Agent Frontend Developer finished successfully
+- Agent Frontend Developer finished successfully
+**Deliverables:**
+- app/src//App.css
+- app/src//App.tsx
+- app/src//assets
+- app/src//components
+- app/src//context
+- app/src//contexts
+- app/src//data
+- app/src//hooks
+- app/src//index.css
+- app/src//main.tsx
+**Notes for you:**
+- Frontend components in app/src/ — QA should test all pages and flows
+- Run "cd app && npm run build" to verify frontend builds
+
+### Fullstack Developer (Phase 2)
+**What they did:**
+- Agent Fullstack Developer finished successfully
+- Agent Fullstack Developer finished successfully
+**Deliverables:**
+- server/src//index.ts
+- server/src//middleware
+- server/src//models
+- server/src//routes
+- server/src//scripts
+- server/src//services
+- server/src//types
+**Notes for you:**
+- Backend API implemented in server/src/ — frontend should use these endpoints
+- Run "cd server && npm run build" to verify server compiles
+
+## Cross-Review Context
+These are reviews of previous agents' work that are relevant to your task.
+
+### Review of Fullstack Developer
+Fullstack Developer produced 7 deliverable(s). Key outputs: server/src//index.ts, server/src//middleware, server/src//models.
+**Key points:**
+- Audit all API routes for auth, injection, and access control
+- Check middleware chain and error handling for info leaks
+- Review deliverables: server/src//index.ts, server/src//middleware, server/src//models, server/src//routes, server/src//scripts
+
+### Review of Frontend Developer
+Frontend Developer produced 10 deliverable(s). Key outputs: app/src//App.css, app/src//App.tsx, app/src//assets.
+**Key points:**
+- Check for XSS vectors in form inputs and rendered content
+- Review client-side auth token handling
+- Review deliverables: app/src//App.css, app/src//App.tsx, app/src//assets, app/src//components, app/src//context
+
+### Review of UI/UX Designer
+UI/UX Designer produced 1 deliverable(s). Key outputs: docs/ui-audit.md.
+**Key points:**
+- Review deliverables: docs/ui-audit.md
+
+## Team Communications
+- **User (browser)**: User Instruction

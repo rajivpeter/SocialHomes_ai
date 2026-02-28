@@ -1,1 +1,9 @@
-Conduct a comprehensive security audit of the project "socialhomes". Review all server routes, auth middleware, frontend code, and dependencies for OWASP Top 10 vulnerabilities. Run npm audit. Check for secrets in code. Produce a detailed report at docs/security-audit.md.
+REMEDIATION CYCLE 1: Developers have applied fixes for the critical/high issues you found.
+
+Re-audit the specific files that were flagged in your previous report at "docs/security-audit.md".
+1. Verify each Critical and High issue has been addressed
+2. Check that fixes are correct and complete (not just suppressing the issue)
+3. Update your security report at "docs/security-audit.md" with the verification results
+4. Mark resolved issues as "Resolved" and note any remaining concerns
+
+If all Critical/High issues are resolved, explicitly state "No critical or high-severity issues remaining."

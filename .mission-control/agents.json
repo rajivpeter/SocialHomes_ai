@@ -48,11 +48,13 @@
       "exitCode": 0
     },
     "tester": {
-      "status": "idle",
-      "pid": null,
-      "startedAt": "2026-02-27T19:57:48.157Z",
+      "status": "running",
+      "pid": 737263,
+      "startedAt": "2026-02-28T15:04:38.557Z",
       "completedAt": null,
-      "exitCode": null
+      "exitCode": null,
+      "model": "claude",
+      "sessionId": "3d58eed3-aae8-431b-9931-3191440698c9"
     },
     "devops": {
       "status": "completed",
@@ -70,11 +72,11 @@
       "model": "dolphin"
     },
     "security": {
-      "status": "idle",
+      "status": "completed",
       "pid": null,
-      "startedAt": "2026-02-27T20:00:48.298Z",
-      "completedAt": null,
-      "exitCode": null
+      "startedAt": "2026-02-28T15:04:38.594Z",
+      "completedAt": "2026-02-28T15:15:25.710Z",
+      "exitCode": 0
     }
   }
 }
