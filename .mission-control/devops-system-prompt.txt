@@ -121,3 +121,6 @@ Cyber Security produced 1 deliverable(s). Key outputs: docs/security-audit.md.
 - Ensure build scripts produce deployable artifacts
 - Check security audit for critical issues that block deployment
 - Review deliverables: docs/security-audit.md
+
+## Team Communications
+- **User (browser)**: User Instruction

@@ -1,11 +1,28 @@
 {
   "createdAt": "2026-02-18T11:37:03.993Z",
   "pipeline": {
-    "status": "completed",
+    "status": "running",
     "mode": "supervised",
     "currentAgent": "ba",
-    "startedAt": "2026-02-27T23:36:11.396Z",
-    "completedAt": "2026-02-28T00:10:43.946Z"
+    "startedAt": "2026-02-28T14:32:08.089Z",
+    "completedAt": "2026-02-28T00:10:43.946Z",
+    "remediationCycles": [
+      {
+        "cycleNumber": 1,
+        "triggeredBy": "security",
+        "reason": "Critical/high severity security issues found",
+        "startedAt": "2026-02-28T10:55:00.938Z",
+        "affectedRoles": [
+          "fullstack",
+          "frontend"
+        ],
+        "retestRoles": [
+          "tester",
+          "security"
+        ]
+      }
+    ],
+    "currentRemediationCycle": 1
   },
   "agents": {
     "ba": {
@@ -17,31 +34,35 @@
       "model": "dolphin"
     },
     "fullstack": {
-      "status": "completed",
-      "pid": null,
-      "startedAt": "2026-02-27T08:36:24.454Z",
-      "completedAt": "2026-02-27T09:16:42.228Z",
-      "exitCode": 0
+      "status": "running",
+      "pid": 725709,
+      "startedAt": "2026-02-28T14:45:38.040Z",
+      "completedAt": null,
+      "exitCode": null,
+      "model": "claude",
+      "sessionId": "785cd436-8fd7-443c-a884-b07ca6afbc8f"
     },
     "frontend": {
-      "status": "completed",
-      "pid": null,
-      "startedAt": "2026-02-27T08:36:54.472Z",
-      "completedAt": "2026-02-27T09:16:08.595Z",
-      "exitCode": 0
+      "status": "running",
+      "pid": 716495,
+      "startedAt": "2026-02-28T14:33:38.244Z",
+      "completedAt": null,
+      "exitCode": null,
+      "model": "claude",
+      "sessionId": "de858118-9ced-4ace-8bcd-6a344b543d56"
     },
     "tester": {
-      "status": "completed",
+      "status": "idle",
       "pid": null,
       "startedAt": "2026-02-27T19:57:48.157Z",
-      "completedAt": "2026-02-27T20:30:07.880Z",
-      "exitCode": 0
+      "completedAt": null,
+      "exitCode": null
     },
     "devops": {
       "status": "completed",
       "pid": null,
-      "startedAt": "2026-02-27T23:36:11.396Z",
-      "completedAt": "2026-02-28T00:10:43.946Z",
+      "startedAt": "2026-02-28T14:32:08.089Z",
+      "completedAt": "2026-02-28T14:59:59.965Z",
       "exitCode": 0
     },
     "uiux": {
@@ -53,11 +74,11 @@
       "model": "dolphin"
     },
     "security": {
-      "status": "completed",
+      "status": "idle",
       "pid": null,
       "startedAt": "2026-02-27T20:00:48.298Z",
-      "completedAt": "2026-02-27T20:40:17.154Z",
-      "exitCode": 0
+      "completedAt": null,
+      "exitCode": null
     }
   }
 }

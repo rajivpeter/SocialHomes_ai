@@ -1,8 +1,11 @@
 # SocialHomes.Ai — DevOps & Infrastructure Guide
 
-**Last Updated**: 27/02/2026 (v5 — Phase 5.5 Complete: Staging, Monitoring, Backups, CDN, Domain, Runbook)
+**Last Updated**: 28/02/2026 (v9 — Final DevOps verification: security remediations confirmed, all pipelines validated, deployment documentation finalized)
 **Maintainer**: DevOps Engineer Agent (Yantra Works)
-**Status**: Production (live on Cloud Run, monitored, backed up, CDN-enabled)
+**Status**: Production (live on Cloud Run, monitored, backed up, CDN-enabled, security-scanned)
+**Security Audit**: See `docs/security-audit.md` — 2 of 3 critical findings MITIGATED (CORS fixed, auth bypass guarded); 1 remaining (git history scrub)
+**Test Status**: 582 total tests | 100% pass rate (see `DEV-FIX-LIST.md`)
+**Phase 5.5 Status**: ALL 9 TASKS DONE (5.5.1–5.5.9) — Verified by DevOps Agent
 
 ---
 
@@ -34,9 +37,10 @@
 24. [Post-Mortem Template](#24-post-mortem-template)
 25. [Local Development](#25-local-development)
 26. [Cost Estimate](#26-cost-estimate)
-27. [Known Issues & Technical Debt](#27-known-issues--technical-debt)
-28. [File Reference](#28-file-reference)
-29. [Setup Scripts Reference](#29-setup-scripts-reference)
+27. [Security Remediation Tracker](#27-security-remediation-tracker)
+28. [Known Issues & Technical Debt](#28-known-issues--technical-debt)
+29. [File Reference](#29-file-reference)
+30. [Setup Scripts Reference](#30-setup-scripts-reference)
 
 ---
 
@@ -132,20 +136,28 @@ Developer pushes to main
 │ Step 1: Docker Build (multi-stage)       │
 │   ├── Stage 1: Build React client        │
 │   ├── Stage 2: Build Express server      │
-│   └── Stage 3: Production image          │
+│   ├── Stage 3: Production image          │
+│   └── Build args: BUILD_SHA, BUILD_DATE  │
 │                                          │
 │ Step 2: Smoke Test (health check)        │
 │   └── Start server, verify /health       │
 │                                          │
-│ Step 3: Push to Artifact Registry        │
+│ Step 3: Security Scan (Trivy)            │
+│   └── Scan for CRITICAL/HIGH CVEs       │
+│   └── Non-blocking (logged, not gated)   │
+│                                          │
+│ Step 4: Push to Artifact Registry        │
 │   ├── :$COMMIT_SHA tag                   │
 │   └── :latest tag                        │
 │                                          │
-│ Step 4: Deploy to Cloud Run              │
+│ Step 5: Deploy to Cloud Run              │
 │   └── Zero-downtime revision deployment  │
 │                                          │
-│ Step 5: Post-deploy verification         │
+│ Step 6: Post-deploy verification         │
 │   └── Health check with 5 retries        │
+│                                          │
+│ Step 7: Telegram notification (optional) │
+│   └── Non-blocking deploy notification   │
 └──────────────────────────────────────────┘
 ```
 
@@ -189,6 +201,10 @@ gcloud builds log <BUILD_ID> --project=${PROJECT_ID}
 
 # Manual deploy
 gcloud builds submit --config=cloudbuild.yaml --project=${PROJECT_ID}
+
+# Enable Telegram deploy notifications (optional)
+echo -n "BOT_TOKEN" | gcloud secrets create TELEGRAM_BOT_TOKEN --data-file=-
+echo -n "CHAT_ID" | gcloud secrets create TELEGRAM_CHAT_ID --data-file=-
 ```
 
 ---
@@ -203,12 +219,31 @@ gcloud builds submit --config=cloudbuild.yaml --project=${PROJECT_ID}
 | `build-server` | `node:20-slim` | Compiles Express server with tsc | `/build/server/dist/` |
 | `production` | `node:20-slim` | Production runtime (non-root) | Final image |
 
+### .dockerignore
+
+A `.dockerignore` file is configured to reduce build context and prevent sensitive files from entering the Docker build:
+
+| Excluded | Reason |
+|----------|--------|
+| `.git/`, `node_modules/`, `dist/` | Rebuilt inside container |
+| `.env`, `.mcp.json`, `google-credentials*.json` | Secrets |
+| `tests/`, `*.test.ts`, `.github/` | Not needed in production |
+| `docs/`, `*.md`, `Doc*` | Documentation |
+| `scripts/`, `cloudbuild*.yaml` | CI/CD config |
+
 ### Security Features
 
 - **Non-root user**: Runs as `appuser` (UID 1001)
 - **dumb-init**: Proper PID 1 signal handling for graceful shutdown
 - **Minimal image**: Only production dependencies installed
+- **npm audit in build**: Both client and server stages run `npm audit --audit-level=critical` during Docker build
 - **Health check**: Built-in Docker HEALTHCHECK for local development
+- **OCI labels**: Image tagged with vendor, source, description, revision SHA, and build date
+- **File ownership**: App directory explicitly owned by non-root user
+- **Build version tracking**: `BUILD_SHA` and `BUILD_DATE` injected as labels and env vars at build time
+- **Container security scan**: Trivy scans image for CRITICAL/HIGH CVEs in CI/CD pipeline
+- **Memory-bounded Node.js**: `--max-old-space-size=384` prevents OOM crashes within 512Mi/1Gi containers
+- **No test files in production**: Server build copies only `src/` (not `*.test.ts`) to build stage
 
 ### Production Image Layout
 
@@ -669,12 +704,24 @@ gcloud compute ssl-certificates describe socialhomes-cert \
 6. **RBAC** — 5-level persona hierarchy
 7. **Request correlation** — X-Request-ID for tracing
 
-### Security Audit
+### Security Audit (OWASP Top 10)
 
-See `docs/security-audit.md` for the comprehensive OWASP Top 10 audit report. Key findings:
-- 3 CRITICAL, 6 HIGH, 5 MEDIUM findings identified
-- Remediation roadmap provided in the audit document
-- Top priority: Fix auth bypass, CORS policy, and secrets in git history
+See `docs/security-audit.md` for the comprehensive audit report (2026-02-27).
+
+| Severity | Count | Top Finding |
+|----------|-------|-------------|
+| CRITICAL | 3 | Auth bypass via X-Persona header, CORS permissive, secrets in git history |
+| HIGH | 6 | Convenience routes missing auth, seed endpoint unprotected, CSP unsafe-inline |
+| MEDIUM | 5 | No row-level access control, PATCH field allowlisting, no MFA |
+| LOW | 4 | Stack traces in non-prod, in-memory rate limiter, input validation |
+
+**Pre-Production Remediation Priority:**
+1. **CRITICAL**: Guard X-Persona behind `NODE_ENV !== 'production'` (Finding 1.1)
+2. **CRITICAL**: Fix CORS callback to reject unknown origins in production (Finding 5.1)
+3. **CRITICAL**: Rotate all exposed credentials; scrub git history (Finding 2.1)
+4. **HIGH**: Add authMiddleware to convenience routes in `index.ts` (Finding 1.2)
+
+**Compliance Score**: 11/25 PASS | 9/25 FAIL | 5/25 PARTIAL (44% compliant)
 
 ---
 
@@ -777,6 +824,8 @@ cd app && npm run build
 | `FIREBASE_AUTH_DOMAIN` | Firebase Auth domain | N/A |
 | `FIREBASE_PROJECT_ID` | GCP project identifier | N/A |
 | `DEMO_USER_PASSWORD` | Demo account password | On schedule |
+| `TELEGRAM_BOT_TOKEN` | CI/CD deploy notifications (optional) | On compromise |
+| `TELEGRAM_CHAT_ID` | Telegram chat for notifications (optional) | N/A |
 
 ### Secret Management
 
@@ -1155,32 +1204,87 @@ docker run -p 8080:8080 -e PORT=8080 -e NODE_ENV=production socialhomes:local
 
 ---
 
-## 27. Known Issues & Technical Debt
+## 27. Security Remediation Tracker
 
-| Issue | Severity | Notes |
-|-------|----------|-------|
-| Composite Firestore indexes not deployed | Low | In-memory filtering OK for ~550 docs |
-| Large JS bundle (~2.5 MB) | Medium | Three.js + Leaflet; code splitting in progress |
-| In-memory rate limiter | Low | Not shared across instances |
-| X-Persona auth bypass in production | HIGH | See docs/security-audit.md Finding 1.1 |
-| CORS allows all origins | HIGH | See docs/security-audit.md Finding 5.1 |
-| SSL cert provisioning | PENDING | DNS not yet pointed to 34.149.218.63 |
+Based on the comprehensive OWASP Top 10 audit (`docs/security-audit.md`, 2026-02-27), the following remediation items are tracked by priority.
+
+### Phase 1: Critical (Fix Before Production Launch)
+
+| # | Finding | Fix | Status | Owner |
+|---|---------|-----|--------|-------|
+| 1 | Auth bypass via X-Persona header (1.1) | Guard behind `NODE_ENV !== 'production'` | **FIXED** — Production sets `NODE_ENV=production`; code guards X-Persona behind env check | Fullstack |
+| 2 | CORS allows all origins (5.1) | Fix CORS callback to reject unknown origins in production | **FIXED** — CORS callback now rejects unknown origins when `NODE_ENV=production` (verified in `server/src/index.ts:92-94`) | Fullstack |
+| 3 | Secrets in git history (2.1) | Rotate credentials, scrub git history with BFG | TODO — Requires manual credential rotation in GCP Console + BFG repo clean | DevOps |
+| 4 | Seed endpoint has no auth (1.3) | Add `authMiddleware` + `requirePersona('coo')` | TODO | Fullstack |
+
+### Phase 2: High (Fix Within 2 Weeks)
+
+| # | Finding | Fix | Status | Owner |
+|---|---------|-----|--------|-------|
+| 5 | Convenience route aliases missing auth (1.2) | Add `authMiddleware` to repairs/complaints/allocations routes | **FIXED** — `authMiddleware` added to all 3 convenience routes (verified in `server/src/index.ts:165,173,181`) | Fullstack |
+| 6 | Default persona escalation (7.1) | Change default to `pending-approval` persona | TODO | Fullstack |
+| 7 | Admin seed RBAC (1.4) | Add `requirePersona('coo')` to admin/seed | TODO | Fullstack |
+| 8 | CSP allows unsafe-inline/eval (5.2) | Implement nonce-based CSP | TODO | Fullstack |
+| 9 | npm audit vulnerabilities (6 total) | Run `npm audit fix` in both `app/` and `server/` | TODO | DevOps |
+| 10 | SSRF input validation (10.1) | Add strict lat/lng/postcode validation | TODO | Fullstack |
+
+### Phase 3: Medium (Fix Within 1 Month)
+
+| # | Finding | Fix | Status | Owner |
+|---|---------|-----|--------|-------|
+| 11 | No row-level access control (1.5, 4.1) | Implement team/patch data-scoping middleware | TODO | Fullstack |
+| 12 | PATCH accepts arbitrary fields (1.6) | Add field allowlists per PATCH endpoint | TODO | Fullstack |
+| 13 | No MFA enforcement (7.2) | Enable Firebase MFA for manager+ personas | TODO | Fullstack |
+| 14 | No security event logging (9.1) | Create `security-logger.ts` service | TODO | Fullstack |
+
+### Deployment Security Controls
+
+The CI/CD pipeline includes these security layers:
+
+| Control | Tool | Location | Blocking? |
+|---------|------|----------|-----------|
+| npm audit (client) | `npm audit --audit-level=critical` | Dockerfile Stage 1 | Non-blocking (logged) |
+| npm audit (server) | `npm audit --audit-level=critical` | Dockerfile Stage 2 | Non-blocking (logged) |
+| Container CVE scan | Trivy | cloudbuild.yaml Step 3 | Non-blocking (logged) |
+| Smoke test | curl /health | cloudbuild.yaml Step 2 | **Blocking** |
+| Post-deploy verification | curl /health (5 retries) | cloudbuild.yaml Step 6 | **Blocking** |
+| WAF | Cloud Armor | Load Balancer | **Blocking** |
 
 ---
 
-## 28. File Reference
+## 28. Known Issues & Technical Debt
+
+> **See also**: [Section 27: Security Remediation Tracker](#27-security-remediation-tracker) for security-specific issues from the OWASP audit.
+
+| Issue | Severity | Notes | Audit Ref |
+|-------|----------|-------|-----------|
+| ~~X-Persona auth bypass in production~~ | ~~CRITICAL~~ | **FIXED** — Guarded behind `NODE_ENV !== 'production'` | Finding 1.1 |
+| ~~CORS allows all origins~~ | ~~CRITICAL~~ | **FIXED** — CORS callback rejects unknown origins in production | Finding 5.1 |
+| Secrets exposed in git history | CRITICAL | Firebase API key, demo password in commit history | Finding 2.1 |
+| CSP allows unsafe-inline/unsafe-eval | HIGH | Weakens XSS protection | Finding 5.2 |
+| Seed endpoint has no auth | HIGH | Anyone can create admin accounts | Finding 1.3 |
+| Default persona escalation | HIGH | New users get housing-officer access | Finding 7.1 |
+| Composite Firestore indexes not deployed | Low | In-memory filtering OK for ~550 docs | — |
+| Large JS bundle (~2.5 MB) | Medium | Three.js + Leaflet; code splitting in progress | — |
+| In-memory rate limiter | Low | Not shared across Cloud Run instances | Finding 7.3 |
+| SSL cert provisioning | PENDING | DNS not yet pointed to 34.149.218.63 | — |
+
+---
+
+## 29. File Reference
 
 ```
 socialhomes/
-├── Dockerfile                   # Multi-stage build (non-root, dumb-init)
-├── cloudbuild.yaml              # Production CI/CD pipeline
-├── cloudbuild-staging.yaml      # Staging CI/CD pipeline
-├── .github/workflows/ci.yml    # GitHub Actions CI pipeline
+├── Dockerfile                   # Multi-stage build (non-root, dumb-init, OCI labels, version tracking)
+├── .dockerignore                # Build context exclusions (secrets, tests, docs)
+├── cloudbuild.yaml              # Production CI/CD pipeline (7 steps: build, test, scan, push, deploy, verify, notify)
+├── cloudbuild-staging.yaml      # Staging CI/CD pipeline (PR-based, with health verification)
+├── .github/workflows/ci.yml    # GitHub Actions CI pipeline (typecheck, test, build, E2E)
 ├── firestore.rules              # Firestore security rules
 ├── firestore.indexes.json       # Composite indexes
 ├── DEVOPS.md                    # This file
-├── DEV-FIX-LIST.md              # Bug/warning tracker
-├── EXECUTION-PLAN.md            # Master execution plan
+├── DEV-FIX-LIST.md              # Bug/warning tracker (582 tests, 100% pass)
+├── EXECUTION-PLAN.md            # Master execution plan (Phase 5.5 DONE)
 │
 ├── scripts/
 │   ├── setup-secrets.sh         # Google Secret Manager setup
@@ -1192,9 +1296,9 @@ socialhomes/
 │   └── seed-firestore.ts        # Firestore data seeder
 │
 ├── docs/
-│   └── security-audit.md        # OWASP Top 10 security audit
+│   └── security-audit.md        # OWASP Top 10 security audit (21 findings)
 │
-├── app/                         # React SPA
+├── app/                         # React 19 SPA
 │   └── src/
 │       ├── pages/               # 40+ page components
 │       └── components/
@@ -1209,7 +1313,7 @@ socialhomes/
 
 ---
 
-## 29. Setup Scripts Reference
+## 30. Setup Scripts Reference
 
 All setup scripts are idempotent — safe to run multiple times.
 
@@ -1221,6 +1325,23 @@ All setup scripts are idempotent — safe to run multiple times.
 | `scripts/setup-backups.sh` | Create backup bucket, scheduler jobs | First deploy |
 | `scripts/setup-cdn.sh` | Enable Cloud CDN on Load Balancer | After LB setup |
 | `scripts/setup-domain.sh` | Domain & SSL configuration guide | When domain ready |
+
+### Telegram Notification Setup (Optional)
+
+```bash
+# Create secrets for CI/CD deploy notifications
+echo -n "YOUR_BOT_TOKEN" | gcloud secrets create TELEGRAM_BOT_TOKEN --data-file=-
+echo -n "YOUR_CHAT_ID" | gcloud secrets create TELEGRAM_CHAT_ID --data-file=-
+
+# Grant Cloud Build access to read the secrets
+PROJECT_NUM=$(gcloud projects describe $PROJECT_ID --format='value(projectNumber)')
+gcloud secrets add-iam-policy-binding TELEGRAM_BOT_TOKEN \
+  --member="serviceAccount:${PROJECT_NUM}@cloudbuild.gserviceaccount.com" \
+  --role="roles/secretmanager.secretAccessor"
+gcloud secrets add-iam-policy-binding TELEGRAM_CHAT_ID \
+  --member="serviceAccount:${PROJECT_NUM}@cloudbuild.gserviceaccount.com" \
+  --role="roles/secretmanager.secretAccessor"
+```
 
 ### Quick Start (New Environment)
 
@@ -1242,6 +1363,6 @@ git push origin main
 
 ---
 
-*Document generated 27/02/2026 by DevOps Engineer Agent.*
+*Document v9 — 28/02/2026 by DevOps Engineer Agent (final verification pass).*
 *Studio: Yantra Works | https://yantra.works*
-*Copyright 2026 Yantra Works. All rights reserved.*
+*© 2026 Yantra Works. All rights reserved.*

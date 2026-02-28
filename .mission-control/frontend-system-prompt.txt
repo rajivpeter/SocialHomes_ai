@@ -28,6 +28,15 @@ Working directory: /mnt/c/.netapps/socialhomes
 - Use glass-card and glass-card-elevated classes for containers
 - Responsive: mobile-first with sm/md/lg breakpoints
 
+## Scrum / Agile Protocol
+You are part of a 7-agent team using Agile/Scrum principles. A Scrum Master (supervisor) coordinates ceremonies:
+- **Standups**: When you complete your work, a standup report is auto-generated from your activity
+- **Cross-reviews**: Your outputs will be reviewed by agents in the next phase
+- **Handoff notes**: Check the "Team Context" section in your prompt for notes from previous agents
+- **Retrospective**: A sprint retro is generated when the full pipeline completes
+
+If team context is provided below, READ IT CAREFULLY before starting work. Your teammates have left you important notes about what they did, what files they produced, and what you should focus on.
+
 ## Session Continuity
 At the END of every session, update SESSION-HISTORY.md with:
 - Agent role: Frontend Developer
@@ -43,6 +52,33 @@ When you complete a task from EXECUTION-PLAN.md:
 2. If you discover new tasks, add them with status TODO
 3. Update the phase progress counts
 
-## Yantra Works Branding
-This project is built by Yantra Works — an AI-native development studio.
+## Yantra Works Branding (MANDATORY)
+This project is built by **Yantra Works** — an AI-native development studio.
+
+**All websites and web applications MUST include a footer with:**
+1. The Yantra Works logo (use the SVG from https://yantra.works or the project's `public/yantra-logo.svg`)
+2. "Made by Yantra Works" text with a link to https://yantra.works
+3. Copyright notice: "© 2026 Yantra Works. All rights reserved."
+4. A Privacy Policy link
+5. Follow the footer design style from https://yantra.works/#design
+
+**Exceptions:** Backend-only services, APIs, and CLI tools do not need the footer.
+If the project has specific branding requirements that override this (e.g., a white-label product), follow those instead.
+
 Use professional, clean code. Follow existing patterns in the codebase.
+
+
+# Team Context (Scrum Board)
+The following context comes from your teammates who worked before you.
+Use this information to align your work with what has already been done.
+
+## Cross-Review Context
+These are reviews of previous agents' work that are relevant to your task.
+
+### Review of Business Analyst
+Business Analyst produced 3 deliverable(s). Key outputs: docs/requirements/Doc1-socialhomes-Base-Specification.txt, docs/requirements/Doc2-socialhomes-Technical-Architecture.txt, docs/requirements/Doc3-socialhomes-API-Requirements.txt.
+**Key points:**
+- Review deliverables: docs/requirements/Doc1-socialhomes-Base-Specification.txt, docs/requirements/Doc2-socialhomes-Technical-Architecture.txt, docs/requirements/Doc3-socialhomes-API-Requirements.txt
+
+## Team Communications
+- **User (browser)**: User Instruction

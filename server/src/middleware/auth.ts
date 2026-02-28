@@ -96,7 +96,12 @@ export function authMiddleware(req: Request, res: Response, next: NextFunction) 
         res.status(401).json({ error: 'Invalid or expired authentication token' });
       });
   } else {
-    // Legacy X-Persona mode (backward compatible)
+    // In production, reject requests without a valid Bearer token
+    if (process.env.NODE_ENV === 'production') {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+    // Development/testing only: Legacy X-Persona fallback
+    console.warn(`[AUTH] X-Persona fallback used for ${req.method} ${req.path} (dev mode only)`);
     const persona = (req.headers['x-persona'] as string) || 'housing-officer';
     req.user = DEMO_PERSONAS[persona] || DEMO_PERSONAS['housing-officer'];
     next();

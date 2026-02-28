@@ -48,7 +48,7 @@ app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https://apis.google.com", "https://www.gstatic.com"],
+      scriptSrc: ["'self'", "https://apis.google.com", "https://www.gstatic.com"],
       styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://unpkg.com"],
       fontSrc: ["'self'", "https://fonts.gstatic.com"],
       imgSrc: ["'self'", "data:", "blob:", "https://*.tile.openstreetmap.org", "https://unpkg.com"],
@@ -66,6 +66,8 @@ app.use((_req, res, next) => {
   res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=(self)');
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  res.setHeader('Cross-Origin-Opener-Policy', 'same-origin');
+  res.setHeader('Cross-Origin-Resource-Policy', 'same-origin');
   next();
 });
 
@@ -87,9 +89,11 @@ app.use(cors({
     // Allow requests with no origin (mobile apps, curl, server-to-server)
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
+    } else if (process.env.NODE_ENV === 'production') {
+      // In production, reject unknown origins to prevent cross-origin attacks
+      callback(new Error('Not allowed by CORS'), false);
     } else {
-      // In production, Cloud Run serves both API and SPA from the same origin
-      // so non-matching origins are still allowed to avoid breaking legitimate traffic.
+      // In development, allow any origin for local testing
       callback(null, true);
     }
   },
@@ -114,7 +118,7 @@ app.get('/health', async (_req, res) => {
 // Serves Firebase client config from environment variables so the SPA
 // never hardcodes keys. The values are NOT secrets — they are the public
 // Firebase Web SDK config used in every browser that loads the app.
-app.get('/api/v1/config', (_req, res) => {
+app.get('/api/v1/config', apiLimiter, (_req, res) => {
   res.json({
     firebase: {
       apiKey: process.env.FIREBASE_API_KEY || '',
@@ -156,8 +160,9 @@ app.use('/api/v1/files', apiLimiter, filesRouter);
 // field. These aliases let external tools (QA, dashboards) hit
 // /api/v1/repairs or /api/v1/complaints directly.
 import { getDocs, collections } from './services/firestore.js';
+import { authMiddleware } from './middleware/auth.js';
 
-app.get('/api/v1/repairs', apiLimiter, async (_req, res, next) => {
+app.get('/api/v1/repairs', apiLimiter, authMiddleware, async (_req, res, next) => {
   try {
     const allCases = await getDocs<any>(collections.cases, undefined, undefined, 1000);
     const repairs = allCases.filter((c: any) => c.type === 'repair');
@@ -165,7 +170,7 @@ app.get('/api/v1/repairs', apiLimiter, async (_req, res, next) => {
   } catch (err) { next(err); }
 });
 
-app.get('/api/v1/complaints', apiLimiter, async (_req, res, next) => {
+app.get('/api/v1/complaints', apiLimiter, authMiddleware, async (_req, res, next) => {
   try {
     const allCases = await getDocs<any>(collections.cases, undefined, undefined, 1000);
     const complaints = allCases.filter((c: any) => c.type === 'complaint');
@@ -173,7 +178,7 @@ app.get('/api/v1/complaints', apiLimiter, async (_req, res, next) => {
   } catch (err) { next(err); }
 });
 
-app.get('/api/v1/allocations', apiLimiter, async (_req, res, next) => {
+app.get('/api/v1/allocations', apiLimiter, authMiddleware, async (_req, res, next) => {
   try {
     // Allocations are derived from void properties
     const allProps = await getDocs<any>(collections.properties, undefined, undefined, 1000);

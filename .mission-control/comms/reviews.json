@@ -28,5 +28,44 @@
       "Review deliverables: docs/security-audit.md"
     ],
     "approved": true
+  },
+  {
+    "id": "cr_1772276131407_v1r33",
+    "timestamp": "2026-02-28T10:55:31.407Z",
+    "reviewer": "fullstack",
+    "reviewerLabel": "Fullstack Developer",
+    "target": "ba",
+    "targetLabel": "Business Analyst",
+    "summary": "Business Analyst produced 3 deliverable(s). Key outputs: docs/requirements/Doc1-socialhomes-Base-Specification.txt, docs/requirements/Doc2-socialhomes-Technical-Architecture.txt, docs/requirements/Doc3-socialhomes-API-Requirements.txt.",
+    "findings": [
+      "Review deliverables: docs/requirements/Doc1-socialhomes-Base-Specification.txt, docs/requirements/Doc2-socialhomes-Technical-Architecture.txt, docs/requirements/Doc3-socialhomes-API-Requirements.txt"
+    ],
+    "approved": true
+  },
+  {
+    "id": "cr_1772276131412_vos0v",
+    "timestamp": "2026-02-28T10:55:31.412Z",
+    "reviewer": "frontend",
+    "reviewerLabel": "Frontend Developer",
+    "target": "ba",
+    "targetLabel": "Business Analyst",
+    "summary": "Business Analyst produced 3 deliverable(s). Key outputs: docs/requirements/Doc1-socialhomes-Base-Specification.txt, docs/requirements/Doc2-socialhomes-Technical-Architecture.txt, docs/requirements/Doc3-socialhomes-API-Requirements.txt.",
+    "findings": [
+      "Review deliverables: docs/requirements/Doc1-socialhomes-Base-Specification.txt, docs/requirements/Doc2-socialhomes-Technical-Architecture.txt, docs/requirements/Doc3-socialhomes-API-Requirements.txt"
+    ],
+    "approved": true
+  },
+  {
+    "id": "cr_1772276131416_hfzz7",
+    "timestamp": "2026-02-28T10:55:31.416Z",
+    "reviewer": "uiux",
+    "reviewerLabel": "UI/UX Designer",
+    "target": "ba",
+    "targetLabel": "Business Analyst",
+    "summary": "Business Analyst produced 3 deliverable(s). Key outputs: docs/requirements/Doc1-socialhomes-Base-Specification.txt, docs/requirements/Doc2-socialhomes-Technical-Architecture.txt, docs/requirements/Doc3-socialhomes-API-Requirements.txt.",
+    "findings": [
+      "Review deliverables: docs/requirements/Doc1-socialhomes-Base-Specification.txt, docs/requirements/Doc2-socialhomes-Technical-Architecture.txt, docs/requirements/Doc3-socialhomes-API-Requirements.txt"
+    ],
+    "approved": true
   }
 ]

@@ -27,6 +27,10 @@ steps:
       - '${_REGISTRY}:latest'
       - '--build-arg'
       - 'BUILDKIT_INLINE_CACHE=1'
+      - '--build-arg'
+      - 'BUILD_SHA=$COMMIT_SHA'
+      - '--build-arg'
+      - 'BUILD_DATE=$BUILD_ID'
       - '.'
 
   # ── Step 2: Smoke test inside built image ──
@@ -97,18 +101,30 @@ steps:
       - 'pr-$SHORT_SHA'
     waitFor: ['push']
 
-  # ── Step 5: Output staging URL ──
+  # ── Step 5: Verify staging deployment ──
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
-    id: output-url
+    id: verify
     entrypoint: 'bash'
     args:
       - '-c'
       - |
         SERVICE_URL=$(gcloud run services describe ${_SERVICE_NAME} \
           --region=${_REGION} --format='value(status.url)')
-        echo "======================================"
-        echo "  Staging deployed: $${SERVICE_URL}"
-        echo "======================================"
+        echo "Verifying staging at: $${SERVICE_URL}/health"
+        for i in 1 2 3; do
+          HEALTH_RESPONSE=$(curl -sf "$${SERVICE_URL}/health" 2>/dev/null || echo '{}')
+          if echo "$$HEALTH_RESPONSE" | grep -q '"healthy"'; then
+            echo "======================================"
+            echo "  ✓ Staging deployed: $${SERVICE_URL}"
+            echo "  ✓ Health check passed (attempt $$i)"
+            echo "======================================"
+            exit 0
+          fi
+          echo "  Attempt $$i: waiting 10s..."
+          sleep 10
+        done
+        echo "⚠ Staging health check failed — deployment may still be starting"
+        echo "  URL: $${SERVICE_URL}"
     waitFor: ['deploy']
 
 images:

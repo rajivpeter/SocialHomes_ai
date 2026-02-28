@@ -1423,5 +1423,600 @@
     "id": "m_1772237443956_suo93",
     "timestamp": "2026-02-28T00:10:43.956Z",
     "parentId": "m_1772235371403_cjpmc"
+  },
+  {
+    "type": "decision_resolved",
+    "agent": "devops",
+    "phaseNumber": 4,
+    "action": "Decision: retry",
+    "details": "Decision resolved for DevOps Engineer: \"retry\"",
+    "outcome": "success",
+    "metadata": {
+      "answer": "retry"
+    },
+    "id": "m_1772274980570_jt5dv",
+    "timestamp": "2026-02-28T10:36:20.570Z",
+    "parentId": null
+  },
+  {
+    "type": "agent_spawn",
+    "agent": "devops",
+    "phaseNumber": 4,
+    "action": "DevOps Engineer started",
+    "details": "Agent DevOps Engineer spawned",
+    "outcome": "pending",
+    "id": "m_1772274980606_trn0i",
+    "timestamp": "2026-02-28T10:36:20.606Z",
+    "parentId": null
+  },
+  {
+    "type": "phase_start",
+    "phase": "Analysis",
+    "phaseNumber": 1,
+    "action": "Phase 1: Analysis",
+    "details": "Starting phase \"Analysis\": Business Analyst",
+    "outcome": "pending",
+    "id": "m_1772276131447_fxg5j",
+    "timestamp": "2026-02-28T10:55:31.447Z",
+    "parentId": null
+  },
+  {
+    "type": "agent_spawn",
+    "agent": "fullstack",
+    "phaseNumber": 2,
+    "action": "Fullstack Developer started",
+    "details": "Agent Fullstack Developer spawned",
+    "outcome": "pending",
+    "id": "m_1772276131495_tzw10",
+    "timestamp": "2026-02-28T10:55:31.495Z",
+    "parentId": null
+  },
+  {
+    "type": "agent_spawn",
+    "agent": "frontend",
+    "phaseNumber": 2,
+    "action": "Frontend Developer started",
+    "details": "Agent Frontend Developer spawned",
+    "outcome": "pending",
+    "id": "m_1772276131536_tpbt9",
+    "timestamp": "2026-02-28T10:55:31.536Z",
+    "parentId": null
+  },
+  {
+    "type": "zombie_detected",
+    "agent": "devops",
+    "phaseNumber": 4,
+    "action": "Zombie: DevOps Engineer",
+    "details": "DevOps Engineer (PID 588337) detected as zombie process",
+    "outcome": "failure",
+    "metadata": {
+      "pid": 588337
+    },
+    "id": "m_1772276640104_mbjqe",
+    "timestamp": "2026-02-28T11:04:00.104Z",
+    "parentId": null
+  },
+  {
+    "type": "retry",
+    "agent": "devops",
+    "phaseNumber": 4,
+    "action": "Retry DevOps Engineer",
+    "details": "Retrying DevOps Engineer (attempt 1)",
+    "outcome": "pending",
+    "metadata": {
+      "attempt": 1
+    },
+    "id": "m_1772276640122_tgen8",
+    "timestamp": "2026-02-28T11:04:00.122Z",
+    "parentId": null
+  },
+  {
+    "type": "agent_spawn",
+    "agent": "devops",
+    "phaseNumber": 4,
+    "action": "DevOps Engineer started",
+    "details": "Agent DevOps Engineer spawned",
+    "outcome": "pending",
+    "id": "m_1772276640176_t2o9x",
+    "timestamp": "2026-02-28T11:04:00.176Z",
+    "parentId": null
+  },
+  {
+    "type": "zombie_detected",
+    "agent": "fullstack",
+    "phaseNumber": 2,
+    "action": "Zombie: Fullstack Developer",
+    "details": "Fullstack Developer (PID 598943) detected as zombie process",
+    "outcome": "failure",
+    "metadata": {
+      "pid": 598943
+    },
+    "id": "m_1772276987029_q6upr",
+    "timestamp": "2026-02-28T11:09:47.029Z",
+    "parentId": null
+  },
+  {
+    "type": "zombie_detected",
+    "agent": "frontend",
+    "phaseNumber": 2,
+    "action": "Zombie: Frontend Developer",
+    "details": "Frontend Developer (PID 598947) detected as zombie process",
+    "outcome": "failure",
+    "metadata": {
+      "pid": 598947
+    },
+    "id": "m_1772276987029_mwq7q",
+    "timestamp": "2026-02-28T11:09:47.029Z",
+    "parentId": null
+  },
+  {
+    "type": "retry",
+    "agent": "fullstack",
+    "phaseNumber": 2,
+    "action": "Retry Fullstack Developer",
+    "details": "Retrying Fullstack Developer (attempt 1)",
+    "outcome": "pending",
+    "metadata": {
+      "attempt": 1
+    },
+    "id": "m_1772276987038_ykbi7",
+    "timestamp": "2026-02-28T11:09:47.038Z",
+    "parentId": null
+  },
+  {
+    "type": "agent_spawn",
+    "agent": "fullstack",
+    "phaseNumber": 2,
+    "action": "Fullstack Developer started",
+    "details": "Agent Fullstack Developer spawned",
+    "outcome": "pending",
+    "id": "m_1772276987077_grqdc",
+    "timestamp": "2026-02-28T11:09:47.077Z",
+    "parentId": null
+  },
+  {
+    "type": "retry",
+    "agent": "frontend",
+    "phaseNumber": 2,
+    "action": "Retry Frontend Developer",
+    "details": "Retrying Frontend Developer (attempt 1)",
+    "outcome": "pending",
+    "metadata": {
+      "attempt": 1
+    },
+    "id": "m_1772277017151_8yuph",
+    "timestamp": "2026-02-28T11:10:17.151Z",
+    "parentId": null
+  },
+  {
+    "type": "agent_spawn",
+    "agent": "frontend",
+    "phaseNumber": 2,
+    "action": "Frontend Developer started",
+    "details": "Agent Frontend Developer spawned",
+    "outcome": "pending",
+    "id": "m_1772277017186_zutec",
+    "timestamp": "2026-02-28T11:10:17.186Z",
+    "parentId": null
+  },
+  {
+    "type": "zombie_detected",
+    "agent": "devops",
+    "phaseNumber": 4,
+    "action": "Zombie: DevOps Engineer",
+    "details": "DevOps Engineer (PID 606184) detected as zombie process",
+    "outcome": "failure",
+    "metadata": {
+      "pid": 606184
+    },
+    "id": "m_1772277826743_o783k",
+    "timestamp": "2026-02-28T11:23:46.743Z",
+    "parentId": null
+  },
+  {
+    "type": "retry",
+    "agent": "devops",
+    "phaseNumber": 4,
+    "action": "Retry DevOps Engineer",
+    "details": "Retrying DevOps Engineer (attempt 1)",
+    "outcome": "pending",
+    "metadata": {
+      "attempt": 1
+    },
+    "id": "m_1772277826748_h1gp6",
+    "timestamp": "2026-02-28T11:23:46.748Z",
+    "parentId": null
+  },
+  {
+    "type": "agent_spawn",
+    "agent": "devops",
+    "phaseNumber": 4,
+    "action": "DevOps Engineer started",
+    "details": "Agent DevOps Engineer spawned",
+    "outcome": "pending",
+    "id": "m_1772277826777_j59jq",
+    "timestamp": "2026-02-28T11:23:46.777Z",
+    "parentId": null
+  },
+  {
+    "type": "zombie_detected",
+    "agent": "fullstack",
+    "phaseNumber": 2,
+    "action": "Zombie: Fullstack Developer",
+    "details": "Fullstack Developer (PID 609465) detected as zombie process",
+    "outcome": "failure",
+    "metadata": {
+      "pid": 609465
+    },
+    "id": "m_1772278337242_c5owf",
+    "timestamp": "2026-02-28T11:32:17.242Z",
+    "parentId": null
+  },
+  {
+    "type": "retry",
+    "agent": "fullstack",
+    "phaseNumber": 2,
+    "action": "Retry Fullstack Developer",
+    "details": "Retrying Fullstack Developer (attempt 1)",
+    "outcome": "pending",
+    "metadata": {
+      "attempt": 1
+    },
+    "id": "m_1772278337247_42x15",
+    "timestamp": "2026-02-28T11:32:17.247Z",
+    "parentId": null
+  },
+  {
+    "type": "agent_spawn",
+    "agent": "fullstack",
+    "phaseNumber": 2,
+    "action": "Fullstack Developer started",
+    "details": "Agent Fullstack Developer spawned",
+    "outcome": "pending",
+    "id": "m_1772278337278_1t9up",
+    "timestamp": "2026-02-28T11:32:17.278Z",
+    "parentId": null
+  },
+  {
+    "type": "zombie_detected",
+    "agent": "frontend",
+    "phaseNumber": 2,
+    "action": "Zombie: Frontend Developer",
+    "details": "Frontend Developer (PID 609812) detected as zombie process",
+    "outcome": "failure",
+    "metadata": {
+      "pid": 609812
+    },
+    "id": "m_1772278396714_pg6f7",
+    "timestamp": "2026-02-28T11:33:16.714Z",
+    "parentId": null
+  },
+  {
+    "type": "retry",
+    "agent": "frontend",
+    "phaseNumber": 2,
+    "action": "Retry Frontend Developer",
+    "details": "Retrying Frontend Developer (attempt 1)",
+    "outcome": "pending",
+    "metadata": {
+      "attempt": 1
+    },
+    "id": "m_1772278396718_jo2vb",
+    "timestamp": "2026-02-28T11:33:16.718Z",
+    "parentId": null
+  },
+  {
+    "type": "agent_spawn",
+    "agent": "frontend",
+    "phaseNumber": 2,
+    "action": "Frontend Developer started",
+    "details": "Agent Frontend Developer spawned",
+    "outcome": "pending",
+    "id": "m_1772278396747_ir4zx",
+    "timestamp": "2026-02-28T11:33:16.747Z",
+    "parentId": null
+  },
+  {
+    "type": "agent_error",
+    "agent": "devops",
+    "phaseNumber": 4,
+    "action": "DevOps Engineer failed",
+    "details": "Agent DevOps Engineer exited with error",
+    "outcome": "failure",
+    "metadata": {
+      "error": "Agent DevOps Engineer exited with error"
+    },
+    "id": "m_1772278660303_1w2bf",
+    "timestamp": "2026-02-28T11:37:40.303Z",
+    "parentId": "m_1772277826777_j59jq"
+  },
+  {
+    "type": "escalation",
+    "agent": "devops",
+    "phaseNumber": 4,
+    "action": "Escalated DevOps Engineer",
+    "details": "Asking Rajiv: DevOps Engineer failed after 2 attempts. Last error: Exit code 1, signal: null",
+    "outcome": "warning",
+    "id": "m_1772278666939_omudr",
+    "timestamp": "2026-02-28T11:37:46.939Z",
+    "parentId": "m_1772278660303_1w2bf"
+  },
+  {
+    "type": "agent_error",
+    "agent": "fullstack",
+    "phaseNumber": 2,
+    "action": "Fullstack Developer failed",
+    "details": "Agent Fullstack Developer exited with error",
+    "outcome": "failure",
+    "metadata": {
+      "error": "Agent Fullstack Developer exited with error"
+    },
+    "id": "m_1772279169586_haw1k",
+    "timestamp": "2026-02-28T11:46:09.586Z",
+    "parentId": "m_1772278337278_1t9up"
+  },
+  {
+    "type": "escalation",
+    "agent": "fullstack",
+    "phaseNumber": 2,
+    "action": "Escalated Fullstack Developer",
+    "details": "Asking Rajiv: Fullstack Developer failed after 2 attempts. Last error: Exit code 1, signal: null",
+    "outcome": "warning",
+    "id": "m_1772279176627_lg0bi",
+    "timestamp": "2026-02-28T11:46:16.627Z",
+    "parentId": "m_1772279169586_haw1k"
+  },
+  {
+    "type": "agent_error",
+    "agent": "frontend",
+    "phaseNumber": 2,
+    "action": "Frontend Developer failed",
+    "details": "Agent Frontend Developer exited with error",
+    "outcome": "failure",
+    "metadata": {
+      "error": "Agent Frontend Developer exited with error"
+    },
+    "id": "m_1772279227170_2r9c9",
+    "timestamp": "2026-02-28T11:47:07.170Z",
+    "parentId": "m_1772278396747_ir4zx"
+  },
+  {
+    "type": "escalation",
+    "agent": "frontend",
+    "phaseNumber": 2,
+    "action": "Escalated Frontend Developer",
+    "details": "Asking Rajiv: Frontend Developer failed after 2 attempts. Last error: Exit code 1, signal: null",
+    "outcome": "warning",
+    "id": "m_1772279236516_7zgsu",
+    "timestamp": "2026-02-28T11:47:16.516Z",
+    "parentId": "m_1772279227170_2r9c9"
+  },
+  {
+    "type": "retry",
+    "agent": "fullstack",
+    "phaseNumber": 2,
+    "action": "Retry Fullstack Developer",
+    "details": "Retrying Fullstack Developer (attempt 1)",
+    "outcome": "pending",
+    "metadata": {
+      "attempt": 1
+    },
+    "id": "m_1772287332417_1sl9a",
+    "timestamp": "2026-02-28T14:02:12.417Z",
+    "parentId": null
+  },
+  {
+    "type": "agent_spawn",
+    "agent": "fullstack",
+    "phaseNumber": 2,
+    "action": "Fullstack Developer started",
+    "details": "Agent Fullstack Developer spawned",
+    "outcome": "pending",
+    "id": "m_1772287332496_075qi",
+    "timestamp": "2026-02-28T14:02:12.496Z",
+    "parentId": null
+  },
+  {
+    "type": "retry",
+    "agent": "frontend",
+    "phaseNumber": 2,
+    "action": "Retry Frontend Developer",
+    "details": "Retrying Frontend Developer (attempt 1)",
+    "outcome": "pending",
+    "metadata": {
+      "attempt": 1
+    },
+    "id": "m_1772287362789_gx2oa",
+    "timestamp": "2026-02-28T14:02:42.789Z",
+    "parentId": null
+  },
+  {
+    "type": "agent_spawn",
+    "agent": "frontend",
+    "phaseNumber": 2,
+    "action": "Frontend Developer started",
+    "details": "Agent Frontend Developer spawned",
+    "outcome": "pending",
+    "id": "m_1772287362819_blo4x",
+    "timestamp": "2026-02-28T14:02:42.819Z",
+    "parentId": null
+  },
+  {
+    "type": "retry",
+    "agent": "devops",
+    "phaseNumber": 4,
+    "action": "Retry DevOps Engineer",
+    "details": "Retrying DevOps Engineer (attempt 1)",
+    "outcome": "pending",
+    "metadata": {
+      "attempt": 1
+    },
+    "id": "m_1772287392933_gw2be",
+    "timestamp": "2026-02-28T14:03:12.933Z",
+    "parentId": null
+  },
+  {
+    "type": "agent_spawn",
+    "agent": "devops",
+    "phaseNumber": 4,
+    "action": "DevOps Engineer started",
+    "details": "Agent DevOps Engineer spawned",
+    "outcome": "pending",
+    "id": "m_1772287392959_zxc74",
+    "timestamp": "2026-02-28T14:03:12.959Z",
+    "parentId": null
+  },
+  {
+    "type": "zombie_detected",
+    "agent": "fullstack",
+    "phaseNumber": 2,
+    "action": "Zombie: Fullstack Developer",
+    "details": "Fullstack Developer (PID 692191) detected as zombie process",
+    "outcome": "failure",
+    "metadata": {
+      "pid": 692191
+    },
+    "id": "m_1772288634157_0olbl",
+    "timestamp": "2026-02-28T14:23:54.157Z",
+    "parentId": null
+  },
+  {
+    "type": "retry",
+    "agent": "fullstack",
+    "phaseNumber": 2,
+    "action": "Retry Fullstack Developer",
+    "details": "Retrying Fullstack Developer (attempt 1)",
+    "outcome": "pending",
+    "metadata": {
+      "attempt": 1
+    },
+    "id": "m_1772288634163_xsju4",
+    "timestamp": "2026-02-28T14:23:54.163Z",
+    "parentId": null
+  },
+  {
+    "type": "agent_spawn",
+    "agent": "fullstack",
+    "phaseNumber": 2,
+    "action": "Fullstack Developer started",
+    "details": "Agent Fullstack Developer spawned",
+    "outcome": "pending",
+    "id": "m_1772288634192_9q4dc",
+    "timestamp": "2026-02-28T14:23:54.192Z",
+    "parentId": null
+  },
+  {
+    "type": "retry",
+    "agent": "devops",
+    "phaseNumber": 4,
+    "action": "Retry DevOps Engineer",
+    "details": "Retrying DevOps Engineer (attempt 1)",
+    "outcome": "pending",
+    "metadata": {
+      "attempt": 1
+    },
+    "id": "m_1772289128067_95m89",
+    "timestamp": "2026-02-28T14:32:08.067Z",
+    "parentId": null
+  },
+  {
+    "type": "agent_spawn",
+    "agent": "devops",
+    "phaseNumber": 4,
+    "action": "DevOps Engineer started",
+    "details": "Agent DevOps Engineer spawned",
+    "outcome": "pending",
+    "id": "m_1772289128095_vkd8e",
+    "timestamp": "2026-02-28T14:32:08.095Z",
+    "parentId": null
+  },
+  {
+    "type": "zombie_detected",
+    "agent": "frontend",
+    "phaseNumber": 2,
+    "action": "Zombie: Frontend Developer",
+    "details": "Frontend Developer (PID 693150) detected as zombie process",
+    "outcome": "failure",
+    "metadata": {
+      "pid": 693150
+    },
+    "id": "m_1772289218222_3hn92",
+    "timestamp": "2026-02-28T14:33:38.222Z",
+    "parentId": null
+  },
+  {
+    "type": "retry",
+    "agent": "frontend",
+    "phaseNumber": 2,
+    "action": "Retry Frontend Developer",
+    "details": "Retrying Frontend Developer (attempt 1)",
+    "outcome": "pending",
+    "metadata": {
+      "attempt": 1
+    },
+    "id": "m_1772289218227_iip3l",
+    "timestamp": "2026-02-28T14:33:38.227Z",
+    "parentId": null
+  },
+  {
+    "type": "agent_spawn",
+    "agent": "frontend",
+    "phaseNumber": 2,
+    "action": "Frontend Developer started",
+    "details": "Agent Frontend Developer spawned",
+    "outcome": "pending",
+    "id": "m_1772289218250_lzm58",
+    "timestamp": "2026-02-28T14:33:38.250Z",
+    "parentId": null
+  },
+  {
+    "type": "zombie_detected",
+    "agent": "fullstack",
+    "phaseNumber": 2,
+    "action": "Zombie: Fullstack Developer",
+    "details": "Fullstack Developer (PID 708643) detected as zombie process",
+    "outcome": "failure",
+    "metadata": {
+      "pid": 708643
+    },
+    "id": "m_1772289938019_3v362",
+    "timestamp": "2026-02-28T14:45:38.019Z",
+    "parentId": null
+  },
+  {
+    "type": "retry",
+    "agent": "fullstack",
+    "phaseNumber": 2,
+    "action": "Retry Fullstack Developer",
+    "details": "Retrying Fullstack Developer (attempt 1)",
+    "outcome": "pending",
+    "metadata": {
+      "attempt": 1
+    },
+    "id": "m_1772289938023_4gaq7",
+    "timestamp": "2026-02-28T14:45:38.023Z",
+    "parentId": null
+  },
+  {
+    "type": "agent_spawn",
+    "agent": "fullstack",
+    "phaseNumber": 2,
+    "action": "Fullstack Developer started",
+    "details": "Agent Fullstack Developer spawned",
+    "outcome": "pending",
+    "id": "m_1772289938046_xl2co",
+    "timestamp": "2026-02-28T14:45:38.046Z",
+    "parentId": null
+  },
+  {
+    "type": "agent_complete",
+    "agent": "devops",
+    "phaseNumber": 4,
+    "action": "DevOps Engineer completed",
+    "details": "Agent DevOps Engineer finished successfully",
+    "outcome": "success",
+    "id": "m_1772290799975_c1nym",
+    "timestamp": "2026-02-28T14:59:59.975Z",
+    "parentId": "m_1772289128095_vkd8e"
   }
 ]

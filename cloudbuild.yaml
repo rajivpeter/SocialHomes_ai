@@ -1,7 +1,12 @@
 # ============================================================
 # SocialHomes.Ai — Production CI/CD Pipeline (Cloud Build)
 # Triggers on push to main branch.
-# Stages: Build → Test → Push → Deploy → Notify
+# Stages: Build → Test → Security Scan → Push → Deploy → Verify → Notify
+#
+# Security: npm audit in Dockerfile, Trivy container scan, health verification
+# See: docs/security-audit.md for full security audit report
+#
+# Studio: Yantra Works (https://yantra.works)
 # ============================================================
 
 substitutions:
@@ -16,6 +21,8 @@ substitutions:
 
 steps:
   # ── Step 1: Build Docker image (multi-stage) ──
+  # Multi-stage build: client (Vite) + server (TypeScript) → production (Node.js slim)
+  # npm audit runs inside Dockerfile build stages for both client and server
   - name: 'gcr.io/cloud-builders/docker'
     id: build
     args:
@@ -28,20 +35,28 @@ steps:
       - '${_REGISTRY}:latest'
       - '--build-arg'
       - 'BUILDKIT_INLINE_CACHE=1'
+      - '--build-arg'
+      - 'BUILD_SHA=$COMMIT_SHA'
+      - '--build-arg'
+      - 'BUILD_DATE=$BUILD_ID'
       - '.'
 
-  # ── Step 2: Run server unit tests inside built image ──
+  # ── Step 2: Run server smoke test inside built image ──
+  # Starts the server, verifies /health endpoint returns expected JSON
   - name: '${_REGISTRY}:$COMMIT_SHA'
     id: test
     entrypoint: 'sh'
     args:
       - '-c'
       - |
-        echo "=== Health check test ==="
+        echo "=== Health check smoke test ==="
         node server/dist/index.js &
         SERVER_PID=$$!
         sleep 3
-        curl -sf http://localhost:8080/health | grep -q '"status"' && echo "✓ Health check passed" || (echo "✗ Health check failed" && exit 1)
+        HEALTH=$(curl -sf http://localhost:8080/health 2>/dev/null || echo '{}')
+        echo "Health response: $$HEALTH"
+        echo "$$HEALTH" | grep -q '"status"' && echo "✓ Health check passed" || (echo "✗ Health check failed" && exit 1)
+        echo "$$HEALTH" | grep -q '"version"' && echo "✓ Version info present" || echo "⚠ No version info"
         kill $$SERVER_PID 2>/dev/null || true
         echo "=== All smoke tests passed ==="
     env:
@@ -49,7 +64,26 @@ steps:
       - 'PORT=8080'
     waitFor: ['build']
 
-  # ── Step 3: Push Docker image to Artifact Registry ──
+  # ── Step 3: Container security scan (Trivy) ──
+  # Scans the built image for known CVEs (CRITICAL and HIGH severity).
+  # Non-blocking (allowFailure) — logs findings but doesn't block deploy.
+  # Review findings in Cloud Build logs and act on critical vulnerabilities.
+  - name: 'aquasec/trivy:latest'
+    id: security-scan
+    args:
+      - 'image'
+      - '--exit-code'
+      - '0'
+      - '--severity'
+      - 'CRITICAL,HIGH'
+      - '--no-progress'
+      - '--format'
+      - 'table'
+      - '${_REGISTRY}:$COMMIT_SHA'
+    waitFor: ['test']
+    allowFailure: true
+
+  # ── Step 4: Push Docker image to Artifact Registry ──
   - name: 'gcr.io/cloud-builders/docker'
     id: push-sha
     args:
@@ -64,9 +98,13 @@ steps:
       - '${_REGISTRY}:latest'
     waitFor: ['test']
 
-  # ── Step 4: Deploy to Cloud Run (Production) ──
-  # IMPORTANT: All secrets are stored in Google Secret Manager.
-  # Before first deploy, create them with scripts/setup-secrets.sh
+  # ── Step 5: Deploy to Cloud Run (Production) ──
+  # Secrets stored in Google Secret Manager.
+  # First-time setup: bash scripts/setup-secrets.sh
+  # NODE_ENV=production ensures:
+  #   - X-Persona auth bypass is disabled (security audit Finding 1.1)
+  #   - CORS rejects unknown origins (security audit Finding 5.1)
+  #   - Error stack traces are hidden (security audit Finding 5.3)
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     id: deploy
     args:
@@ -106,7 +144,8 @@ steps:
       - '--startup-cpu-boost'
     waitFor: ['push-sha']
 
-  # ── Step 5: Verify deployment health ──
+  # ── Step 6: Verify deployment health ──
+  # Retries up to 5 times with 10s intervals for cold-start tolerance
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     id: verify
     entrypoint: 'bash'
@@ -117,9 +156,11 @@ steps:
           --region=${_REGION} --format='value(status.url)')
         echo "Verifying deployment at: $${SERVICE_URL}/health"
         for i in 1 2 3 4 5; do
-          STATUS=$(curl -sf "$${SERVICE_URL}/health" | grep -o '"status":"[a-z]*"' | head -1)
+          HEALTH_RESPONSE=$(curl -sf "$${SERVICE_URL}/health" 2>/dev/null || echo '{}')
+          STATUS=$(echo "$$HEALTH_RESPONSE" | grep -o '"status":"[a-z]*"' | head -1)
           if echo "$$STATUS" | grep -q '"healthy"'; then
             echo "✓ Deployment verified healthy (attempt $$i)"
+            echo "$$HEALTH_RESPONSE" | head -1
             exit 0
           fi
           echo "  Attempt $$i: $$STATUS — retrying in 10s..."
@@ -128,6 +169,34 @@ steps:
         echo "✗ Deployment health check failed after 5 attempts"
         exit 1
     waitFor: ['deploy']
+
+  # ── Step 7: Send Telegram deployment notification ──
+  # Requires TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID in Secret Manager.
+  # Safe to fail — notification is non-blocking.
+  - name: 'gcr.io/cloud-builders/curl'
+    id: notify
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        # Fetch secrets (graceful failure if not configured)
+        BOT_TOKEN=$$(gcloud secrets versions access latest --secret=TELEGRAM_BOT_TOKEN 2>/dev/null || echo "")
+        CHAT_ID=$$(gcloud secrets versions access latest --secret=TELEGRAM_CHAT_ID 2>/dev/null || echo "")
+        if [ -z "$$BOT_TOKEN" ] || [ -z "$$CHAT_ID" ]; then
+          echo "⚠ Telegram notification skipped — secrets not configured"
+          exit 0
+        fi
+        SERVICE_URL=$$(gcloud run services describe ${_SERVICE_NAME} \
+          --region=${_REGION} --format='value(status.url)' 2>/dev/null || echo "N/A")
+        SHORT_SHA=$$(echo "$COMMIT_SHA" | cut -c1-7)
+        MESSAGE="🚀 *SocialHomes.Ai deployed*%0A%0ACommit: \`$$SHORT_SHA\`%0AService: ${_SERVICE_NAME}%0ARegion: ${_REGION}%0AURL: $$SERVICE_URL%0A%0A✅ Health check passed"
+        curl -sf "https://api.telegram.org/bot$${BOT_TOKEN}/sendMessage" \
+          -d "chat_id=$${CHAT_ID}" \
+          -d "text=$${MESSAGE}" \
+          -d "parse_mode=Markdown" \
+          > /dev/null 2>&1 || echo "⚠ Telegram notification failed (non-blocking)"
+    waitFor: ['verify']
+    allowFailure: true
 
 images:
   - '${_REGISTRY}:$COMMIT_SHA'

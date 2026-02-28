@@ -1,7 +1,7 @@
 import type { Request, Response, NextFunction } from 'express';
 import { ApiError } from './error-handler.js';
 
-type PersonaLevel = 'coo' | 'head-of-service' | 'manager' | 'housing-officer' | 'operative';
+type PersonaLevel = 'coo' | 'head-of-service' | 'manager' | 'housing-officer' | 'operative' | 'pending-approval';
 
 const personaHierarchy: Record<PersonaLevel, number> = {
   'coo': 5,
@@ -9,6 +9,7 @@ const personaHierarchy: Record<PersonaLevel, number> = {
   'manager': 3,
   'housing-officer': 2,
   'operative': 1,
+  'pending-approval': 0,
 };
 
 /**

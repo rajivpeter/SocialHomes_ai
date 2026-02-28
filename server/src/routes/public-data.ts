@@ -21,6 +21,28 @@ import {
 export const publicDataRouter = Router();
 publicDataRouter.use(authMiddleware);
 
+// ── Input Validation Helpers ──
+
+/** Validate lat/lng are numeric and within UK bounds */
+function validateUKCoordinates(lat: string, lng: string): { lat: number; lng: number } | null {
+  const latNum = parseFloat(lat);
+  const lngNum = parseFloat(lng);
+  if (isNaN(latNum) || isNaN(lngNum)) return null;
+  // UK bounding box: lat 49–61, lng -8 to 2
+  if (latNum < 49 || latNum > 61 || lngNum < -8 || lngNum > 2) return null;
+  return { lat: latNum, lng: lngNum };
+}
+
+/** Validate LSOA code format: E followed by 8 digits */
+function isValidLSOACode(code: string): boolean {
+  return /^E\d{8}$/.test(code);
+}
+
+/** Validate UK postcode format (loose) */
+function isValidPostcode(postcode: string): boolean {
+  return /^[A-Z]{1,2}\d[A-Z\d]?\s*\d[A-Z]{2}$/i.test(postcode.trim());
+}
+
 // ── Cache TTLs (seconds) ──
 const TTL = {
   POSTCODE: 90 * 24 * 3600,   // 90 days
@@ -249,7 +271,11 @@ publicDataRouter.get('/crime/postcode/:postcode', async (req, res, next) => {
 
 publicDataRouter.get('/crime/:lat/:lng', async (req, res, next) => {
   try {
-    const { lat, lng } = req.params;
+    const coords = validateUKCoordinates(req.params.lat, req.params.lng);
+    if (!coords) {
+      return res.status(400).json({ error: 'Invalid UK coordinates' });
+    }
+    const { lat, lng } = { lat: req.params.lat, lng: req.params.lng };
     const date = (req.query.date as string) || undefined;
     const category = (req.query.category as string) || 'all-crime';
     const key = `${lat},${lng}:${date || 'latest'}:${category}`;
@@ -301,6 +327,9 @@ publicDataRouter.get('/crime/:lat/:lng', async (req, res, next) => {
 
 publicDataRouter.get('/weather/:lat/:lng', async (req, res, next) => {
   try {
+    if (!validateUKCoordinates(req.params.lat, req.params.lng)) {
+      return res.status(400).json({ error: 'Invalid UK coordinates' });
+    }
     const { lat, lng } = req.params;
 
     const result = await fetchWithCache(
@@ -341,8 +370,11 @@ publicDataRouter.get('/weather/:lat/:lng', async (req, res, next) => {
 
 publicDataRouter.get('/weather/history/:lat/:lng', async (req, res, next) => {
   try {
+    if (!validateUKCoordinates(req.params.lat, req.params.lng)) {
+      return res.status(400).json({ error: 'Invalid UK coordinates' });
+    }
     const { lat, lng } = req.params;
-    const days = parseInt((req.query.days as string) || '90', 10);
+    const days = Math.min(Math.max(parseInt((req.query.days as string) || '90', 10), 1), 365);
     const end = new Date();
     const start = new Date(end.getTime() - days * 24 * 3600 * 1000);
     const startStr = start.toISOString().split('T')[0];
@@ -420,8 +452,12 @@ publicDataRouter.get('/flood/postcode/:postcode', async (req, res, next) => {
 
 publicDataRouter.get('/flood/:lat/:lng', async (req, res, next) => {
   try {
+    if (!validateUKCoordinates(req.params.lat, req.params.lng)) {
+      return res.status(400).json({ error: 'Invalid UK coordinates' });
+    }
     const { lat, lng } = req.params;
-    const dist = (req.query.dist as string) || '5';
+    const distNum = Math.min(Math.max(parseInt((req.query.dist as string) || '5', 10), 1), 50);
+    const dist = String(distNum);
 
     const result = await fetchWithCache(
       'defra-flood',
@@ -460,6 +496,9 @@ publicDataRouter.get('/flood/:lat/:lng', async (req, res, next) => {
 publicDataRouter.get('/imd/:lsoaCode', async (req, res, next) => {
   try {
     const lsoaCode = req.params.lsoaCode.trim();
+    if (!isValidLSOACode(lsoaCode)) {
+      return res.status(400).json({ error: 'Invalid LSOA code format. Expected format: E followed by 8 digits (e.g. E01003968)' });
+    }
 
     const result = await fetchWithCache(
       'imd',
@@ -572,6 +611,9 @@ publicDataRouter.get('/epc/:postcode', async (req, res, next) => {
 publicDataRouter.get('/census/:lsoaCode', async (req, res, next) => {
   try {
     const lsoaCode = req.params.lsoaCode.trim();
+    if (!isValidLSOACode(lsoaCode)) {
+      return res.status(400).json({ error: 'Invalid LSOA code format' });
+    }
     const result = await getCensusData(lsoaCode);
     res.json(result);
   } catch (err) { next(err); }
@@ -585,6 +627,9 @@ publicDataRouter.get('/census/:lsoaCode', async (req, res, next) => {
 publicDataRouter.get('/nomis/:lsoaCode', async (req, res, next) => {
   try {
     const lsoaCode = req.params.lsoaCode.trim();
+    if (!isValidLSOACode(lsoaCode)) {
+      return res.status(400).json({ error: 'Invalid LSOA code format' });
+    }
     const result = await getNomisLabourMarket(lsoaCode);
     res.json(result);
   } catch (err) { next(err); }

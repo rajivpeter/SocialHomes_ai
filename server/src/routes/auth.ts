@@ -5,6 +5,8 @@ import {
   getUserByEmail,
 } from '../services/firebase-admin.js';
 import { collections, setDoc, getDoc } from '../services/firestore.js';
+import { authMiddleware } from '../middleware/auth.js';
+import { requirePersona } from '../middleware/rbac.js';
 
 export const authRouter = Router();
 
@@ -60,7 +62,7 @@ const DEMO_USERS = [
  * Create demo Firebase Auth users and their Firestore profiles.
  * Idempotent — skips users that already exist.
  */
-authRouter.post('/seed-users', async (_req, res, next) => {
+authRouter.post('/seed-users', authMiddleware, requirePersona('coo'), async (_req, res, next) => {
   try {
     const results = [];
 
@@ -136,7 +138,7 @@ authRouter.post('/profile', async (req, res, next) => {
       id: decoded.uid,
       email: decoded.email || '',
       displayName: decoded.name || req.body.name || '',
-      persona: 'housing-officer', // Default persona for new users
+      persona: 'pending-approval', // Default to least-privilege; admin must approve
       teamId: null,
       patchIds: [],
       createdAt: new Date().toISOString(),

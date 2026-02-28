@@ -1,0 +1,69 @@
+# =============================================================
+# SocialHomes.Ai — Docker Build Exclusions
+# Reduces build context size and prevents secrets from leaking
+# =============================================================
+
+# Git
+.git
+.gitignore
+
+# Dependencies (rebuilt inside container)
+node_modules
+app/node_modules
+server/node_modules
+
+# Build output (rebuilt inside container)
+app/dist
+server/dist
+
+# IDE / Editor
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# Environment and secrets
+.env
+.env.*
+*.env
+.mcp.json
+server/google-credentials.json
+server/google-credentials*.json
+
+# Documentation (not needed in production image)
+*.md
+docs/
+LICENSE
+
+# Tests (not needed in production image)
+tests/
+**/*.test.ts
+**/*.test.js
+**/*.spec.ts
+**/*.spec.js
+pytest.ini
+.pytest_cache
+__pycache__
+
+# CI/CD config (not needed in production image)
+.github/
+cloudbuild.yaml
+cloudbuild-staging.yaml
+
+# Scripts (not needed in production image)
+scripts/
+
+# Specification docs
+Doc1-*.txt
+Doc2-*.txt
+Doc3-*.txt
+Doc4-*.md
+
+# Misc
+.dockerignore
+Dockerfile
+*.log
+*.tmp
+.DS_Store
+Thumbs.db

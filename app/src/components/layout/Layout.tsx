@@ -90,17 +90,19 @@ export default function Layout() {
           <Outlet />
         </div>
 
-        {/* Footer — hidden on mobile */}
-        <footer className="hidden md:block border-t border-border-default py-5 px-6 mt-8 relative">
+        {/* Yantra Works Footer */}
+        <footer className="border-t border-border-default py-5 px-4 sm:px-6 mt-8 mb-14 lg:mb-0 relative">
           <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-brand-teal/10 to-transparent" />
-          <div className="max-w-[1400px] mx-auto flex items-center justify-between text-xs text-text-muted">
-            <span className="flex items-center gap-2">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 751 772" width="12" height="12" className="opacity-40">
-                <path fill="currentColor" d="M745.51,390.8l-95.41-91.94-41.32,42.88,48.94,47.16-250.45,254.19-1.31-194.04,12.47-12.74-.31-.3,143.2-143.64.08.08,42.88-42.58-.29-.29,1-1-41.76-41.63-.79.79L377.89,21.94l-1.41,1.4-.43-.44L10.05,385.9l.67.67-2.57,2.54,325.25,328.97-.16.16,12.35,12.17,30.65,31,.41-.4,2.02,1.99,324.99-329.84.55.53,41.32-42.88ZM345.09,452.5l1.28,189.95-251.12-253.99,92.74-91.98,144.76,141.66-1.03,1.03,13.37,13.33ZM375.98,394.78l-144.51-141.42,146.65-145.45,141.65,142.63-143.79,144.23Z"/>
-              </svg>
-              SocialHomes.Ai is an open-source project by Yantra.Works — www.socialhomes.ai
-            </span>
-            <span className="text-[10px] text-text-muted/60 tracking-wider uppercase">AI-native. Human-assured.</span>
+          <div className="max-w-[1400px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-text-muted">
+            <a href="https://yantra.works" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:text-brand-teal transition-colors">
+              <img src="/yantra-logo-teal.svg" alt="Yantra Works" width="16" height="16" className="opacity-60 hover:opacity-100 transition-opacity" />
+              <span>Made by <strong className="text-text-secondary">Yantra Works</strong></span>
+            </a>
+            <div className="flex items-center gap-3 text-[10px] sm:text-xs">
+              <span>© 2026 Yantra Works. All rights reserved.</span>
+              <span className="text-border-default">|</span>
+              <a href="https://yantra.works/privacy" target="_blank" rel="noopener noreferrer" className="hover:text-brand-teal transition-colors">Privacy Policy</a>
+            </div>
           </div>
         </footer>
       </main>

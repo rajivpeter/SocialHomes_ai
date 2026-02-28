@@ -56,7 +56,7 @@ adminRouter.get('/users', requirePersona('manager'), async (_req, res, next) => 
 });
 
 // POST /api/v1/admin/seed
-adminRouter.post('/seed', async (req, res, next) => {
+adminRouter.post('/seed', requirePersona('coo'), async (req, res, next) => {
   try {
     const data = req.body;
     if (!data || !data.regions || !data.properties || !data.tenants) {

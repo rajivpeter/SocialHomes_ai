@@ -23,10 +23,10 @@
 | Component | Detail |
 |-----------|--------|
 | **Hosting** | Google Cloud Run (`socialhomes` service, `europe-west2`) |
-| **Database** | Google Cloud Firestore (project: `gen-lang-client-0146156913`) |
+| **Database** | Google Cloud Firestore (project: `[REDACTED]`) |
 | **CI/CD** | GitHub → Cloud Build → Artifact Registry → Cloud Run (auto-deploy on push to `main`) |
 | **GitHub Repo** | https://github.com/rajivpeter/SocialHomes_ai |
-| **Container Registry** | `europe-west2-docker.pkg.dev/gen-lang-client-0146156913/socialhomes/app` |
+| **Container Registry** | `europe-west2-docker.pkg.dev/[REDACTED]/socialhomes/app` |
 | **Auth** | Public access (allUsers = roles/run.invoker) |
 
 ### Data Source
