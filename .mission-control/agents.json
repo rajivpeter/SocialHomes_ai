@@ -43,13 +43,11 @@
       "sessionId": "785cd436-8fd7-443c-a884-b07ca6afbc8f"
     },
     "frontend": {
-      "status": "running",
-      "pid": 716495,
+      "status": "completed",
+      "pid": null,
       "startedAt": "2026-02-28T14:33:38.244Z",
-      "completedAt": null,
-      "exitCode": null,
-      "model": "claude",
-      "sessionId": "de858118-9ced-4ace-8bcd-6a344b543d56"
+      "completedAt": "2026-02-28T15:03:32.728Z",
+      "exitCode": 0
     },
     "tester": {
       "status": "idle",
