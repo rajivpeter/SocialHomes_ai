@@ -1,0 +1,32 @@
+{
+  "cli_version": "0.4.4",
+  "checkpoint_id": "49504d45db0e",
+  "session_id": "063b2089-8383-4405-b8a8-aed2415acca9",
+  "strategy": "manual-commit",
+  "created_at": "2026-02-28T15:00:16.278653403Z",
+  "branch": "main",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "SESSION-HISTORY.md",
+    "app/src/components/layout/Layout.tsx",
+    "app/vite.config.ts"
+  ],
+  "agent": "Claude Code",
+  "token_usage": {
+    "input_tokens": 31,
+    "cache_creation_tokens": 42288,
+    "cache_read_tokens": 1077951,
+    "output_tokens": 7253,
+    "api_call_count": 22
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-02-28T15:00:15.527338028Z",
+    "agent_lines": 16,
+    "human_added": 2248,
+    "human_modified": 18,
+    "human_removed": 0,
+    "total_committed": 2282,
+    "agent_percentage": 0.7011393514461
+  },
+  "transcript_path": ".claude/projects/-mnt-c--netapps-socialhomes/063b2089-8383-4405-b8a8-aed2415acca9.jsonl"
+}
