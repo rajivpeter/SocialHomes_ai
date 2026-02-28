@@ -15,7 +15,7 @@
 | 2 | Intelligence | 3-4 | DONE | 14/14 |
 | 3 | Enrichment | 5-6 | DONE | 14/17 (3 deferred) |
 | 4 | Completion | 7-8 | DONE | 11/14 (3 deferred) |
-| **5** | **Evolution** | **9-14** | **IN PROGRESS** | **45/50** |
+| **5** | **Evolution** | **9-14** | **IN PROGRESS** | **49/50** |
 
 ---
 
@@ -220,14 +220,14 @@ Phase 5 is organized into 5 sub-phases matching the agent structure:
 | # | Task | Priority | Complexity | Agent | Status |
 |---|------|----------|------------|-------|--------|
 | 5.5.1 | Fix cloudbuild.yaml to use correct Artifact Registry path (`cloud-run-source-deploy/socialhomes`) — update image tag, add multi-stage build steps, add test step before deploy, add build notifications to Telegram, version tagging with git SHA | P1 | S | DevOps | DONE |
-| 5.5.2 | Set up staging environment on Cloud Run — separate service (`socialhomes-staging`), separate secrets (staging Firebase project), deploy-on-PR workflow, automatic cleanup of old revisions, staging URL for QA testing, environment variable differentiation | P1 | M | DevOps | TODO |
-| 5.5.3 | Configure Cloud Run auto-scaling policies — CPU utilisation target (70%), memory threshold, request latency trigger (P95 > 500ms -> scale up), min instances (1 for production to avoid cold start), max instances (10), concurrency tuning (80 -> optimal), startup probe and liveness check | P2 | M | DevOps | TODO |
-| 5.5.4 | Set up Cloud Monitoring alerts — error rate >5% alert, P95 latency >1s alert, memory >80% alert, Firestore read/write quota >80% warning, failed health check alert, notification channels (email + Telegram), alert dashboard in Cloud Console | P1 | M | DevOps | TODO |
-| 5.5.5 | Implement database backup strategy — Firestore scheduled exports to Cloud Storage (daily at 02:00 UTC), retention policy (30 days daily, 12 months weekly), point-in-time recovery testing, restore procedure documentation, backup monitoring alert | P1 | M | DevOps | TODO |
-| 5.5.6 | Set up Cloud CDN for static assets — frontend build output served via CDN edge nodes, cache-control headers (max-age=31536000 for hashed assets, no-cache for index.html), invalidation on deploy, compression (brotli/gzip), performance benchmarking | P2 | M | DevOps | TODO |
-| 5.5.7 | Configure custom domain with SSL — socialhomes.ai domain, Cloud Run domain mapping, managed SSL certificate via Google-managed, HTTP->HTTPS redirect, www->non-www redirect, DNS configuration documentation | P2 | S | DevOps | TODO |
-| 5.5.8 | Create runbook documentation — incident response procedures (severity levels, escalation matrix), rollback process (Cloud Run revision rollback), database recovery (Firestore import), secret rotation procedure, scaling playbook, on-call guide, post-mortem template | P2 | M | DevOps | TODO |
-| 5.5.9 | Set up log-based monitoring — Cloud Logging structured query for error patterns, log-based metrics (4xx rate, 5xx rate, auth failures), log sink to BigQuery for long-term analysis, correlation with request IDs, PII filtering in logs | P2 | M | DevOps | TODO |
+| 5.5.2 | Set up staging environment on Cloud Run — separate service (`socialhomes-staging`), separate secrets (staging Firebase project), deploy-on-PR workflow, automatic cleanup of old revisions, staging URL for QA testing, environment variable differentiation | P1 | M | DevOps | DONE |
+| 5.5.3 | Configure Cloud Run auto-scaling policies — CPU utilisation target (70%), memory threshold, request latency trigger (P95 > 500ms -> scale up), min instances (1 for production to avoid cold start), max instances (10), concurrency tuning (80 -> optimal), startup probe and liveness check | P2 | M | DevOps | DONE |
+| 5.5.4 | Set up Cloud Monitoring alerts — error rate >5% alert, P95 latency >1s alert, memory >80% alert, Firestore read/write quota >80% warning, failed health check alert, notification channels (email + Telegram), alert dashboard in Cloud Console | P1 | M | DevOps | DONE |
+| 5.5.5 | Implement database backup strategy — Firestore scheduled exports to Cloud Storage (daily at 02:00 UTC), retention policy (30 days daily, 12 months weekly), point-in-time recovery testing, restore procedure documentation, backup monitoring alert | P1 | M | DevOps | DONE |
+| 5.5.6 | Set up Cloud CDN for static assets — frontend build output served via CDN edge nodes, cache-control headers (max-age=31536000 for hashed assets, no-cache for index.html), invalidation on deploy, compression (brotli/gzip), performance benchmarking | P2 | M | DevOps | DONE |
+| 5.5.7 | Configure custom domain with SSL — socialhomes.ai domain, Cloud Run domain mapping, managed SSL certificate via Google-managed, HTTP->HTTPS redirect, www->non-www redirect, DNS configuration documentation | P2 | S | DevOps | DONE |
+| 5.5.8 | Create runbook documentation — incident response procedures (severity levels, escalation matrix), rollback process (Cloud Run revision rollback), database recovery (Firestore import), secret rotation procedure, scaling playbook, on-call guide, post-mortem template | P2 | M | DevOps | DONE |
+| 5.5.9 | Set up log-based monitoring — Cloud Logging structured query for error patterns, log-based metrics (4xx rate, 5xx rate, auth failures), log sink to BigQuery for long-term analysis, correlation with request IDs, PII filtering in logs | P2 | M | DevOps | DONE |
 
 ---
 
@@ -329,8 +329,8 @@ Items deferred from earlier phases, now included in Phase 5:
 | **Fullstack** | 23 | 0 | 8 | 15 | 0 |
 | **Frontend** | 12 (ALL DONE) | 0 | 2 | 9 | 1 |
 | **Tester** | 8 (ALL DONE) | 0 | 4 | 4 | 0 |
-| **DevOps** | 9 | 0 | 3 | 6 | 0 |
-| **TOTAL** | **50** (DONE: 45, TODO: 5) |
+| **DevOps** | 9 (ALL DONE) | 0 | 3 | 6 | 0 |
+| **TOTAL** | **50** (DONE: 49, TODO: 1) |
 
 ### Recommended Execution Order (Critical Path)
 

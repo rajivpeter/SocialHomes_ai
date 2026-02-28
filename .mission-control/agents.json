@@ -1,10 +1,11 @@
 {
   "createdAt": "2026-02-18T11:37:03.993Z",
   "pipeline": {
-    "status": "running",
+    "status": "completed",
     "mode": "supervised",
     "currentAgent": "ba",
-    "startedAt": "2026-02-27T19:57:48.157Z"
+    "startedAt": "2026-02-27T23:36:11.396Z",
+    "completedAt": "2026-02-28T00:10:43.946Z"
   },
   "agents": {
     "ba": {
@@ -37,11 +38,11 @@
       "exitCode": 0
     },
     "devops": {
-      "status": "idle",
+      "status": "completed",
       "pid": null,
-      "startedAt": null,
-      "completedAt": null,
-      "exitCode": null
+      "startedAt": "2026-02-27T23:36:11.396Z",
+      "completedAt": "2026-02-28T00:10:43.946Z",
+      "exitCode": 0
     },
     "uiux": {
       "status": "completed",

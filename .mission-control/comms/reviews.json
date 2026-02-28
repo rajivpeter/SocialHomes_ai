@@ -1,0 +1,32 @@
+[
+  {
+    "id": "cr_1772224818602_a7nse",
+    "timestamp": "2026-02-27T20:40:18.602Z",
+    "reviewer": "devops",
+    "reviewerLabel": "DevOps Engineer",
+    "target": "tester",
+    "targetLabel": "QA Tester",
+    "summary": "QA Tester produced 11 deliverable(s). Key outputs: DEV-FIX-LIST.md, tests//.pytest_cache, tests//__pycache__.",
+    "findings": [
+      "Ensure build scripts produce deployable artifacts",
+      "Review test results for deployment blockers",
+      "Review deliverables: DEV-FIX-LIST.md, tests//.pytest_cache, tests//__pycache__, tests//conftest.py, tests//debug_login.png"
+    ],
+    "approved": true
+  },
+  {
+    "id": "cr_1772224818603_x7iyq",
+    "timestamp": "2026-02-27T20:40:18.603Z",
+    "reviewer": "devops",
+    "reviewerLabel": "DevOps Engineer",
+    "target": "security",
+    "targetLabel": "Cyber Security",
+    "summary": "Cyber Security produced 1 deliverable(s). Key outputs: docs/security-audit.md.",
+    "findings": [
+      "Ensure build scripts produce deployable artifacts",
+      "Check security audit for critical issues that block deployment",
+      "Review deliverables: docs/security-audit.md"
+    ],
+    "approved": true
+  }
+]

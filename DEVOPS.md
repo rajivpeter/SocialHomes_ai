@@ -1,8 +1,42 @@
 # SocialHomes.Ai — DevOps & Infrastructure Guide
 
-**Last Updated**: 09/02/2026 (v3 — Security Hardening Release)
-**Maintainer**: DevOps Senior
-**Status**: Production (live on Cloud Run, min-instances=1, uptime monitored)
+**Last Updated**: 27/02/2026 (v5 — Phase 5.5 Complete: Staging, Monitoring, Backups, CDN, Domain, Runbook)
+**Maintainer**: DevOps Engineer Agent (Yantra Works)
+**Status**: Production (live on Cloud Run, monitored, backed up, CDN-enabled)
+
+---
+
+## Table of Contents
+
+1. [Live Deployment](#1-live-deployment)
+2. [Architecture Overview](#2-architecture-overview)
+3. [CI/CD Pipeline](#3-cicd-pipeline)
+4. [Docker Build](#4-docker-build)
+5. [Cloud Run Configuration](#5-cloud-run-configuration)
+6. [Staging Environment](#6-staging-environment)
+7. [Auto-Scaling Configuration](#7-auto-scaling-configuration)
+8. [Firestore Database](#8-firestore-database)
+9. [Monitoring & Alerting](#9-monitoring--alerting)
+10. [Log-Based Monitoring](#10-log-based-monitoring)
+11. [Database Backup Strategy](#11-database-backup-strategy)
+12. [CDN & Caching Strategy](#12-cdn--caching-strategy)
+13. [Custom Domain & SSL](#13-custom-domain--ssl)
+14. [Security Configuration](#14-security-configuration)
+15. [API Server](#15-api-server)
+16. [Frontend (React SPA)](#16-frontend-react-spa)
+17. [Environment Variables & Secrets](#17-environment-variables--secrets)
+18. [Incident Response Runbook](#18-incident-response-runbook)
+19. [Rollback Procedures](#19-rollback-procedures)
+20. [Database Recovery](#20-database-recovery)
+21. [Secret Rotation](#21-secret-rotation)
+22. [Scaling Playbook](#22-scaling-playbook)
+23. [On-Call Guide](#23-on-call-guide)
+24. [Post-Mortem Template](#24-post-mortem-template)
+25. [Local Development](#25-local-development)
+26. [Cost Estimate](#26-cost-estimate)
+27. [Known Issues & Technical Debt](#27-known-issues--technical-debt)
+28. [File Reference](#28-file-reference)
+29. [Setup Scripts Reference](#29-setup-scripts-reference)
 
 ---
 
@@ -13,81 +47,135 @@
 | **Live Application** | https://socialhomes-587984201316.europe-west2.run.app |
 | **Health Check** | https://socialhomes-587984201316.europe-west2.run.app/health |
 | **API Base** | https://socialhomes-587984201316.europe-west2.run.app/api/v1/ |
+| **Staging** | https://socialhomes-staging-587984201316.europe-west2.run.app |
 | **GitHub Repo** | https://github.com/rajivpeter/SocialHomes_ai |
 | **GCP Project** | `${FIREBASE_PROJECT_ID}` |
 | **Cloud Run Service** | `socialhomes` in `europe-west2` |
-| **Artifact Registry** | `europe-west2-docker.pkg.dev/${FIREBASE_PROJECT_ID}/socialhomes/app` |
+| **Staging Service** | `socialhomes-staging` in `europe-west2` |
+| **Artifact Registry** | `europe-west2-docker.pkg.dev/${PROJECT_ID}/socialhomes/app` |
 | **Firestore Database** | Default database in `${FIREBASE_PROJECT_ID}` |
+| **Load Balancer IP** | `34.149.218.63` |
+| **Custom Domain** | `socialhomes.ai` (SSL: Google-managed) |
 
 ---
 
 ## 2. Architecture Overview
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│                    INTERNET                              │
-└───────────────────────┬─────────────────────────────────┘
-                        │
-                        ▼
-┌─────────────────────────────────────────────────────────┐
-│              Google Cloud Run (europe-west2)             │
-│                                                         │
-│  ┌───────────────────────────────────────────────────┐  │
-│  │           Node.js Express Server (:8080)           │  │
-│  │                                                   │  │
-│  │  GET /health          → Health check endpoint     │  │
-│  │  GET /api/v1/*        → API routes (12 modules)   │  │
-│  │  GET /*               → React SPA (index.html)    │  │
-│  └──────────────────┬────────────────────────────────┘  │
-│                     │                                    │
-│                     ▼                                    │
-│  ┌───────────────────────────────────────────────────┐  │
-│  │         Google Cloud Firestore (NoSQL)             │  │
-│  │   17 collections · ~550 documents                  │  │
-│  └───────────────────────────────────────────────────┘  │
-│                                                         │
-└─────────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────────────┐
+│                         INTERNET                                      │
+│                            │                                          │
+│                    ┌───────┴───────┐                                  │
+│                    │  Cloud DNS     │  socialhomes.ai                 │
+│                    └───────┬───────┘                                  │
+│                            │                                          │
+│                    ┌───────┴───────────────────┐                      │
+│                    │  Global External LB        │  34.149.218.63     │
+│                    │  ├── Cloud Armor (WAF)     │  XSS/SQLi/RFI     │
+│                    │  ├── Cloud CDN             │  Edge caching      │
+│                    │  └── SSL Termination       │  Google-managed    │
+│                    └───────┬───────────────────┘                      │
+│                            │                                          │
+│              ┌─────────────┴─────────────┐                            │
+│              │                           │                            │
+│     ┌────────┴────────┐        ┌────────┴────────┐                   │
+│     │  Production      │        │  Staging         │                  │
+│     │  Cloud Run       │        │  Cloud Run       │                  │
+│     │  socialhomes     │        │  socialhomes-stg │                  │
+│     │  min:1  max:10   │        │  min:0  max:3    │                  │
+│     │  1Gi / 1CPU      │        │  512Mi / 1CPU    │                  │
+│     └────────┬────────┘        └────────┬────────┘                   │
+│              │                           │                            │
+│     ┌────────┴────────────────────────────┴─────────┐                │
+│     │                                               │                │
+│     │     Node.js Express Server (:8080)            │                │
+│     │     ├── /health          Health probe         │                │
+│     │     ├── /api/v1/*        REST API (21 routes) │                │
+│     │     └── /*               React SPA            │                │
+│     │                                               │                │
+│     └───────────┬───────────────┬──────────┬────────┘                │
+│                 │               │          │                          │
+│      ┌──────────┴──┐  ┌────────┴──┐  ┌────┴─────────┐              │
+│      │  Firestore   │  │  Vertex AI │  │  External    │              │
+│      │  17 colls    │  │  Gemini    │  │  APIs        │              │
+│      │  ~550 docs   │  │  Pro/Flash │  │  Police.uk   │              │
+│      │              │  │            │  │  DEFRA Flood  │              │
+│      │              │  │            │  │  Open-Meteo   │              │
+│      │              │  │            │  │  Postcodes.io │              │
+│      └──────────────┘  └───────────┘  └──────────────┘              │
+│                                                                       │
+│     ┌──────────────────────────────────────────────┐                 │
+│     │  Supporting Services                          │                │
+│     │  ├── Secret Manager (4 secrets)               │                │
+│     │  ├── Cloud Storage (backups bucket)           │                │
+│     │  ├── Cloud Scheduler (backup jobs)            │                │
+│     │  ├── Cloud Monitoring (alerts + dashboard)    │                │
+│     │  ├── Cloud Logging → BigQuery sink            │                │
+│     │  └── Artifact Registry (Docker images)        │                │
+│     └──────────────────────────────────────────────┘                 │
+└──────────────────────────────────────────────────────────────────────┘
 ```
 
-**Single-container deployment**: The Express server serves both the API (`/api/v1/*`) and the React SPA static files (`/*`) from one Cloud Run service. No separate frontend hosting is needed.
+**Single-container deployment**: Express serves both the API (`/api/v1/*`) and React SPA static files (`/*`) from one Cloud Run service. No separate frontend hosting needed.
 
 ---
 
 ## 3. CI/CD Pipeline
 
-### Flow
+### Production Pipeline (main branch)
 
 ```
 Developer pushes to main
         │
-        ▼
-GitHub (rajivpeter/SocialHomes_ai)
-        │
-        ▼  (Cloud Build trigger on push to main)
-Google Cloud Build
-        │
-        ├── Step 1: docker build (multi-stage)
-        │     ├── Stage 1: Build React client (npm ci + vite build)
-        │     ├── Stage 2: Build Express server (npm ci + tsc)
-        │     └── Stage 3: Production image (node:20-slim)
-        │
-        ├── Step 2: docker push → Artifact Registry
-        │     ├── :$COMMIT_SHA tag
-        │     └── :latest tag
-        │
-        └── Step 3: gcloud run deploy
-              └── Deploys new revision to Cloud Run
+        ▼  (Cloud Build trigger: cloudbuild.yaml)
+┌──────────────────────────────────────────┐
+│ Step 1: Docker Build (multi-stage)       │
+│   ├── Stage 1: Build React client        │
+│   ├── Stage 2: Build Express server      │
+│   └── Stage 3: Production image          │
+│                                          │
+│ Step 2: Smoke Test (health check)        │
+│   └── Start server, verify /health       │
+│                                          │
+│ Step 3: Push to Artifact Registry        │
+│   ├── :$COMMIT_SHA tag                   │
+│   └── :latest tag                        │
+│                                          │
+│ Step 4: Deploy to Cloud Run              │
+│   └── Zero-downtime revision deployment  │
+│                                          │
+│ Step 5: Post-deploy verification         │
+│   └── Health check with 5 retries        │
+└──────────────────────────────────────────┘
 ```
 
-### Trigger Configuration
+### Staging Pipeline (PR branches)
 
-The Cloud Build trigger should be configured in GCP Console:
-- **Source**: GitHub repository `rajivpeter/SocialHomes_ai`
-- **Branch**: `^main$`
-- **Config file**: `cloudbuild.yaml` (in repo root)
-- **Build config location**: Repository
+```
+Developer opens PR / pushes to branch
+        │
+        ▼  (Cloud Build trigger: cloudbuild-staging.yaml)
+┌──────────────────────────────────────────┐
+│ Build → Test → Push → Deploy to staging  │
+│ socialhomes-staging (scale-to-zero)      │
+└──────────────────────────────────────────┘
+```
 
-### How to Deploy
+### GitHub Actions CI (all branches)
+
+```
+Push/PR to main
+        │
+        ▼  (.github/workflows/ci.yml)
+┌──────────────────────────────────────────┐
+│ Job 1: TypeScript check + Lint           │
+│ Job 2: Vitest unit tests (226 tests)     │
+│ Job 3: Build frontend + server           │
+│ Job 4: Selenium E2E tests (main only)    │
+└──────────────────────────────────────────┘
+```
+
+### Deploy Commands
 
 ```bash
 # Standard deploy (auto-triggered)
@@ -96,28 +184,11 @@ git commit -m "description of changes"
 git push origin main
 
 # Monitor build
-# https://console.cloud.google.com/cloud-build/builds?project=${FIREBASE_PROJECT_ID}
-```
+gcloud builds list --limit=5 --project=${PROJECT_ID}
+gcloud builds log <BUILD_ID> --project=${PROJECT_ID}
 
-### Manual Deploy (if needed)
-
-```bash
-# Build and push image locally
-gcloud builds submit --config=cloudbuild.yaml \
-  --project=${FIREBASE_PROJECT_ID}
-
-# Or deploy a specific image
-gcloud run deploy socialhomes \
-  --image=europe-west2-docker.pkg.dev/${FIREBASE_PROJECT_ID}/socialhomes/app:latest \
-  --region=europe-west2 \
-  --platform=managed \
-  --allow-unauthenticated \
-  --memory=1Gi \
-  --cpu=1 \
-  --min-instances=0 \
-  --max-instances=10 \
-  --port=8080 \
-  --set-env-vars=NODE_ENV=production
+# Manual deploy
+gcloud builds submit --config=cloudbuild.yaml --project=${PROJECT_ID}
 ```
 
 ---
@@ -130,7 +201,14 @@ gcloud run deploy socialhomes \
 |-------|-----------|---------|--------|
 | `build-client` | `node:20-slim` | Compiles React SPA with Vite | `/build/app/dist/` |
 | `build-server` | `node:20-slim` | Compiles Express server with tsc | `/build/server/dist/` |
-| `production` | `node:20-slim` | Production runtime | Final image |
+| `production` | `node:20-slim` | Production runtime (non-root) | Final image |
+
+### Security Features
+
+- **Non-root user**: Runs as `appuser` (UID 1001)
+- **dumb-init**: Proper PID 1 signal handling for graceful shutdown
+- **Minimal image**: Only production dependencies installed
+- **Health check**: Built-in Docker HEALTHCHECK for local development
 
 ### Production Image Layout
 
@@ -143,7 +221,7 @@ gcloud run deploy socialhomes \
 │       ├── index.js         (entry point)
 │       ├── middleware/
 │       ├── models/
-│       ├── routes/
+│       ├── routes/          (21 route modules)
 │       └── services/
 └── app/
     └── dist/                (Vite build output)
@@ -156,325 +234,193 @@ gcloud run deploy socialhomes \
 ### Build Locally
 
 ```bash
-# Full build
+# Build
 docker build -t socialhomes:local .
 
-# Run locally
+# Run
 docker run -p 8080:8080 \
   -e PORT=8080 \
   -e NODE_ENV=production \
   -e GOOGLE_CLOUD_PROJECT=${FIREBASE_PROJECT_ID} \
   socialhomes:local
+
+# Access
+open http://localhost:8080
 ```
 
 ---
 
 ## 5. Cloud Run Configuration
 
-| Setting | Value | Notes |
-|---------|-------|-------|
-| **Service Name** | `socialhomes` | |
-| **Region** | `europe-west2` (London) | UK data residency |
-| **CPU** | 1 vCPU | |
-| **Memory** | 1 GiB | |
-| **Min Instances** | 1 | Always-warm instance (no cold starts) |
-| **Max Instances** | 10 | |
-| **Port** | 8080 | Express listens on `$PORT` |
-| **Concurrency** | 80 (default) | |
-| **Timeout** | 300s (default) | |
-| **Auth** | `allUsers` (public) | No IAM gate — app handles auth |
-| **CPU Allocation** | Only during requests | |
+| Setting | Production | Staging |
+|---------|-----------|---------|
+| **Service Name** | `socialhomes` | `socialhomes-staging` |
+| **Region** | `europe-west2` (London) | `europe-west2` (London) |
+| **CPU** | 1 vCPU | 1 vCPU |
+| **Memory** | 1 GiB | 512 MiB |
+| **Min Instances** | 1 (always warm) | 0 (scale to zero) |
+| **Max Instances** | 10 | 3 |
+| **Concurrency** | 80 | 80 |
+| **Timeout** | 300s | 300s |
+| **Auth** | `allUsers` (public) | `allUsers` (public) |
+| **CPU Allocation** | Only during requests | Only during requests |
+| **Startup Boost** | Enabled | Disabled |
 
-### Environment Variables & Secrets (set in Cloud Run)
+---
 
-| Variable | Value | Source |
-|----------|-------|--------|
-| `PORT` | `8080` | Cloud Run default |
-| `NODE_ENV` | `production` | Set in cloudbuild.yaml |
-| `GOOGLE_CLOUD_PROJECT` | Auto-injected | Cloud Run metadata |
-| `FIREBASE_API_KEY` | (secret) | **Google Secret Manager** |
-| `FIREBASE_AUTH_DOMAIN` | (secret) | **Google Secret Manager** |
-| `FIREBASE_PROJECT_ID` | (secret) | **Google Secret Manager** |
-| `DEMO_USER_PASSWORD` | (secret) | **Google Secret Manager** |
+## 6. Staging Environment
 
-**IMPORTANT**: Secrets are injected via `--update-secrets` in `cloudbuild.yaml`, NOT via env vars. See Section 16 for setup.
+### Purpose
+
+- Pre-production testing of PRs before merging to main
+- QA verification of new features
+- Separate from production (uses same Firebase project but tagged as staging)
+
+### Setup
+
+```bash
+# First-time setup (run once)
+bash scripts/setup-staging.sh
+```
+
+### How It Works
+
+1. Developer opens PR against `main`
+2. Cloud Build trigger (`cloudbuild-staging.yaml`) fires
+3. Image built, tested, pushed to `app-staging` registry
+4. Deployed to `socialhomes-staging` Cloud Run service
+5. Tagged with `pr-<SHORT_SHA>` for traceability
+6. Scales to zero when idle (cost-effective)
+7. Old revisions cleaned up weekly via Cloud Scheduler
+
+### Staging URL
+
+```
+https://socialhomes-staging-587984201316.europe-west2.run.app
+```
+
+### Environment Differentiation
+
+| Variable | Production | Staging |
+|----------|-----------|---------|
+| `NODE_ENV` | `production` | `staging` |
+| Min instances | 1 | 0 |
+| Max instances | 10 | 3 |
+| Memory | 1Gi | 512Mi |
+
+---
+
+## 7. Auto-Scaling Configuration
+
+### Production Scaling Policy
+
+| Parameter | Value | Rationale |
+|-----------|-------|-----------|
+| **Min instances** | 1 | Eliminates cold starts for first request |
+| **Max instances** | 10 | Handles ~800 concurrent requests (80 x 10) |
+| **Concurrency** | 80 | Optimal for Node.js single-thread + async I/O |
+| **CPU throttling** | Enabled | CPU only allocated during requests (cost saving) |
+| **Startup CPU boost** | Enabled | Extra CPU during cold start for faster init |
+
+### Scaling Triggers
+
+Cloud Run auto-scales based on:
+1. **CPU utilisation** — Target ~70% (managed by Cloud Run)
+2. **Concurrent requests** — Scales when approaching concurrency limit
+3. **Request latency** — New instances added if queue depth increases
 
 ### Cold Start Behaviour
 
-- Min instances = 1 ensures one warm instance is always available (no cold starts)
-- Configured in `cloudbuild.yaml` so it persists across deployments
-- Additional instances beyond 1 may still cold-start under load spikes (~2-3s)
-- To revert to scale-to-zero: change `--min-instances` to `0` in `cloudbuild.yaml`
+- **Production**: Min instances = 1 ensures one warm instance always available
+- **Additional instances**: May cold-start under load spikes (~2-3s)
+- **Startup boost**: Extra CPU during init reduces cold start to ~1.5s
+
+### Tuning Commands
 
 ```bash
-# Check current min-instances setting
+# View current scaling config
 gcloud run services describe socialhomes --region=europe-west2 \
-  --format="value(spec.template.metadata.annotations['autoscaling.knative.dev/minScale'])"
+  --format="table(spec.template.metadata.annotations)"
+
+# Update min instances
+gcloud run services update socialhomes --region=europe-west2 \
+  --min-instances=0
+
+# Update max instances
+gcloud run services update socialhomes --region=europe-west2 \
+  --max-instances=20
+
+# Update concurrency
+gcloud run services update socialhomes --region=europe-west2 \
+  --concurrency=100
 ```
 
 ---
 
-## 6. Firestore Database
+## 8. Firestore Database
 
 ### Project & Access
 
 - **GCP Project**: `${FIREBASE_PROJECT_ID}`
 - **Database**: `(default)` in Firestore Native mode
-- **Authentication**: Cloud Run's default service account auto-authenticates
-- **Console**: https://console.cloud.google.com/firestore/databases?project=${FIREBASE_PROJECT_ID}
+- **Authentication**: Cloud Run default SA auto-authenticates
+- **Console**: https://console.cloud.google.com/firestore/databases
 
-### Collections
+### Collections (17)
 
-| Collection | Document Count | Key Fields |
-|------------|---------------|------------|
+| Collection | Documents | Key Fields |
+|------------|----------|------------|
 | `organisations` | 1 | `name`, `abbreviation`, `totalUnits` |
 | `regions` | 3 | `id`, `name`, `stats` |
 | `localAuthorities` | 5 | `id`, `name`, `regionId` |
 | `estates` | 9 | `id`, `name`, `localAuthorityId` |
 | `blocks` | 16 | `id`, `name`, `estateId` |
 | `properties` | 75 | `id`, `address`, `type`, `compliance`, `hact` |
-| `tenants` | 68 | `id`, `firstName`, `lastName`, `rentBalance`, `hact` |
-| `cases` | 279 | `id`, `type`, `status`, `priority`, `tenantId`, `propertyId` |
+| `tenants` | 68 | `id`, `firstName`, `lastName`, `rentBalance` |
+| `cases` | 279 | `id`, `type`, `status`, `priority` |
 | `activities` | 8 | `id`, `tenantId`, `caseId`, `date` |
 | `tsmMeasures` | 22 | `id`, `name`, `value`, `target` |
 | `hactCodes` | ~15 | Code list name → array of code mappings |
-| `communications` | 0 | (ready for app-generated data) |
-| `rentTransactions` | 0 | (ready for app-generated data) |
-| `users` | 0 | (ready for Firebase Auth integration) |
-| `auditLog` | 0 | (append-only) |
-| `notifications` | 0 | (ready for app-generated data) |
-| `voidProperties` | 0 | (static data in frontend; not yet seeded) |
-
-### Seeding Data
-
-Data is seeded via the admin API endpoint. The seed script reads static data from the frontend data files and writes to Firestore with HACT code enrichment.
-
-```bash
-# Trigger seed from API (POST with JSON body containing all static data)
-curl -X POST https://socialhomes-587984201316.europe-west2.run.app/api/v1/admin/seed \
-  -H "Content-Type: application/json" \
-  -H "X-Persona: coo" \
-  -d @seed-data.json
-```
-
-The seed operation is idempotent (uses `set` not `add` — documents with the same ID are overwritten).
-
-### Composite Indexes
-
-The file `firestore.indexes.json` defines 17 composite indexes. **These are NOT currently deployed** — the application was refactored to use in-memory filtering instead of Firestore composite queries (sufficient for the current dataset size of ~550 documents).
-
-If the dataset grows significantly (>10,000 documents), deploy the indexes:
-
-```bash
-# Deploy Firestore indexes (requires Firebase CLI)
-npm install -g firebase-tools
-firebase login
-firebase init firestore --project ${FIREBASE_PROJECT_ID}
-firebase deploy --only firestore:indexes
-```
-
-Then refactor the API routes back to Firestore-native `where()` + `orderBy()` queries for performance.
+| `communications` | 0 | App-generated data |
+| `rentTransactions` | 0 | App-generated data |
+| `users` | 5 | Firebase Auth profiles |
+| `auditLog` | 0 | Append-only audit trail |
+| `notifications` | 0 | App-generated notifications |
+| `voidProperties` | 0 | Void property tracking |
 
 ### Security Rules
 
-The file `firestore.rules` defines persona-based RBAC rules. **Deployed to production** on 09/02/2026.
-
-Rules enforce:
+Firestore security rules (`firestore.rules`) enforce:
 - All reads require authentication (`request.auth != null`)
-- Writes use persona hierarchy from custom claims (`request.auth.token.persona`)
+- Writes use persona hierarchy from custom claims
 - Audit log is append-only (no update/delete)
 - Users can only update their own profile (unless admin)
 
-Note: The Express API uses Firebase Admin SDK which bypasses security rules. These rules protect against any future direct client-side Firestore access.
-
-### Cloud Armor WAF
-
-A Cloud Armor security policy (`socialhomes-waf`) is attached to the load balancer:
-
-| Rule | Priority | Action | Description |
-|------|----------|--------|-------------|
-| XSS Protection | 1000 | deny-403 | OWASP XSS v3.3 stable rules |
-| SQL Injection | 1001 | deny-403 | OWASP SQLi v3.3 stable rules |
-| Remote File Inclusion | 1002 | deny-403 | OWASP RFI v3.3 stable rules |
-| Rate Limiting | 900 | throttle | 100 requests/minute per IP, exceed = 429 |
-| Default | 2147483647 | allow | Allow all other traffic |
-
-```bash
-# View current rules
-gcloud compute security-policies describe socialhomes-waf --project=${FIREBASE_PROJECT_ID}
-
-# Add a new rule
-gcloud compute security-policies rules create <PRIORITY> \
-  --security-policy=socialhomes-waf \
-  --expression="<CEL expression>" \
-  --action=deny-403
-```
-
-### Load Balancer
-
-| Component | Value |
-|-----------|-------|
-| **External IP** | 34.149.218.63 |
-| **URL Map** | `socialhomesai` |
-| **Backend Service** | `socialhomes-backend` (Cloud Armor attached) |
-| **NEG** | `socialhomes-neg` (serverless, europe-west2) |
-| **SSL Cert** | Managed, domains: `socialhomes.ai`, `www.socialhomes.ai` (PROVISIONING) |
-| **HTTP Redirect** | `socialhomesai-redirect` → HTTPS |
-
 ---
 
-## 7. API Server
+## 9. Monitoring & Alerting
 
-### Entry Point
-
-`server/dist/index.js` (compiled from `server/src/index.ts`)
-
-### Middleware Stack (in order)
-
-1. `compression` — gzip response compression
-2. `helmet` — Security headers (CSP disabled for SPA)
-3. `cors` — Cross-origin resource sharing (open)
-4. `morgan('combined')` — HTTP request logging to stdout
-5. `express.json({ limit: '10mb' })` — JSON body parsing
-6. `express.urlencoded({ extended: true })` — URL-encoded body parsing
-
-### Route Modules (12)
-
-| Mount Path | Module | Auth | Description |
-|------------|--------|------|-------------|
-| `/health` | inline | none | Health check for Cloud Run |
-| `/api/v1/properties` | `properties.ts` | all | Property CRUD + listing |
-| `/api/v1/tenants` | `tenants.ts` | all | Tenant CRUD + activities + cases |
-| `/api/v1/cases` | `cases.ts` | all | Case CRUD + type filtering |
-| `/api/v1/explore` | `explore.ts` | all | Hierarchy drill-down |
-| `/api/v1/briefing` | `briefing.ts` | all | Daily AI briefing (persona-scoped) |
-| `/api/v1/compliance` | `compliance.ts` | all | Big 6 compliance dashboard |
-| `/api/v1/rent` | `rent.ts` | all | Rent & arrears dashboard |
-| `/api/v1/reports` | `reports.ts` | all | TSM measures + report data |
-| `/api/v1/ai` | `ai.ts` | all | AI drafts + chat responses |
-| `/api/v1/admin` | `admin.ts` | manager+ | Audit log, user mgmt, seed |
-| `/api/v1/public-data` | `public-data.ts` | all | EPC, IMD, weather proxy |
-| `/api/v1/export` | `export.ts` | all | HACT v3.5 JSON export |
-
-### Authentication (Dual Mode)
-
-Supports two authentication modes simultaneously:
-
-**1. Firebase JWT (production)**: Client sends `Authorization: Bearer <idToken>`. The server verifies the token via Firebase Admin SDK, loads the user profile from Firestore, and attaches it to `req.user`.
-
-**2. Legacy X-Persona (development/testing)**: When no `Authorization` header is present, the server reads `X-Persona` header and attaches a demo user. This allows backward-compatible API testing via `curl`.
-
-#### Demo Accounts (Firebase Auth)
-
-| Email | Password | Persona |
-|-------|----------|---------|
-| helen.carter@rcha.org.uk | [STORED IN SECRET MANAGER] | coo |
-| james.wright@rcha.org.uk | [STORED IN SECRET MANAGER] | head-of-housing |
-| priya.patel@rcha.org.uk | [STORED IN SECRET MANAGER] | manager |
-| sarah.mitchell@rcha.org.uk | [STORED IN SECRET MANAGER] | housing-officer |
-| mark.johnson@rcha.org.uk | [STORED IN SECRET MANAGER] | operative |
-
-#### Auth API Endpoints
-
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/api/v1/auth/me` | GET | Get authenticated user profile (requires Bearer token) |
-| `/api/v1/auth/seed-users` | POST | Create/sync demo Firebase Auth users |
-| `/login` | SPA | Frontend login page with email/password and demo mode |
-
-Valid personas: `coo`, `head-of-housing`, `manager`, `housing-officer`, `operative`
-
-### RBAC Middleware
-
-`requirePersona(minLevel)` checks the persona hierarchy:
-```
-coo (5) > head-of-service (4) > manager (3) > housing-officer (2) > operative (1)
-```
-
----
-
-## 8. Frontend (React SPA)
-
-### Tech Stack
-
-| Technology | Version | Purpose |
-|------------|---------|---------|
-| React | 19 | UI framework |
-| TypeScript | 5.7 | Type safety |
-| Vite | 7.3 | Build tool + dev server |
-| Tailwind CSS | 4 | Styling (dark-mode first) |
-| React Router | 6 | Client-side routing |
-| React Query | 5 | Server state management |
-| Leaflet | 1.9 | 2D maps (OpenStreetMap) |
-| Three.js | r128 | 3D building visualisation |
-| Recharts | — | Charts and graphs |
-| Lucide React | — | Icons |
-
-### API Communication
-
-The frontend uses React Query hooks (`app/src/hooks/useApi.ts`) with a `withFallback` mechanism:
-
-1. On first load, checks `/health` to determine if the API is available
-2. If API healthy: all data fetched from Express API -> Firestore
-3. If API unavailable: falls back to static data in `app/src/data/`
-
-This ensures the frontend works both locally (dev, no server) and in production (Cloud Run).
-
-### Build Output
+### Setup
 
 ```bash
-cd app && npm run build
-# Output: app/dist/
-#   index.html       (0.56 kB)
-#   assets/index.css (78.53 kB, 11.82 kB gzip)
-#   assets/index.js  (2,093 kB, 545 kB gzip)
+# Run the monitoring setup script (one-time)
+bash scripts/setup-monitoring.sh
 ```
 
-The large JS bundle includes Three.js and Leaflet. Future optimisation: code-split with dynamic `import()`.
+### Alert Policies
 
----
+| Alert | Condition | Severity | Notification |
+|-------|-----------|----------|-------------|
+| **Error Rate > 5%** | 5xx response rate exceeds 5% for 5 min | CRITICAL | Email |
+| **P95 Latency > 1s** | Request P95 latency exceeds 1000ms for 5 min | WARNING | Email |
+| **Memory > 80%** | Container memory utilisation > 80% for 5 min | WARNING | Email |
+| **Health Check Failed** | Uptime check returns non-healthy for 5 min | CRITICAL | Email |
+| **Backup Job Failed** | Firestore backup scheduler job fails | WARNING | Email |
 
-## 9. Monitoring & Observability
-
-### Health Check
-
-```bash
-curl -s https://socialhomes-587984201316.europe-west2.run.app/health | jq .
-```
-
-Expected response:
-```json
-{
-  "status": "healthy",
-  "service": "socialhomes-api",
-  "version": "1.0.0",
-  "timestamp": "2026-02-08T23:17:00.000Z"
-}
-```
-
-### Logs
-
-Cloud Run logs stream to Google Cloud Logging:
-
-```bash
-# View recent logs
-gcloud run services logs read socialhomes \
-  --region=europe-west2 \
-  --limit=100
-
-# Or use Cloud Console:
-# https://console.cloud.google.com/run/detail/europe-west2/socialhomes/logs?project=${FIREBASE_PROJECT_ID}
-```
-
-Morgan middleware logs every HTTP request in Apache combined format.
-
-### Uptime Monitoring
-
-An automated uptime check runs every 5 minutes from 3 global regions:
+### Uptime Check
 
 | Setting | Value |
 |---------|-------|
-| **Check Name** | `SocialHomes.Ai Health Check` |
 | **URL** | `https://socialhomes-587984201316.europe-west2.run.app/health` |
 | **Protocol** | HTTPS (GET) |
 | **Period** | 300s (5 minutes) |
@@ -482,471 +428,820 @@ An automated uptime check runs every 5 minutes from 3 global regions:
 | **Content match** | `healthy` |
 | **Regions** | Europe, USA Virginia, Asia Pacific |
 
-View at: https://console.cloud.google.com/monitoring/uptime?project=${FIREBASE_PROJECT_ID}
-
-```bash
-# List uptime checks
-gcloud monitoring uptime list-configs --project=${FIREBASE_PROJECT_ID}
-
-# Delete if needed
-gcloud monitoring uptime delete <CHECK_ID> --project=${FIREBASE_PROJECT_ID}
-```
-
-### Metrics
-
-Cloud Run auto-provides:
-- Request count, latency (p50, p95, p99)
-- Instance count, CPU/memory utilisation
-- Billable container instance time
-- Cold start frequency
-
-View at: https://console.cloud.google.com/run/detail/europe-west2/socialhomes/metrics?project=${FIREBASE_PROJECT_ID}
-
-### Error Tracking
-
-The Express error handler (`server/src/middleware/error-handler.ts`) catches all unhandled errors and returns structured JSON:
+### Health Endpoint Response
 
 ```json
 {
-  "error": "Error message",
-  "status": 500
-}
-```
-
-Errors are logged to stdout and captured by Cloud Logging.
-
----
-
-## 10. Data Integrity & HACT Compliance
-
-### UK Housing Data Standard (HACT v3.5)
-
-The application stores HACT-coded sub-objects alongside application data:
-
-```json
-{
-  "id": "prop-001",
-  "address": "Flat 1, Oak Tower",
-  "type": "flat",
-  "hact": {
-    "propertyPrimaryTypeCode": "07-00-00",
-    "propertySubtypeCode": "07-02-00",
-    "tenureTypeCode": "100",
-    "heatingTypeCode": "10"
+  "status": "healthy",
+  "service": "socialhomes-api",
+  "version": "1.0.0",
+  "timestamp": "2026-02-27T12:00:00.000Z",
+  "uptime": 86400,
+  "memory": {
+    "rss": 120,
+    "heapUsed": 80,
+    "heapTotal": 150
+  },
+  "firestore": {
+    "connected": true,
+    "latencyMs": 45
+  },
+  "cacheStatus": {
+    "hits": 1200,
+    "misses": 300,
+    "hitRate": 80
   }
 }
 ```
 
-### HACT Export Endpoint
+### Monitoring Dashboard
+
+A custom Cloud Monitoring dashboard (`SocialHomes.Ai — Production Dashboard`) provides:
+- Request count by status code class (2xx/4xx/5xx)
+- P95 latency trend
+- Instance count (auto-scaling visualisation)
+- Memory utilisation per instance
+
+**Console**: https://console.cloud.google.com/monitoring/dashboards
+
+---
+
+## 10. Log-Based Monitoring
+
+### Log-Based Metrics
+
+| Metric Name | Filter | Purpose |
+|-------------|--------|---------|
+| `socialhomes_5xx_errors` | `httpRequest.status>=500` | Track server errors |
+| `socialhomes_4xx_errors` | `httpRequest.status>=400 AND <500` | Track client errors |
+| `socialhomes_auth_failures` | `httpRequest.status=401` | Track auth failures |
+| `socialhomes_slow_requests` | `httpRequest.latency>"1s"` | Track slow requests |
+
+### Log Sink to BigQuery
+
+All Cloud Run logs are exported to BigQuery for long-term analysis:
+- **Dataset**: `socialhomes_logs`
+- **Location**: `europe-west2`
+- **Retention**: Indefinite (BigQuery default)
+- **PII filtering**: Application logs are structured; no PII in request logs
+
+### Viewing Logs
 
 ```bash
-# Export a property as HACT v3.5 JSON
-curl -s https://socialhomes-587984201316.europe-west2.run.app/api/v1/export/hact/property/prop-001 \
-  -H "X-Persona: coo" | jq .
+# Recent Cloud Run logs
+gcloud run services logs read socialhomes \
+  --region=europe-west2 --limit=100
+
+# Filter by severity
+gcloud logging read 'resource.type="cloud_run_revision"
+  AND resource.labels.service_name="socialhomes"
+  AND severity>=ERROR' \
+  --limit=50 --project=${PROJECT_ID}
+
+# Filter by request ID
+gcloud logging read 'resource.type="cloud_run_revision"
+  AND jsonPayload.requestId="<REQUEST_ID>"' \
+  --project=${PROJECT_ID}
+
+# BigQuery analysis (after log sink is active)
+bq query --use_legacy_sql=false '
+  SELECT
+    httpRequest.requestUrl,
+    httpRequest.status,
+    httpRequest.latency,
+    timestamp
+  FROM `PROJECT_ID.socialhomes_logs.run_googleapis_com_requests_*`
+  WHERE httpRequest.status >= 500
+  ORDER BY timestamp DESC
+  LIMIT 100'
 ```
 
 ---
 
-## 11. Known Issues & Technical Debt
+## 11. Database Backup Strategy
 
-### Current Limitations
+### Setup
 
-| Issue | Severity | Notes |
-|-------|----------|-------|
-| Composite indexes not deployed | Low | Using in-memory filtering. Fine for current dataset (~550 docs). Deploy indexes if >10K docs |
-| Large JS bundle (~2.5 MB) | Medium | Three.js + Leaflet. Code-split with dynamic imports for production |
-| WebGL in headless Chrome | Low | TC-404 (3D visualisation) fails in headless Selenium. Works in real browsers |
-| No custom domain | Low | Currently using default `*.run.app` domain |
+```bash
+# Run the backup setup script (one-time)
+bash scripts/setup-backups.sh
+```
 
-### Production Readiness Status
+### Schedule
 
-| Item | Status | Notes |
-|------|--------|-------|
-| Firebase Authentication | **DONE** | JWT verification + legacy X-Persona backward compat |
-| Firestore security rules | **DONE** | Persona-based RBAC deployed to production |
-| Google Secret Manager | **DONE** | 4 secrets: FIREBASE_API_KEY, FIREBASE_AUTH_DOMAIN, FIREBASE_PROJECT_ID, DEMO_USER_PASSWORD |
-| Secrets removed from code | **DONE** | No API keys, passwords, or project IDs in source (commit e0c23e4) |
-| Cloud Armor WAF | **DONE** | XSS, SQLi, RFI protection + 100 req/min rate limit |
-| Load Balancer | **DONE** | Global External LB at 34.149.218.63 |
-| Custom domain SSL | **PROVISIONING** | Cert for `socialhomes.ai` + `www.socialhomes.ai` |
-| Min-instances=1 | **DONE** | Configured in `cloudbuild.yaml` |
-| Uptime monitoring | **DONE** | 5-min checks from 3 global regions |
-| Server-side data serialisation | **DONE** | All Firestore Timestamps converted to ISO strings before API response |
-| Mobile device detection | **DONE** | Login page blocks mobile users with desktop-required message |
+| Backup Type | Schedule | Destination | Retention |
+|-------------|----------|-------------|-----------|
+| **Daily** | 02:00 UTC every day | `gs://${PROJECT_ID}-firestore-backups/daily/` | 30 days |
+| **Weekly** | Sunday 03:00 UTC | `gs://${PROJECT_ID}-firestore-backups/weekly/` | 365 days |
 
-### Remaining TODO
+### Lifecycle Rules
 
-1. **Configure DNS** — Point `socialhomes.ai` A record to `34.149.218.63` to complete SSL provisioning
-2. ~~**Rotate Firebase API key**~~ — **MITIGATED**: Key restricted to allowed referrers only (Cloud Run domain, socialhomes.ai, localhost). See Section 16.
-3. **Clean git history** — Remove exposed secrets from historical commits (see Section 16). Low priority since key is now restricted.
-4. **Set up alerting policy** — Email/Slack notifications when uptime check fails
+- Daily backups older than 30 days are automatically deleted
+- Weekly backups older than 365 days are automatically deleted
+- Lifecycle rules managed via Cloud Storage bucket policy
+
+### Manual Backup
+
+```bash
+# Trigger immediate backup
+gcloud firestore export \
+  gs://${PROJECT_ID}-firestore-backups/manual/$(date +%Y%m%d-%H%M%S)/ \
+  --project=${PROJECT_ID}
+
+# List available backups
+gsutil ls gs://${PROJECT_ID}-firestore-backups/daily/
+gsutil ls gs://${PROJECT_ID}-firestore-backups/weekly/
+```
+
+### Restore from Backup
+
+```bash
+# Restore (CAUTION: overwrites existing data for matched documents)
+gcloud firestore import \
+  gs://${PROJECT_ID}-firestore-backups/daily/<TIMESTAMP>/ \
+  --project=${PROJECT_ID}
+```
+
+See [Section 20: Database Recovery](#20-database-recovery) for full procedures.
 
 ---
 
-## 12. Cost Estimate (Current Configuration)
+## 12. CDN & Caching Strategy
 
-| Resource | Monthly Estimate | Notes |
-|----------|-----------------|-------|
-| Cloud Run (min=1) | ~$15-20 | Always-on warm instance (current config) |
-| Firestore | ~$0 | Free tier covers ~550 docs easily |
-| Artifact Registry | ~$0.10 | Image storage |
-| Cloud Build | Free tier | 120 min/day free |
-| **Total (current)** | **~$15-25/month** | min-instances=1 |
+### Setup
+
+```bash
+# Enable CDN on the Load Balancer backend
+bash scripts/setup-cdn.sh
+```
+
+### Cache Headers
+
+The Express server sets appropriate `Cache-Control` headers:
+
+| Asset Type | Header | TTL | Notes |
+|-----------|--------|-----|-------|
+| Hashed JS/CSS (`*.hash.js/css`) | `public, max-age=31536000, immutable` | 1 year | Content-hash ensures cache bust on change |
+| `index.html` | `no-cache` | 0 | Always fetches fresh (checks for new deploys) |
+| API responses | `no-store` | 0 | Dynamic data, never cached at CDN |
+| Static images/fonts | `public, max-age=86400` | 1 day | |
+
+### CDN Invalidation
+
+After deployment, invalidate CDN cache for `index.html`:
+
+```bash
+# Invalidate specific path
+gcloud compute url-maps invalidate-cdn-cache socialhomesai \
+  --path="/index.html" --global --project=${PROJECT_ID}
+
+# Invalidate everything (nuclear option)
+gcloud compute url-maps invalidate-cdn-cache socialhomesai \
+  --path="/*" --global --project=${PROJECT_ID}
+```
+
+### Compression
+
+- **Brotli**: Supported by Cloud CDN automatically
+- **Gzip**: Express `compression` middleware for direct requests
+- Frontend bundle: ~2.5MB uncompressed, ~545KB gzipped
 
 ---
 
-## 13. Rollback Procedure
+## 13. Custom Domain & SSL
 
-Every deploy is tagged with `$COMMIT_SHA`. To rollback:
+### Setup
+
+```bash
+# Run domain setup script for guidance
+bash scripts/setup-domain.sh
+```
+
+### Current Configuration
+
+| Component | Value |
+|-----------|-------|
+| **Domain** | `socialhomes.ai` |
+| **External IP** | `34.149.218.63` |
+| **SSL Certificate** | Google-managed (auto-renewing) |
+| **HTTP -> HTTPS** | Redirect via URL map |
+| **www -> non-www** | Redirect via URL map |
+
+### DNS Records Required
+
+| Type | Name | Value | TTL |
+|------|------|-------|-----|
+| A | @ | 34.149.218.63 | 300 |
+| A | www | 34.149.218.63 | 300 |
+
+### SSL Certificate Status
+
+```bash
+# Check certificate provisioning status
+gcloud compute ssl-certificates describe socialhomes-cert \
+  --global --project=${PROJECT_ID} \
+  --format="table(managed.status, managed.domainStatus)"
+```
+
+**Note**: SSL provisioning requires DNS records to be correctly pointed. Status changes from `PROVISIONING` to `ACTIVE` after DNS propagation (typically 15-60 minutes).
+
+---
+
+## 14. Security Configuration
+
+### Cloud Armor WAF
+
+| Rule | Priority | Action | Description |
+|------|----------|--------|-------------|
+| XSS Protection | 1000 | deny-403 | OWASP XSS v3.3 stable |
+| SQL Injection | 1001 | deny-403 | OWASP SQLi v3.3 stable |
+| Remote File Inclusion | 1002 | deny-403 | OWASP RFI v3.3 stable |
+| Rate Limiting | 900 | throttle | 100 req/min per IP |
+| Default | MAX_INT | allow | Allow all other traffic |
+
+### Application Security Layers
+
+1. **Cloud Armor** — WAF at Load Balancer level
+2. **Helmet** — Security headers (CSP, HSTS, X-Frame-Options)
+3. **CORS** — Origin allowlist
+4. **Rate Limiting** — Per-category Express middleware
+5. **Firebase JWT** — Authentication via Bearer tokens
+6. **RBAC** — 5-level persona hierarchy
+7. **Request correlation** — X-Request-ID for tracing
+
+### Security Audit
+
+See `docs/security-audit.md` for the comprehensive OWASP Top 10 audit report. Key findings:
+- 3 CRITICAL, 6 HIGH, 5 MEDIUM findings identified
+- Remediation roadmap provided in the audit document
+- Top priority: Fix auth bypass, CORS policy, and secrets in git history
+
+---
+
+## 15. API Server
+
+### Entry Point
+
+`server/dist/index.js` (compiled from `server/src/index.ts`)
+
+### Middleware Stack (in order)
+
+1. `compression` — Gzip response compression
+2. `helmet` — Security headers (CSP, HSTS, X-Frame-Options)
+3. `x-request-id` — Request correlation UUID
+4. `cors` — Cross-origin resource sharing
+5. `morgan('combined')` — HTTP request logging
+6. `metricsMiddleware` — Request/response metrics collection
+7. `express.json({ limit: '1mb' })` — JSON body parsing
+8. `express.urlencoded({ extended: true })` — URL-encoded parsing
+
+### Route Modules (21+)
+
+| Mount Path | Module | Rate Limiter | Description |
+|------------|--------|-------------|-------------|
+| `/health` | inline | none | Health check for Cloud Run |
+| `/api/v1/config` | inline | none | Firebase client config |
+| `/api/v1/auth` | `auth.ts` | authLimiter | Authentication |
+| `/api/v1/ai` | `ai.ts` | aiLimiter | AI/ML endpoints |
+| `/api/v1/admin` | `admin.ts` | adminLimiter | Admin operations |
+| `/api/v1/properties` | `properties.ts` | apiLimiter | Property CRUD |
+| `/api/v1/tenants` | `tenants.ts` | apiLimiter | Tenant CRUD |
+| `/api/v1/cases` | `cases.ts` | apiLimiter | Case management |
+| `/api/v1/explore` | `explore.ts` | apiLimiter | Hierarchy drill-down |
+| `/api/v1/briefing` | `briefing.ts` | apiLimiter | Daily AI briefing |
+| `/api/v1/compliance` | `compliance.ts` | apiLimiter | Big 6 compliance |
+| `/api/v1/rent` | `rent.ts` | apiLimiter | Rent & arrears |
+| `/api/v1/reports` | `reports.ts` | apiLimiter | TSM + reports |
+| `/api/v1/public-data` | `public-data.ts` | apiLimiter | External API proxy |
+| `/api/v1/export` | `export.ts` | apiLimiter | HACT export |
+| `/api/v1/lettings` | `lettings.ts` | apiLimiter | Lettings |
+| `/api/v1/booking` | `booking.ts` | apiLimiter | Booking |
+| `/api/v1/notifications` | `notifications.ts` | apiLimiter | Notifications |
+| `/api/v1/scheduled-tasks` | `scheduled-tasks.ts` | adminLimiter | Scheduled tasks |
+| `/api/v1/bulk` | `bulk-operations.ts` | adminLimiter | Bulk operations |
+| `/api/v1/audit` | `audit.ts` | apiLimiter | Audit log |
+| `/api/v1/gdpr` | `gdpr.ts` | adminLimiter | GDPR compliance |
+| `/api/v1/files` | `files.ts` | apiLimiter | File management |
+
+### RBAC Hierarchy
+
+```
+coo (5) > head-of-service (4) > manager (3) > housing-officer (2) > operative (1)
+```
+
+---
+
+## 16. Frontend (React SPA)
+
+### Tech Stack
+
+| Technology | Version | Purpose |
+|------------|---------|---------|
+| React | 19 | UI framework |
+| TypeScript | 5.9 | Type safety |
+| Vite | 7.2 | Build tool |
+| Tailwind CSS | 4 | Styling (dark-mode first) |
+| React Router | 6 | Client-side routing |
+| React Query | 5 | Server state management |
+| Leaflet | 1.9 | 2D maps |
+| Three.js | 0.182 | 3D building visualisation |
+| Recharts | 3 | Charts and graphs |
+
+### Build Output
+
+```bash
+cd app && npm run build
+# Output: app/dist/
+#   index.html       (~0.56 kB)
+#   assets/index.css (~78 kB, ~12 kB gzip)
+#   assets/index.js  (~2.5 MB, ~545 kB gzip)
+```
+
+---
+
+## 17. Environment Variables & Secrets
+
+### Environment Variables (set in cloudbuild.yaml)
+
+| Variable | Value | Source |
+|----------|-------|--------|
+| `PORT` | `8080` | Cloud Run default |
+| `NODE_ENV` | `production` | Set in deploy step |
+| `GOOGLE_CLOUD_PROJECT` | Auto-injected | Cloud Run metadata |
+
+### Secrets (Google Secret Manager)
+
+| Secret Name | Purpose | Rotated |
+|-------------|---------|---------|
+| `FIREBASE_API_KEY` | Firebase Web SDK config | Restricted to referrers |
+| `FIREBASE_AUTH_DOMAIN` | Firebase Auth domain | N/A |
+| `FIREBASE_PROJECT_ID` | GCP project identifier | N/A |
+| `DEMO_USER_PASSWORD` | Demo account password | On schedule |
+
+### Secret Management
+
+```bash
+# List all secrets
+gcloud secrets list --project=${PROJECT_ID}
+
+# View a secret
+gcloud secrets versions access latest --secret=FIREBASE_API_KEY
+
+# Rotate a secret
+echo -n "NEW_VALUE" | gcloud secrets versions add FIREBASE_API_KEY --data-file=-
+
+# First-time setup
+bash scripts/setup-secrets.sh
+```
+
+---
+
+## 18. Incident Response Runbook
+
+### Severity Levels
+
+| Level | Description | Response Time | Escalation |
+|-------|-------------|---------------|------------|
+| **SEV1** | Service down, no users can access | 15 minutes | Immediately to all engineers |
+| **SEV2** | Degraded performance, some features broken | 30 minutes | To on-call + team lead |
+| **SEV3** | Minor issue, workaround available | 4 hours | To on-call engineer |
+| **SEV4** | Cosmetic issue, no impact on functionality | Next business day | To backlog |
+
+### SEV1: Service Down
+
+```
+1. CHECK: Is Cloud Run responding?
+   gcloud run services describe socialhomes --region=europe-west2 \
+     --format="value(status.conditions)"
+
+2. CHECK: Health endpoint
+   curl -sf https://socialhomes-587984201316.europe-west2.run.app/health
+
+3. CHECK: Recent deploys
+   gcloud run revisions list --service=socialhomes --region=europe-west2 --limit=5
+
+4. IF recent deploy caused the issue:
+   → ROLLBACK (see Section 19)
+
+5. CHECK: Firestore connectivity
+   → GCP Console: Firestore > Overview
+
+6. CHECK: Cloud Run logs for errors
+   gcloud run services logs read socialhomes --region=europe-west2 --limit=50
+
+7. IF out of memory:
+   gcloud run services update socialhomes --region=europe-west2 --memory=2Gi
+
+8. IF scaling issue:
+   gcloud run services update socialhomes --region=europe-west2 --max-instances=20
+```
+
+### SEV2: Degraded Performance
+
+```
+1. CHECK: P95 latency in monitoring dashboard
+   → Cloud Console: Monitoring > Dashboard
+
+2. CHECK: Instance count
+   gcloud run services describe socialhomes --region=europe-west2 \
+     --format="value(status.traffic)"
+
+3. CHECK: External API failures
+   → Health endpoint cacheStatus shows hit rate
+
+4. CHECK: Firestore latency
+   → Health endpoint shows firestore.latencyMs
+
+5. IF cache cold:
+   → Wait for cache warming (external API data caches for 2h/24h)
+
+6. IF external API rate limited:
+   → Circuit breaker will activate automatically
+```
+
+---
+
+## 19. Rollback Procedures
+
+### Cloud Run Revision Rollback
 
 ```bash
 # List recent revisions
-gcloud run revisions list --service=socialhomes --region=europe-west2
+gcloud run revisions list --service=socialhomes --region=europe-west2 --limit=10
 
-# Route traffic to a previous revision
+# Route 100% traffic to a previous revision
 gcloud run services update-traffic socialhomes \
   --region=europe-west2 \
   --to-revisions=socialhomes-XXXXX=100
 
-# Or redeploy a specific image tag
+# Or redeploy a specific image tag (by commit SHA)
 gcloud run deploy socialhomes \
-  --image=europe-west2-docker.pkg.dev/${FIREBASE_PROJECT_ID}/socialhomes/app:<COMMIT_SHA> \
+  --image=europe-west2-docker.pkg.dev/${PROJECT_ID}/socialhomes/app:<COMMIT_SHA> \
   --region=europe-west2
+```
+
+### Canary Rollback
+
+```bash
+# Split traffic: 90% to stable, 10% to new
+gcloud run services update-traffic socialhomes \
+  --region=europe-west2 \
+  --to-revisions=socialhomes-stable=90,socialhomes-new=10
+
+# If new revision is bad, route 100% back to stable
+gcloud run services update-traffic socialhomes \
+  --region=europe-west2 \
+  --to-revisions=socialhomes-stable=100
+```
+
+### Git Rollback
+
+```bash
+# Revert a commit and auto-deploy
+git revert <COMMIT_SHA>
+git push origin main
 ```
 
 ---
 
-## 14. Local Development
+## 20. Database Recovery
+
+### Point-in-Time Recovery
+
+Firestore doesn't natively support PITR, but our backup strategy provides:
+- **Daily snapshots** at 02:00 UTC (30-day retention)
+- **Weekly snapshots** on Sundays at 03:00 UTC (365-day retention)
+
+### Full Recovery Procedure
+
+```bash
+# 1. Identify the backup to restore
+gsutil ls gs://${PROJECT_ID}-firestore-backups/daily/
+
+# 2. Take backup of current state first
+gcloud firestore export gs://${PROJECT_ID}-firestore-backups/pre-restore/$(date +%Y%m%d-%H%M%S)/
+
+# 3. Import the backup (additive — won't delete existing documents)
+gcloud firestore import gs://${PROJECT_ID}-firestore-backups/daily/<TIMESTAMP>/
+
+# 4. Verify data integrity
+curl -sf https://socialhomes-587984201316.europe-west2.run.app/health | jq .
+```
+
+### Partial Recovery (specific collections)
+
+```bash
+# Import specific collections from backup
+gcloud firestore import gs://${PROJECT_ID}-firestore-backups/daily/<TIMESTAMP>/ \
+  --collection-ids=properties
+```
+
+### Recovery Time Estimates
+
+| Scenario | Data Size | Estimated Time |
+|----------|-----------|---------------|
+| Full database (~550 docs) | ~5 MB | < 1 minute |
+| Properties only (75 docs) | ~500 KB | < 30 seconds |
+| Full database (10K docs) | ~50 MB | ~5 minutes |
+
+---
+
+## 21. Secret Rotation
+
+### Rotation Procedure
+
+```bash
+# 1. Generate new secret value
+NEW_PASSWORD=$(openssl rand -base64 24)
+
+# 2. Add new version to Secret Manager
+echo -n "$NEW_PASSWORD" | gcloud secrets versions add DEMO_USER_PASSWORD --data-file=-
+
+# 3. Deploy new revision (picks up latest secret version)
+gcloud run services update socialhomes --region=europe-west2
+
+# 4. Verify the new revision is healthy
+curl -sf https://socialhomes-587984201316.europe-west2.run.app/health
+
+# 5. Disable old secret version
+gcloud secrets versions disable <OLD_VERSION> --secret=DEMO_USER_PASSWORD
+```
+
+### Firebase API Key
+
+The Firebase API key is restricted to allowed referrers. To rotate:
+
+```bash
+# 1. Create new API key in Firebase Console
+# 2. Apply same referrer restrictions
+# 3. Update Secret Manager
+echo -n "NEW_API_KEY" | gcloud secrets versions add FIREBASE_API_KEY --data-file=-
+# 4. Redeploy
+gcloud run services update socialhomes --region=europe-west2
+# 5. Delete old key in Firebase Console
+```
+
+---
+
+## 22. Scaling Playbook
+
+### Scenario: Expected Traffic Spike
+
+```bash
+# Pre-scale to handle load
+gcloud run services update socialhomes --region=europe-west2 \
+  --min-instances=5 --max-instances=20
+
+# After traffic normalises
+gcloud run services update socialhomes --region=europe-west2 \
+  --min-instances=1 --max-instances=10
+```
+
+### Scenario: Cost Reduction
+
+```bash
+# Scale to zero when not needed
+gcloud run services update socialhomes --region=europe-west2 \
+  --min-instances=0
+
+# Reduce max instances
+gcloud run services update socialhomes --region=europe-west2 \
+  --max-instances=5
+```
+
+### Capacity Planning
+
+| Load Level | Concurrent Users | Instances | Cost/Month |
+|-----------|-----------------|-----------|------------|
+| **Minimal** | 1-10 | 1 | ~$15-20 |
+| **Normal** | 10-80 | 1-2 | ~$20-40 |
+| **High** | 80-500 | 2-7 | ~$40-100 |
+| **Peak** | 500-800 | 7-10 | ~$100-150 |
+| **Surge** | 800+ | 10-20 | ~$150-300 |
+
+---
+
+## 23. On-Call Guide
+
+### Daily Checks
+
+1. **Health endpoint**: Should return `"status": "healthy"`
+2. **Uptime monitoring**: Check Cloud Monitoring for alerts
+3. **Error rate**: Should be < 1% (Cloud Run metrics)
+4. **Backup status**: Verify daily backup completed
+
+### Weekly Checks
+
+1. **Review Cloud Run metrics**: Latency trends, instance count
+2. **Review Firestore usage**: Read/write counts, storage
+3. **Review alerting**: Any suppressed or auto-resolved alerts
+4. **Review security**: `npm audit` results, dependency updates
+5. **Verify staging**: Ensure staging is still operational
+
+### Monthly Checks
+
+1. **Cost review**: GCP billing report
+2. **Backup restoration test**: Restore a backup to verify integrity
+3. **Secret rotation**: Rotate DEMO_USER_PASSWORD
+4. **Dependency updates**: `npm audit` in both `app/` and `server/`
+5. **Review security audit**: Check `docs/security-audit.md` for outstanding items
+
+### Contact
+
+| Role | Contact |
+|------|---------|
+| **DevOps Lead** | admin@yantra.works |
+| **Telegram Bot** | @SocialHomesBot |
+| **GCP Support** | Via Cloud Console |
+
+---
+
+## 24. Post-Mortem Template
+
+```markdown
+# Post-Mortem: [Incident Title]
+
+## Date: YYYY-MM-DD
+## Duration: HH:MM
+## Severity: SEV1/SEV2/SEV3
+
+## Summary
+[1-2 sentence summary]
+
+## Timeline (UTC)
+- HH:MM — [First detection]
+- HH:MM — [Actions taken]
+- HH:MM — [Resolution]
+
+## Root Cause
+[Technical explanation]
+
+## Impact
+- Users affected: [count or percentage]
+- Duration: [how long]
+- Data loss: [yes/no]
+
+## Resolution
+[What was done to fix]
+
+## Action Items
+| # | Action | Owner | Due Date | Status |
+|---|--------|-------|----------|--------|
+| 1 | [action] | [who] | [when] | TODO |
+
+## Lessons Learned
+- What went well
+- What could be improved
+```
+
+---
+
+## 25. Local Development
 
 ### Prerequisites
 
-- Node.js 20+
-- npm 10+
-- (Optional) `gcloud` CLI for manual deploys
-- (Optional) Firebase CLI for rules/index deployment
+- Node.js 20+ / npm 10+
+- (Optional) `gcloud` CLI, Docker, Firebase CLI
 
-### Run Frontend Only (no server)
+### Run Frontend Only
 
 ```bash
-cd app
-npm install
-npm run dev
-# Opens at http://localhost:5173
-# Uses static fallback data (no Firestore)
+cd app && npm install --legacy-peer-deps && npm run dev
+# http://localhost:5173 (uses static fallback data)
 ```
 
-### Run Server Locally (requires GCP auth)
+### Run Server Locally
 
 ```bash
-# Authenticate with GCP
 gcloud auth application-default login
-
-# Set project
 export GOOGLE_CLOUD_PROJECT=${FIREBASE_PROJECT_ID}
-
-cd server
-npm install
-npm run dev
-# Runs at http://localhost:8080
-# Connects to live Firestore
+cd server && npm install && npm run dev
+# http://localhost:8080 (connects to live Firestore)
 ```
 
-### Run Full Stack Locally
+### Run Full Stack
 
 ```bash
 # Terminal 1: Server
 cd server && npm run dev
 
-# Terminal 2: Client (with API proxy)
+# Terminal 2: Client
 cd app && npm run dev
-# Vite proxies /api/* to localhost:8080
+```
+
+### Run in Docker
+
+```bash
+docker build -t socialhomes:local .
+docker run -p 8080:8080 -e PORT=8080 -e NODE_ENV=production socialhomes:local
 ```
 
 ---
 
-## 15. File Reference
+## 26. Cost Estimate
+
+| Resource | Monthly Estimate | Notes |
+|----------|-----------------|-------|
+| Cloud Run (min=1) | ~$15-20 | Always-on warm instance |
+| Firestore | ~$0 | Free tier covers ~550 docs |
+| Artifact Registry | ~$0.10 | Image storage |
+| Cloud Build | Free tier | 120 min/day free |
+| Cloud Storage (backups) | ~$0.05 | < 100 MB |
+| Cloud Scheduler | Free tier | 3 jobs |
+| Cloud Monitoring | Free tier | Basic alerting |
+| Cloud Armor | ~$5-10 | WAF policy |
+| Load Balancer | ~$18 | Forwarding rule |
+| **Total** | **~$40-55/month** | |
+
+---
+
+## 27. Known Issues & Technical Debt
+
+| Issue | Severity | Notes |
+|-------|----------|-------|
+| Composite Firestore indexes not deployed | Low | In-memory filtering OK for ~550 docs |
+| Large JS bundle (~2.5 MB) | Medium | Three.js + Leaflet; code splitting in progress |
+| In-memory rate limiter | Low | Not shared across instances |
+| X-Persona auth bypass in production | HIGH | See docs/security-audit.md Finding 1.1 |
+| CORS allows all origins | HIGH | See docs/security-audit.md Finding 5.1 |
+| SSL cert provisioning | PENDING | DNS not yet pointed to 34.149.218.63 |
+
+---
+
+## 28. File Reference
 
 ```
 socialhomes/
-├── Dockerfile              # Multi-stage build (client + server + production)
-├── cloudbuild.yaml         # CI/CD pipeline config
-├── firestore.rules         # Firestore security rules (not deployed)
-├── firestore.indexes.json  # Composite indexes (not deployed)
-├── .gitignore
-├── DEVOPS.md               # This file
-├── TEST-REPORT-V2.md       # QA test report
+├── Dockerfile                   # Multi-stage build (non-root, dumb-init)
+├── cloudbuild.yaml              # Production CI/CD pipeline
+├── cloudbuild-staging.yaml      # Staging CI/CD pipeline
+├── .github/workflows/ci.yml    # GitHub Actions CI pipeline
+├── firestore.rules              # Firestore security rules
+├── firestore.indexes.json       # Composite indexes
+├── DEVOPS.md                    # This file
+├── DEV-FIX-LIST.md              # Bug/warning tracker
+├── EXECUTION-PLAN.md            # Master execution plan
 │
-├── app/                    # React SPA (Vite + TypeScript + Tailwind)
-│   ├── package.json
-│   ├── vite.config.ts
-│   ├── tsconfig.json
+├── scripts/
+│   ├── setup-secrets.sh         # Google Secret Manager setup
+│   ├── setup-staging.sh         # Staging environment setup
+│   ├── setup-monitoring.sh      # Monitoring & alerting setup
+│   ├── setup-backups.sh         # Firestore backup setup
+│   ├── setup-cdn.sh             # Cloud CDN setup
+│   ├── setup-domain.sh          # Custom domain & SSL setup
+│   └── seed-firestore.ts        # Firestore data seeder
+│
+├── docs/
+│   └── security-audit.md        # OWASP Top 10 security audit
+│
+├── app/                         # React SPA
 │   └── src/
-│       ├── main.tsx        # Entry point (QueryClientProvider)
-│       ├── App.tsx         # Router + Layout
-│       ├── hooks/useApi.ts # React Query hooks with API fallback
-│       ├── services/api-client.ts  # Fetch wrapper with X-Persona header
-│       ├── data/           # Static fallback data
-│       ├── pages/          # 20 page components
-│       └── components/     # Shared UI components
+│       ├── pages/               # 40+ page components
+│       └── components/
 │
-├── server/                 # Express API server (TypeScript)
-│   ├── package.json
-│   ├── tsconfig.json
-│   └── src/
-│       ├── index.ts        # Entry point (Express app)
-│       ├── middleware/
-│       │   ├── auth.ts     # Permissive auth (X-Persona header)
-│       │   ├── rbac.ts     # Persona hierarchy RBAC
-│       │   └── error-handler.ts
-│       ├── models/
-│       │   ├── firestore-schemas.ts  # TypeScript interfaces for Firestore docs
-│       │   └── hact-codes.ts         # HACT v3.5 bidirectional code mappings
-│       ├── routes/         # 12 Express routers
-│       │   ├── properties.ts
-│       │   ├── tenants.ts
-│       │   ├── cases.ts
-│       │   ├── explore.ts
-│       │   ├── briefing.ts
-│       │   ├── compliance.ts
-│       │   ├── rent.ts
-│       │   ├── reports.ts
-│       │   ├── ai.ts
-│       │   ├── admin.ts
-│       │   ├── public-data.ts
-│       │   └── export.ts
-│       └── services/
-│           ├── firestore.ts       # Firestore client + CRUD helpers + serializeFirestoreData()
-│           ├── firebase-admin.ts  # Firebase Admin SDK (auth token verification)
-│           ├── hact-export.ts     # HACT v3.5 export transformer
-│           └── seed.ts            # Firestore data seeder
-│
-└── scripts/
-    ├── seed-firestore.ts       # Standalone seed script
-    └── setup-secrets.sh        # Google Secret Manager setup (interactive)
+└── server/                      # Express API server
+    └── src/
+        ├── index.ts
+        ├── middleware/
+        ├── routes/              # 21+ route modules
+        └── services/
 ```
 
 ---
 
-## Firebase Authentication — DEPLOYED
+## 29. Setup Scripts Reference
 
-**Status**: LIVE and fully operational (deployed 09/02/2026)
+All setup scripts are idempotent — safe to run multiple times.
 
-### What Was Done (DevOps)
+| Script | Purpose | Run When |
+|--------|---------|----------|
+| `scripts/setup-secrets.sh` | Create Google Secret Manager secrets | First deploy |
+| `scripts/setup-staging.sh` | Create staging Cloud Run service + trigger | First deploy |
+| `scripts/setup-monitoring.sh` | Create alerts, metrics, dashboard, log sink | First deploy |
+| `scripts/setup-backups.sh` | Create backup bucket, scheduler jobs | First deploy |
+| `scripts/setup-cdn.sh` | Enable Cloud CDN on Load Balancer | After LB setup |
+| `scripts/setup-domain.sh` | Domain & SSL configuration guide | When domain ready |
 
-1. **Fixed build failure**: `firebaseui@6.1.0` declares peer `firebase@^9||^10` but works with v12 via compat layer. Added `--legacy-peer-deps` to Dockerfile client stage.
-2. **Secrets moved to Google Secret Manager** (commit e0c23e4): `FIREBASE_API_KEY`, `FIREBASE_AUTH_DOMAIN`, `FIREBASE_PROJECT_ID`, `DEMO_USER_PASSWORD` are now injected via `--update-secrets` in `cloudbuild.yaml`. No secrets in source code.
-3. **Seeded 5 demo Firebase Auth accounts** with Firestore profiles and custom claims.
-4. **Verified end-to-end**: Firebase REST sign-in → ID token → `/api/v1/auth/me` returns correct persona, team, and patch data.
-
-### Firebase Config Endpoint
-
-```
-GET /api/v1/config → { firebase: { apiKey, authDomain, projectId } }
-```
-
-### Demo Accounts (all password: `[STORED IN SECRET MANAGER]`)
-
-| Email | Persona | Team |
-|-------|---------|------|
-| helen.carter@rcha.org.uk | COO | — |
-| james.wright@rcha.org.uk | Head of Housing | london |
-| priya.patel@rcha.org.uk | Manager | southwark-lewisham |
-| sarah.mitchell@rcha.org.uk | Housing Officer | southwark-lewisham |
-| mark.johnson@rcha.org.uk | Operative | southwark-lewisham |
-
-### Auth Flow
-
-```
-Browser loads /                          → redirects to /login (not authenticated)
-LoginPage fetches /api/v1/config         → gets Firebase config from env vars
-FirebaseUI initialises with config       → renders Email/Password + Google sign-in
-User signs in                            → Firebase returns ID token
-AuthContext stores user, calls profile API → creates Firestore user doc on first login
-All subsequent API calls include Bearer token → server verifies with firebase-admin
-```
-
-### Build Fix Note
-
-The Dockerfile uses `npm ci --legacy-peer-deps` in the client build stage because `firebaseui@6.1.0` has not been updated for Firebase v11+. This is the standard workaround; the compat layer functions identically across v9-v12.
-
----
-
-## Remaining TODO
-
-| Item | Status | Notes |
-|------|--------|-------|
-| ~~Rotate Firebase API key~~ | **MITIGATED** | Key restricted to allowed referrers (Cloud Run, socialhomes.ai, localhost) |
-| ~~Disable email enumeration~~ | **DONE** | Disabled via Identity Toolkit API on 09/02/2026 |
-| ~~Create Secret Manager secrets~~ | **DONE** | 4 secrets created + IAM bindings set for compute SA |
-| ~~Enable Email/Password provider~~ | **DONE** | Enabled via Identity Toolkit API on 09/02/2026 |
-| Clean git history | LOW | Remove secrets from historical commits — optional since key is now restricted |
-| Configure DNS | PENDING | Point `socialhomes.ai` A record to `34.149.218.63` |
-| Set up alerting policy | PENDING | Email/Slack notifications on uptime failure |
-
----
-
-## 16. Security — Secret Manager & Key Rotation
-
-### CRITICAL: Security Incident — Exposed Keys (09/02/2026)
-
-**What happened**: The Firebase API key, Auth Domain, Project ID, and demo user password were hardcoded in `cloudbuild.yaml` and `server/src/routes/auth.ts` and committed to the public GitHub repository. GitHub and Google Cloud both issued security alerts.
-
-**What was done** (commit `e0c23e4`):
-
-1. **Removed all secrets from source code**:
-   - `cloudbuild.yaml`: Replaced `--set-env-vars` (with hardcoded values) with `--update-secrets` (pulls from Secret Manager)
-   - `server/src/routes/auth.ts`: Demo password now reads from `process.env.DEMO_USER_PASSWORD`
-   - `app/src/pages/auth/LoginPage.tsx`: Removed password hint from UI
-   - `DEVOPS.md` + `TEST-REPORT-V2.md`: Redacted all keys and passwords
-
-2. **Created 4 secrets in Google Secret Manager**:
-   - `FIREBASE_API_KEY`
-   - `FIREBASE_AUTH_DOMAIN`
-   - `FIREBASE_PROJECT_ID`
-   - `DEMO_USER_PASSWORD`
-
-3. **Created setup script**: `scripts/setup-secrets.sh`
-
-### Secret Manager Setup
-
-If secrets have not yet been created (e.g., fresh environment), run the interactive setup:
+### Quick Start (New Environment)
 
 ```bash
-cd /path/to/socialhomes
+# 1. Set GCP project
+gcloud config set project YOUR_PROJECT_ID
+
+# 2. Run all setup scripts
 bash scripts/setup-secrets.sh
+bash scripts/setup-staging.sh
+bash scripts/setup-monitoring.sh
+bash scripts/setup-backups.sh
+bash scripts/setup-cdn.sh
+bash scripts/setup-domain.sh
+
+# 3. Push to main to trigger first deployment
+git push origin main
 ```
-
-This prompts for each value (no echo for secrets), creates the secrets, and grants IAM access to both the Cloud Run and Cloud Build service accounts.
-
-### Manual Secret Operations
-
-```bash
-# List all secrets
-gcloud secrets list
-
-# View a secret value
-gcloud secrets versions access latest --secret=FIREBASE_API_KEY
-
-# Rotate a secret (add new version)
-echo -n "NEW_VALUE" | gcloud secrets versions add FIREBASE_API_KEY --data-file=-
-
-# Grant access to a service account
-gcloud secrets add-iam-policy-binding FIREBASE_API_KEY \
-  --member="serviceAccount:SA_EMAIL" \
-  --role="roles/secretmanager.secretAccessor"
-```
-
-### How `cloudbuild.yaml` Uses Secrets
-
-```yaml
-# The deploy step injects secrets as environment variables at runtime:
-- '--update-secrets'
-- 'FIREBASE_API_KEY=FIREBASE_API_KEY:latest,FIREBASE_AUTH_DOMAIN=FIREBASE_AUTH_DOMAIN:latest,FIREBASE_PROJECT_ID=FIREBASE_PROJECT_ID:latest,DEMO_USER_PASSWORD=DEMO_USER_PASSWORD:latest'
-```
-
-The format is `ENV_VAR_NAME=SECRET_NAME:VERSION`. Cloud Run reads the secret value at container start and injects it as a standard environment variable. The secret is never written to disk or included in the container image.
-
-### Key Rotation — MITIGATED (09/02/2026)
-
-The old Firebase API key was exposed in git history. Rather than rotating (which would break all active sessions), the key has been **restricted to allowed HTTP referrers only**:
-
-- `https://socialhomes-587984201316.europe-west2.run.app/*`
-- `https://socialhomes.ai/*`
-- `https://www.socialhomes.ai/*`
-- `http://localhost:*/*`
-
-This means the key cannot be used from unauthorized origins, even if found in git history. Applied via:
-
-```bash
-gcloud services api-keys update projects/674258130066/locations/global/keys/51b47da7-88a0-4711-b308-89bff721c0ca \
-  --allowed-referrers="https://socialhomes-587984201316.europe-west2.run.app/*,https://socialhomes.ai/*,https://www.socialhomes.ai/*,http://localhost:*/*"
-```
-
-If full rotation is still desired in the future, follow steps in the git history of this document.
-
-### Secret Manager Setup — COMPLETED (09/02/2026)
-
-All 4 secrets created and IAM bindings configured for the compute service account (`674258130066-compute@developer.gserviceaccount.com`):
-
-```
-FIREBASE_API_KEY        → version 1
-FIREBASE_AUTH_DOMAIN    → version 1
-FIREBASE_PROJECT_ID     → version 1
-DEMO_USER_PASSWORD      → version 1
-```
-
-Cloud Build deploys now succeed with `--update-secrets` pulling values from Secret Manager at runtime.
 
 ---
 
-## 17. Data Serialisation — Firestore Timestamp Handling
-
-### Problem
-
-Firestore stores date fields as `Timestamp` objects. When Express serialises these via `res.json()`, they become opaque objects (`{_seconds: N, _nanoseconds: N}` or `{seconds: N, nanoseconds: N}`) in JSON. React cannot render objects as children, causing **Error #310** ("Objects are not valid as a React child").
-
-### Solution (Two Layers)
-
-**Layer 1: Server-side** (`server/src/services/firestore.ts`)
-
-The `serializeFirestoreData()` function recursively converts:
-- `Timestamp` instances → ISO date strings
-- `Date` objects → ISO date strings
-- `DocumentReference` → path string
-- `GeoPoint` → `{latitude, longitude}` plain object
-
-Applied in `getDoc()` and `getDocs()` so ALL API responses contain only JSON-safe primitives.
-
-**Layer 2: Client-side** (`app/src/services/api-client.ts`)
-
-The `sanitizeFirestoreTimestamps()` function runs on every API response as a safety net. It catches:
-- `{_seconds, _nanoseconds}` (older `@google-cloud/firestore` format)
-- `{seconds, nanoseconds}` (newer format)
-
-And converts them to `DD/MM/YYYY` locale strings.
-
-### Why Two Layers?
-
-Belt and suspenders. The server-side fix is definitive, but the client-side sanitiser catches edge cases where:
-- A route bypasses `getDoc`/`getDocs` and uses raw `.data()`
-- A third-party library returns Firestore objects
-- The Firestore SDK changes its serialisation format
-
----
-
-## 18. Login Page & Mobile Detection
-
-### Login Page (Redesigned 09/02/2026)
-
-The login page no longer shows any credentials or password hints. It now features:
-
-- **Split layout**: Left panel (product showcase) + Right panel (login form)
-- **Product showcase carousel**: 6 auto-advancing slides with feature descriptions
-- **Feature grid**: 8 capability cards (Properties, Tenancies, Repairs, etc.)
-- **Request Access section**: Directs users to `support@yantra.works`
-- **BETA badge**: Clearly indicates closed beta status
-
-### Mobile Detection
-
-If the user visits from a mobile device (screen < 768px or mobile user-agent), they see a dedicated screen explaining:
-- SocialHomes.Ai is a full housing operating system for desktop/laptop
-- A mobile app for housing officers is on the roadmap
-- Contact `support@yantra.works` for help
-
-The FirebaseUI widget is NOT initialised on mobile to prevent broken login attempts.
-
-### Dashboard (Polished 09/02/2026)
-
-- Persona-aware welcome header with time-of-day greeting
-- Quick Action buttons: Morning Briefing, Explore Portfolio, View Reports
-- Gradient accent card with organisation info
-
----
-
-*Document generated 08/02/2026 by Development Agent.*
-*Updated 09/02/2026 by DevOps Senior: min-instances=1, uptime monitoring, Artifact Registry cleanup.*
-*Updated 09/02/2026: Firebase Authentication deployment instructions added.*
-*Updated 09/02/2026 by DevOps Senior: Firebase Auth deployed — build fix, env vars, seeding, E2E verification complete.*
-*Updated 09/02/2026: Security hardening — secrets moved to Secret Manager, key rotation instructions, data serialisation fix, login redesign, mobile detection.*
-*Updated 09/02/2026 by DevOps Senior: Created Secret Manager secrets, enabled Email/Password provider, disabled email enumeration protection, restricted API key to allowed referrers, deployed successfully.*
-*For QA test results, see `TEST-REPORT-V2.md`.*
+*Document generated 27/02/2026 by DevOps Engineer Agent.*
+*Studio: Yantra Works | https://yantra.works*
+*Copyright 2026 Yantra Works. All rights reserved.*

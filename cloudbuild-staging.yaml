@@ -1,21 +1,20 @@
 # ============================================================
-# SocialHomes.Ai — Production CI/CD Pipeline (Cloud Build)
-# Triggers on push to main branch.
-# Stages: Build → Test → Push → Deploy → Notify
+# SocialHomes.Ai — Staging CI/CD Pipeline (Cloud Build)
+# Triggers on push to any branch except main (PRs).
+# Deploys to socialhomes-staging Cloud Run service.
 # ============================================================
 
 substitutions:
   _REGION: europe-west2
-  _SERVICE_NAME: socialhomes
-  _REGISTRY: europe-west2-docker.pkg.dev/$PROJECT_ID/socialhomes/app
-  _MIN_INSTANCES: '1'
-  _MAX_INSTANCES: '10'
-  _MEMORY: '1Gi'
+  _SERVICE_NAME: socialhomes-staging
+  _REGISTRY: europe-west2-docker.pkg.dev/$PROJECT_ID/socialhomes/app-staging
+  _MIN_INSTANCES: '0'
+  _MAX_INSTANCES: '3'
+  _MEMORY: '512Mi'
   _CPU: '1'
-  _CONCURRENCY: '80'
 
 steps:
-  # ── Step 1: Build Docker image (multi-stage) ──
+  # ── Step 1: Build Docker image ──
   - name: 'gcr.io/cloud-builders/docker'
     id: build
     args:
@@ -23,50 +22,47 @@ steps:
       - '-t'
       - '${_REGISTRY}:$COMMIT_SHA'
       - '-t'
-      - '${_REGISTRY}:latest'
+      - '${_REGISTRY}:$BRANCH_NAME'
       - '--cache-from'
       - '${_REGISTRY}:latest'
       - '--build-arg'
       - 'BUILDKIT_INLINE_CACHE=1'
       - '.'
 
-  # ── Step 2: Run server unit tests inside built image ──
+  # ── Step 2: Smoke test inside built image ──
   - name: '${_REGISTRY}:$COMMIT_SHA'
     id: test
     entrypoint: 'sh'
     args:
       - '-c'
       - |
-        echo "=== Health check test ==="
+        echo "=== Staging smoke test ==="
         node server/dist/index.js &
         SERVER_PID=$$!
         sleep 3
         curl -sf http://localhost:8080/health | grep -q '"status"' && echo "✓ Health check passed" || (echo "✗ Health check failed" && exit 1)
         kill $$SERVER_PID 2>/dev/null || true
-        echo "=== All smoke tests passed ==="
     env:
       - 'NODE_ENV=test'
       - 'PORT=8080'
     waitFor: ['build']
 
-  # ── Step 3: Push Docker image to Artifact Registry ──
+  # ── Step 3: Push Docker image ──
   - name: 'gcr.io/cloud-builders/docker'
-    id: push-sha
+    id: push
     args:
       - 'push'
       - '${_REGISTRY}:$COMMIT_SHA'
     waitFor: ['test']
 
   - name: 'gcr.io/cloud-builders/docker'
-    id: push-latest
+    id: push-branch
     args:
       - 'push'
-      - '${_REGISTRY}:latest'
+      - '${_REGISTRY}:$BRANCH_NAME'
     waitFor: ['test']
 
-  # ── Step 4: Deploy to Cloud Run (Production) ──
-  # IMPORTANT: All secrets are stored in Google Secret Manager.
-  # Before first deploy, create them with scripts/setup-secrets.sh
+  # ── Step 4: Deploy to Cloud Run (Staging) ──
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     id: deploy
     args:
@@ -89,53 +85,37 @@ steps:
       - '${_MIN_INSTANCES}'
       - '--max-instances'
       - '${_MAX_INSTANCES}'
-      - '--concurrency'
-      - '${_CONCURRENCY}'
-      - '--cpu-throttling'
       - '--port'
       - '8080'
-      - '--timeout'
-      - '300'
       - '--set-env-vars'
-      - 'NODE_ENV=production'
+      - 'NODE_ENV=staging'
       - '--update-secrets'
       - 'FIREBASE_API_KEY=FIREBASE_API_KEY:latest,FIREBASE_AUTH_DOMAIN=FIREBASE_AUTH_DOMAIN:latest,FIREBASE_PROJECT_ID=FIREBASE_PROJECT_ID:latest,DEMO_USER_PASSWORD=DEMO_USER_PASSWORD:latest'
       - '--labels'
-      - 'app=socialhomes,env=production,managed-by=cloudbuild'
-      # Startup probe: health endpoint, 0s initial delay, 10s period, 3 failures to kill
-      - '--startup-cpu-boost'
-    waitFor: ['push-sha']
+      - 'app=socialhomes,env=staging,managed-by=cloudbuild'
+      - '--tag'
+      - 'pr-$SHORT_SHA'
+    waitFor: ['push']
 
-  # ── Step 5: Verify deployment health ──
+  # ── Step 5: Output staging URL ──
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
-    id: verify
+    id: output-url
     entrypoint: 'bash'
     args:
       - '-c'
       - |
         SERVICE_URL=$(gcloud run services describe ${_SERVICE_NAME} \
           --region=${_REGION} --format='value(status.url)')
-        echo "Verifying deployment at: $${SERVICE_URL}/health"
-        for i in 1 2 3 4 5; do
-          STATUS=$(curl -sf "$${SERVICE_URL}/health" | grep -o '"status":"[a-z]*"' | head -1)
-          if echo "$$STATUS" | grep -q '"healthy"'; then
-            echo "✓ Deployment verified healthy (attempt $$i)"
-            exit 0
-          fi
-          echo "  Attempt $$i: $$STATUS — retrying in 10s..."
-          sleep 10
-        done
-        echo "✗ Deployment health check failed after 5 attempts"
-        exit 1
+        echo "======================================"
+        echo "  Staging deployed: $${SERVICE_URL}"
+        echo "======================================"
     waitFor: ['deploy']
 
 images:
   - '${_REGISTRY}:$COMMIT_SHA'
-  - '${_REGISTRY}:latest'
 
 options:
   logging: CLOUD_LOGGING_ONLY
-  machineType: E2_HIGHCPU_8
   dynamic_substitutions: true
 
-timeout: 1200s
+timeout: 900s
