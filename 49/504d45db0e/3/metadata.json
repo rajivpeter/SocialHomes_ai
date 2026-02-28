@@ -1,0 +1,35 @@
+{
+  "cli_version": "0.4.4",
+  "checkpoint_id": "49504d45db0e",
+  "session_id": "40dbfa93-1ac3-42ce-8c70-1914b105ec55",
+  "strategy": "manual-commit",
+  "created_at": "2026-02-28T15:00:23.761652515Z",
+  "branch": "main",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "SESSION-HISTORY.md",
+    "TEST-REPORT-V2.md",
+    "server/src/index.ts",
+    "server/src/middleware/auth.ts",
+    "server/src/routes/auth.ts",
+    "tests/test_results_firebase_auth.json"
+  ],
+  "agent": "Claude Code",
+  "token_usage": {
+    "input_tokens": 514,
+    "cache_creation_tokens": 70596,
+    "cache_read_tokens": 3202146,
+    "output_tokens": 11736,
+    "api_call_count": 47
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-02-28T15:00:22.738696155Z",
+    "agent_lines": 0,
+    "human_added": 2222,
+    "human_modified": 54,
+    "human_removed": 0,
+    "total_committed": 2246,
+    "agent_percentage": 0
+  },
+  "transcript_path": ".claude/projects/-mnt-c--netapps-socialhomes/40dbfa93-1ac3-42ce-8c70-1914b105ec55.jsonl"
+}
