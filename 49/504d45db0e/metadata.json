@@ -3,7 +3,7 @@
   "checkpoint_id": "49504d45db0e",
   "strategy": "manual-commit",
   "branch": "main",
-  "checkpoints_count": 8,
+  "checkpoints_count": 9,
   "files_touched": [
     ".dockerignore",
     ".mission-control/work-tracker.json",
@@ -13,6 +13,7 @@
     "TEST-REPORT-V2.md",
     "app/src/components/layout/Layout.tsx",
     "app/vite.config.ts",
+    "cloudbuild-staging.yaml",
     "cloudbuild.yaml",
     "server/src/index.ts",
     "server/src/middleware/auth.ts",
@@ -78,13 +79,20 @@
       "context": "/49/504d45db0e/7/context.md",
       "content_hash": "/49/504d45db0e/7/content_hash.txt",
       "prompt": "/49/504d45db0e/7/prompt.txt"
+    },
+    {
+      "metadata": "/49/504d45db0e/8/metadata.json",
+      "transcript": "/49/504d45db0e/8/full.jsonl",
+      "context": "/49/504d45db0e/8/context.md",
+      "content_hash": "/49/504d45db0e/8/content_hash.txt",
+      "prompt": "/49/504d45db0e/8/prompt.txt"
     }
   ],
   "token_usage": {
-    "input_tokens": 875,
-    "cache_creation_tokens": 425441,
-    "cache_read_tokens": 15113737,
-    "output_tokens": 73803,
-    "api_call_count": 218
+    "input_tokens": 929,
+    "cache_creation_tokens": 516838,
+    "cache_read_tokens": 18970961,
+    "output_tokens": 87773,
+    "api_call_count": 263
   }
 }
