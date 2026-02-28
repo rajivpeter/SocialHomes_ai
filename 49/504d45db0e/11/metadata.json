@@ -1,0 +1,30 @@
+{
+  "cli_version": "0.4.4",
+  "checkpoint_id": "49504d45db0e",
+  "session_id": "785cd436-8fd7-443c-a884-b07ca6afbc8f",
+  "strategy": "manual-commit",
+  "created_at": "2026-02-28T15:04:16.270636089Z",
+  "branch": "main",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "SESSION-HISTORY.md"
+  ],
+  "agent": "Claude Code",
+  "token_usage": {
+    "input_tokens": 866,
+    "cache_creation_tokens": 57902,
+    "cache_read_tokens": 532837,
+    "output_tokens": 4395,
+    "api_call_count": 10
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-02-28T15:04:15.606538408Z",
+    "agent_lines": 0,
+    "human_added": 2382,
+    "human_modified": 13,
+    "human_removed": 0,
+    "total_committed": 2382,
+    "agent_percentage": 0
+  },
+  "transcript_path": ".claude/projects/-mnt-c--netapps-socialhomes/785cd436-8fd7-443c-a884-b07ca6afbc8f.jsonl"
+}

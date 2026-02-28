@@ -1,0 +1,1 @@
+Read EXECUTION-PLAN.md and implement all tasks assigned to the fullstack agent. Focus on server/src/ — routes, services, models, types. Verify TypeScript compiles with "cd server && npm run build".
