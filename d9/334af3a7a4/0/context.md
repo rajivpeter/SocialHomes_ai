@@ -1,0 +1,16 @@
+# Session Context
+
+## User Prompts
+
+### Prompt 1
+
+REMEDIATION CYCLE 1: Developers have applied fixes for the critical/high issues you found.
+
+Re-audit the specific files that were flagged in your previous report at "docs/security-audit.md".
+1. Verify each Critical and High issue has been addressed
+2. Check that fixes are correct and complete (not just suppressing the issue)
+3. Update your security report at "docs/security-audit.md" with the verification results
+4. Mark resolved issues as "Resolved" and note any remaining concerns
+
+If all Critic...
+
