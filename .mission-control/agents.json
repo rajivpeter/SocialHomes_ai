@@ -34,13 +34,11 @@
       "model": "dolphin"
     },
     "fullstack": {
-      "status": "running",
-      "pid": 725709,
+      "status": "completed",
+      "pid": null,
       "startedAt": "2026-02-28T14:45:38.040Z",
-      "completedAt": null,
-      "exitCode": null,
-      "model": "claude",
-      "sessionId": "785cd436-8fd7-443c-a884-b07ca6afbc8f"
+      "completedAt": "2026-02-28T15:04:22.834Z",
+      "exitCode": 0
     },
     "frontend": {
       "status": "completed",
