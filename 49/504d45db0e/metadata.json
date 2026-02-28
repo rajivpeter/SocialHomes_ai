@@ -3,7 +3,7 @@
   "checkpoint_id": "49504d45db0e",
   "strategy": "manual-commit",
   "branch": "main",
-  "checkpoints_count": 5,
+  "checkpoints_count": 6,
   "files_touched": [
     ".dockerignore",
     ".mission-control/work-tracker.json",
@@ -54,13 +54,20 @@
       "context": "/49/504d45db0e/4/context.md",
       "content_hash": "/49/504d45db0e/4/content_hash.txt",
       "prompt": "/49/504d45db0e/4/prompt.txt"
+    },
+    {
+      "metadata": "/49/504d45db0e/5/metadata.json",
+      "transcript": "/49/504d45db0e/5/full.jsonl",
+      "context": "/49/504d45db0e/5/context.md",
+      "content_hash": "/49/504d45db0e/5/content_hash.txt",
+      "prompt": "/49/504d45db0e/5/prompt.txt"
     }
   ],
   "token_usage": {
-    "input_tokens": 761,
-    "cache_creation_tokens": 242303,
-    "cache_read_tokens": 9102133,
-    "output_tokens": 43031,
-    "api_call_count": 131
+    "input_tokens": 806,
+    "cache_creation_tokens": 328938,
+    "cache_read_tokens": 11944620,
+    "output_tokens": 57855,
+    "api_call_count": 167
   }
 }
