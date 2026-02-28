@@ -1,0 +1,12 @@
+REMEDIATION CYCLE 1: Critical or high-severity security issues have been found.
+
+Read the security audit report at "docs/security-audit.md" carefully. Focus ONLY on fixing the issues marked as "Critical" or "High" severity.
+
+For each issue:
+1. Read the finding and understand the vulnerability
+2. Locate the affected code (file:line references are in the report)
+3. Apply the recommended fix or implement an equivalent secure solution
+4. Verify your fix doesn't break existing functionality
+
+Do NOT rebuild the entire project. Only fix the specific security issues.
+After fixing, run "npm run build" in the affected directory to verify no build errors.

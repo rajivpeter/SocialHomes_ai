@@ -3,7 +3,7 @@
   "checkpoint_id": "49504d45db0e",
   "strategy": "manual-commit",
   "branch": "main",
-  "checkpoints_count": 6,
+  "checkpoints_count": 7,
   "files_touched": [
     ".dockerignore",
     ".mission-control/work-tracker.json",
@@ -16,7 +16,10 @@
     "cloudbuild.yaml",
     "server/src/index.ts",
     "server/src/middleware/auth.ts",
+    "server/src/middleware/rbac.ts",
+    "server/src/routes/admin.ts",
     "server/src/routes/auth.ts",
+    "server/src/routes/public-data.ts",
     "tests/test_results_firebase_auth.json"
   ],
   "sessions": [
@@ -61,13 +64,20 @@
       "context": "/49/504d45db0e/5/context.md",
       "content_hash": "/49/504d45db0e/5/content_hash.txt",
       "prompt": "/49/504d45db0e/5/prompt.txt"
+    },
+    {
+      "metadata": "/49/504d45db0e/6/metadata.json",
+      "transcript": "/49/504d45db0e/6/full.jsonl",
+      "context": "/49/504d45db0e/6/context.md",
+      "content_hash": "/49/504d45db0e/6/content_hash.txt",
+      "prompt": "/49/504d45db0e/6/prompt.txt"
     }
   ],
   "token_usage": {
-    "input_tokens": 806,
-    "cache_creation_tokens": 328938,
-    "cache_read_tokens": 11944620,
-    "output_tokens": 57855,
-    "api_call_count": 167
+    "input_tokens": 858,
+    "cache_creation_tokens": 397066,
+    "cache_read_tokens": 14840858,
+    "output_tokens": 70229,
+    "api_call_count": 210
   }
 }
