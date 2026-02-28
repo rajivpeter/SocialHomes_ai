@@ -3,17 +3,26 @@
   "checkpoint_id": "a3e5564d36e0",
   "strategy": "manual-commit",
   "branch": "main",
-  "checkpoints_count": 4,
+  "checkpoints_count": 5,
   "files_touched": [
     ".github/workflows/ci.yml",
     ".mission-control/security-system-prompt.txt",
     ".mission-control/security-task-prompt.txt",
     "DEV-FIX-LIST.md",
+    "DEVOPS.md",
+    "Dockerfile",
     "EXECUTION-PLAN.md",
     "SESSION-HISTORY.md",
     "app/public/yantra-logo-teal.svg",
     "app/public/yantra-logo.svg",
+    "cloudbuild-staging.yaml",
+    "cloudbuild.yaml",
     "docs/security-audit.md",
+    "scripts/setup-backups.sh",
+    "scripts/setup-cdn.sh",
+    "scripts/setup-domain.sh",
+    "scripts/setup-monitoring.sh",
+    "scripts/setup-staging.sh",
     "server/src/routes/api-integration.test.ts",
     "server/src/services/ai-services.test.ts",
     "tests/conftest.py",
@@ -49,13 +58,20 @@
       "context": "/a3/e5564d36e0/3/context.md",
       "content_hash": "/a3/e5564d36e0/3/content_hash.txt",
       "prompt": "/a3/e5564d36e0/3/prompt.txt"
+    },
+    {
+      "metadata": "/a3/e5564d36e0/4/metadata.json",
+      "transcript": "/a3/e5564d36e0/4/full.jsonl",
+      "context": "/a3/e5564d36e0/4/context.md",
+      "content_hash": "/a3/e5564d36e0/4/content_hash.txt",
+      "prompt": "/a3/e5564d36e0/4/prompt.txt"
     }
   ],
   "token_usage": {
-    "input_tokens": 201,
-    "cache_creation_tokens": 409012,
-    "cache_read_tokens": 12552559,
-    "output_tokens": 98324,
-    "api_call_count": 147
+    "input_tokens": 241,
+    "cache_creation_tokens": 531974,
+    "cache_read_tokens": 15638756,
+    "output_tokens": 135627,
+    "api_call_count": 178
   }
 }

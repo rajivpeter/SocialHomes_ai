@@ -1,0 +1,40 @@
+{
+  "cli_version": "0.4.4",
+  "checkpoint_id": "a3e5564d36e0",
+  "session_id": "1c66df9e-cd70-4c19-bf8d-80c7f8b566d9",
+  "strategy": "manual-commit",
+  "created_at": "2026-02-28T00:10:57.22057077Z",
+  "branch": "main",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "DEVOPS.md",
+    "Dockerfile",
+    "EXECUTION-PLAN.md",
+    "SESSION-HISTORY.md",
+    "cloudbuild-staging.yaml",
+    "cloudbuild.yaml",
+    "scripts/setup-backups.sh",
+    "scripts/setup-cdn.sh",
+    "scripts/setup-domain.sh",
+    "scripts/setup-monitoring.sh",
+    "scripts/setup-staging.sh"
+  ],
+  "agent": "Claude Code",
+  "token_usage": {
+    "input_tokens": 40,
+    "cache_creation_tokens": 122962,
+    "cache_read_tokens": 3086197,
+    "output_tokens": 37303,
+    "api_call_count": 31
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-02-28T00:10:55.732323107Z",
+    "agent_lines": 2015,
+    "human_added": 386,
+    "human_modified": 17,
+    "human_removed": 0,
+    "total_committed": 2418,
+    "agent_percentage": 83.33333333333334
+  },
+  "transcript_path": ".claude/projects/-mnt-c--netapps-socialhomes/1c66df9e-cd70-4c19-bf8d-80c7f8b566d9.jsonl"
+}
