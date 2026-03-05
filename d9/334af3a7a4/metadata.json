@@ -3,12 +3,14 @@
   "checkpoint_id": "d9334af3a7a4",
   "strategy": "manual-commit",
   "branch": "main",
-  "checkpoints_count": 2,
+  "checkpoints_count": 3,
   "files_touched": [
     "DEV-FIX-LIST.md",
+    "SESSION-HISTORY.md",
     "docs/security-audit.md",
     "server/src/routes/api-integration.test.ts",
-    "server/src/routes/public-data.test.ts"
+    "server/src/routes/public-data.test.ts",
+    "tests/test_phase5_features.py"
   ],
   "sessions": [
     {
@@ -24,13 +26,20 @@
       "context": "/d9/334af3a7a4/1/context.md",
       "content_hash": "/d9/334af3a7a4/1/content_hash.txt",
       "prompt": "/d9/334af3a7a4/1/prompt.txt"
+    },
+    {
+      "metadata": "/d9/334af3a7a4/2/metadata.json",
+      "transcript": "/d9/334af3a7a4/2/full.jsonl",
+      "context": "/d9/334af3a7a4/2/context.md",
+      "content_hash": "/d9/334af3a7a4/2/content_hash.txt",
+      "prompt": "/d9/334af3a7a4/2/prompt.txt"
     }
   ],
   "token_usage": {
-    "input_tokens": 2481,
-    "cache_creation_tokens": 152105,
-    "cache_read_tokens": 3930741,
-    "output_tokens": 28830,
-    "api_call_count": 64
+    "input_tokens": 2519,
+    "cache_creation_tokens": 626945,
+    "cache_read_tokens": 6658601,
+    "output_tokens": 62096,
+    "api_call_count": 100
   }
 }

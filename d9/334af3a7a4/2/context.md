@@ -1,0 +1,8 @@
+# Session Context
+
+## User Prompts
+
+### Prompt 1
+
+Read EXECUTION-PLAN.md and implement all tasks assigned to the tester agent. Write Selenium E2E tests in tests/, run them, and update DEV-FIX-LIST.md with results.
+
