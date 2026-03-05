@@ -233,7 +233,8 @@ function makeApp(router: any, prefix: string) {
   app.use(express.json());
   app.use(prefix, router);
   app.use((err: any, _req: any, res: any, _next: any) => {
-    res.status(err.status || 500).json({ error: err.message || 'Internal error' });
+    const status = err.statusCode || err.status || 500;
+    res.status(status).json({ error: err.message || 'Internal error' });
   });
   return app;
 }
@@ -1117,14 +1118,15 @@ describe('API Integration Routes', () => {
       expect(res.body.error).toBe('No authorization token provided');
     });
 
-    it('creates a new user profile on first registration', async () => {
+    it('creates a new user profile on first registration with pending-approval persona', async () => {
       const res = await request(app(), 'POST', '/api/v1/auth/profile', { name: 'New User' }, {
         'Authorization': 'Bearer valid-token',
       });
       expect(res.status).toBe(201);
       expect(res.body.status).toBe('created');
       expect(res.body.profile.email).toBe('test@rcha.org.uk');
-      expect(res.body.profile.persona).toBe('housing-officer');
+      // Security fix: new users default to 'pending-approval' (least-privilege)
+      expect(res.body.profile.persona).toBe('pending-approval');
     });
 
     it('returns existing profile if user already has one', async () => {
@@ -1214,20 +1216,21 @@ describe('API Integration Routes', () => {
   describe('Auth — POST /api/v1/auth/seed-users', () => {
     const app = () => makeApp(authRouter, '/api/v1/auth');
 
-    it('seeds demo users and returns results', async () => {
+    it('rejects seed-users without COO persona (no token, dev X-Persona fallback)', async () => {
+      // Security fix: seed-users requires requirePersona('coo')
+      // In dev mode, no token = X-Persona fallback = housing-officer = insufficient
       const res = await request(app(), 'POST', '/api/v1/auth/seed-users');
-      expect(res.status).toBe(200);
-      expect(res.body.status).toBe('success');
-      expect(res.body.users).toBeDefined();
-      expect(Array.isArray(res.body.users)).toBe(true);
-      expect(res.body.users.length).toBe(5);
-      // Each user should have email, uid, persona, status
-      for (const user of res.body.users) {
-        expect(user.email).toBeDefined();
-        expect(user.uid).toBeDefined();
-        expect(user.persona).toBeDefined();
-        expect(user.status).toBeDefined();
-      }
+      expect(res.status).toBe(403);
+      expect(res.body.error).toContain('Insufficient permissions');
+    });
+
+    it('rejects seed-users from non-COO bearer token', async () => {
+      // valid-token mock returns persona: 'housing-officer' — insufficient for COO-only endpoint
+      const res = await request(app(), 'POST', '/api/v1/auth/seed-users', {}, {
+        'Authorization': 'Bearer valid-token',
+      });
+      expect(res.status).toBe(403);
+      expect(res.body.error).toContain('Insufficient permissions');
     });
   });
 });

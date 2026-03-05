@@ -2084,5 +2084,258 @@
     "id": "m_1772291725720_sspke",
     "timestamp": "2026-02-28T15:15:25.720Z",
     "parentId": "m_1772291078600_mhz46"
+  },
+  {
+    "type": "agent_error",
+    "agent": "tester",
+    "phaseNumber": 3,
+    "action": "QA Tester failed",
+    "details": "Agent QA Tester exited with error",
+    "outcome": "failure",
+    "metadata": {
+      "error": "Agent QA Tester exited with error"
+    },
+    "id": "m_1772293003516_ry11u",
+    "timestamp": "2026-02-28T15:36:43.516Z",
+    "parentId": "m_1772291078564_t44wn"
+  },
+  {
+    "type": "retry",
+    "agent": "tester",
+    "phaseNumber": 3,
+    "action": "Retry QA Tester",
+    "details": "Retrying QA Tester (attempt 1)",
+    "outcome": "pending",
+    "metadata": {
+      "attempt": 1
+    },
+    "id": "m_1772293028675_0nx8m",
+    "timestamp": "2026-02-28T15:37:08.675Z",
+    "parentId": "m_1772293003516_ry11u"
+  },
+  {
+    "type": "agent_spawn",
+    "agent": "tester",
+    "phaseNumber": 3,
+    "action": "QA Tester started",
+    "details": "Agent QA Tester spawned",
+    "outcome": "pending",
+    "id": "m_1772293028707_fqokx",
+    "timestamp": "2026-02-28T15:37:08.707Z",
+    "parentId": null
+  },
+  {
+    "type": "zombie_detected",
+    "agent": "tester",
+    "phaseNumber": 3,
+    "action": "Zombie: QA Tester",
+    "details": "QA Tester (PID 762241) detected as zombie process",
+    "outcome": "failure",
+    "metadata": {
+      "pid": 762241
+    },
+    "id": "m_1772296070837_lcxxu",
+    "timestamp": "2026-02-28T16:27:50.837Z",
+    "parentId": null
+  },
+  {
+    "type": "retry",
+    "agent": "tester",
+    "phaseNumber": 3,
+    "action": "Retry QA Tester",
+    "details": "Retrying QA Tester (attempt 1)",
+    "outcome": "pending",
+    "metadata": {
+      "attempt": 1
+    },
+    "id": "m_1772296070843_8bpt8",
+    "timestamp": "2026-02-28T16:27:50.843Z",
+    "parentId": null
+  },
+  {
+    "type": "agent_spawn",
+    "agent": "tester",
+    "phaseNumber": 3,
+    "action": "QA Tester started",
+    "details": "Agent QA Tester spawned",
+    "outcome": "pending",
+    "id": "m_1772296070870_8tghe",
+    "timestamp": "2026-02-28T16:27:50.870Z",
+    "parentId": null
+  },
+  {
+    "type": "agent_error",
+    "agent": "tester",
+    "phaseNumber": 3,
+    "action": "QA Tester failed",
+    "details": "Agent QA Tester exited with error",
+    "outcome": "failure",
+    "metadata": {
+      "error": "Agent QA Tester exited with error"
+    },
+    "id": "m_1772296795482_1g1de",
+    "timestamp": "2026-02-28T16:39:55.482Z",
+    "parentId": "m_1772296070870_8tghe"
+  },
+  {
+    "type": "escalation",
+    "agent": "tester",
+    "phaseNumber": 3,
+    "action": "Escalated QA Tester",
+    "details": "Asking Rajiv: QA Tester failed after 2 attempts. Last error: Exit code 1, signal: null",
+    "outcome": "warning",
+    "id": "m_1772296820994_0ads3",
+    "timestamp": "2026-02-28T16:40:20.994Z",
+    "parentId": "m_1772296795482_1g1de"
+  },
+  {
+    "type": "retry",
+    "agent": "tester",
+    "phaseNumber": 3,
+    "action": "Retry QA Tester",
+    "details": "Retrying QA Tester (attempt 1)",
+    "outcome": "pending",
+    "metadata": {
+      "attempt": 1
+    },
+    "id": "m_1772546793048_xdnst",
+    "timestamp": "2026-03-03T14:06:33.048Z",
+    "parentId": null
+  },
+  {
+    "type": "agent_spawn",
+    "agent": "tester",
+    "phaseNumber": 3,
+    "action": "QA Tester started",
+    "details": "Agent QA Tester spawned",
+    "outcome": "pending",
+    "id": "m_1772546793170_c8ynp",
+    "timestamp": "2026-03-03T14:06:33.170Z",
+    "parentId": null
+  },
+  {
+    "type": "agent_error",
+    "agent": "tester",
+    "phaseNumber": 3,
+    "action": "QA Tester failed",
+    "details": "Agent QA Tester exited with error",
+    "outcome": "failure",
+    "metadata": {
+      "error": "Agent QA Tester exited with error"
+    },
+    "id": "m_1772546793234_qb80f",
+    "timestamp": "2026-03-03T14:06:33.234Z",
+    "parentId": "m_1772546793170_c8ynp"
+  },
+  {
+    "type": "retry",
+    "agent": "tester",
+    "phaseNumber": 3,
+    "action": "Retry QA Tester",
+    "details": "Retrying QA Tester (attempt 1)",
+    "outcome": "pending",
+    "metadata": {
+      "attempt": 1
+    },
+    "id": "m_1772546821072_kgxz3",
+    "timestamp": "2026-03-03T14:07:01.072Z",
+    "parentId": null
+  },
+  {
+    "type": "agent_spawn",
+    "agent": "tester",
+    "phaseNumber": 3,
+    "action": "QA Tester started",
+    "details": "Agent QA Tester spawned",
+    "outcome": "pending",
+    "id": "m_1772546821103_eh4eh",
+    "timestamp": "2026-03-03T14:07:01.103Z",
+    "parentId": null
+  },
+  {
+    "type": "agent_error",
+    "agent": "tester",
+    "phaseNumber": 3,
+    "action": "QA Tester failed",
+    "details": "Agent QA Tester exited with error",
+    "outcome": "failure",
+    "metadata": {
+      "error": "Agent QA Tester exited with error"
+    },
+    "id": "m_1772546821148_lgsyz",
+    "timestamp": "2026-03-03T14:07:01.148Z",
+    "parentId": "m_1772546821103_eh4eh"
+  },
+  {
+    "type": "escalation",
+    "agent": "tester",
+    "phaseNumber": 3,
+    "action": "Escalated QA Tester",
+    "details": "Asking Rajiv: QA Tester failed after 2 attempts. Last error: Exit code 127, signal: null",
+    "outcome": "warning",
+    "id": "m_1772546851600_wu5k1",
+    "timestamp": "2026-03-03T14:07:31.600Z",
+    "parentId": "m_1772546821148_lgsyz"
+  },
+  {
+    "type": "retry",
+    "agent": "tester",
+    "phaseNumber": 3,
+    "action": "Retry QA Tester",
+    "details": "Retrying QA Tester (attempt 1)",
+    "outcome": "pending",
+    "metadata": {
+      "attempt": 1
+    },
+    "id": "m_1772704465106_p6yv4",
+    "timestamp": "2026-03-05T09:54:25.106Z",
+    "parentId": null
+  },
+  {
+    "type": "agent_spawn",
+    "agent": "tester",
+    "phaseNumber": 3,
+    "action": "QA Tester started",
+    "details": "Agent QA Tester spawned",
+    "outcome": "pending",
+    "id": "m_1772704465199_gehow",
+    "timestamp": "2026-03-05T09:54:25.199Z",
+    "parentId": null
+  },
+  {
+    "type": "retry",
+    "agent": "tester",
+    "phaseNumber": 3,
+    "action": "Retry QA Tester",
+    "details": "Retrying QA Tester (attempt 1)",
+    "outcome": "pending",
+    "metadata": {
+      "attempt": 1
+    },
+    "id": "m_1772704552333_cql4h",
+    "timestamp": "2026-03-05T09:55:52.333Z",
+    "parentId": null
+  },
+  {
+    "type": "agent_spawn",
+    "agent": "tester",
+    "phaseNumber": 3,
+    "action": "QA Tester started",
+    "details": "Agent QA Tester spawned",
+    "outcome": "pending",
+    "id": "m_1772704552369_i4im1",
+    "timestamp": "2026-03-05T09:55:52.369Z",
+    "parentId": null
+  },
+  {
+    "type": "agent_complete",
+    "agent": "tester",
+    "phaseNumber": 3,
+    "action": "QA Tester completed",
+    "details": "Agent QA Tester finished successfully",
+    "outcome": "success",
+    "id": "m_1772707197048_j1glh",
+    "timestamp": "2026-03-05T10:39:57.048Z",
+    "parentId": "m_1772704552369_i4im1"
   }
 ]

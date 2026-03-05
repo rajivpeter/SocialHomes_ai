@@ -576,9 +576,16 @@ describe('Public Data API Routes', () => {
       expect(res.body.data.imdScore).toBe(35.2);
     });
 
-    it('returns simulated fallback when LSOA not found', async () => {
-      _mockFetch.mockResolvedValueOnce({ ok: true, json: async () => ({ features: [] }) });
+    it('rejects invalid LSOA code format with 400', async () => {
+      // Security fix: LSOA codes are now validated (must match /^E\d{8}$/)
       const res = await request('GET', '/api/v1/public-data/imd/INVALID_LSOA');
+      expect(res.status).toBe(400);
+      expect(res.body.error).toContain('Invalid LSOA code format');
+    });
+
+    it('returns simulated fallback when valid LSOA not found in dataset', async () => {
+      _mockFetch.mockResolvedValueOnce({ ok: true, json: async () => ({ features: [] }) });
+      const res = await request('GET', '/api/v1/public-data/imd/E01999999');
       expect(res.status).toBe(200);
       expect(res.body.source).toBe('simulated');
     });
