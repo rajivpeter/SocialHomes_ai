@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 import { useProperties, useTenants, useCases } from '@/hooks/useApi';
 import AiActionCard from '@/components/shared/AiActionCard';
 import ActionModal from '@/components/shared/ActionModal';
@@ -31,6 +32,7 @@ import PropertyMap from '@/components/shared/PropertyMap';
 
 export default function PropertyDetailPage() {
   const { id } = useParams<{ id: string }>();
+  const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<'overview' | 'compliance' | 'stock-condition' | 'damp-mould' | 'works-history' | 'documents'>('overview');
   const [activeModal, setActiveModal] = useState<string | null>(null);
 
@@ -572,6 +574,8 @@ export default function PropertyDetailPage() {
         submitLabel="Save Changes"
         onSubmit={async (values) => {
           await propertiesApi.update(property.id, values);
+          queryClient.invalidateQueries({ queryKey: ['properties'] });
+          queryClient.invalidateQueries({ queryKey: ['property', id] });
         }}
       />
 
@@ -599,7 +603,9 @@ export default function PropertyDetailPage() {
         ]}
         submitLabel="Report Issue"
         onSubmit={async (v) => {
-          await casesApi.create({ propertyId: property.id, type: v.issueType, priority: v.priority, description: v.description });
+          await casesApi.create({ propertyId: property.id, type: v.issueType, priority: v.priority, description: v.description, subject: v.description, status: 'open', createdDate: new Date().toISOString() });
+          queryClient.invalidateQueries({ queryKey: ['cases'] });
+          queryClient.invalidateQueries({ queryKey: ['repairs'] });
         }}
       />
     </div>

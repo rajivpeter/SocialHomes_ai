@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 import {
   Phone, Mail, MapPin, User, Calendar, AlertTriangle,
   FileText, Activity, Receipt, Scale, Clock, Home,
@@ -20,6 +21,7 @@ import { casesApi, tenantsApi } from '@/services/api-client';
 
 export default function TenancyDetailPage() {
   const { id } = useParams<{ id: string }>();
+  const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<'overview' | 'cases' | 'activities' | 'statement' | 'orders'>('overview');
   const [activeModal, setActiveModal] = useState<string | null>(null);
   const navigate = useNavigate();
@@ -632,6 +634,8 @@ export default function TenancyDetailPage() {
         submitLabel="Save Changes"
         onSubmit={async (values) => {
           await tenantsApi.update(tenant.id, values);
+          queryClient.invalidateQueries({ queryKey: ['tenants'] });
+          queryClient.invalidateQueries({ queryKey: ['tenant', id] });
         }}
       />
 
@@ -653,7 +657,9 @@ export default function TenancyDetailPage() {
         ]}
         submitLabel="Log Activity"
         onSubmit={async (values) => {
-          await casesApi.create({ tenantId: tenant.id, type: 'activity', ...values });
+          await casesApi.create({ tenantId: tenant.id, type: 'activity', subject: values.notes, activityType: values.activityType, status: 'completed', createdDate: new Date().toISOString() });
+          queryClient.invalidateQueries({ queryKey: ['tenant', id, 'activities'] });
+          queryClient.invalidateQueries({ queryKey: ['cases'] });
         }}
       />
     </div>

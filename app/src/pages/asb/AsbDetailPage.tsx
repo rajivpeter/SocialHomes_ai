@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 import { AlertTriangle, FileText, CheckCircle, Clock, X, UserCheck, Edit, TrendingUp, XCircle } from 'lucide-react';
 import { allAsbCases as asbCases } from '@/data';
 import { useTenants, useProperties } from '@/hooks/useApi';
@@ -48,6 +49,7 @@ export default function AsbDetailPage() {
   
   const case_ = asbCases.find((c: any) => c.id === id);
   const [activeModal, setActiveModal] = useState<string | null>(null);
+  const queryClient = useQueryClient();
 
   if (!case_) {
     return (
@@ -84,7 +86,7 @@ export default function AsbDetailPage() {
         { value: 'james-wright', label: 'James Wright — Head of Housing' },
       ]},
       { id: 'notes', label: 'Notes', type: 'textarea', placeholder: 'Assignment notes...' },
-    ]} submitLabel="Assign" onSubmit={async (v) => { await casesApi.update(case_.id, { handler: v.handler, assignmentNotes: v.notes }); }} />
+    ]} submitLabel="Assign" onSubmit={async (v) => { await casesApi.update(case_.id, { handler: v.handler, assignmentNotes: v.notes }); queryClient.invalidateQueries({ queryKey: ['cases'] }); }} />
     <ActionModal open={activeModal === 'update'} onClose={() => setActiveModal(null)} title="Update ASB Case" description={`Update ${case_.reference}`} icon={<Edit size={20} className="text-brand-blue" />} fields={[
       { id: 'status', label: 'Status', type: 'select', defaultValue: case_.status, options: [
         { value: 'open', label: 'Open' },
@@ -94,11 +96,11 @@ export default function AsbDetailPage() {
       ]},
       { id: 'escalationStage', label: 'Escalation Stage', type: 'select', defaultValue: case_.escalationStage, options: escalationStages.map(s => ({ value: s, label: escalationStageLabels[s] })) },
       { id: 'notes', label: 'Update Notes', type: 'textarea', placeholder: 'Describe the update...' },
-    ]} submitLabel="Save" onSubmit={async (v) => { await casesApi.update(case_.id, { status: v.status, escalationStage: v.escalationStage, updateNotes: v.notes }); }} />
+    ]} submitLabel="Save" onSubmit={async (v) => { await casesApi.update(case_.id, { status: v.status, escalationStage: v.escalationStage, updateNotes: v.notes }); queryClient.invalidateQueries({ queryKey: ['cases'] }); }} />
     <ActionModal open={activeModal === 'escalate'} onClose={() => setActiveModal(null)} title="Escalate ASB Case" description={`Escalate ${case_.reference} to next stage`} icon={<TrendingUp size={20} className="text-status-warning" />} variant="warning" fields={[
       { id: 'reason', label: 'Escalation Reason', type: 'textarea', required: true, placeholder: 'Why is this being escalated?' },
       { id: 'nextStage', label: 'Escalate To', type: 'select', required: true, options: escalationStages.filter((_, i) => i > currentStageIndex).map(s => ({ value: s, label: escalationStageLabels[s] })) },
-    ]} submitLabel="Escalate" onSubmit={async (v) => { await casesApi.update(case_.id, { escalationStage: v.nextStage, escalationReason: v.reason, status: 'action-taken' }); }} />
+    ]} submitLabel="Escalate" onSubmit={async (v) => { await casesApi.update(case_.id, { escalationStage: v.nextStage, escalationReason: v.reason, status: 'action-taken' }); queryClient.invalidateQueries({ queryKey: ['cases'] }); }} />
     <ActionModal open={activeModal === 'close'} onClose={() => setActiveModal(null)} title="Close ASB Case" description={`Close ${case_.reference}`} icon={<CheckCircle size={20} className="text-status-compliant" />} variant="success" fields={[
       { id: 'outcome', label: 'Outcome', type: 'select', required: true, options: [
         { value: 'resolved', label: 'Resolved' },
@@ -107,7 +109,7 @@ export default function AsbDetailPage() {
         { value: 'transferred', label: 'Transferred' },
       ]},
       { id: 'notes', label: 'Closing Notes', type: 'textarea', placeholder: 'Describe the outcome...' },
-    ]} submitLabel="Close Case" onSubmit={async (v) => { await casesApi.update(case_.id, { status: 'closed', outcome: v.outcome, closingNotes: v.notes }); }} />
+    ]} submitLabel="Close Case" onSubmit={async (v) => { await casesApi.update(case_.id, { status: 'closed', outcome: v.outcome, closingNotes: v.notes }); queryClient.invalidateQueries({ queryKey: ['cases'] }); }} />
     <div className="space-y-6">
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
