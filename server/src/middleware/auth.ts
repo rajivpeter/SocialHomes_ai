@@ -9,6 +9,7 @@ export interface AuthUser {
   displayName?: string;
   teamId?: string;
   patchIds?: string[];
+  orgId: string;
 }
 
 declare global {
@@ -26,6 +27,7 @@ const DEMO_PERSONAS: Record<string, AuthUser> = {
     email: 'helen.carter@rcha.org.uk',
     persona: 'coo',
     displayName: 'Helen Carter',
+    orgId: 'rcha',
   },
   'head-of-housing': {
     uid: 'demo-head',
@@ -33,6 +35,7 @@ const DEMO_PERSONAS: Record<string, AuthUser> = {
     persona: 'head-of-housing',
     displayName: 'James Wright',
     teamId: 'london',
+    orgId: 'rcha',
   },
   'manager': {
     uid: 'demo-manager',
@@ -40,6 +43,7 @@ const DEMO_PERSONAS: Record<string, AuthUser> = {
     persona: 'manager',
     displayName: 'Priya Patel',
     teamId: 'southwark-lewisham',
+    orgId: 'rcha',
   },
   'housing-officer': {
     uid: 'demo-ho',
@@ -48,6 +52,7 @@ const DEMO_PERSONAS: Record<string, AuthUser> = {
     displayName: 'Sarah Mitchell',
     teamId: 'southwark-lewisham',
     patchIds: ['oak-park', 'elm-gardens'],
+    orgId: 'rcha',
   },
   'operative': {
     uid: 'demo-operative',
@@ -55,6 +60,7 @@ const DEMO_PERSONAS: Record<string, AuthUser> = {
     persona: 'operative',
     displayName: 'Mark Johnson',
     teamId: 'southwark-lewisham',
+    orgId: 'rcha',
   },
 };
 
@@ -88,6 +94,7 @@ export function authMiddleware(req: Request, res: Response, next: NextFunction) 
           displayName: decoded.name || userProfile?.displayName,
           teamId: userProfile?.teamId,
           patchIds: userProfile?.patchIds,
+          orgId: userProfile?.organisationId || 'rcha',
         };
         next();
       })

@@ -52,30 +52,47 @@ export function serializeFirestoreData(value: any): any {
   return value;
 }
 
-// ---- Collection References ----
-export const collections = {
-  organisations: db.collection('organisations'),
-  regions: db.collection('regions'),
-  localAuthorities: db.collection('localAuthorities'),
-  estates: db.collection('estates'),
-  blocks: db.collection('blocks'),
-  properties: db.collection('properties'),
-  tenants: db.collection('tenants'),
-  cases: db.collection('cases'),
-  activities: db.collection('activities'),
-  communications: db.collection('communications'),
-  rentTransactions: db.collection('rentTransactions'),
-  users: db.collection('users'),
-  auditLog: db.collection('auditLog'),
-  hactCodes: db.collection('hactCodes'),
-  notifications: db.collection('notifications'),
-  voidProperties: db.collection('voidProperties'),
-  applicants: db.collection('applicants'),
-  tsmMeasures: db.collection('tsmMeasures'),
-  externalDataCache: db.collection('externalDataCache'),
-  viewings: db.collection('viewings'),
-  applications: db.collection('applications'),
-};
+// ---- Multi-tenancy: Org-scoped collection references ----
+
+/**
+ * Returns Firestore collection references scoped to an organisation.
+ * Org-specific data lives under `orgs/{orgId}/...` for full data isolation.
+ * Global collections (users, organisations, auditLog) remain at root level.
+ *
+ * @param orgId - Organisation identifier (defaults to 'rcha' for backward compatibility)
+ */
+export function getCollections(orgId: string = 'rcha') {
+  const prefix = `orgs/${orgId}`;
+  return {
+    // Org-scoped collections
+    regions: db.collection(`${prefix}/regions`),
+    localAuthorities: db.collection(`${prefix}/localAuthorities`),
+    estates: db.collection(`${prefix}/estates`),
+    blocks: db.collection(`${prefix}/blocks`),
+    properties: db.collection(`${prefix}/properties`),
+    tenants: db.collection(`${prefix}/tenants`),
+    cases: db.collection(`${prefix}/cases`),
+    activities: db.collection(`${prefix}/activities`),
+    communications: db.collection(`${prefix}/communications`),
+    rentTransactions: db.collection(`${prefix}/rentTransactions`),
+    hactCodes: db.collection(`${prefix}/hactCodes`),
+    notifications: db.collection(`${prefix}/notifications`),
+    voidProperties: db.collection(`${prefix}/voidProperties`),
+    applicants: db.collection(`${prefix}/applicants`),
+    tsmMeasures: db.collection(`${prefix}/tsmMeasures`),
+    externalDataCache: db.collection(`${prefix}/externalDataCache`),
+    viewings: db.collection(`${prefix}/viewings`),
+    applications: db.collection(`${prefix}/applications`),
+    // Global collections (NOT org-scoped)
+    users: db.collection('users'),
+    organisations: db.collection('organisations'),
+    auditLog: db.collection('auditLog'),
+  };
+}
+
+// Backward-compatible default export — existing routes that import `collections`
+// continue to work against the default 'rcha' org without any code changes.
+export const collections = getCollections('rcha');
 
 // ---- Helpers ----
 export async function getDoc<T>(collection: FirebaseFirestore.CollectionReference, id: string): Promise<T | null> {
