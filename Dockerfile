@@ -46,7 +46,7 @@ RUN npm ci
 RUN npm audit --omit=dev --audit-level=critical 2>&1 || echo "⚠ npm audit found issues (see CI logs)"
 
 # Copy source and build (exclude test files)
-COPY server/tsconfig.json server/tsconfig.json
+COPY server/tsconfig.json ./tsconfig.json
 COPY server/src/ ./src/
 RUN npm run build
 
