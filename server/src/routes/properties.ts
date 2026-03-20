@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { getCollections, getDocs, getDoc, updateDoc } from '../services/firestore.js';
+import { collections, getDocs, getDoc, updateDoc } from '../services/firestore.js';
 import { authMiddleware } from '../middleware/auth.js';
 import type { PropertyDoc } from '../models/firestore-schemas.js';
 
@@ -9,8 +9,8 @@ propertiesRouter.use(authMiddleware);
 // GET /api/v1/properties?regionId=london&estateId=oak-park&type=flat&isVoid=true&limit=50
 propertiesRouter.get('/', async (req, res, next) => {
   try {
-    const orgId = req.user?.orgId || 'rcha';
-    const cols = getCollections(orgId);
+    // Multi-tenancy: will use getCollections(orgId) once data is migrated
+    // For now, use flat collections for backward compatibility
 
     const { regionId, estateId, blockId, localAuthorityId, type, isVoid, limit: limitStr } = req.query;
     const filters: { field: string; op: FirebaseFirestore.WhereFilterOp; value: any }[] = [];
@@ -23,7 +23,7 @@ propertiesRouter.get('/', async (req, res, next) => {
     if (isVoid !== undefined) filters.push({ field: 'isVoid', op: '==', value: isVoid === 'true' });
 
     const limit = limitStr ? parseInt(limitStr as string, 10) : 200;
-    const properties = await getDocs<PropertyDoc>(cols.properties, filters, undefined, limit);
+    const properties = await getDocs<PropertyDoc>(collections.properties, filters, undefined, limit);
 
     res.json({
       items: properties,
@@ -37,11 +37,11 @@ propertiesRouter.get('/', async (req, res, next) => {
 // GET /api/v1/properties/available — properties available for viewing/renting
 propertiesRouter.get('/available', async (req, res, next) => {
   try {
-    const orgId = req.user?.orgId || 'rcha';
-    const cols = getCollections(orgId);
+    // Multi-tenancy: will use getCollections(orgId) once data is migrated
+    // For now, use flat collections for backward compatibility
 
     const voidProps = await getDocs<PropertyDoc>(
-      cols.properties,
+      collections.properties,
       [{ field: 'isVoid', op: '==', value: true }],
       undefined,
       200,
@@ -55,10 +55,10 @@ propertiesRouter.get('/available', async (req, res, next) => {
 // GET /api/v1/properties/:id
 propertiesRouter.get('/:id', async (req, res, next) => {
   try {
-    const orgId = req.user?.orgId || 'rcha';
-    const cols = getCollections(orgId);
+    // Multi-tenancy: will use getCollections(orgId) once data is migrated
+    // For now, use flat collections for backward compatibility
 
-    const property = await getDoc<PropertyDoc>(cols.properties, req.params.id);
+    const property = await getDoc<PropertyDoc>(collections.properties, req.params.id);
     if (!property) return res.status(404).json({ error: 'Property not found' });
     res.json(property);
   } catch (err) {
@@ -69,11 +69,11 @@ propertiesRouter.get('/:id', async (req, res, next) => {
 // PATCH /api/v1/properties/:id
 propertiesRouter.patch('/:id', async (req, res, next) => {
   try {
-    const orgId = req.user?.orgId || 'rcha';
-    const cols = getCollections(orgId);
+    // Multi-tenancy: will use getCollections(orgId) once data is migrated
+    // For now, use flat collections for backward compatibility
 
-    await updateDoc(cols.properties, req.params.id, req.body);
-    const updated = await getDoc<PropertyDoc>(cols.properties, req.params.id);
+    await updateDoc(collections.properties, req.params.id, req.body);
+    const updated = await getDoc<PropertyDoc>(collections.properties, req.params.id);
     res.json(updated);
   } catch (err) {
     next(err);

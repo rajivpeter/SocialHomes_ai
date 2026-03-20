@@ -90,9 +90,32 @@ export function getCollections(orgId: string = 'rcha') {
   };
 }
 
-// Backward-compatible default export — existing routes that import `collections`
-// continue to work against the default 'rcha' org without any code changes.
-export const collections = getCollections('rcha');
+// Backward-compatible default export — uses FLAT collection paths (no org prefix)
+// so existing seeded data and tests continue to work. Routes will migrate to
+// getCollections(orgId) when multi-tenancy data migration is complete.
+export const collections = {
+  regions: db.collection('regions'),
+  localAuthorities: db.collection('localAuthorities'),
+  estates: db.collection('estates'),
+  blocks: db.collection('blocks'),
+  properties: db.collection('properties'),
+  tenants: db.collection('tenants'),
+  cases: db.collection('cases'),
+  activities: db.collection('activities'),
+  communications: db.collection('communications'),
+  rentTransactions: db.collection('rentTransactions'),
+  hactCodes: db.collection('hactCodes'),
+  notifications: db.collection('notifications'),
+  voidProperties: db.collection('voidProperties'),
+  applicants: db.collection('applicants'),
+  tsmMeasures: db.collection('tsmMeasures'),
+  externalDataCache: db.collection('externalDataCache'),
+  viewings: db.collection('viewings'),
+  applications: db.collection('applications'),
+  users: db.collection('users'),
+  organisations: db.collection('organisations'),
+  auditLog: db.collection('auditLog'),
+};
 
 // ---- Helpers ----
 export async function getDoc<T>(collection: FirebaseFirestore.CollectionReference, id: string): Promise<T | null> {
