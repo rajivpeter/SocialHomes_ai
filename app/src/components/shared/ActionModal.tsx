@@ -19,7 +19,7 @@ interface ActionModalProps {
   icon?: React.ReactNode;
   fields: ActionField[];
   submitLabel?: string;
-  onSubmit: (values: Record<string, string>) => void;
+  onSubmit: (values: Record<string, string>) => void | Promise<void>;
   variant?: 'default' | 'success' | 'warning' | 'danger';
 }
 
@@ -125,15 +125,18 @@ export default function ActionModal({ open, onClose, title, description, icon, f
       return;
     }
     setSubmitting(true);
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 800));
-    setSubmitting(false);
-    setSubmitted(true);
-    onSubmit(values);
-    setTimeout(() => {
-      setSubmitted(false);
-      onClose();
-    }, 1500);
+    try {
+      await onSubmit(values);
+      setSubmitting(false);
+      setSubmitted(true);
+      setTimeout(() => {
+        setSubmitted(false);
+        onClose();
+      }, 1200);
+    } catch (err) {
+      setSubmitting(false);
+      setErrors({ _form: err instanceof Error ? err.message : 'An error occurred. Please try again.' });
+    }
   };
 
   const borderColor = variant === 'danger' ? 'border-status-critical/30' :
@@ -183,6 +186,12 @@ export default function ActionModal({ open, onClose, title, description, icon, f
         ) : (
           <form onSubmit={handleSubmit} noValidate>
             <div className="p-5 space-y-4">
+              {errors._form && (
+                <div className="flex items-center gap-2 p-3 bg-status-critical/10 border border-status-critical/20 rounded-lg text-sm text-status-critical" role="alert">
+                  <AlertCircle size={16} />
+                  {errors._form}
+                </div>
+              )}
               {fields.map(field => {
                 const fieldId = `field-${field.id}`;
                 const errorId = `error-${field.id}`;

@@ -14,6 +14,7 @@ import ActionModal from '@/components/shared/ActionModal';
 import type { ActionField } from '@/components/shared/ActionModal';
 import { formatDate, formatCurrency } from '@/utils/format';
 import { useRepairIntelligence } from '@/hooks/useEntityIntelligence';
+import { casesApi } from '@/services/api-client';
 
 export default function RepairDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -204,10 +205,10 @@ export default function RepairDetailPage() {
 
   return (
     <>
-    <ActionModal open={activeModal === 'assign'} onClose={() => setActiveModal(null)} title="Assign Repair" description={`Assign ${repair.reference} to a handler or operative`} icon={<UserCheck size={20} className="text-brand-teal" />} fields={assignFields} submitLabel="Assign" onSubmit={(v) => { console.log('Assign:', v); setActiveModal(null); }} />
-    <ActionModal open={activeModal === 'update'} onClose={() => setActiveModal(null)} title="Update Repair" description={`Update status, priority, or schedule for ${repair.reference}`} icon={<Edit size={20} className="text-brand-blue" />} fields={updateFields} submitLabel="Save Changes" onSubmit={(v) => { console.log('Update:', v); setActiveModal(null); }} />
-    <ActionModal open={activeModal === 'escalate'} onClose={() => setActiveModal(null)} title="Escalate Repair" description={`Escalate ${repair.reference} to management`} icon={<TrendingUp size={20} className="text-status-warning" />} fields={escalateFields} submitLabel="Escalate" variant="warning" onSubmit={(v) => { console.log('Escalate:', v); setActiveModal(null); }} />
-    <ActionModal open={activeModal === 'close'} onClose={() => setActiveModal(null)} title="Close Repair" description={`Mark ${repair.reference} as completed`} icon={<CheckCircle size={20} className="text-status-compliant" />} fields={closeFields} submitLabel="Close Repair" variant="success" onSubmit={(v) => { console.log('Close:', v); setActiveModal(null); }} />
+    <ActionModal open={activeModal === 'assign'} onClose={() => setActiveModal(null)} title="Assign Repair" description={`Assign ${repair.reference} to a handler or operative`} icon={<UserCheck size={20} className="text-brand-teal" />} fields={assignFields} submitLabel="Assign" onSubmit={async (v) => { await casesApi.update(repair.id, { handler: v.handler, assignedOperative: v.operative, status: 'assigned' }); }} />
+    <ActionModal open={activeModal === 'update'} onClose={() => setActiveModal(null)} title="Update Repair" description={`Update status, priority, or schedule for ${repair.reference}`} icon={<Edit size={20} className="text-brand-blue" />} fields={updateFields} submitLabel="Save Changes" onSubmit={async (v) => { await casesApi.update(repair.id, { status: v.status, priority: v.priority, scheduledDate: v.scheduledDate }); }} />
+    <ActionModal open={activeModal === 'escalate'} onClose={() => setActiveModal(null)} title="Escalate Repair" description={`Escalate ${repair.reference} to management`} icon={<TrendingUp size={20} className="text-status-warning" />} fields={escalateFields} submitLabel="Escalate" variant="warning" onSubmit={async (v) => { await casesApi.update(repair.id, { priority: 'emergency', escalatedReason: v.reason, escalatedNotes: v.notes, status: 'escalated' }); }} />
+    <ActionModal open={activeModal === 'close'} onClose={() => setActiveModal(null)} title="Close Repair" description={`Mark ${repair.reference} as completed`} icon={<CheckCircle size={20} className="text-status-compliant" />} fields={closeFields} submitLabel="Close Repair" variant="success" onSubmit={async (v) => { await casesApi.update(repair.id, { status: 'completed', completionDate: v.completionDate, completionNotes: v.notes, satisfactionRating: v.satisfaction }); }} />
     <div className={`space-y-6 ${intel.urgencyLevel === 'crisis' ? 'ring-1 ring-brand-garnet/20 rounded-xl p-2' : intel.urgencyLevel === 'urgent' ? 'ring-1 ring-status-warning/10 rounded-xl p-2' : ''}`}>
       <div className="max-w-7xl mx-auto space-y-6">
         {/* AI Warnings */}
