@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Search, Filter, List, LayoutGrid, Plus } from 'lucide-react';
 import { useRepairs, useProperties } from '@/hooks/useApi';
 import StatusPill from '@/components/shared/StatusPill';
-import { formatDate } from '@/utils/format';
+import { formatDate, daysUntil } from '@/utils/format';
 
 export default function RepairsPage() {
   const navigate = useNavigate();
@@ -47,6 +47,14 @@ export default function RepairsPage() {
       case 'planned': return 'border-l-status-compliant';
       default: return 'border-l-border-default';
     }
+  };
+
+  const getSlaStatus = (repair: any): { dot: string; label: string } | null => {
+    if (!repair.targetDate || repair.status === 'completed' || repair.status === 'closed') return null;
+    const days = daysUntil(repair.targetDate);
+    if (days <= 0) return { dot: 'bg-status-critical animate-pulse', label: 'Breached' };
+    if (days <= 3) return { dot: 'bg-status-warning', label: 'Approaching' };
+    return { dot: 'bg-status-compliant', label: 'Within SLA' };
   };
 
   const kanbanColumns = [
@@ -292,14 +300,25 @@ export default function RepairsPage() {
                             {property?.address ? property.address.split(',')[0] : 'N/A'}
                           </div>
                           <div className="flex items-center justify-between mt-2">
-                            <span className={`text-xs px-2 py-0.5 rounded capitalize ${
-                              repair.priority === 'emergency' ? 'bg-status-critical/20 text-status-critical' :
-                              repair.priority === 'urgent' ? 'bg-status-warning/20 text-status-warning' :
-                              repair.priority === 'routine' ? 'bg-brand-blue/20 text-brand-blue' :
-                              'bg-status-compliant/20 text-status-compliant'
-                            }`}>
-                              {repair.priority}
-                            </span>
+                            <div className="flex items-center gap-1.5">
+                              <span className={`text-xs px-2 py-0.5 rounded capitalize ${
+                                repair.priority === 'emergency' ? 'bg-status-critical/20 text-status-critical' :
+                                repair.priority === 'urgent' ? 'bg-status-warning/20 text-status-warning' :
+                                repair.priority === 'routine' ? 'bg-brand-blue/20 text-brand-blue' :
+                                'bg-status-compliant/20 text-status-compliant'
+                              }`}>
+                                {repair.priority}
+                              </span>
+                              {(() => {
+                                const sla = getSlaStatus(repair);
+                                if (!sla) return null;
+                                return (
+                                  <span className="flex items-center gap-1" title={sla.label}>
+                                    <span className={`w-2 h-2 rounded-full ${sla.dot}`} />
+                                  </span>
+                                );
+                              })()}
+                            </div>
                             <span className="text-xs text-text-muted">{repair.daysOpen}d</span>
                           </div>
                         </Link>

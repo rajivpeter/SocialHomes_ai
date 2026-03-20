@@ -3,12 +3,14 @@ import { useParams, Link } from 'react-router-dom';
 import {
   Building2, User, Calendar, Wrench, AlertTriangle,
   CheckCircle, Clock, ArrowRight, UserCheck, Edit,
-  TrendingUp, XCircle, Home, FileText, ShieldCheck, ShieldAlert
+  TrendingUp, XCircle, Home, FileText, ShieldCheck, ShieldAlert,
+  ClipboardList, Search, CalendarCheck, UserPlus, PlayCircle, CircleCheckBig, Lock
 } from 'lucide-react';
 import { useRepairs, useProperties, useTenants } from '@/hooks/useApi';
 import { activities as activitiesData } from '@/data';
 import StatusPill from '@/components/shared/StatusPill';
 import CountdownTimer from '@/components/shared/CountdownTimer';
+import WorkflowProgress from '@/components/shared/WorkflowProgress';
 import AiActionCard from '@/components/shared/AiActionCard';
 import ActionModal from '@/components/shared/ActionModal';
 import type { ActionField } from '@/components/shared/ActionModal';
@@ -57,31 +59,37 @@ export default function RepairDetailPage() {
     }
   };
 
-  const getTimelineSteps = () => {
-    const steps = [
-      { id: 'created', label: 'Created', date: repair.createdDate, completed: true },
-    ];
+  // Workflow stages for the WorkflowProgress component
+  const repairWorkflowStages = [
+    { id: 'reported', label: 'Reported', icon: <ClipboardList size={16} /> },
+    { id: 'triaged', label: 'Triaged', icon: <Search size={16} /> },
+    { id: 'scheduled', label: 'Scheduled', icon: <CalendarCheck size={16} /> },
+    { id: 'assigned', label: 'Assigned', icon: <UserPlus size={16} /> },
+    { id: 'in-progress', label: 'In Progress', icon: <PlayCircle size={16} /> },
+    { id: 'completed', label: 'Completed', icon: <CircleCheckBig size={16} /> },
+    { id: 'closed', label: 'Closed', icon: <Lock size={16} /> },
+  ];
 
-    if (repair.status === 'in-progress' || repair.status === 'awaiting-parts' || repair.status === 'completed') {
-      steps.push({ id: 'in-progress', label: 'In Progress', date: repair.createdDate, completed: true });
+  const getRepairCurrentStage = (): string => {
+    switch (repair.status) {
+      case 'open': return repair.handler ? 'triaged' : 'reported';
+      case 'awaiting-parts': return 'scheduled';
+      case 'assigned': return 'assigned';
+      case 'in-progress': return 'in-progress';
+      case 'completed': return 'completed';
+      case 'closed': return 'closed';
+      default: return 'reported';
     }
-
-    if (repair.status === 'awaiting-parts' || repair.status === 'completed') {
-      steps.push({ id: 'awaiting-parts', label: 'Awaiting Parts', date: repair.appointmentDate || repair.createdDate, completed: true });
-    }
-
-    if (repair.status === 'completed') {
-      steps.push({ id: 'completed', label: 'Completed', date: repair.completionDate || repair.closedDate || '', completed: true });
-    } else {
-      const currentStep = repair.status === 'open' ? 'created' : 
-                          repair.status === 'in-progress' ? 'in-progress' : 'awaiting-parts';
-      steps.push({ id: currentStep, label: currentStep === 'created' ? 'In Progress' : 
-                  currentStep === 'in-progress' ? 'Awaiting Parts' : 'Completed', 
-                  date: '', completed: false });
-    }
-
-    return steps;
   };
+
+  const getRepairCompletedStages = (): string[] => {
+    const statusOrder = ['reported', 'triaged', 'scheduled', 'assigned', 'in-progress', 'completed', 'closed'];
+    const currentStage = getRepairCurrentStage();
+    const currentIndex = statusOrder.indexOf(currentStage);
+    return statusOrder.slice(0, currentIndex);
+  };
+
+  const isRepairOverdue = repair.targetDate ? new Date(repair.targetDate) < new Date() && repair.status !== 'completed' && repair.status !== 'closed' : false;
 
   const generateAiActions = () => {
     const actions = [];
@@ -350,35 +358,18 @@ export default function RepairDetailPage() {
           </div>
         </div>
 
-        {/* Timeline */}
+        {/* Workflow Progress */}
         <div className="bg-surface-card rounded-lg p-6 border border-border-default opacity-0 animate-fade-in-up" style={{ animationDelay: '150ms', animationFillMode: 'forwards' }}>
-          <h2 className="text-lg font-bold text-text-primary mb-4">Repair Timeline</h2>
-          <div className="flex items-center gap-4 overflow-x-auto pb-4">
-            {getTimelineSteps().map((step, index) => (
-              <div key={step.id} className="flex items-center gap-4 min-w-fit">
-                <div className="flex flex-col items-center">
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center border-2 ${
-                    step.completed
-                      ? 'bg-brand-teal border-brand-teal text-white'
-                      : 'bg-surface-dark border-border-default text-text-muted'
-                  }`}>
-                    {step.completed ? (
-                      <CheckCircle size={20} />
-                    ) : (
-                      <Clock size={20} />
-                    )}
-                  </div>
-                  <div className="text-xs text-text-muted mt-2 text-center max-w-[80px]">{step.label}</div>
-                  {step.date && (
-                    <div className="text-xs text-text-muted mt-1">{formatDate(step.date)}</div>
-                  )}
-                </div>
-                {index < getTimelineSteps().length - 1 && (
-                  <ArrowRight size={20} className="text-border-default flex-shrink-0" />
-                )}
-              </div>
-            ))}
-          </div>
+          <h2 className="text-lg font-bold text-text-primary mb-4">Repair Progress</h2>
+          <WorkflowProgress
+            stages={repairWorkflowStages}
+            currentStage={getRepairCurrentStage()}
+            completedStages={getRepairCompletedStages()}
+            variant="horizontal"
+            size="md"
+            slaDeadline={repair.targetDate}
+            isOverdue={isRepairOverdue}
+          />
         </div>
 
         {/* Split Layout */}

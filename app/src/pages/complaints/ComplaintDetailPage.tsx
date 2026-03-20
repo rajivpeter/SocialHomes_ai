@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { 
+import {
   MessageSquareWarning,
   Clock,
   CheckCircle,
@@ -19,6 +19,7 @@ import {
 import { useComplaints, useTenants, useProperties } from '@/hooks/useApi';
 import { activities } from '@/data';
 import CountdownTimer from '@/components/shared/CountdownTimer';
+import Complaint2StageTracker from '@/components/shared/Complaint2StageTracker';
 import StatusPill from '@/components/shared/StatusPill';
 import AiActionCard from '@/components/shared/AiActionCard';
 import ActionModal from '@/components/shared/ActionModal';
@@ -117,104 +118,22 @@ export default function ComplaintDetailPage() {
           </div>
         </div>
 
+        {/* Complaint 2-Stage Tracker */}
+        <div className="opacity-0 animate-fade-in-up" style={{ animationDelay: '80ms', animationFillMode: 'forwards' }}>
+          <Complaint2StageTracker
+            stage={complaint.stage as 1 | 2}
+            status={complaint.status}
+            receivedDate={complaint.createdDate}
+            acknowledgementDate={complaint.acknowledgedDate}
+            responseDeadline={complaint.responseDeadline}
+            respondedDate={complaint.respondedDate}
+            escalatedDate={complaint.escalatedDate}
+          />
+        </div>
+
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Two-Stage Timeline */}
-            <div className="bg-surface-card rounded-lg p-6 border border-border-default opacity-0 animate-fade-in-up" style={{ animationDelay: '100ms', animationFillMode: 'forwards' }}>
-              <h2 className="text-xl font-bold font-heading text-brand-peach mb-4">Complaint Timeline</h2>
-              
-              {/* Stage 1 */}
-              <div className="mb-6">
-                <div className="flex items-center gap-2 mb-4">
-                  <span className="text-sm font-medium text-text-primary">Stage 1</span>
-                  {complaint.stage === 1 && <StatusPill status="open" size="sm" />}
-                  {complaint.stage > 1 && <CheckCircle size={16} className="text-status-compliant" />}
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm text-text-muted">Acknowledge (5WD)</span>
-                      {stage1AckMet ? (
-                        <CheckCircle size={16} className="text-status-compliant" />
-                      ) : stage1AckDeadline < 0 ? (
-                        <XCircle size={16} className="text-status-critical" />
-                      ) : null}
-                    </div>
-                    <CountdownTimer
-                      deadline={complaint.acknowledgeDeadline}
-                      label="Acknowledge Deadline"
-                      useWorkingDays
-                      size="sm"
-                    />
-                    {complaint.acknowledgedDate && (
-                      <div className="text-xs text-text-muted mt-2">Acknowledged: {formatDate(complaint.acknowledgedDate)}</div>
-                    )}
-                  </div>
-                  <div>
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm text-text-muted">Respond (10WD)</span>
-                      {stage1ResponseMet ? (
-                        <CheckCircle size={16} className="text-status-compliant" />
-                      ) : stage1ResponseDeadline < 0 ? (
-                        <XCircle size={16} className="text-status-critical" />
-                      ) : null}
-                    </div>
-                    <CountdownTimer
-                      deadline={complaint.responseDeadline}
-                      label="Response Deadline"
-                      useWorkingDays
-                      size="sm"
-                    />
-                    {complaint.respondedDate && (
-                      <div className="text-xs text-text-muted mt-2">Responded: {formatDate(complaint.respondedDate)}</div>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {/* Stage 2 */}
-              {complaint.stage === 2 && (
-                <div>
-                  <div className="flex items-center gap-2 mb-4">
-                    <span className="text-sm font-medium text-text-primary">Stage 2</span>
-                    <StatusPill status="investigation" size="sm" />
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm text-text-muted">Acknowledge (5WD)</span>
-                        {complaint.acknowledgedDate && <CheckCircle size={16} className="text-status-compliant" />}
-                      </div>
-                      <CountdownTimer
-                        deadline={complaint.acknowledgeDeadline}
-                        label="Acknowledge Deadline"
-                        useWorkingDays
-                        size="sm"
-                      />
-                      {complaint.acknowledgedDate && (
-                        <div className="text-xs text-text-muted mt-2">Acknowledged: {formatDate(complaint.acknowledgedDate)}</div>
-                      )}
-                    </div>
-                    <div>
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm text-text-muted">Respond (20WD)</span>
-                        {complaint.respondedDate && <CheckCircle size={16} className="text-status-compliant" />}
-                      </div>
-                      <CountdownTimer
-                        deadline={complaint.responseDeadline}
-                        label="Response Deadline"
-                        useWorkingDays
-                        size="sm"
-                      />
-                      {complaint.respondedDate && (
-                        <div className="text-xs text-text-muted mt-2">Responded: {formatDate(complaint.respondedDate)}</div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
 
             {/* Case Details */}
             <div className="bg-surface-card rounded-lg p-6 border border-border-default opacity-0 animate-fade-in-up" style={{ animationDelay: '200ms', animationFillMode: 'forwards' }}>
