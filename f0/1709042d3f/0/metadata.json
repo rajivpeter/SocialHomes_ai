@@ -1,0 +1,35 @@
+{
+  "cli_version": "0.4.4",
+  "checkpoint_id": "f01709042d3f",
+  "session_id": "248fc533-92b5-44dd-8a07-2d5da933cf2e",
+  "strategy": "manual-commit",
+  "created_at": "2026-03-20T21:31:34.798485956Z",
+  "branch": "main",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "app/src/pages/asb/AsbDetailPage.tsx",
+    "app/src/pages/properties/PropertyDetailPage.tsx",
+    "app/src/pages/tenancies/TenancyDetailPage.tsx"
+  ],
+  "agent": "Claude Code",
+  "transcript_identifier_at_start": "b66fc415-6014-426a-81b6-5f1b1d7ab6af",
+  "checkpoint_transcript_start": 2692,
+  "transcript_lines_at_start": 2692,
+  "token_usage": {
+    "input_tokens": 44,
+    "cache_creation_tokens": 12426,
+    "cache_read_tokens": 21582289,
+    "output_tokens": 7525,
+    "api_call_count": 42
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-03-20T21:31:21.404831528Z",
+    "agent_lines": 0,
+    "human_added": 181,
+    "human_modified": 36,
+    "human_removed": 0,
+    "total_committed": 213,
+    "agent_percentage": 0
+  },
+  "transcript_path": ".claude/projects/-mnt-c--netapps-socialhomes/248fc533-92b5-44dd-8a07-2d5da933cf2e.jsonl"
+}
