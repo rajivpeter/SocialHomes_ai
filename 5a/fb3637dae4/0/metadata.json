@@ -1,0 +1,41 @@
+{
+  "cli_version": "0.4.4",
+  "checkpoint_id": "5afb3637dae4",
+  "session_id": "248fc533-92b5-44dd-8a07-2d5da933cf2e",
+  "strategy": "manual-commit",
+  "created_at": "2026-03-20T10:21:10.726665506Z",
+  "branch": "main",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "app/src/components/shared/ActionModal.tsx",
+    "app/src/pages/asb/AsbDetailPage.tsx",
+    "app/src/pages/complaints/ComplaintDetailPage.tsx",
+    "app/src/pages/repairs/RepairDetailPage.tsx",
+    "docs/SocialHomesAi-Business-Plan-2026.md",
+    "docs/generate-business-plan-v4.py",
+    "docs/generate-business-plan.py",
+    "docs/generate-infographic-charts.py",
+    "docs/generate-investor-brochure.py"
+  ],
+  "agent": "Claude Code",
+  "transcript_identifier_at_start": "d9028bcc-c772-4aee-995b-20152eccd2de",
+  "checkpoint_transcript_start": 1384,
+  "transcript_lines_at_start": 1384,
+  "token_usage": {
+    "input_tokens": 25,
+    "cache_creation_tokens": 350778,
+    "cache_read_tokens": 7058606,
+    "output_tokens": 6659,
+    "api_call_count": 21
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-03-20T10:20:59.690562968Z",
+    "agent_lines": 44,
+    "human_added": 0,
+    "human_modified": 377,
+    "human_removed": 1721,
+    "total_committed": 421,
+    "agent_percentage": 10.451306413301662
+  },
+  "transcript_path": ".claude/projects/-mnt-c--netapps-socialhomes/248fc533-92b5-44dd-8a07-2d5da933cf2e.jsonl"
+}
