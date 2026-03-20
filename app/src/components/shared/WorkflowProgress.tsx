@@ -1,4 +1,4 @@
-import { ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { CheckCircle, AlertTriangle, Clock } from 'lucide-react';
 import { daysUntil, workingDaysUntil } from '@/utils/format';
 

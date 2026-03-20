@@ -4,9 +4,9 @@ import { useApp } from '@/context/AppContext';
 import { usePersonaScope } from '@/hooks/usePersonaScope';
 import {
   X, Pin, Send, Sparkles, AlertCircle, AlertTriangle, Lightbulb,
-  BarChart3, Cloud, Copy, Share2, RotateCcw, MessageSquare, Loader2
+  BarChart3, Cloud, Copy, RotateCcw, MessageSquare, Loader2
 } from 'lucide-react';
-import { aiInsights, tenants, properties, repairs } from '@/data';
+import { aiInsights, tenants, repairs } from '@/data';
 import { generateAiChatResponse } from '@/services/ai-drafting';
 
 interface ChatMessage {
@@ -54,7 +54,7 @@ const SUGGESTED_QUESTIONS: Record<string, string[]> = {
 export default function YantraAssist() {
   const { state, dispatch } = useApp();
   const location = useLocation();
-  const { personaInsights, persona, scopedRepairs, scopedTenants, scopedComplaints, scopedDampCases } = usePersonaScope();
+  const { personaInsights, persona, scopedRepairs, scopedComplaints, scopedDampCases } = usePersonaScope();
   const [pinned, setPinned] = useState(false);
   const [chatInput, setChatInput] = useState('');
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
@@ -95,9 +95,7 @@ export default function YantraAssist() {
     }
   }, [chatMessages]);
 
-  if (!state.yantraAssistOpen) return null;
-
-  // Extract entity ID from URL for context
+  // Extract entity ID from URL for context (must be before any conditional return)
   const pathParts = location.pathname.split('/');
   const currentPage = pathParts[1] || 'dashboard';
   const entityId = pathParts[2] || null;
@@ -258,6 +256,9 @@ export default function YantraAssist() {
   };
 
   const suggestions = SUGGESTED_QUESTIONS[currentPage] || SUGGESTED_QUESTIONS.default;
+
+  // Early return AFTER all hooks (React Rules of Hooks compliance)
+  if (!state.yantraAssistOpen) return null;
 
   const personaContext: Record<string, string> = {
     'coo': 'Strategic portfolio overview',
