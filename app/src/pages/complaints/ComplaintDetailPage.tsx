@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 import {
   MessageSquareWarning,
   Clock,
@@ -29,6 +30,7 @@ import { casesApi } from '@/services/api-client';
 
 export default function ComplaintDetailPage() {
   const { id } = useParams<{ id: string }>();
+  const queryClient = useQueryClient();
   const { data: complaints = [] } = useComplaints();
   const { data: tenants = [] } = useTenants();
   const { data: properties = [] } = useProperties();
@@ -338,7 +340,7 @@ export default function ComplaintDetailPage() {
         { value: 'helen-carter', label: 'Helen Carter — COO' },
       ]},
       { id: 'reason', label: 'Reason', type: 'textarea', placeholder: 'Reason for reassignment...' },
-    ]} submitLabel="Reassign" onSubmit={async (v) => { await casesApi.update(complaint.id, { handler: v.handler, reassignReason: v.reason }); }} />
+    ]} submitLabel="Reassign" onSubmit={async (v) => { await casesApi.update(complaint.id, { handler: v.handler, reassignReason: v.reason }); queryClient.invalidateQueries({ queryKey: ['complaints'] }); queryClient.invalidateQueries({ queryKey: ['cases'] }); }} />
     <ActionModal open={activeModal === 'respond'} onClose={() => setActiveModal(null)} title="Send Complaint Response" description={`Respond to ${getTenantName()}`} icon={<Mail size={20} className="text-brand-blue" />} fields={[
       { id: 'ref', label: 'Reference', type: 'readonly', defaultValue: complaint.reference },
       { id: 'channel', label: 'Response Channel', type: 'select', required: true, options: [
@@ -352,7 +354,7 @@ export default function ComplaintDetailPage() {
         { value: 'not-upheld', label: 'Not Upheld' },
       ]},
       { id: 'body', label: 'Response Body', type: 'textarea', required: true, placeholder: 'Write the complaint response...' },
-    ]} submitLabel="Send Response" onSubmit={async (v) => { await casesApi.update(complaint.id, { status: 'responded', responseChannel: v.channel, outcome: v.outcome, responseBody: v.body }); }} />
+    ]} submitLabel="Send Response" onSubmit={async (v) => { await casesApi.update(complaint.id, { status: 'responded', responseChannel: v.channel, outcome: v.outcome, responseBody: v.body }); queryClient.invalidateQueries({ queryKey: ['complaints'] }); }} />
     <ActionModal open={activeModal === 'escalate'} onClose={() => setActiveModal(null)} title="Escalate to Stage 2" description={`Escalate ${complaint.reference}`} icon={<TrendingUp size={20} className="text-status-warning" />} variant="warning" fields={[
       { id: 'ref', label: 'Reference', type: 'readonly', defaultValue: complaint.reference },
       { id: 'reason', label: 'Escalation Reason', type: 'textarea', required: true, placeholder: 'Why is this being escalated?' },
@@ -361,7 +363,7 @@ export default function ComplaintDetailPage() {
         { value: 'james-wright', label: 'James Wright — Head of Housing' },
         { value: 'helen-carter', label: 'Helen Carter — COO' },
       ]},
-    ]} submitLabel="Escalate" onSubmit={async (v) => { await casesApi.update(complaint.id, { stage: 2, status: 'escalated', escalationReason: v.reason, handler: v.handler }); }} />
+    ]} submitLabel="Escalate" onSubmit={async (v) => { await casesApi.update(complaint.id, { stage: 2, status: 'escalated', escalationReason: v.reason, handler: v.handler }); queryClient.invalidateQueries({ queryKey: ['complaints'] }); }} />
     <ActionModal open={activeModal === 'update'} onClose={() => setActiveModal(null)} title="Update Complaint" description={`Update ${complaint.reference}`} icon={<Edit size={20} className="text-brand-blue" />} fields={[
       { id: 'ref', label: 'Reference', type: 'readonly', defaultValue: complaint.reference },
       { id: 'status', label: 'Status', type: 'select', defaultValue: complaint.status, options: [
@@ -371,7 +373,7 @@ export default function ComplaintDetailPage() {
         { value: 'closed', label: 'Closed' },
       ]},
       { id: 'notes', label: 'Notes', type: 'textarea', placeholder: 'Add an update note...' },
-    ]} submitLabel="Save" onSubmit={async (v) => { await casesApi.update(complaint.id, { status: v.status, updateNotes: v.notes }); }} />
+    ]} submitLabel="Save" onSubmit={async (v) => { await casesApi.update(complaint.id, { status: v.status, updateNotes: v.notes }); queryClient.invalidateQueries({ queryKey: ['complaints'] }); }} />
     <ActionModal open={activeModal === 'close'} onClose={() => setActiveModal(null)} title="Close Complaint" description={`Close ${complaint.reference}`} icon={<CheckCircle size={20} className="text-status-compliant" />} variant="success" fields={[
       { id: 'ref', label: 'Reference', type: 'readonly', defaultValue: complaint.reference },
       { id: 'outcome', label: 'Final Outcome', type: 'select', required: true, options: [
@@ -387,7 +389,7 @@ export default function ComplaintDetailPage() {
         { value: '1', label: '1 — Very Dissatisfied' },
       ]},
       { id: 'lessons', label: 'Lessons Learned', type: 'textarea', placeholder: 'What changes should be made to prevent recurrence?' },
-    ]} submitLabel="Close Complaint" onSubmit={async (v) => { await casesApi.update(complaint.id, { status: 'closed', outcome: v.outcome, satisfactionRating: v.satisfaction, lessonsLearned: v.lessons }); }} />
+    ]} submitLabel="Close Complaint" onSubmit={async (v) => { await casesApi.update(complaint.id, { status: 'closed', outcome: v.outcome, satisfactionRating: v.satisfaction, lessonsLearned: v.lessons }); queryClient.invalidateQueries({ queryKey: ['complaints'] }); }} />
   </>
   );
 }
