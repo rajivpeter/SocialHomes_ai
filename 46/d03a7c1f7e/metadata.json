@@ -1,0 +1,27 @@
+{
+  "cli_version": "0.4.4",
+  "checkpoint_id": "46d03a7c1f7e",
+  "strategy": "manual-commit",
+  "branch": "main",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "app/src/components/layout/YantraAssist.tsx",
+    "app/src/components/shared/WorkflowProgress.tsx"
+  ],
+  "sessions": [
+    {
+      "metadata": "/46/d03a7c1f7e/0/metadata.json",
+      "transcript": "/46/d03a7c1f7e/0/full.jsonl",
+      "context": "/46/d03a7c1f7e/0/context.md",
+      "content_hash": "/46/d03a7c1f7e/0/content_hash.txt",
+      "prompt": "/46/d03a7c1f7e/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 26,
+    "cache_creation_tokens": 415317,
+    "cache_read_tokens": 9618500,
+    "output_tokens": 4779,
+    "api_call_count": 24
+  }
+}
