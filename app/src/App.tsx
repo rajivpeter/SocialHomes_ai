@@ -49,6 +49,7 @@ const WorkflowBuilderPage = lazy(() => import('@/pages/admin/WorkflowBuilderPage
 const NotificationPreferencesPage = lazy(() => import('@/pages/admin/NotificationPreferencesPage'));
 const GdprDashboardPage = lazy(() => import('@/pages/admin/GdprDashboardPage'));
 const SchedulingPage = lazy(() => import('@/pages/admin/SchedulingPage'));
+const DataImportPage = lazy(() => import('@/pages/admin/DataImportPage'));
 const TenantPortalPage = lazy(() => import('@/pages/tenant-portal/TenantPortalPage'));
 
 // Suspense wrapper for lazy-loaded routes
@@ -161,6 +162,7 @@ export default function App() {
             <Route path="/admin/notifications" element={<SuspenseWrapper><NotificationPreferencesPage /></SuspenseWrapper>} />
             <Route path="/admin/gdpr" element={<SuspenseWrapper><GdprDashboardPage /></SuspenseWrapper>} />
             <Route path="/admin/scheduling" element={<SuspenseWrapper><SchedulingPage /></SuspenseWrapper>} />
+            <Route path="/admin/import" element={<SuspenseWrapper><DataImportPage /></SuspenseWrapper>} />
             <Route path="/admin/audit" element={<SuspenseWrapper><AdminPage /></SuspenseWrapper>} />
             <Route path="/admin/system" element={<SuspenseWrapper><AdminPage /></SuspenseWrapper>} />
           </Route>

@@ -30,6 +30,7 @@ import { auditRouter } from './routes/audit.js';
 import { gdprRouter } from './routes/gdpr.js';
 import { filesRouter } from './routes/files.js';
 import { schedulingRouter } from './routes/scheduling.js';
+import { importRouter } from './routes/import.js';
 import { errorHandler } from './middleware/error-handler.js';
 import { metricsMiddleware } from './middleware/metrics.js';
 import { getHealthStatus } from './services/monitoring.js';
@@ -156,6 +157,7 @@ app.use('/api/v1/audit', apiLimiter, auditRouter);
 app.use('/api/v1/gdpr', adminLimiter, gdprRouter);
 app.use('/api/v1/files', apiLimiter, filesRouter);
 app.use('/api/v1/scheduling', apiLimiter, schedulingRouter);
+app.use('/api/v1/import', adminLimiter, importRouter);
 
 // ---- Convenience Route Aliases ----
 // Repairs and complaints are stored in the `cases` collection with a `type`
