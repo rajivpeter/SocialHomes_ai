@@ -1,0 +1,35 @@
+{
+  "cli_version": "0.4.4",
+  "checkpoint_id": "49294b40f293",
+  "session_id": "248fc533-92b5-44dd-8a07-2d5da933cf2e",
+  "strategy": "manual-commit",
+  "created_at": "2026-03-20T21:10:30.018620507Z",
+  "branch": "main",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "app/src/pages/complaints/ComplaintDetailPage.tsx",
+    "app/src/pages/repairs/RepairDetailPage.tsx",
+    "server/src/index.ts"
+  ],
+  "agent": "Claude Code",
+  "transcript_identifier_at_start": "67601d9e-4e55-4780-8ae5-fdb9b544c822",
+  "checkpoint_transcript_start": 2255,
+  "transcript_lines_at_start": 2255,
+  "token_usage": {
+    "input_tokens": 144,
+    "cache_creation_tokens": 503760,
+    "cache_read_tokens": 58113844,
+    "output_tokens": 27638,
+    "api_call_count": 124
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-03-20T21:10:16.747916655Z",
+    "agent_lines": 0,
+    "human_added": 14,
+    "human_modified": 12,
+    "human_removed": 0,
+    "total_committed": 14,
+    "agent_percentage": 0
+  },
+  "transcript_path": ".claude/projects/-mnt-c--netapps-socialhomes/248fc533-92b5-44dd-8a07-2d5da933cf2e.jsonl"
+}
