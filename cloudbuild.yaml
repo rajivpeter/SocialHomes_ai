@@ -50,7 +50,7 @@ steps:
       - '-c'
       - |
         echo "=== Health check smoke test ==="
-        node server/dist/index.js &
+        cd /srv/app && node server/dist/index.js &
         SERVER_PID=$$!
         sleep 3
         HEALTH=$(curl -sf http://localhost:8080/health 2>/dev/null || echo '{}')
@@ -141,7 +141,7 @@ steps:
       - '--labels'
       - 'app=socialhomes,env=production,managed-by=cloudbuild'
       # Startup probe: health endpoint, 0s initial delay, 10s period, 3 failures to kill
-      - '--startup-cpu-boost'
+      - '--cpu-boost'
     waitFor: ['push-sha']
 
   # ── Step 6: Verify deployment health ──
