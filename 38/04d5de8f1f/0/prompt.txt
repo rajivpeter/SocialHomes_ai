@@ -1,0 +1,2127 @@
+okay have a review of where we are
+
+---
+
+spend longer and make it professional and do indepth research and make a word document
+
+---
+
+realistically we will need until winter 26 to get a group on orgs togather
+
+---
+
+<task-notification>
+<task-id>a1f04d011f86a64db</task-id>
+<tool-use-id>REDACTED</tool-use-id>
+<output-file>REDACTED.output</output-file>
+<status>completed</status>
+<summary>Agent "Research UK housing market data" completed</summary>
+<result>Now I have enough data to compile a comprehensive research report. Here is the full findings document:
+
+---
+
+# UK Social Housing Market Research (2024-2026)
+
+## 1. Registered Providers (Housing Associations) in England
+
+**Total on RSH Register (31 March 2025):** 1,581 providers
+- **228 local authorities**
+- **1,353 private registered providers** (mostly housing associations)
+
+**Size Breakdown (estimated from available data):**
+
+| Size Band | Estimated Number | Notes |
+|---|---|---|
+| <1,000 homes | ~1,070 (approx. 79% of PRPs) | RSH's own SDR uses <1,000 as the threshold for a "short form" return. The 79% figure comes from RSH historical data. |
+| 1,000-5,000 homes | ~150-180 | Mid-tier providers; NHF defines "smaller" as <2,000 |
+| 5,000-10,000 homes | ~50-60 | Regional providers |
+| 10,000-30,000 homes | ~40-50 | Large providers |
+| 30,000+ homes | ~15-20 | The G15 alone (London's largest 15 HAs) manage 800,000+ homes collectively. Clarion (125,000), Peabody (108,000), L&Q (105,000) lead. |
+
+The sector is highly concentrated: the top 50 HAs manage over half of all HA stock. The top 20 average 13,000+ homes each. 19 providers alone account for 42% of units owned and 47% of turnover.
+
+Sources:
+- [RSH Registered Providers (GOV.UK)](https://www.gov.uk/government/publications/registered-providers-of-social-housing)
+- [How Many Housing Associations in England 2025 (Axxco)](https://www.axxco.co.uk/post/how-many-housing-associations-operate-in-england-in-2025)
+- [RSH Stock and Rents 2024-25 (GOV.UK)](https://www.gov.uk/government/statistics/registered-provider-social-housing-stock-and-rents-in-england-2024-to-2025)
+- [Largest 50 Housing Associations 2025 (Housing Today)](https://www.housingtoday.co.uk/data/largest-50-housing-associations-2025-full-table/5139296.article)
+- [G15 Housing Associations (Wikipedia)](https://en.wikipedia.org/wiki/G15_(housing_associations))
+
+---
+
+## 2. Total Social Housing Stock in England
+
+**As of 31 March 2025: approximately 4.5 million homes**
+
+| Owner Type | Homes |
+|---|---|
+| Private registered providers (housing associations) | 2.9 million |
+| Local authority registered providers | 1.6 million |
+| **Total** | **~4.5 million** |
+
+Net increase of nearly 38,000 social homes since 2024, driven by ~28,000 new Affordable Rent homes and ~13,900 low-cost homeownership homes, offset by a decrease of ~4,100 social rent homes.
+
+54,000 new social homes were delivered by the largest providers in 2024/25.
+
+Sources:
+- [RSH Stock and Rents 2024-25 (GOV.UK)](https://www.gov.uk/government/statistics/registered-provider-social-housing-stock-and-rents-in-england-2024-to-2025)
+- [RSH Annual Statistics News (GOV.UK)](https://www.gov.uk/government/news/rsh-publishes-annual-statistics-on-stocks-and-rents-in-the-social-housing-sector)
+- [How Many Social Homes in England 2025 (Axxco)](https://www.axxco.co.uk/post/how-many-social-homes-exist-in-england-in-2025)
+
+---
+
+## 3. Local Authorities Retaining Housing Stock
+
+**228 local authorities** are on the RSH register as of 31 March 2025, collectively owning **1.6 million homes**.
+
+Of England's 333 local authorities (including districts, unitaries, metropolitan boroughs, London boroughs), roughly two-thirds still retain some council housing stock. Around 105+ authorities have completed full Large Scale Voluntary Transfers (LSVTs) to housing associations and hold no stock.
+
+**ALMOs (Arms-Length Management Organisations):** Down to just **19** as of January 2024 (from a peak of 65 managing 1 million+ homes in 2010). Many councils have taken management back in-house.
+
+Sources:
+- [Local Authority RP Stock and Rents 2024-25 (GOV.UK)](https://www.gov.uk/government/statistics/local-authority-registered-provider-social-housing-stock-and-rents-in-england-2024-to-2025)
+- [ALMOs (Wikipedia)](https://en.wikipedia.org/wiki/ALMO)
+- [Councils with ALMOs Group (LGA)](https://www.local.gov.uk/about/our-meetings-and-leadership/special-interest-groups/councils-almos-group-sig-annual-report)
+
+---
+
+## 4. Housing Management System (HMS) Costs
+
+HMS vendors do not publish standardised pricing. Costs are quoted per-customer based on stock size, modules, and users. From procurement data and industry sources:
+
+**Known contract values from public tenders:**
+
+| Provider | System | Contract | Annual Cost |
+|---|---|---|---|
+| Royal Borough of Greenwich | NEC Housing | 5 years from April 2025 | ~£440,000/year (£2.2m total) |
+| Various councils | Aareon QL | 3-year + 1-year extension | Not disclosed publicly |
+
+**Estimated annual costs by organisation size (industry estimates):**
+
+| Organisation Size | Estimated Annual HMS Licence | Per-unit equivalent |
+|---|---|---|
+| Small (<1,000 homes) | £30,000-£80,000 | £30-£80/unit |
+| Medium (1,000-5,000) | £80,000-£250,000 | £50-£80/unit |
+| Large (5,000-10,000) | £200,000-£500,000 | £40-£50/unit |
+| Very Large (10,000-30,000) | £400,000-£1,000,000 | £30-£40/unit |
+| Mega (30,000+) | £800,000-£2,000,000+ | £20-£30/unit |
+
+**Note:** These estimates include licence, hosting, and support but typically exclude implementation costs (which can be 1-3x the annual licence for initial setup). The Greenwich/NEC example (£440k/year) aligns with a large local authority. Small HAs often report total HMS costs are one of their largest single IT expenditure items.
+
+**Major UK HMS vendors:** Civica Cx, NEC Housing (Northgate), Aareon QL, MRI Software, ActiveH (now Aareon group), Orchard Housing, OmniLedger PyramidG2, Capita OpenHousing, OneAdvanced.
+
+Budget alternatives like OmniLedger PyramidG2 position themselves as more affordable for smaller providers, and Landlord Vision starts from £19.97/month but targets much smaller landlords.
+
+Sources:
+- [NEC Housing Tender (Find a Tender)](https://www.find-a-tender.service.gov.uk/Notice/069301-2025)
+- [NEC Housing (Digital Marketplace)](https://www.applytosupply.digitalmarketplace.service.gov.uk/g-cloud/services/916522570514486)
+- [Top Ten HMS in UK (Omfax)](https://omfax.co.uk/housing-management-systems-in-the-uk/)
+- [HMS Blog (Tony Smith, Housing IT Guy)](http://tonysmiththathousingitguy.blogspot.com/2024/05/-HMS-social-Housing-Anite-NEC-OHMS-system-systems.html)
+- [PyramidG2 (OmniLedger)](https://omniledger.co.uk/housing-management-system/)
+
+---
+
+## 5. Key Regulations Driving HMS Demand
+
+### Awaab's Law (Social Housing (Regulation) Act 2023)
+Phased implementation of mandatory repair timeframes:
+
+| Phase | Date | Scope |
+|---|---|---|
+| Phase 1 | **27 October 2025** | Damp & mould + all emergency hazards |
+| Phase 2 | **2026** | Excess cold/heat, falls, structural collapse, fire, electrical, hygiene hazards |
+| Phase 3 | **2027** | All remaining HHSRS hazards (except overcrowding) |
+
+Social landlords must investigate hazards within 14 days, begin repairs within 7 days of investigation, and complete emergency repairs within 24 hours. Failure to comply means tenants can claim compensation.
+
+### Tenant Satisfaction Measures (TSMs)
+- Mandatory since April 2023 for all registered providers with 1,000+ homes
+- Annual collection and reporting of 22 defined metrics (12 perception-based, 10 management data)
+- Covers: overall satisfaction, repairs, safety, complaints, ASB, neighbourhood management
+- **Updated March 2026** to align with Awaab's Law responsive repair categories
+- Results are published publicly, enabling benchmarking and regulatory scrutiny
+
+### Housing Ombudsman Complaint Handling Code
+- **Became statutory from 1 April 2024** (previously voluntary)
+- Stage 1 response: 10 working days
+- Stage 2 response: 20 working days
+- 94% of complaints now responded to within the Code's timeframes (up from ~87% in 2023/24)
+- Landlords must have a dedicated complaints policy and self-assess annually
+
+### RSH Consumer Standards (from 1 April 2024)
+Four new consumer standards that RSH can now proactively enforce:
+1. **Safety and Quality Standard** - homes must be safe, well-maintained, decent
+2. **Transparency, Influence and Accountability Standard** - tenant engagement and TSM reporting
+3. **Neighbourhood and Community Standard** - estate management and ASB
+4. **Tenancy Standard** - fair allocation and tenancy management
+
+RSH has begun a programme of landlord inspections. New Competence and Conduct requirements expected from **October 2026**, plus proactive publication requirements.
+
+**Why this drives HMS demand:** All of these regulations require robust data tracking, reporting, audit trails, and tenant communication capabilities that legacy systems often cannot deliver.
+
+Sources:
+- [Awaab's Law Timeline (GLP Law)](https://www.glplaw.com/2026/01/23/awaabs-law-timeline/)
+- [Awaab's Law Phase 2 (Mobysoft)](https://www.mobysoft.com/resources/blogs/awaabs-law-phase-2-is-coming-what-social-landlords-need-to-know-about-additional-hazard-compliance-in-2026/)
+- [Awaab's Law Guidance (GOV.UK)](https://www.gov.uk/government/publications/awaabs-law-guidance-for-social-landlords/awaabs-law-guidance-for-social-landlords-timeframes-for-repairs-in-the-social-rented-sector)
+- [CIH: Awaab's Law Now in Force](https://www.cih.org/news/awaab-s-law-is-now-in-force-in-the-social-housing-sector/)
+- [TSM FAQs (GOV.UK)](https://www.gov.uk/government/publications/tenant-satisfaction-measures-faqs)
+- [TSM Headline Report 2024/25 (GOV.UK)](https://www.gov.uk/government/statistics/tenant-satisfaction-measures-202425/tenant-satisfaction-measures-202425-headline-report)
+- [RSH Consumer Standards (GOV.UK)](https://www.gov.uk/government/news/rsh-sets-new-standards-to-drive-improvements-in-social-housing)
+- [Housing Ombudsman Code Statutory (Lexology)](https://www.lexology.com/library/detail.aspx?g=1fb270f0-7177-40fa-8145-bfeb32edcf8b)
+
+---
+
+## 6. UK PropTech / Housing Technology Market Size
+
+| Metric | Value | Source |
+|---|---|---|
+| UK PropTech market (2024) | **$3.32 billion** (~£2.6 billion) | Market Research Future |
+| UK PropTech market (2035 projected) | **$25.08 billion** | Market Research Future |
+| CAGR (2025-2035) | **~20%** | Market Research Future |
+| Global PropTech market (2024) | **$33.57 billion** | Precedence Research |
+| Global PropTech market (2034 projected) | **$89.93 billion** | Precedence Research |
+| UK residential PropTech segment (2024) | **~$1.5 billion** | Market Data Forecast |
+| Global Housing Management Software market | Data available but behind paywall | Valuates Reports |
+
+The housing association segment captured the highest revenue share in the UK PropTech market in 2024, indicating social housing is a key driver of the UK housing technology market.
+
+Sources:
+- [UK PropTech Market Size (Market Research Future)](https://www.marketresearchfuture.com/reports/uk-proptech-market-46496)
+- [PropTech Market Size (Precedence Research)](https://www.precedenceresearch.com/proptech-market)
+- [PropTech Market (Fortune Business Insights)](https://www.fortunebusinessinsights.com/proptech-market-108634)
+- [Europe PropTech Market (Market Data Forecast)](https://www.marketdataforecast.com/market-reports/europe-proptech-market)
+- [Housing Management Software Market (Valuates Reports)](https://reports.valuates.REDACTED)
+
+---
+
+## 7. Google Cloud Run Pricing (europe-west2 / London)
+
+europe-west2 is classified as a **Tier 1** region.
+
+### Per-unit pricing (on-demand):
+
+| Resource | Price |
+|---|---|
+| CPU | $0.00002400 per vCPU-second |
+| Memory | $0.00000250 per GiB-second |
+| Requests | $0.40 per million requests |
+
+### Free tier (US regions only - does NOT apply to europe-west2):
+- 180,000 vCPU-seconds/month
+- 360,000 GiB-seconds/month
+- 2 million requests/month
+
+### Estimated monthly cost for a typical web app:
+
+| Scenario | Config | Est. Monthly Cost |
+|---|---|---|
+| Light (always-on, low traffic) | 1 vCPU, 512 MiB, always allocated | ~$65/month ($62 CPU + $3 memory) |
+| Medium (request-based) | 1 vCPU, 1 GiB, scales to zero | ~$15-$30/month depending on traffic |
+| Heavy (high traffic, always-on) | 2 vCPU, 2 GiB | ~$135/month |
+
+For a startup SaaS like SocialHomes.Ai with moderate traffic, expect **$15-$65/month** for Cloud Run compute, plus networking egress costs.
+
+Sources:
+- [Cloud Run Pricing (Google Cloud)](https://cloud.google.com/run/pricing)
+- [Cloud Run Pricing Guide 2025 (Cloudchipr)](https://cloudchipr.com/blog/cloud-run-pricing)
+- [Cloud Run Pricing Breakdown (HAMY)](https://hamy.xyz/blog/2025-04_google-cloud-run-pricing)
+- [Cloud Run Pricing Optimization (ProsperOps)](https://www.prosperops.com/blog/google-cloud-run-pricing-and-cost-optimization/)
+
+---
+
+## 8. Google Cloud Firestore Pricing
+
+### Standard Edition (Native mode) - general pricing:
+
+| Operation | Price |
+|---|---|
+| Document reads | $0.06 per 100,000 reads |
+| Document writes | $0.18 per 100,000 writes |
+| Document deletes | $0.02 per 100,000 deletes |
+| Stored data | $0.18 per GB/month |
+| Network egress | Standard GCP egress rates |
+
+### Free tier (one database per project):
+- 50,000 reads/day
+- 20,000 writes/day
+- 20,000 deletes/day
+- 1 GiB storage
+
+### Estimated monthly cost for SocialHomes.Ai:
+
+| Usage Level | Reads | Writes | Storage | Est. Monthly Cost |
+|---|---|---|---|---|
+| Early stage (100 tenants) | 500K/month | 100K/month | 1 GB | ~$0.50 |
+| Growth (1,000 tenants) | 5M/month | 1M/month | 10 GB | ~$5 |
+| Scale (10,000 tenants) | 50M/month | 10M/month | 100 GB | ~$50 |
+
+**Note:** Prices may vary slightly by region. The official pricing page at cloud.google.com/firestore/pricing contains the exact region-specific tables. europe-west2 rates are typically identical or very close to the general rates shown above.
+
+Sources:
+- [Firestore Pricing (Google Cloud)](https://cloud.google.com/firestore/pricing)
+- [Firestore Billing (Firebase)](https://firebase.google.com/docs/firestore/pricing)
+- [Firestore Pricing Example (Firebase)](https://firebase.google.com/docs/firestore/billing-example)
+- [Firestore Pricing Guide (Airbyte)](https://airbyte.com/data-engineering-resources/google-firestore-pricing)
+
+---
+
+## 9. Average UK Developer Salaries (2025-2026)
+
+### Onshore UK:
+
+| Role | Average Salary | Range | London Premium |
+|---|---|---|---|
+| **Senior Full-Stack Developer** | £62,000-£70,000 | £51,000-£79,000 | £80,000-£100,000 |
+| **DevOps Engineer** | £53,000-£58,000 | £38,000-£82,000 | £78,000-£105,000 (senior) |
+| **QA Tester** | £30,000-£42,000 | £25,000-£52,000 | Higher in London |
+| **QA Tester (Senior, 8+ yrs)** | £52,000 | - | - |
+
+### Offshore (India):
+
+| Role | Annual Cost (USD) | Hourly Rate (USD) |
+|---|---|---|
+| Mid-weight Developer | $10,500-$22,000 | $18-$40/hour |
+| Fully-loaded (salary + benefits + overhead) | $15,000-$30,000 | $20-$45/hour |
+
+### Offshore (Sri Lanka):
+
+| Role | Monthly (LKR) | Annual (approx. GBP) |
+|---|---|---|
+| Mid-level Software Engineer | LKR 100,000-220,000 | £3,000-£7,000 |
+| Mid-level in Colombo | LKR 250,000+ | £8,000-£10,000 |
+
+**Cost comparison:** A UK-based senior full-stack developer at £70,000/year costs roughly 5-8x more than an equivalent offshore developer in India or Sri Lanka (at £9,000-£15,000 fully loaded).
+
+Sources:
+- [Senior Full Stack Developer Salary (IT Jobs Watch)](https://www.itjobswatch.co.uk/jobs/uk/senior%20full%20stack%20developer.do)
+- [Full Stack Developer Salary UK (Indeed)](https://uk.indeed.com/career/full-stack-developer/salaries)
+- [Full Stack Developer Salary London (Morgan McKinley)](https://www.morganmckinley.com/uk/salary-guide/data/full-stack-developer/london)
+- [Senior Full Stack Developer Salary (Glassdoor UK)](https://www.glassdoor.co.uk/Salaries/senior-full-stack-developer-salary-SRCH_KO0,27.htm)
+- [DevOps Engineer Salary UK (PayScale)](https://www.payscale.com/research/UK/Job=Development_Operations_(DevOps)_Engineer/Salary)
+- [DevOps Engineer Salary UK (Indeed)](https://uk.indeed.com/career/devops-engineer/salaries)
+- [QA Tester Salary UK (Glassdoor)](https://www.glassdoor.co.uk/Salaries/qa-tester-salary-SRCH_KO0,9.htm)
+- [QA Tester Salary UK (SalaryExpert)](https://www.salaryexpert.com/salary/job/qa-tester/united-kingdom)
+- [Offshore Development Rates 2025 (DistantJob)](https://distantjob.com/blog/offshore-software-development-rates-by-country-2025/)
+- [Offshore Rates Guide 2026 (Qubit Labs)](https://qubit-labs.com/average-hourly-rates-offshore-development-services-software-development-costs-guide/)
+- [Software Engineer Salary Sri Lanka (WhatIsTheSalary)](https://whatisthesalary.com/it-salaries/software-engineer-salary-in-sri-lanka/)</result>
+<usage><total_tokens>43529</total_tokens><tool_uses>24</tool_uses><duration_ms>363972</duration_ms></usage>
+</task-notification>
+Full transcript available at: REDACTED.output
+
+---
+
+<task-notification>
+<task-id>a02af474e2f6a0846</task-id>
+<tool-use-id>toolu_011fZM9VsQ9BAuCu1K9gArmM</tool-use-id>
+<output-file>REDACTED.output</output-file>
+<status>completed</status>
+<summary>Agent "Research cloud costs and dev salaries" completed</summary>
+<result>Now I have comprehensive data across all categories. Let me compile the complete structured report.
+
+---
+
+# SocialHomes.Ai Business Plan -- Infrastructure & Cost Research
+
+All data researched March 2026 with sources cited.
+
+---
+
+## 1. Google Cloud Run Pricing (europe-west2, London)
+
+**Region Classification: Tier 2** (confirmed via [Cloud Run Locations docs](https://docs.cloud.google.com/run/docs/locations)). Tier 1 includes Belgium (europe-west1) and Netherlands (europe-west4), but London is Tier 2 with higher rates.
+
+| Component | Tier 2 Price (London) |
+|---|---|
+| vCPU-second | $0.00003360 |
+| GiB-second (memory) | $0.00000350 |
+| Requests | $0.40 per million |
+| Network egress (internet) | Standard GCP egress rates |
+
+**Free Tier Allowances (per month):**
+- 180,000 vCPU-seconds (applies to US regions only per some docs; other sources cite 240,000)
+- 360,000 GiB-seconds (US regions; other sources cite 450,000)
+- 2 million requests
+- 1 GB network egress (North America)
+
+Note: Free tier allowances may be restricted to US regions (us-central1, us-east1, us-west1). For europe-west2, all usage may be billable.
+
+**Estimated Monthly Cost -- Typical Web App (2 vCPUs, 1GB RAM, 100k requests/day):**
+
+Assuming the app runs 24/7 with "CPU always allocated":
+- vCPU: 2 vCPUs x 2,592,000 seconds/month = 5,184,000 vCPU-seconds x $0.00003360 = **$174.18**
+- Memory: 1 GiB x 2,592,000 seconds = 2,592,000 GiB-seconds x $0.00000350 = **$9.07**
+- Requests: 100k/day x 30 = 3M requests. First 2M free = 1M billable x $0.40/M = **$0.40**
+- **Total: ~$183.65/month (~GBP 145/month)**
+
+With request-based billing (CPU only during requests, assuming 50ms avg response time):
+- vCPU: 2 x 100k x 30 x 0.05s = 300,000 vCPU-seconds x $0.00003360 = **$10.08**
+- Memory: 1 x 100k x 30 x 0.05s = 150,000 GiB-seconds x $0.00000350 = **$0.53**
+- **Total: ~$11.01/month (~GBP 9/month)**
+
+Sources: [Cloud Run Pricing](https://cloud.google.com/run/pricing), [Cloudchipr Guide](https://cloudchipr.com/blog/cloud-run-pricing), [Cloud Run Locations](https://docs.cloud.google.com/run/docs/locations)
+
+---
+
+## 2. Google Cloud Firestore Pricing
+
+| Operation | Cost |
+|---|---|
+| Document reads | $0.06 per 100,000 reads |
+| Document writes | $0.18 per 100,000 writes |
+| Document deletes | $0.02 per 100,000 deletes |
+| Storage | $0.18 per GB/month |
+| Network egress (same region) | Free |
+| Network egress (cross-region) | $0.01/GB |
+| Network egress (internet) | $0.12/GB (first 10TB) |
+
+**Free Tier (per month, one database per project):**
+- 50,000 document reads
+- 20,000 document writes
+- 20,000 document deletes
+- 1 GB stored data
+
+**Estimated Monthly Cost -- 10 Organisations, ~10,000 docs each, 500k reads/day:**
+
+- Reads: 500k/day x 30 = 15M reads/month. Minus 50k free = 14.95M. Cost: 149.5 x $0.06 = **$8.97**
+- Writes (estimated 50k/day): 1.5M/month x $0.18/100k = **$2.70**
+- Deletes (estimated 5k/day): 150k/month x $0.02/100k = **$0.03**
+- Storage: 100k docs, avg 5KB each = ~0.5GB x $0.18 = **$0.09**
+- **Total: ~$11.79/month (~GBP 9.30/month)**
+
+Firestore is remarkably cheap at this scale. Even at 1M reads/day, it would be ~$18/month.
+
+Sources: [Firestore Pricing](https://cloud.google.com/firestore/pricing), [Firebase Billing Docs](https://firebase.google.com/docs/firestore/pricing), [Airbyte Firestore Guide](https://airbyte.com/data-engineering-resources/google-firestore-pricing)
+
+---
+
+## 3. Firebase Authentication Pricing
+
+| Tier | Cost |
+|---|---|
+| Email/password, social logins | **Free** up to 50,000 MAU |
+| Beyond 50,000 MAU | $0.0025 per MAU (up to 1M) |
+| Phone/SMS auth | $0.01-$0.34 per SMS (varies by country) |
+| SMS testing | 10 free verifications/day |
+
+**Estimated Cost for 500-5,000 MAU:**
+- **$0.00/month** -- well within the 50,000 MAU free tier
+- Even at 5,000 MAU with email/password + social login: completely free
+- Phone auth for UK SMS: ~$0.04 per SMS. At 500 SMS/month = ~$20/month
+
+Sources: [Firebase Pricing](https://firebase.google.com/pricing), [MetaCTO Firebase Auth Guide](https://www.metacto.com/blogs/the-complete-guide-to-firebase-auth-costs-setup-integration-and-maintenance), [SuperTokens Firebase Analysis](https://supertokens.com/blog/firebase-pricing)
+
+---
+
+## 4. Google Vertex AI / Gemini Pricing
+
+| Model | Input (per 1M tokens) | Output (per 1M tokens) |
+|---|---|---|
+| **Gemini 2.5 Pro** | $1.25 (<=200K ctx) / $2.50 (>200K) | $10.00 |
+| **Gemini 2.5 Flash** | $0.30 | $2.50 |
+| **Gemini 2.5 Flash-Lite** | $0.10 | $0.40 |
+| **Gemini 3.1 Pro** (latest) | $2.00 | $12.00 |
+| **Gemini 3 Flash** | $0.50 | $3.00 |
+
+**Estimated Cost -- 50,000 AI inference calls/month:**
+
+Assuming average 500 input tokens + 200 output tokens per call (typical for classification/extraction):
+- Input: 50k x 500 = 25M tokens = 25 x rate
+- Output: 50k x 200 = 10M tokens = 10 x rate
+
+Using **Gemini 2.5 Flash** (best value):
+- Input: 25 x $0.30 = $7.50
+- Output: 10 x $2.50 = $25.00
+- **Total: ~$32.50/month (~GBP 26/month)**
+
+Using **Gemini 2.5 Pro**:
+- Input: 25 x $1.25 = $31.25
+- Output: 10 x $10.00 = $100.00
+- **Total: ~$131.25/month (~GBP 104/month)**
+
+Sources: [Vertex AI Pricing](https://cloud.google.com/vertex-ai/generative-ai/pricing), [MetaCTO Gemini Pricing Guide](https://www.metacto.com/blogs/the-true-cost-of-google-gemini-a-guide-to-api-pricing-and-integration), [AI Free API Gemini Guide](https://www.aifreeapi.com/en/posts/gemini-api-pricing-2026)
+
+---
+
+## 5. UK Developer Salaries 2025-2026
+
+| Role | London | UK National | Source |
+|---|---|---|---|
+| **Senior Full-Stack Developer** | GBP 70,000-87,000 (median GBP 71,089) | GBP 65,000-70,000 | Glassdoor, IT Jobs Watch |
+| **Mid-level Full-Stack Developer** | GBP 42,000-70,000 | GBP 40,000-55,000 | Glassdoor, PayScale |
+| **DevOps Engineer** | GBP 65,000-80,000 (median ~GBP 70,000) | GBP 53,000-70,000 | Morgan McKinley, Glassdoor |
+| **QA Engineer** | GBP 46,000-60,000 (automation: GBP 80,000-85,000) | GBP 40,000-52,000 | Morgan McKinley, PayScale |
+| **Product Manager** | GBP 70,000-100,000 (senior: GBP 95,000-147,000) | GBP 58,000-67,000 | Ravio, Mind the Product, Glassdoor |
+
+**Note:** Morgan McKinley's 2026 Salary Guide reports Full-Stack Developer range in London as GBP 80,000-100,000 (covering all experience levels). DevSecOps skills add approximately GBP 8,000-15,000 to DevOps base salary. Financial services roles command 20-35% premium.
+
+Sources: [Morgan McKinley 2026 Salary Guide](https://www.morganmckinley.com/uk/salary-guide/data/full-stack-developer/london), [IT Jobs Watch](https://www.itjobswatch.co.uk/jobs/uk/senior%20full%20stack%20developer.do), [Glassdoor London Senior Full Stack](https://www.glassdoor.co.uk/Salaries/london-senior-full-stack-developer-salary-SRCH_IL.0,6_IM1035_KO7,34.htm), [PayScale UK](https://www.payscale.com/research/UK/Job=Full_Stack_Software_Developer/Salary), [Ravio Product Manager Trends](https://ravio.com/blog/product-manager-salary-trends), [Mind the Product 2025 Survey](https://www.mindtheproduct.com/how-much-were-product-managers-paid-in-2025/)
+
+---
+
+## 6. Offshore Developer Rates (India / Sri Lanka)
+
+### India
+
+| Role | Annual Salary (INR) | Annual Salary (USD) | Annual Salary (GBP approx) |
+|---|---|---|---|
+| **Mid-level Full-Stack Developer** | INR 6-11 LPA | $7,200-$13,200 | GBP 5,700-10,500 |
+| **DevOps Engineer** | INR 5.5-16 LPA (median INR 9 LPA) | $6,600-$19,200 | GBP 5,200-15,200 |
+| **QA Tester** | INR 3-6 LPA (automation: INR 5.5-8 LPA) | $3,600-$9,600 | GBP 2,850-7,600 |
+
+Hourly rate equivalent: $20-45/hour for mid-level developers.
+
+### Sri Lanka
+
+| Role | Monthly Salary (LKR) | Annual (USD approx) |
+|---|---|---|
+| **Mid-level Developer** | LKR 100,000-220,000 | $4,000-$8,800 |
+| **Senior Developer** | LKR 300,000-750,000 | $12,000-$30,000 |
+| **Remote (USD-pegged)** | -- | $20,000-$48,000 |
+
+### UK Outsourcing Company Margins
+
+- **Typical gross margin: 40-60%** on offshore developer billing
+- If client pays $50/hour, developer sees $20-30/hour
+- Mature IT outsourcing businesses average **30% gross margin**
+- UK agencies typically bill GBP 85-120/hour while paying offshore developers $20-45/hour
+- Effective markup on India costs: **150-300%** (cost to client vs developer salary)
+- India team costs roughly **30% of an equivalent UK in-house team** (after overheads)
+- Operational overhead factor for India: ~40% (management, rework, churn risk)
+
+Sources: [DistantJob Offshore Rates 2025](https://distantjob.com/blog/offshore-software-development-rates-by-country-2025/), [Code & Pepper Offshore Cost Analysis](https://codeandpepper.com/offshore-development-team-cost-2025/), [Glassdoor India](https://www.glassdoor.com/Salaries/india-full-stack-developer-salary-SRCH_IL.0,5_IN115_KO6,26.htm), [Indeed India](https://in.indeed.com/career/full-stack-developer/salaries), [PayScale Sri Lanka](https://www.payscale.com/research/LK/Job=Software_Engineer/Salary), [Quora Outsourcing Margins](https://www.quora.com/What-margin-is-it-reasonable-to-expect-for-providing-an-off-shore-software-development-team-in-Eastern-Europe-to-a-UK-business), [SourcingSpeak IT Outsourcing Margins](https://www.sourcingspeak.com/supplier-margins-in-it-outsourcing/)
+
+---
+
+## 7. Anthropic Claude API Pricing
+
+| Model | Input (per 1M tokens) | Output (per 1M tokens) |
+|---|---|---|
+| **Claude Opus 4.6** | $5.00 | $25.00 |
+| **Claude Sonnet 4.6** | $3.00 | $15.00 |
+| **Claude Haiku 4.5** | $1.00 | $5.00 |
+
+**Discounts:**
+- **Batch processing:** 50% off token prices
+- **Prompt caching:** Cache hits cost 10% of standard input price
+
+**Claude Code Monthly Cost per Developer:**
+- Average: ~$6/day = **$100-200/month per developer** (Sonnet 4.6)
+- 90% of users stay under $12/day
+- Subscription option: **$150/person/month** (Premium seat with Claude Code access)
+
+**Estimated Team Spend (3-developer team):**
+- Using API directly: $300-600/month
+- Using Team Premium subscription: $450/month (3 x $150)
+- Using Max plan individually: $100-200/month per person
+
+Sources: [Claude API Pricing Docs](https://platform.claude.com/docs/en/about-claude/pricing), [Claude Code Cost Management](https://code.claude.com/docs/en/costs), [IntuitionLabs Claude Pricing](https://intuitionlabs.ai/articles/claude-pricing-plans-api-costs), [Finout Claude Pricing Guide](https://www.finout.io/blog/claude-pricing-in-2026-for-individuals-organizations-and-developers)
+
+---
+
+## 8. Cyber Essentials Plus Certification Cost
+
+| Item | Cost |
+|---|---|
+| **Cyber Essentials (Basic)** | GBP 300-500 + VAT |
+| **Cyber Essentials Plus** (small company) | **GBP 1,500-2,250 + VAT** |
+| **Cyber Essentials Plus** (general range) | GBP 1,499-4,250+ VAT |
+| **Annual renewal** | Required every 12 months at similar cost |
+| **Included benefit** | Free cyber liability insurance up to GBP 25,000 |
+
+**Important:** IASME has announced updated Cyber Essentials requirements taking effect **27 April 2026** (v3.3), which may affect costs and scope.
+
+Sources: [The Cyphere CE Cost Guide](https://thecyphere.com/blog/cyber-essentials-certification-cost/), [Paul Reynolds CE Cost UK 2026](https://paulreynolds.uk/cyber-essentials-certification-cost/), [SmartSMS CE Cost UK](https://smartsmssolutions.com/resources/blog/uk/cyber-essentials-cost-uk), [NCSC Cyber Essentials](https://www.ncsc.gov.uk/cyberessentials/overview)
+
+---
+
+## 9. Professional Indemnity + Cyber Insurance
+
+### Professional Indemnity Insurance
+
+| Scenario | Annual Cost |
+|---|---|
+| **Minimum (low-risk IT consultant, GBP 250k cover)** | GBP 64-400/year |
+| **Small tech startup (<GBP 250k turnover, GBP 500k cover)** | GBP 300-1,200/year |
+| **Mid-size company (GBP 250k-1M turnover, GBP 1M cover)** | GBP 800-3,000/year |
+| **Example: GBP 250k cover vs GBP 1M cover** | ~GBP 400 vs ~GBP 600 (only GBP 200 more) |
+
+### Cyber Insurance
+
+| Scenario | Annual Cost |
+|---|---|
+| **Micro-business** | from GBP 175/year |
+| **Small tech company (low data, <GBP 250k turnover)** | GBP 350-800/year |
+| **Software company (GBP 2M turnover, GBP 2M cover)** | ~GBP 2,450/year |
+| **SME general range** | GBP 350-5,000/year |
+
+### Combined Budget for SocialHomes.Ai (Startup Phase)
+
+| Cover | Estimated Annual Cost |
+|---|---|
+| Professional Indemnity (GBP 1M cover) | GBP 500-1,000/year |
+| Cyber Insurance (GBP 1M cover) | GBP 500-1,500/year |
+| **Combined** | **GBP 1,000-2,500/year** |
+
+Market conditions are favourable: PI rates reduced 25-30% vs 2024, currently the softest PI market in years. Combined PI + Cyber packages are competitively priced.
+
+Sources: [Hiscox PI Insurance](https://www.hiscox.co.uk/business-insurance/professional-indemnity-insurance/faq/how-much-does-professional-indemnity-insurance-cost), [Get Indemnity Cyber Cost](https://getindemnity.co.uk/business-insurance/cyber/how-much-does-cyber-insurance-cost), [Simply Business PI](https://www.simplybusiness.co.uk/business-insurance/professional-indemnity-insurance/), [AXA PI Cost](https://www.axa.co.uk/business-insurance/professional-indemnity/how-much-does-professional-indemnity-insurance-cost/), [NimbleFins PI Guide](https://www.nimblefins.co.uk/business-insurance/professional-indemnity-insurance), [JMG Cyber Insurance](https://www.jmginsurance.co.uk/blog/how-much-does-cyber-liability-insurance-cost-in-the-uk/), [PI Market Review 2025](https://www.professionalindemnity.co.uk/news/professional-indemnity-insurance-market-review/)
+
+---
+
+## Quick Reference: Monthly Infrastructure Cost Summary
+
+For SocialHomes.Ai at early-to-mid scale (10 housing associations, 5,000 users):
+
+| Service | Monthly Cost (GBP) |
+|---|---|
+| Cloud Run (europe-west2, request-based) | GBP 9-145 |
+| Firestore (500k reads/day) | GBP 10 |
+| Firebase Auth (5,000 MAU) | GBP 0 (free tier) |
+| Vertex AI / Gemini Flash (50k calls) | GBP 26 |
+| Claude API (dev tooling, 3 devs) | GBP 240-360 |
+| **Total infrastructure** | **GBP 285-541/month** |
+| Cyber Essentials Plus (annualised) | GBP 150-190/month |
+| Insurance PI + Cyber (annualised) | GBP 85-210/month |</result>
+<usage><total_tokens>37767</total_tokens><tool_uses>36</tool_uses><duration_ms>204433</duration_ms></usage>
+</task-notification>
+Full transcript available at: REDACTED.output
+
+---
+
+<task-notification>
+<task-id>a757a21b6c2ced50e</task-id>
+<tool-use-id>toolu_01EVtCfg2tdtzDFqyPfu7v6W</tool-use-id>
+<output-file>REDACTED.output</output-file>
+<status>completed</status>
+<summary>Agent "Research regulations and competitor pricing" completed</summary>
+<result>Now I have comprehensive data across all seven research areas. Let me compile this into a structured response.
+
+---
+
+## 1. AWAAB'S LAW
+
+**Background:**
+- Named after Awaab Ishak, a 2-year-old who died in December 2020 from a severe respiratory condition caused by prolonged exposure to mould in his social housing home in Rochdale
+- His parents had complained repeatedly for three years; the social landlord took no action
+- Enacted via **Section 42 of the Social Housing (Regulation) Act 2023**, which inserts Section 10A into the Landlord and Tenant Act 1985
+- Section 10A received Royal Assent on 20 September 2023; the operational regulations were laid before Parliament on 25 June 2025
+
+**Commencement Date:**
+- **27 October 2025** (Phase 1)
+
+**Mandated Timescales:**
+- **Investigation of hazards:** Within **10 working days** of landlord becoming aware
+- **Written summary to tenant:** Within **3 working days** of investigation concluding
+- **Emergency hazards (investigation + action):** Within **24 hours**
+- **Relevant safety work (non-emergency):** Must begin within **5 working days** of investigation conclusion
+- **Long-stop for supplementary/preventative work:** Must physically begin within **12 weeks** if cannot start in 5 days
+- **Alternative accommodation:** Must be provided if landlord cannot complete safety work within 5 working days (or 24 hours for emergencies)
+
+**Phased Rollout:**
+- **Phase 1 (27 Oct 2025):** Damp & mould (significant hazards) + all emergency hazards
+- **Phase 2 (2026):** Excess cold/heat, falls, structural collapse, fire, electrical/explosions, hygiene hazards
+- **Phase 3 (2027):** All remaining HHSRS hazards (excluding overcrowding)
+
+**Penalties for Non-Compliance:**
+- RSH can impose **unlimited fines** (previously capped at GBP 5,000 -- cap removed by the 2023 Act)
+- RSH can issue enforcement notices and require Performance Improvement Plans
+- RSH can authorise emergency remedial action at the landlord's expense
+- RSH can remove officers of Registered Providers
+- The "serious detriment test" has been removed -- RSH no longer needs to prove risk of serious detriment before acting
+- Tenants can take **direct legal action through the courts** for breach of contract
+- Housing Ombudsman can order repairs, award compensation, and require practice improvements
+
+**Sources:**
+- [GOV.UK -- Awaab's Law Guidance for Social Landlords](https://www.gov.uk/government/publications/awaabs-law-guidance-for-social-landlords/awaabs-law-guidance-for-social-landlords-timeframes-for-repairs-in-the-social-rented-sector)
+- [Browne Jacobson -- Awaab's Law to take effect from October 2025](https://www.brownejacobson.com/insights/awaab-s-law-to-take-effect-from-october-2025)
+- [Trowers -- Phase 1 of Awaab's Law takes effect 27 October 2025](https://www.trowers.com/insights/2025/july/phase-1-of-awaabs-law-takes-effect-on-27-october-2025)
+- [GOV.UK -- Awaab's Law Consultation Government Response](https://www.gov.uk/government/consultations/awaabs-law-consultation-on-timescales-for-repairs-in-the-social-rented-sector/outcome/awaabs-law-consultation-on-timescales-for-repairs-in-the-social-rented-sector-government-response)
+- [Penningtons Law -- Social Housing Regulation Act 2023 new RSH powers](https://www.penningtonslaw.com/news-publications/latest-news/2024/the-social-housing-regulation-act-2023-the-regulator-of-social-housing-s-new-powers)
+- [National Housing Federation -- Awaab's Law](https://www.housing.org.uk/resources/awaabs-law/)
+
+---
+
+## 2. TENANT SATISFACTION MEASURES (TSMs)
+
+**Structure:**
+- **22 measures total**: 12 tenant perception survey questions + 10 management information (self-reported) metrics
+- Management info covers: repairs, complaints handling, and anti-social behaviour
+
+**Mandatory Reporting:**
+- Mandatory for all landlords owning **1,000+ homes** -- must submit TSM data to RSH
+- First TSM data return deadline: **30 June 2024**
+- Requirement sits under RSH's **Transparency, Influence and Accountability Standard**
+- Landlords must conduct surveys following RSH's prescribed methodology
+- Self-assessment against the Housing Ombudsman Complaint Handling Code must be submitted at the same time
+
+**2024/25 Headline Results (second year of reporting):**
+- **360 large landlord submissions** analysed
+- **Almost 500,000 tenant surveys** completed (~464,000 rental, ~35,000 shared ownership)
+- **Overall satisfaction (rental): 71.8% median**
+- Home safety: 77.6%
+- Fair treatment: 77.9%
+- **Complaint handling: 35.5%** (the lowest score -- a critical data point)
+- Gas safety checks: 99.7% compliance
+- Non-emergency repairs within target: 79%
+- Shared ownership satisfaction: **47.9%** (significantly lower)
+- Geographic variance: London 61.2% vs North of England 76.6%
+- Survey method impact: Postal surveys 80.2% satisfaction vs internet surveys 60.1%
+
+**Sources:**
+- [GOV.UK -- TSM 2024/25 Headline Report](https://www.gov.uk/government/statistics/tenant-satisfaction-measures-202425/tenant-satisfaction-measures-202425-headline-report)
+- [GOV.UK -- Tenant Satisfaction Measures Collection](https://www.gov.uk/government/collections/tenant-satisfaction-measures)
+- [GOV.UK -- RSH publishes analysis on tenant satisfaction](https://www.gov.uk/government/news/rsh-publishes-analysis-on-tenant-satisfaction-in-the-social-housing-sector)
+
+---
+
+## 3. HOUSING OMBUDSMAN COMPLAINT HANDLING CODE
+
+**When Mandatory:**
+- Became **statutory on 1 April 2024** under the Social Housing (Regulation) Act 2023
+- The Housing Ombudsman has a legal duty to **monitor compliance** from that date
+- Applies to **all landlords regardless of size**
+
+**Key Requirements (2024 Code):**
+- **9 sections** covering all aspects of complaints handling
+- Two-stage complaints process mandatory
+- **Stage 1:** Acknowledge within **5 working days**, full response within **10 working days**
+- **Stage 2:** Escalation available; response within **20 working days**
+- Annual self-assessment required, submitted alongside TSM data
+- Must record and report refused complaints from April 2024
+
+**Complaint Volumes -- 2023-24:**
+- **5,465 determinations** made (107% increase on prior year)
+- **11,835 findings** on categories within those cases
+- **8,619 maladministration determinations**
+- **21,740 interventions/remedies** ordered (up 329% from prior year, up from 6,575 in 2022-23)
+- **168 Complaint Handling Failure Orders** (up from 146)
+- Overall casework volumes increased **27%** year-on-year
+- Cases coming to formal investigation increased **60%**
+
+**Complaint Volumes -- 2024-25 (latest):**
+- **7,082 determinations** (30% increase on 2023-24)
+- Cases moving to formal investigation up **39%**
+- **GBP 5.4 million** in compensation ordered/recommended (up from GBP 4.9M in 2023-24)
+- Described as "the busiest year yet for complaints and enquiries"
+
+**Sources:**
+- [Housing Ombudsman -- Complaint Handling Code 2024](https://www.housing-ombudsman.org.uk/landlords-info/complaint-handling-code/the-code-2024/)
+- [Housing Ombudsman -- Complaint Handling Code becomes statutory](https://www.housing-ombudsman.org.uk/2024/02/08/housing-ombudsmans-complaint-handling-code-becomes-statutory/)
+- [Housing Ombudsman -- Annual Complaints Review 2023-24](https://www.housing-ombudsman.org.uk/annual-complaint-review-reports/annual-complaints-review-2023-24/)
+- [Housing Ombudsman -- Annual Report and Accounts 2023-24](https://www.housing-ombudsman.org.uk/2025/02/05/2023-24-annual-report-and-accounts/)
+- [Housing Ombudsman -- Annual Complaints Review 2024-25](https://www.housing-ombudsman.org.uk/annual-complaint-review-reports/annual-complaints-review-2024-25/)
+- [Housing Today -- Ombudsman determinations up 30%](https://www.housingtoday.co.uk/news/housing-ombudsman-case-determinations-up-30-on-last-year/5139908.article)
+
+---
+
+## 4. RSH CONSUMER REGULATION
+
+**New Regime:**
+- New **consumer standards** came into force **1 April 2024**
+- RSH began a **proactive inspection programme** for all large landlords (1,000+ homes) on a **4-year cycle**
+- Previously RSH operated reactively; now it conducts scheduled inspections
+
+**Referrals (2023-24 Review):**
+- **986 referrals** received (5% increase from 940 in prior year)
+- 482 progressed to Stage 2 review (49%)
+- 217 progressed to Stage 3 investigation (22%)
+- **9 landlords** found not meeting consumer standards (down from 13 in 2022-23)
+- 10 landlords had regulatory notices **removed** after improvements
+- Referral sources: 58% individual tenants, 16% self-referrals from RPs, 13% Housing Ombudsman/other reports
+
+**C3 Gradings Issued (April 2024 onwards -- "serious failings"):**
+- First batch (July 2024): Bristol City Council, Guildford Borough Council, Octavia Housing, Sheffield City Council
+- East Suffolk Council, Ipswich Borough Council, Leicester City Council, North Kesteven District Council, Redditch Borough Council
+- Southend-on-Sea City Council
+- Newcastle City Council, Nottingham City Council
+- City of London Corporation, Rugby Borough Council
+- Canterbury City Council
+- Broxtowe Borough Council
+- **Total: At least 15+ landlords graded C3** since April 2024
+
+**Common Failures Found:**
+- ~50% of homes not meeting Decent Homes Standard
+- Damp and mould cases not fully tracked
+- Electrical safety tests incomplete for communal areas
+- 900+ overdue repairs cases (in one authority)
+
+**Enforcement Powers (from Social Housing Regulation Act 2023):**
+- **Unlimited fines** (cap of GBP 5,000 removed)
+- Performance Improvement Plans
+- Emergency remedial action at landlord's expense
+- Power to remove officers of Registered Providers
+- Power to undertake surveys
+- No longer needs to satisfy "serious detriment test" before acting
+
+**Sources:**
+- [GOV.UK -- Consumer Regulation Review 2023-24](https://www.gov.uk/government/publications/consumer-regulation-review-2023-to-2024)
+- [GOV.UK -- RSH publishes key findings from 2023-24 consumer regulation work](https://www.gov.uk/government/news/rsh-publishes-key-findings-from-its-2023-24-consumer-regulation-work)
+- [GOV.UK -- Five landlords fail to meet RSH consumer standards](https://www.gov.uk/government/news/five-landlords-fail-to-meet-rshs-consumer-standards)
+- [GOV.UK -- Three councils fail to meet RSH consumer standards](https://www.gov.uk/government/news/three-councils-fail-to-meet-rshs-consumer-standards)
+- [GOV.UK -- RSH publishes regulatory judgements for ten social landlords](https://www.gov.uk/government/news/rsh-publishes-regulatory-judgements-for-ten-social-landlords)
+- [Penningtons Law -- Social Housing Regulation Act 2023 new RSH powers](https://www.penningtonslaw.com/news-publications/latest-news/2024/the-social-housing-regulation-act-2023-the-regulator-of-social-housing-s-new-powers)
+
+---
+
+## 5. COMPETITOR PRICING (HMS Contract Values)
+
+Specific per-licence pricing is not published by any major vendor. However, **public procurement records** from UK councils reveal actual contract values:
+
+**NEC Housing (formerly Northgate):**
+- Royal Borough of Greenwich: **GBP 2,200,000 total** / 5 years = **~GBP 440,000/year**
+- Awarded March 2025 via Crown Commercial Services framework (RM6259)
+- NEC Housing has 110+ customers
+- Source: [Greenwich Council Decision](https://greenwich.moderngov.co.uk/ieDecisionDetails.aspx?Id=832)
+
+**MRI Software (ActiveH / Housing Enterprise):**
+- Westminster City Council: **GBP 4,798,220 total** / 2+1+1 years = **~GBP 1,200,000/year**
+- This is a large London borough with significant stock
+- Source: [Westminster Council Decision](https://committees.westminster.gov.uk/ieDecisionDetails.aspx?ID=2216)
+
+**Civica Cx:**
+- Arun District Council: Upper value approved at **GBP 1,500,000**
+- 110+ customers across UK social housing
+- South Lakes Housing saved ~GBP 30,000/year on predictive arrears licensing by switching to Cx
+- Source: [Arun District Council Decision](https://democracy.arun.gov.uk/mgAi.aspx?ID=10525), [Civica brochure](https://www.civica.com/globalassets/7.document-downloads/2.uk-docs/product-information/civica-housing-cx-brochure.pdf)
+
+**Aareon QL:**
+- Bury Council: **~GBP 1,200,000** for upgrade over 3-year contract (professional services + subscription)
+- One housing association reduced annual IT costs from GBP 244,000/year across 4 systems to ~GBP 90,000/year on a single QL system
+- Source: [Bury Council Decision Document](https://councildecisions.bury.gov.uk/documents/s48537/Housing%20IT%20and%20Systems%20QL%20improvements%20and%20upgrade.pdf)
+
+**Folkestone & Hythe Council:**
+- HMS contract: **GBP 1,049,062** awarded July 2024, contract period 2024-29
+- Source: [Contracts Finder](https://www.contractsfinder.service.gov.uk/Notice/168ab3b2-b36f-4571-8319-d7c12b954fce)
+
+**Key Takeaway:** Typical HMS annual costs range from **GBP 200,000 to GBP 1,200,000/year** depending on housing stock size and scope. Most councils are locked into multi-year contracts with legacy vendors via direct awards, citing "no immediate possibility of replacement."
+
+---
+
+## 6. UK PROPTECH MARKET
+
+**Market Size:**
+- UK PropTech market valued at **USD 3.32 billion (GBP ~2.6B) in 2024**
+- Projected to reach **USD 6.56 billion by 2030** (Grand View Research)
+- Long-range forecast: **USD 25.08 billion by 2035** (Market Research Future)
+- Residential segment alone valued at **USD 1.5 billion in 2024**
+
+**Growth Rate:**
+- CAGR estimates vary by source: **14.3% to 20.2%** depending on forecast period
+- Most commonly cited: **15-18% CAGR from 2025-2030**
+
+**UK PropTech Investment:**
+- **749 active PropTech companies** in the UK
+- **GBP 1.68 billion raised** from 2020 to 2024 across UK PropTech
+- 2024: 98 deals, **GBP 174 million** raised (lowest since 2016, down from peak of GBP 527M in 2021)
+- 2022 peak: GBP 479.4M of VC into London PropTech alone (53+ rounds)
+- GBP 1.4 billion VC into London PropTech companies between 2017-2022
+- 2025 deal values on track to eclipse 2024 figures
+
+**Global Context:**
+- Global PropTech VC: USD 15.1 billion in 2024 (32.5% increase over 2023)
+- 2023 was a down year: USD 11.38B (42% dip from 2022's USD 19.75B)
+
+**Sources:**
+- [Market Research Future -- UK PropTech Market](https://www.marketresearchfuture.com/reports/uk-proptech-market-46496)
+- [Grand View Research -- UK PropTech Market](https://www.grandviewresearch.com/horizon/outlook/proptech-market/uk)
+- [Beauhurst -- Top 10 PropTech Companies in the UK](https://www.beauhurst.com/blog/proptech-companies-uk/)
+- [Commercial Observer -- PropTech VC Investment 2024](https://commercialobserver.com/2024/12/proptech-venture-capital-investment-2024-2025/)
+- [CRETI -- 2024 PropTech Venture Capital Report](https://creti.org/2024-proptech-venture-capital-report)
+
+---
+
+## 7. COMPARABLE COMPANIES
+
+### Plentific (Repairs & Maintenance SaaS)
+- **Total funding:** ~USD 136-166M (varies by source; includes **USD 100M Series C** in August 2021)
+- **Revenue:** USD 21.1M (October 2024)
+- **Customers:** 100 customers
+- **Properties managed:** 350,000-400,000+ (including via Active Housing acquisition)
+- FT 1000 recognition as one of Europe's fastest-growing companies
+- 1,500% revenue growth over four years
+- Acquired Active Housing (managing 400,000 properties for social landlords)
+- **Sources:** [TechCrunch](https://techcrunch.com/2021/08/24/plentific-cements-100m-to-expand-its-property-management-saas/), [The Negotiator](https://thenegotiator.co.uk/news/property-management-proptech-raises-72-million-for-global-expansion/), [GetLatka](https://getlatka.com/companies/plentific)
+
+### Switchee (Smart Thermostat / IoT for Social Housing)
+- **Total funding:** USD 20.1M over 6 rounds (latest: GBP 5M Series A in July 2024)
+- **Valuation:** USD 1.63 billion (July 2024 -- notable unicorn valuation)
+- **Revenue:** USD 11.6M (2023), revenues doubling for 3 consecutive years
+- **Customers:** 130+ social housing providers
+- **Devices installed:** 60,000 smart thermostats (up from 35,000 at earlier reporting)
+- Reduces tenant heating bills by 17%
+- Key investors: Axa IM Alts, Octopus Ventures
+- **Sources:** [UK Tech News](https://www.uktech.news/climate-tech/switchee-funding-social-housing-20240710), [Inside Housing](https://www.insidehousing.co.uk/news/social-housing-proptech-firm-raises-5m-from-two-major-investors-87579), [GetLatka](https://getlatka.com/companies/switchee.co)
+
+### FaultFixers (Maintenance Management Software)
+- **Total funding:** ~GBP 421K (GBP 271K Innovate UK grant + GBP 150K investment via Suss Ventures)
+- **Team:** 8 people (as of last report)
+- Founded 2017 by Tom O'Neill
+- Won Best Maintenance & Facilities Management Supplier at Care Sector Supplier Awards (2022, 2023)
+- Primarily focused on care/facilities sector, not exclusively housing
+- Available on G-Cloud Digital Marketplace
+- **Sources:** [UK Tech News](https://www.uktechnews.info/2021/04/07/london-based-maintenance-software-company-faultfixers-technologies-secures-271k-grant-funding-from-innovate-uk/), [Crunchbase](https://www.crunchbase.com/organization/faultfixers)
+
+### Localz (Last-Mile Customer Engagement)
+- **Acquired by Descartes Systems Group** in April 2023 for **USD 6.2M**
+- Total funding raised prior to acquisition: **USD 7.44M** over 3 rounds (latest: USD 2.67M Series A in June 2020)
+- Key housing clients: Clarion Housing, Wates Property Services
+- Partnered with MRI Software for social housing market
+- Platform provides real-time tracking, notifications, and feedback for housing repair appointments
+- **Sources:** [Descartes Acquisition Announcement](https://www.descartes.com/resources/news/descartes-acquires-localz), [Tracxn](https://tracxn.REDACTED)
+
+---
+
+## SUMMARY TABLE -- KEY REGULATORY NUMBERS FOR BUSINESS PLAN
+
+| Metric | Figure | Source Date |
+|--------|--------|-------------|
+| Awaab's Law investigation deadline | 10 working days | Oct 2025 |
+| Awaab's Law emergency response | 24 hours | Oct 2025 |
+| Awaab's Law repair start deadline | 5 working days | Oct 2025 |
+| RSH fines | Unlimited (cap removed) | Apr 2024 |
+| TSM measures | 22 (12 perception + 10 management) | Apr 2023 |
+| Overall tenant satisfaction | 71.8% median | 2024-25 |
+| Complaint handling satisfaction | 35.5% (worst TSM score) | 2024-25 |
+| Ombudsman determinations | 7,082 (up 30%) | 2024-25 |
+| Ombudsman compensation ordered | GBP 5.4M | 2024-25 |
+| RSH referrals received | 986 | 2023-24 |
+| RSH C3 gradings issued | 15+ landlords | Since Apr 2024 |
+| RSH inspection cycle | All 1,000+ home landlords in 4 years | From Apr 2024 |
+| UK PropTech market | USD 3.32B (2024) | 2024 |
+| UK PropTech CAGR | 15-18% | 2025-2030 |
+| UK PropTech companies | 749 active | 2024 |
+| Typical HMS contract | GBP 200K-1.2M/year | 2024-25 tenders |</result>
+<usage><total_tokens>50004</total_tokens><tool_uses>43</tool_uses><duration_ms>282233</duration_ms></usage>
+</task-notification>
+Full transcript available at: REDACTED.output
+
+---
+
+<task-notification>
+<task-id>a0664926ca16352a2</task-id>
+<tool-use-id>REDACTED</tool-use-id>
+<output-file>REDACTED.output</output-file>
+<status>completed</status>
+<summary>Agent "Research UK housing providers market" completed</summary>
+<result>Now I have comprehensive data. Let me compile the final research document.
+
+Here is the structured research output across all six areas:
+
+---
+
+## 1. RSH Registered Provider Statistics (2024-25)
+
+**Total Registered Providers on RSH Register (31 March 2025): 1,581**
+
+- **228** local authority registered providers
+- **1,353** private registered providers (PRPs)
+
+**Stock Size Band Breakdown (PRPs):**
+- **227 large PRPs** (1,000+ units) = 17% of all PRPs but own **96% of all PRP stock**
+- **~1,126 smaller PRPs** (fewer than 1,000 units) = 83% of PRPs but own only 4% of stock
+- **78 for-profit providers** own 46,555 units (up 21% year-on-year)
+- The **19 largest providers** (40,000+ units each) account for 42% of sector units and 47% of sector turnover
+
+**Total Social Housing Stock: ~4.5 million homes**
+- Private registered providers: **2.9 million homes** (3,284,294 units incl. non-social tenures)
+- Local authority registered providers: **1.6 million homes**
+
+**Stock Composition:**
+- General needs (social rent + Affordable Rent): 83%
+- Supported housing: 11%
+- Low cost home ownership: 6%
+
+**Annual Growth (2024-25):**
+- Net increase of **~38,000 social homes** (50,059 more PRP units, partly offset by LA losses)
+- Affordable Rent: +28,000
+- Low cost home ownership: +13,900
+- Social rent: -4,100
+
+**Sources:**
+- [RSH publishes annual statistics on stocks and rents](https://www.gov.uk/government/news/rsh-publishes-annual-statistics-on-stocks-and-rents-in-the-social-housing-sector)
+- [Registered provider social housing stock and rents 2024-25](https://www.gov.uk/government/statistics/registered-provider-social-housing-stock-and-rents-in-england-2024-to-2025)
+- [Private registered providers - Summary key facts](https://www.gov.uk/government/statistics/private-registered-provider-social-housing-stock-and-rents-in-england-2024-to-2025/private-registered-providers-stock-and-rents-in-england-summary-key-facts)
+
+---
+
+## 2. Local Authorities with Council Housing
+
+**143 local authorities** in England still directly own and manage council housing, representing **over 1.4 million homes**.
+
+- There are **228 local authorities** on the RSH register (some may have transferred stock but retain residual landlord functions)
+- There are **296 local authorities** in total in England
+- Over 111 local authorities transferred all their stock to housing associations (primarily between 1988-2010)
+- LA stock decreased by ~7,000 homes in 2024-25 (primarily Right to Buy sales)
+- **ARCH** (Association of Retained Council Housing) represents over 60 stock-retained councils directly
+
+**Sources:**
+- [ARCH Housing - Voice of stock-retained council sector](https://www.arch-housing.org.uk/)
+- [Local authority registered provider stock and rents 2024-25](https://www.gov.uk/government/statistics/local-authority-registered-provider-social-housing-stock-and-rents-in-england-2024-to-2025)
+- [Wikipedia - Public housing in the United Kingdom](https://en.wikipedia.org/wiki/Public_housing_in_the_United_Kingdom)
+
+---
+
+## 3. Average Turnover of a 2,000-3,000 Home Housing Association & IT Spend
+
+**Estimated annual turnover for a 2,000-2,500 home HA: ~£15m-£20m**
+
+This is derived from the following data points:
+
+- **RSH 2025 Global Accounts**: Total PRP sector turnover is **£27.4bn** across ~2.9m homes = approximately **£9,400 turnover per unit** (sector-wide average, but large providers with development income skew this upward)
+- **Social Housing Lettings turnover**: **£21.2bn** across the sector (77% of total) = roughly **£7,300 per unit** from lettings alone
+- **Average weekly general needs rent**: **£118.15/week** = ~**£6,144/year per unit** in pure rental income
+- **Tuntum HA** (1,600 homes): turnover of **£10.3m** = ~£6,400/unit
+- **Headline social housing cost per unit (2025 median)**: **£5,690** (lower quartile £5,025, upper quartile £7,230)
+
+**Extrapolating for a 2,500-home HA (lettings-focused, no major development):**
+- Rental income: ~£6,100/unit x 2,500 = ~£15.3m
+- With service charges and other income: **~£16m-£20m total turnover**
+
+**IT/Digital Spend:**
+- No housing-sector-specific benchmark was found in public data. Housemark collects this data but it sits behind a membership paywall.
+- **Cross-industry UK SME benchmark**: 4-7% of revenue on IT (Fusion IT / Confidence IT / Avasant)
+- **Housing sector reality**: Funding constraints are "a significant barrier, especially for smaller providers without large IT budgets" (Housing Digital / OneAdvanced survey)
+- **Reasonable estimate for housing**: **2-4% of turnover** (housing is a lower-tech sector historically, but rising due to regulatory demands and digital transformation)
+- For a £17m-turnover HA, that implies **£340k-£680k/year on IT** (including HMS licensing, infrastructure, support, and staff)
+
+**RSH Value for Money Metrics (2025):**
+
+| Cost Component | Per Unit (weighted avg) |
+|---|---|
+| Management costs | £1,390 |
+| Maintenance & major repairs | £3,420 |
+| Service charges | £920 |
+| Other costs | £560 |
+| **Total headline cost** | **£6,280** |
+
+**Sources:**
+- [2025 Global Accounts of private registered providers](https://www.gov.uk/government/publications/2025-global-accounts-of-private-registered-providers/2025-global-accounts-of-private-registered-providers)
+- [RSH VfM metrics and reporting 2025](https://www.gov.uk/government/publications/value-for-money-metrics-and-reporting-2025)
+- [Fusion IT - How much should you spend on IT](https://www.fusionmanageit.co.uk/node/how-much-should-you-be-spending-on-it/)
+- [Housing Digital - Digitally Does It](https://housingdigital.co.uk/digitally-does-it/)
+
+---
+
+## 4. Real HMS Procurement Contract Values
+
+| Organisation | System/Supplier | Contract Value | Duration | Notes |
+|---|---|---|---|---|
+| **Westminster City Council** | MRI Software (MRI Housing Enterprise) | **£4,798,220** | 2+1+1 years (up to 4 years) | Reimplementation of existing vendor's updated product; direct award |
+| **Royal Borough of Greenwich** | NEC Software Solutions (NEC Housing) | **£2,200,000** | 5 years (~£440k/year) | Via CCS RM6259 framework Lot 3 |
+| **Arun District Council** | Civica CX | **£1,500,000** | 4 years initial + CPI increases | Ongoing hosting and support (implementation already completed) |
+| **Atrium Homes (Kilmarnock)** | HomeMaster | **£416,750** | Not specified | Integrated HMS + Financial Management System |
+| **Maryhill Housing Association** | Designer Software | **£379,000** | Not specified | Awarded June 2025 |
+| **RBWM (Windsor & Maidenhead)** | MRI Real Estate Software | **£182,709** | 3 years (May 2025-2028) | Direct award; ~£61k/year |
+
+**CCS Framework RM6259 (Vertical Application Solutions):**
+- Lot 3: Housing, Environmental & Planning Solutions
+- **29 suppliers** on Lot 3, including Civica UK Limited, OneAdvanced Limited, and others
+- Framework period: 7 March 2023 to 6 September 2025
+- 81 suppliers total across 5 lots
+
+**Sources:**
+- [Westminster HMS procurement decision](https://committees.westminster.gov.uk/ieDecisionDetails.aspx?ID=2216)
+- [Greenwich HMS contract - Find a Tender](https://www.find-tender.service.gov.uk/Notice/009047-2025)
+- [Arun District Council HMS contract](https://democracy.arun.gov.uk/mgAi.aspx?ID=10525)
+- [RBWM HMS contract decision](https://rbwm.moderngov.co.uk/ieDecisionDetails.aspx?Id=370)
+- [CCS RM6259 Framework](https://www.crowncommercial.gov.uk/agreements/RM6259)
+- [Contracts Finder - RM6259](https://www.contractsfinder.service.gov.uk/Notice/168ab3b2-b36f-4571-8319-d7c12b954fce)
+
+---
+
+## 5. HACT UK Housing Data Standard
+
+**Current version: 3.5** (with Version 4.0 in development with L&Q as a key contributor)
+
+**Adoption metrics:**
+- Downloaded **over 2,000 times** by social housing organisations across the UK
+- Continues to be downloaded daily
+- Developed and supported by **over 100 housing associations and software companies**
+- Developed in collaboration with **over 70 housing associations** since 2018
+- Version 4.0 being developed alongside **50 leading housing associations and software companies** including L&Q, Hyde, Riverside, Home Group, Yorkshire Housing, and Housemark
+- **Free to all users**
+
+**The Standard covers 10 modules:**
+1. Care and Support
+2. Customer Data
+3. Development Handover
+4. Income and Service Charges
+5. Planned Maintenance
+6. Reactive Repairs
+7. Resident Feedback and Customer Complaints
+8. Voids
+9. Environmental
+10. Regulatory Returns
+
+Additional: BIM4HAs toolkit and Awaab's Law data model (damp and mould)
+
+**Notable signatories/users:**
+- L&Q (contributed to v2.0, 3.0, working on 4.0)
+- Housing Solutions
+- RHP
+- Kingdom Housing Association (Scotland)
+- Hyde, Riverside, Home Group, Yorkshire Housing (v4.0 contributors)
+
+**Housing Technology published "Data Standards in Social Housing 2025"** in partnership with MHCLG, HACT, and Open Data Exchange - described as "the UK's most comprehensive survey of social housing providers' views on data standards" (full report behind registration wall).
+
+**Sources:**
+- [HACT UK Housing Data Standards](https://hact.org.uk/tools-and-services/uk-housing-data-standards/)
+- [L&Q signs up for v4.0](https://www.hact.org.uk/news/lq-signs-v40-uk-housing-data-standards)
+- [Housing Technology Data Standards Report 2025](https://www.housing-technology.com/report/data-standards-2025/)
+- [RHP signs up to data standards](https://hact.org.uk/news/rhp-signs-up-to-the-data-standards/)
+- [Kingdom signs up (SFHA)](https://www.sfha.co.uk/news/news-category/sector-news/news-article/kingdom-signs)
+
+---
+
+## 6. HMS Market Switching Activity
+
+**Key market dynamics:**
+
+**NEC OHMS End-of-Life (Critical Trigger):**
+- Oracle-based OHMS has been announced **end of life** with de-support after **March 2026**
+- Primarily affects smaller local councils
+- Migration to a new system typically requires **12-20+ months** (3-6 months procurement + implementation)
+- This is creating an urgent wave of procurement activity
+
+**Major vendor landscape and customer bases:**
+- **Aareon**: Trusted by **250+ UK providers** (Aareon QL and ActiveH products)
+- **Civica**: Works with **400+ UK social housing organisations** across all products; **100+ customers** specifically on Civica CX
+- **MRI Software**: Largest portfolio of HMS solutions; acquired multiple products including Orchard
+- **NEC Software Solutions**: NEC Housing (formerly Northgate); strong in local authority market
+- **OneAdvanced**: On CCS framework; growing presence
+
+**Market consolidation pattern:**
+- Larger vendors (MRI, Civica, OneAdvanced) have been acquiring smaller solutions to gain customers
+- Historical failed consolidations: OpenHousing/Academy, Saffron/Universal Housing
+- "Buying up a solution and quickly thinking clients will just roll over and migrate to another product from the group, rarely works" (Tony Smith, HousingITguy)
+
+**Recent confirmed HMS switches/procurements (2024-2025):**
+- **Southern Housing**: Fully integrated legacy HMS into one database
+- **Westminster City Council**: Reimplementing MRI (from older Orchard to MRI Housing Enterprise) -- £4.8m
+- **Royal Borough of Greenwich**: Contracting NEC Housing for 5 years -- £2.2m
+- **Arun District Council**: Renewed with Civica CX -- £1.5m
+- **Maryhill Housing Association**: Awarded to Designer Software -- £379k
+- **Atrium Homes**: Awarded to HomeMaster -- £417k
+- **East Lothian Housing Association**: Procuring new HMS (in progress)
+- **Onward Homes** (35,000 homes): Selected MIS Active Management Systems and Incline-IT for new hosted HMS platform
+- **Paradigm Housing**: Selected Civica CX
+
+**No aggregate statistic exists for "how many HAs changed HMS in the last 3 years"** - this data is not centrally tracked. However, the combination of OHMS end-of-life, new Procurement Act requirements (October 2024), Social Housing (Regulation) Act 2023 compliance demands, and aging legacy systems is driving **significant procurement activity** across the sector.
+
+**Sources:**
+- [Tony Smith HousingITguy blog - OHMS end of life](http://tonysmiththathousingitguy.blogspot.com/2024/05/-HMS-social-Housing-Anite-NEC-OHMS-system-systems.html)
+- [Aareon UK](https://www.aareon.co.uk/)
+- [Civica Housing Solutions](https://www.civica.com/en-gb/sector-pages/housing/)
+- [Find a Tender - HMS notices](https://www.find-tender.service.gov.uk/Notice/009047-2025)
+- [Paradigm Housing picks Civica](https://www.civica.com/en-us/news-library/paradigm-housing-selects-civica-cx-housing/)
+- [BidStats - Housing management software contracts](https://bidstats.uk/tenders/?q=housing+management+software)
+
+---
+
+## Summary of Key Business Plan Numbers
+
+| Metric | Value | Source |
+|---|---|---|
+| Total registered providers (England) | 1,581 | RSH 2024-25 |
+| Private registered providers | 1,353 | RSH 2024-25 |
+| Local authority providers | 228 | RSH 2024-25 |
+| LAs still owning council housing | 143 | ARCH |
+| Total social housing stock | ~4.5 million | RSH 2024-25 |
+| PRP stock | 2.9 million | RSH 2024-25 |
+| LA stock | 1.6 million | RSH 2024-25 |
+| Large PRPs (1,000+ homes) | 227 | RSH 2024-25 |
+| Small PRPs (<1,000 homes) | ~1,126 | Calculated from RSH |
+| Sector turnover (PRPs) | £27.4bn | RSH Global Accounts 2025 |
+| SHL turnover | £21.2bn | RSH Global Accounts 2025 |
+| Estimated turnover for 2,500-home HA | £16m-£20m | Derived |
+| Headline cost per unit (median) | £5,690 | RSH VfM 2025 |
+| Management cost per unit | £1,390 | RSH VfM 2025 |
+| HMS contract range (small HA) | £180k-£420k | Contract Finder / Find a Tender |
+| HMS contract range (LA/large) | £1.5m-£4.8m | Contract Finder / Find a Tender |
+| HACT Data Standard version | 3.5 (v4.0 in dev) | HACT |
+| HACT supporters | 100+ organisations | HACT |
+| Aareon UK customers | 250+ providers | Aareon |
+| Civica housing customers | 400+ organisations | Civica |</result>
+<usage><total_tokens>55408</total_tokens><tool_uses>58</tool_uses><duration_ms>309036</duration_ms></usage>
+</task-notification>
+Full transcript available at: REDACTED.output
+
+---
+
+okay i think asking small housing association 100k each is too much i think they may realistaically out in 10k or max 20k; can you add the companmy logo and other artifacts as in the example proposal; I think we need to hire a testing company to test the AI workforces work that probably the more critical thing so check out the prices etc; it would be good to also show the minimim budget if we had to scaleback; lost of overlapping labels, can you make them editabel so i can move them etc can we change the ai to claude ; i would really question bthe 6. competitive analsyis- is that accurate - i can understand 44k for a HA that ha 2.5k but it wouldnt be the same for a much HA which i think the other numbersrelate to eg MRI- a HA with 2.5k homes will not spend 1.2billion on a system; its probably be good to show growth over 10 years because i dont think in year 2 we wikk have 20 orgsand we will probably go slow at start then ramp up quickly after 3 years, I dont think we need such a big team in year 1- we probably need a testing company and 3 full stacks; probably make a loss in year 1 and 2 and then nbreak even year 3 and then ramp up significantly after that; also make sure we keep to out agentic+ real workforce hybrid thematic and also agentic agent embedding within the appliaction which is currently limited to "human in the loop" with AI augementation ie Ai works out whats important and gets it to the attacntion of the user or it dows things that get its ready for nuser to click and go; it would be good to thoughly check whats missing from the prototype rather than saying its all ready/complete for example, the admin section is not ready i dont think, should it be multi tenated afer year 2, what about input output, are changes user mades  currently registering in the database and showing up in the records, i dont think the cases and repairs workflows are complete probably needs significant work, is awabs case managent ready to go; and invetment option we should also consider grant funding; how about getting iso as well in milestones; what about a peer comparison feature using starutory returns eg on cost per nunit etc; what about predective maintenence etc
+
+---
+
+<task-notification>
+<task-id>a9214dc2ffee9b07f</task-id>
+<tool-use-id>toolu_012xoTkKq2jtkZx7QTdGCBGB</tool-use-id>
+<output-file>REDACTED.output</output-file>
+<status>completed</status>
+<summary>Agent "Research testing companies and ISO" completed</summary>
+<result>Now I have enough data to compile the comprehensive research report. Let me write this up.
+
+---
+
+# UK Tech Startup Business Plan Research -- Hard Data with Sources
+
+## 1. UK Software Testing Companies (Independent QA)
+
+### Key Companies
+
+| Company | Speciality | Hourly Rate | Notable |
+|---------|-----------|-------------|---------|
+| **Zoonou** | Full QA, accessibility, pen testing (CREST), performance | ~GBP 30-45/hr (crowdtesting) | Employee-owned, B Corp, **Crown Commercial Service Supplier**, ISTQB Gold Partner. Has a Southern Housing case study. |
+| **Edge Testing** | Functional, automation, performance for enterprise | Not published | One of the largest UK-based providers |
+| **Digivante** | Crowdtesting, usability, eCommerce | Custom quotes only | Rapid turnaround |
+| **TestingXperts** | Regression, full QA | From GBP 26/hr | London + offshore (India) |
+| **Ten10** | Automation, performance, accessibility, DevOps | Not published | London & Leeds |
+| **nFocus** | Mission-critical, regulated industries | Not published | Reusable testing frameworks |
+| **BJSS** | Government, healthcare, retail | Not published | Tech consultancy model |
+| **Qualitest** | UK public sector specialist | Not published | Explicit public sector focus |
+| **KiwiQA** | Full QA at affordable rates | Custom quotes | Established UK provider |
+
+### Typical Costs -- QA Tester Rates
+
+| Role | Hourly Rate (GBP) |
+|------|-------------------|
+| QA Analyst | 24/hr |
+| QA Engineer | 25/hr |
+| Test Engineer | 26/hr |
+| Automation Test Engineer | 30-36/hr |
+| Senior QA Engineer | 45/hr |
+
+### Cost of a Full Test Engagement (4-8 weeks)
+
+Based on collected data, here is a realistic estimate for a **full independent testing engagement** of a React + Node.js + Cloud web application:
+
+| Testing Type | Duration | Estimated Cost (GBP) |
+|-------------|----------|---------------------|
+| **Functional testing** (manual + automated) | 3-4 weeks | 12,000 - 20,000 |
+| **Security / Penetration testing** (CREST) | 1-2 weeks (6-10 days) | 6,000 - 15,000 |
+| **Performance / Load testing** | 1 week | 4,000 - 8,000 |
+| **Accessibility audit** (WCAG 2.2 AA) | 1-2 weeks | 2,500 - 5,000 |
+| **TOTAL: Full 4-8 week engagement** | | **24,500 - 48,000** |
+
+**Penetration testing specifics:**
+- CREST-certified pen test day rate: GBP 1,000-1,500/day
+- Typical web application pen test: ~6 days at ~GBP 1,000/day = GBP 6,000
+- Complex web app (multiple roles, APIs, integrations): GBP 8,000-15,000
+- Providers start from GBP 2,500 for a targeted assessment
+
+**Accessibility audit specifics:**
+- AbilityNet (leading UK provider): GBP 4,950 + VAT for a WCAG 2.2 review
+- Jim Byrne (specialist): from GBP 2,000 (GBP 2,500+ with disabled testers)
+- Average: ~GBP 175 per page audited
+- Manual review required for 60-70% of accessibility issues (cannot be automated)
+
+### Ongoing Regression Testing (Monthly)
+
+| Model | Monthly Cost (GBP) |
+|-------|-------------------|
+| 1 embedded QA tester (outsourced) | 4,000 - 6,000/month |
+| Managed regression testing service | 2,000 - 5,000/month |
+| Small-scale automated regression suite maintenance | 1,500 - 3,000/month |
+| Budget reference: testing = 15-25% of dev budget | Proportional |
+
+Testing as a proportion of total project budget: **15-25%** is the industry standard, with 23% of organisational IT spend going to QA on average.
+
+---
+
+## 2. ISO 27001 Certification Cost (Small UK Tech Company)
+
+### Year 1 Costs
+
+| Cost Component | Small (1-10 staff) | Small (10-50 staff) |
+|---------------|--------------------|--------------------|
+| **UKAS audit fees (Stage 1 + Stage 2)** | 3,000 - 4,500 | 4,000 - 7,000 |
+| **Implementation consultancy** (15-20 days) | 6,000 - 20,000 | 12,000 - 30,000 |
+| **Consultant day rate** | 800 - 1,500/day | 800 - 1,500/day |
+| **Total Year 1 (DIY approach)** | ~8,250 | ~12,000 |
+| **Total Year 1 (with consultant)** | 15,000 - 25,000 | 21,000 - 37,000 |
+| **Total Year 1 (typical SME range)** | **10,000 - 25,000** | **15,000 - 35,000** |
+
+### Ongoing Annual Costs
+
+| Cost | Small (1-10 staff) | Small (10-50 staff) |
+|------|--------------------|--------------------|
+| Annual surveillance audit | 1,500 - 3,000 | 2,000 - 4,000 |
+| Continuous improvement activities | 1,000 - 2,000 | 2,000 - 4,000 |
+| **Annual total (Years 2-3)** | **2,500 - 5,000** | **4,000 - 8,000** |
+
+### 3-Year Certification Cycle
+
+| Company Size | 3-Year Total |
+|-------------|-------------|
+| 1-10 staff | 6,000 - 10,000 (audit fees only) |
+| 10-50 staff | 10,000 - 18,000 (audit fees only) |
+
+### Timeline
+- **Small company (1-10 staff):** 3-6 months
+- **Small company (10-50 staff):** 6-9 months
+- **Less mature organisations:** up to 12-18 months
+- Note: 2026 rates ~20% higher than 2025 due to UKAS auditor scarcity and ISO 27001:2022 transition
+
+---
+
+## 3. ISO 9001 Certification Cost (Small UK Tech Company)
+
+### Year 1 Costs
+
+| Cost Component | 1-10 employees | 11-25 employees |
+|---------------|---------------|-----------------|
+| **Certification body fees (Stage 1 + 2)** | 2,000 - 3,500 | 3,000 - 5,000 |
+| **Consultancy (full implementation)** | 0 (DIY) to 15,000 | 5,000 - 15,000 |
+| **Gap analysis** | 800 - 2,000 | 800 - 2,000 |
+| **Training** | 300 - 600/person | 500 - 1,500 total |
+| **ISO standard copy** | 138 | 138 |
+| **Total Year 1 (DIY)** | ~5,000 | ~7,000 |
+| **Total Year 1 (with consultant)** | 7,000 - 15,000 | 10,000 - 20,000 |
+
+### Ongoing Costs
+
+| Cost | Amount (GBP) |
+|------|-------------|
+| Annual surveillance audit (Years 2-3) | 1,200 - 2,500 |
+| Recertification (Year 4) | 2,500 - 4,500 |
+| QMS software (optional) | 0 - 500/month |
+
+### Timeline
+- Implementation: 3-6 months for small company
+- Auditor day rates: GBP 800-1,200/day
+
+---
+
+## 4. Cyber Essentials Plus -- Current Cost
+
+### Cyber Essentials Basic (prerequisite)
+
+| Company Size | Employees | Fee (GBP + VAT) |
+|-------------|-----------|-----------------|
+| Micro | 0-9 | 320 |
+| Small | 10-49 | 440 |
+| Medium | 50-249 | 500 |
+| Large | 250+ | 600 |
+
+### Cyber Essentials Plus
+
+| Company Size | Employees | Cost Range (GBP + VAT) |
+|-------------|-----------|----------------------|
+| Micro | 0-9 | 1,499 - 1,650 |
+| Small | 10-49 | 1,999 - 2,250 |
+| Medium | 50-249 | 2,499 - 3,250 |
+| Large | 250+ | 2,999 - 4,250+ |
+
+### Key Details
+- **Renewal:** Annual (certificate lasts 12 months), same cost each year
+- **Prerequisite:** Must pass basic CE first; 3 months to complete Plus or restart
+- **Hidden costs:** Gap remediation GBP 0-5,000+, form help GBP 150-400
+- **Bonus:** Free cyber liability insurance up to GBP 25,000 for UK firms with turnover under GBP 20M
+- **For a small tech startup (under 10 staff):** Total = ~GBP 320 (basic) + ~GBP 1,500 (Plus) = **~GBP 1,820 + VAT per year**
+
+---
+
+## 5. Anthropic Claude API Pricing
+
+### Current Model Pricing (from official Anthropic docs)
+
+| Model | Input (per MTok) | Output (per MTok) | Batch Input | Batch Output |
+|-------|-----------------|-------------------|-------------|-------------|
+| **Claude Opus 4.6** | $5.00 | $25.00 | $2.50 | $12.50 |
+| **Claude Sonnet 4.6** | $3.00 | $15.00 | $1.50 | $7.50 |
+| **Claude Sonnet 4** | $3.00 | $15.00 | $1.50 | $7.50 |
+| **Claude Haiku 4.5** | $1.00 | $5.00 | $0.50 | $2.50 |
+| Claude Haiku 3.5 | $0.80 | $4.00 | $0.40 | $2.00 |
+
+### Prompt Caching Multipliers
+- 5-minute cache write: 1.25x base input price
+- 1-hour cache write: 2.0x base input price
+- Cache read (hit): **0.1x base input price** (massive savings)
+
+### Fast Mode (Opus 4.6 only)
+- $30/MTok input, $150/MTok output (6x standard)
+
+### Cost Estimate: 10,000 Users x 50 AI Queries/Day
+
+**Assumptions:**
+- 500,000 queries/day
+- Average query: ~800 input tokens, ~400 output tokens (housing management domain -- short, structured queries)
+- System prompt cached (~2,000 tokens, cache hit at 0.1x)
+
+**Using Claude Haiku 4.5 (recommended for most user-facing queries):**
+
+| Component | Daily Tokens | Daily Cost | Monthly Cost |
+|-----------|-------------|------------|-------------|
+| Input tokens | 400M (500K queries x 800 tokens) | $0.40 | $12.00 |
+| Cached system prompt reads | 1B (500K x 2,000 tokens at 0.1x) | $0.10 | $3.00 |
+| Output tokens | 200M (500K x 400 tokens) | $1.00 | $30.00 |
+| **Daily total** | | **$1.50** | **$45/month** |
+
+**Using Claude Sonnet 4 (for more complex reasoning):**
+
+| Component | Daily Tokens | Daily Cost | Monthly Cost |
+|-----------|-------------|------------|-------------|
+| Input tokens | 400M | $1.20 | $36.00 |
+| Cached system prompt reads | 1B at 0.1x | $0.30 | $9.00 |
+| Output tokens | 200M | $3.00 | $90.00 |
+| **Daily total** | | **$4.50** | **$135/month** |
+
+**Using Claude Sonnet 4 with larger queries (1,500 input + 800 output tokens):**
+
+| Component | Daily Tokens | Daily Cost | Monthly Cost |
+|-----------|-------------|------------|-------------|
+| Input tokens | 750M | $2.25 | $67.50 |
+| Cached prompts | 1B at 0.1x | $0.30 | $9.00 |
+| Output tokens | 400M | $6.00 | $180.00 |
+| **Daily total** | | **$8.55** | **$256.50/month** |
+
+**Realistic blended model approach (80% Haiku, 20% Sonnet):**
+
+| Scenario | Monthly Cost |
+|----------|-------------|
+| Light queries (800 in / 400 out) | ~$63/month |
+| Medium queries (1,500 in / 800 out) | ~$130/month |
+| Heavy queries (3,000 in / 1,500 out) | ~$350/month |
+
+**At scale with enterprise volume discounts (negotiable), costs could be lower.** The web search tool costs an additional $10 per 1,000 searches if used.
+
+**Bottom line:** Embedding Claude as an AI engine at 10,000 users / 50 queries/day is remarkably affordable -- likely **$50-350/month** depending on query complexity and model mix, before any volume discounts.
+
+---
+
+## 6. Small Housing Association (2,000-3,000 Homes) HMS Spend
+
+### Sector-Wide Cost Benchmarks (RSH Value for Money 2024)
+
+| Metric | Median (All HAs) | 1,000-2,499 homes | 2,500-4,999 homes |
+|--------|------------------|--------------------|--------------------|
+| **Headline social housing cost per unit** | 5,136 | 5,768 | 5,601 |
+| **Management cost per unit** | ~1,300 | Not broken out | Not broken out |
+| **Maintenance & major repairs per unit** | 3,046 | Not broken out | Not broken out |
+
+Note: Smaller associations (1,000-2,499 homes) have **higher** costs per unit than larger ones -- GBP 5,768 vs sector median of GBP 5,136. This is the inefficiency that SocialHomes.Ai can target.
+
+### HMS Software Costs -- Hard Data from G-Cloud Digital Marketplace
+
+| Provider | Pricing Model | Published Price |
+|----------|--------------|-----------------|
+| **NEC Housing** | Per unit per month | **GBP 1.08 per unit/month** |
+| **MRI Housing Enterprise** | Annual licence | **GBP 78,814 per licence/year** |
+| **Civica Cx Housing** | Per licence per month | **GBP 5,527 per licence/month** |
+
+**Extrapolated for a 2,500-home housing association:**
+
+| Provider | Annual HMS Cost (est.) | Per Unit/Year |
+|----------|----------------------|---------------|
+| **NEC Housing** | 2,500 x GBP 1.08 x 12 = **GBP 32,400/year** | GBP 12.96 |
+| **MRI Housing Enterprise** | ~GBP 78,814/year (single licence) | ~GBP 31.53 |
+| **Civica Cx** | GBP 5,527/month x 12 = **GBP 66,324/year** | GBP 26.53 |
+
+**Important caveats:** These are base platform costs. Implementation, data migration, training, customisation, and ongoing professional services are additional. Total cost of ownership for a full HMS implementation is typically 2-3x the licence cost in Year 1.
+
+### IT Spend as Proportion of Turnover
+
+- Housemark benchmark data (not publicly available in full) tracks IT cost as a proportion of turnover
+- Smaller providers (under 1,000 homes) have overhead rates of **16.24%** of turnover vs **10.97%** for large providers (10,000+ homes)
+- IT is a subset of overheads -- typically estimated at **2-5% of turnover** for housing associations
+- For a 2,500-home HA at average rent of ~GBP 5,500/year = GBP 13.75M turnover, IT spend at 3% = **~GBP 412,000/year** (all IT, not just HMS)
+- HMS licence alone represents roughly **8-20% of total IT spend**
+
+### Key Intelligence
+
+- **70% of housing associations** are increasing AI utilisation (Connect In Cloud 2026 survey)
+- **79%** are consolidating platforms
+- **39%** cite data security as primary concern
+- Repair and maintenance costs rose 20% to GBP 7.7B across the sector
+- English Rural HA (small provider) reported headline cost per unit of GBP 3,813 and is actively reviewing its housing management technology platform
+- **No publicly available case studies** were found of small HAs (under 5,000 homes) switching HMS with published cost data -- vendors do not publish this. Zoonou has a case study with Southern Housing but details are not public.
+
+---
+
+## Summary: Total Certification & Quality Costs for a Small UK Tech Startup
+
+| Item | Year 1 Cost (GBP) | Annual Ongoing (GBP) |
+|------|-------------------|---------------------|
+| ISO 27001 (with consultant) | 15,000 - 25,000 | 2,500 - 5,000 |
+| ISO 9001 (with consultant) | 7,000 - 15,000 | 1,200 - 2,500 |
+| Cyber Essentials Plus | 1,820 + VAT | 1,820 + VAT |
+| Full independent testing (once) | 24,500 - 48,000 | -- |
+| Ongoing regression testing | -- | 24,000 - 60,000 |
+| **TOTAL** | **48,320 - 89,820** | **29,520 - 69,320** |
+
+Sources:
+- [Anthropic Claude API Pricing (Official)](https://platform.claude.com/docs/en/about-claude/pricing)
+- [Software Testing Cost 2025 - Global App Testing](https://www.globalapptesting.com/blog/software-testing-cost)
+- [Software Testing Cost UK - London App Development](https://londonappdevelopment.co.uk/blog/software-testing-cost)
+- [Top 10 UK Testing Companies - The London Economic](https://www.thelondoneconomic.REDACTED)
+- [Zoonou Services](https://zoonou.com/our-services/)
+- [Pen Testing Price List UK 2025 - SecForce](https://www.secforce.com/the-blog/pen-testing-price-list-uk-and-eu-guide-2025/)
+- [Penetration Testing Cost UK - Intruder](https://www.intruder.io/blog/how-much-does-penetration-testing-cost)
+- [Penetration Testing UK from GBP 2,500 - Precursor Security](https://www.precursorsecurity.com/services/offensive-security/penetration-testing)
+- [WCAG 2.2 Audit Cost UK - GuardianScan](https://guardianscan.ai/blog/accessibility-audit-economics-uk-agencies)
+- [WCAG Audit Cost Guide - DigitalA11Y](https://www.digitala11y.com/how-much-does-a-web-accessibility-audit-cost/)
+- [ISO 27001 Cost UK 2026 - Vorago Security](https://www.voragosecurity.com/blog-posts/iso-27001-certification-cost-uk)
+- [ISO 27001 Cost 2026 - High Table](https://hightable.io/iso-27001-certification-cost/)
+- [ISO 27001 Cost - Sprinto](https://sprinto.com/blog/iso-27001-certification-cost/)
+- [ISO 9001 Cost UK 2026 - Clausewise](https://clausewise.co.uk/blog/iso-9001-certification-cost-uk/)
+- [ISO 9001 Cost UK 2026 - RKMS](https://www.rkmsuk.co.uk/iso-consultancy/how-much-does-iso-9001-cost/)
+- [Cyber Essentials Cost UK 2026 - Paul Reynolds](https://paulreynolds.uk/cyber-essentials-certification-cost/)
+- [Cyber Essentials - NCSC](https://www.ncsc.gov.uk/cyberessentials/overview)
+- [Cyber Essentials Plus from GBP 450 - Forensic Control](https://forensiccontrol.com/cyber-essentials/)
+- [NEC Housing - G-Cloud Digital Marketplace](https://www.applytosupply.digitalmarketplace.service.gov.uk/g-cloud/services/916522570514486)
+- [MRI Housing Enterprise - G-Cloud Digital Marketplace](https://www.applytosupply.digitalmarketplace.service.gov.uk/g-cloud/services/899769864757652)
+- [Civica Cx Housing - G-Cloud Digital Marketplace](https://www.applytosupply.digitalmarketplace.service.gov.uk/g-cloud/services/257446994756649)
+- [RSH Value for Money Metrics 2024 - GOV.UK](https://www.gov.uk/government/publications/value-for-money-metrics-and-reporting-2024)
+- [UK Housing Association Technology Trends - Connect In Cloud](https://www.connectincloud.co.uk/uk-housing-association-technology/)
+- [Housing Association IT Benchmarking - Housing Technology](https://www.housing-technology.com/benchmarking-services/)
+- [NHF Sector Scorecard](https://www.housing.org.uk/resources/sector-scorecard/)
+- [Best UK Social Housing Software - Landlord Vision](https://www.landlordvision.co.uk/blog/best-uk-social-housing-management-software/)
+- [Digivante Pricing](https://www.digivante.com/pricing/)</result>
+<usage><total_tokens>51663</total_tokens><tool_uses>66</tool_uses><duration_ms>390060</duration_ms></usage>
+</task-notification>
+Full transcript available at: REDACTED.output
+
+---
+
+<task-notification>
+<task-id>a282ed7d6c7a7a041</task-id>
+<tool-use-id>REDACTED</tool-use-id>
+<output-file>REDACTED.output</output-file>
+<status>completed</status>
+<summary>Agent "Research small HA HMS costs" completed</summary>
+<result>I now have enough data to compile a comprehensive research report. Let me organize all findings.
+
+---
+
+## HMS Costs for Small UK Housing Associations (1,000-3,000 homes) -- Research Findings
+
+### 1. RSH Cost Per Unit Data by Provider Size (2024-2025)
+
+The RSH Value for Money metrics provide the most authoritative data on what small housing associations actually spend:
+
+**Headline cost per unit by provider size (2024 VFM report):**
+- **1,000-2,499 homes: £5,768/unit** (above sector median)
+- **2,500-4,999 homes: £5,601/unit**
+- **5,000-9,999 homes: £5,093/unit**
+- **10,000-24,999 homes: £4,365/unit** (lowest band)
+- **Sector median: £5,136/unit**
+
+**2025 VFM report cost components (sector-wide weighted average):**
+- Management costs: **£1,390/unit** (up 9% year-on-year)
+- Maintenance & major repairs: £3,420/unit
+- Service charges: £920/unit
+- Other costs: £560/unit
+- **Total: £5,690/unit median**
+
+Small providers (1,000-2,499 units) pay materially more per unit than larger ones. This is a well-documented diseconomy of scale.
+
+Sources: [RSH VFM Metrics 2024](https://www.gov.uk/government/publications/value-for-money-metrics-and-reporting-2024), [RSH VFM Metrics 2025](https://www.gov.uk/government/publications/value-for-money-metrics-and-reporting-2025)
+
+---
+
+### 2. IT Costs as a Component of Management Costs
+
+The RSH does not separately report IT costs. However, from the NHF Sector Scorecard and Housemark data:
+
+- **Overheads (which include IT, HR, finance, office premises, corporate services)** for small providers (<1,000 units) = **16.24% of costs** vs 10.97% for providers >10,000 units
+- Housemark notes that **"expenditure on information technology is climbing"** as landlords invest in systems integration, data quality, real-time reporting, and digital channel shift
+- General cross-industry benchmarks put IT spend at **2-4% of revenue** for enterprises, and **6-8% for SMEs**
+
+**Estimated IT cost per unit for a 2,500-home HA:**
+- Management cost/unit = £1,390
+- IT is typically estimated at **15-25% of management costs** in housing (covering HMS, infrastructure, support, telephony, cybersecurity)
+- This gives an estimated IT spend of approximately **£210-£350 per unit per year**
+- For 2,500 homes: **£525k-£875k total annual IT budget**
+- The HMS itself would be a subset of this, typically the single largest software line item
+
+Source: [NHF Sector Scorecard 2020](https://www.housing.org.uk/globalassets/files/sector-scorecard/nhf-sector-scorecard-analysis-report-2020.pdf), [Housemark benchmarking](https://hexagon.org.uk/residents/value-for-money/housemark-data/)
+
+---
+
+### 3. Actual HMS Pricing Data from G-Cloud Digital Marketplace
+
+These are publicly listed prices on the UK Government's Digital Marketplace:
+
+| System | Vendor | Pricing Model | Listed Price |
+|--------|--------|---------------|-------------|
+| **ActiveH** | MIS/Aareon | Per unit/year | **£24/unit/year** |
+| **HomeMaster** | Designer Software/Aareon | Per unit/year (SaaS, by modules + units) | **£18,000-£120,000/year total** |
+| **PyramidG2** | OmniLedger | Per concurrent user/month | **£125/user/month** |
+| **Civica Cx** | Civica | Per licence/month | **£5,527/licence/month** |
+| **MRI Housing Enterprise** | MRI Software | Per licence/year | **£78,814/licence/year** |
+| **Pyramid Essentials** (cloud, small providers) | OmniLedger | Subscription | **From £99/month (max 3 users)** |
+
+**Interpretation for a 2,500-home HA:**
+- **ActiveH at £24/unit/year** = £60,000/year for 2,500 units
+- **HomeMaster** = £18k-£120k/year range depending on modules (designed for providers up to 2,500 units)
+- **PyramidG2 at £125/user/month** with ~15-20 concurrent users = £22,500-£30,000/year
+- **PyramidG2 Essentials from £99/month** (entry-level for very small providers, max 3 users)
+
+Sources: [ActiveH - Digital Marketplace](https://www.applytosupply.digitalmarketplace.service.gov.uk/g-cloud/services/738605197571906), [HomeMaster - Digital Marketplace](https://www.applytosupply.digitalmarketplace.service.gov.uk/g-cloud/services/568570456893119), [PyramidG2 - Digital Marketplace](https://www.applytosupply.digitalmarketplace.service.gov.uk/g-cloud/services/674216984766645)
+
+---
+
+### 4. Case Studies of Small HAs Selecting/Switching HMS
+
+**Loreburn Housing Association (2,750 homes, Dumfries & Galloway)**
+- Switched to **HomeMaster** from 5 separate systems
+- Contract signed November 2020, live July 2021 (6 months -- vs typical 12-18 months)
+- Achieved **£250,000 in cost savings**: £50k/year from eliminated licensing, £50k from reduced staffing, £50k from office expenses, £100k from avoided development costs
+- HomeMaster was "the most cost-effective of all the housing management systems considered"
+- Zero implementation fees was a major factor
+
+Source: [Aareon Loreburn case study](https://www.aareon.co.uk/case-studies/loreburn-ha), [Housing Technology](https://www.housing-technology.com/loreburn-housings-new-homemaster-hms/)
+
+**ISHA - Islington and Shoreditch Housing Association (2,500 homes, London)**
+- Active procurement (2023 tender) for new HMS + FMS
+- Seeking licence for 75 users and circa 2,500 properties
+- Tender on Find a Tender service -- contract value not publicly disclosed
+
+Source: [Find a Tender](https://www.find-tender.service.gov.uk/Notice/010862-2023)
+
+**Small providers using OmniLedger Pyramid Essentials:**
+- Lyng Community Housing, Holland Rise & Whitebeam Close TMO, Hull United Charities, Quo Vadis, Inspire Wellbeing
+- These are very small providers (often <500 units) using the budget cloud offering from £99/month
+
+Source: [Housing Technology](https://www.housing-technology.com/omniledgers-pyramid-hms-moves-to-the-cloud/)
+
+**English Rural Housing Association (small rural HA)**
+- Headline cost per unit: £3,813 (well below sector median due to rural, general needs housing)
+- Currently reviewing housing management technology platform to target cost savings
+
+Source: [English Rural VFM Report 2024](https://englishrural.org.REDACTED.pdf)
+
+---
+
+### 5. Bury Council Aareon QL -- A Comparison Point
+
+Bury Council's QL upgrade provides a useful large-provider benchmark:
+- **£1.2M over 3 years** for QL upgrade (split across professional services + annual subscription)
+- A completely **new HMS would cost £6M-£9M** (Aareon estimate) or £12M (independent consultant estimate)
+- This is for a council managing significantly more homes than a small HA
+
+Source: [Bury Council decision document](https://councildecisions.bury.gov.uk/documents/s48537/Housing%20IT%20and%20Systems%20QL%20improvements%20and%20upgrade.pdf)
+
+---
+
+### 6. HomeMaster / Designer Software -- The Small HA Champion
+
+HomeMaster (now acquired by Aareon, April 2025) is explicitly positioned for the small-HA market:
+- **Designed for providers managing up to 2,500 units**
+- 55+ community housing provider customers (110+ when including Housing Online alliance)
+- SaaS pricing based on modules + number of managed units
+- **Zero implementation fees** -- a major differentiator vs traditional HMS vendors
+- No upfront capital expenditure
+- Customer example: Cathcart and District HA (1,200 units)
+
+Source: [HomeMaster website](https://homemaster.co.uk/), [Intelligent SME Tech](https://www.intelligentsme.tech/2023/11/14/homemaster-saas-helps-streamline-admin-at-housing-associations/)
+
+---
+
+### 7. OmniLedger PyramidG2 -- Budget HMS for Smaller Providers
+
+- Trusted by 180+ social landlords nationwide
+- **Pyramid Essentials / Essentials Plus** specifically designed for smaller providers
+- Cloud-hosted from **£99/month** (max 3 concurrent users) -- the entry point
+- Full PyramidG2 at **£125/concurrent user/month** on G-Cloud
+- Concurrent user licensing means you only pay for simultaneous logins
+- Quarterly subscription model
+- 5-year standard contract term
+
+Source: [OmniLedger](https://omniledger.co.uk/), [PyramidG2 Digital Marketplace](https://www.applytosupply.digitalmarketplace.service.gov.uk/g-cloud/services/674216984766645)
+
+---
+
+### 8. Realistic Annual HMS Cost for a 2,500-Home HA
+
+Based on all the data gathered, here is the estimated annual HMS cost range:
+
+| Tier | Annual HMS Cost | Examples |
+|------|----------------|----------|
+| **Budget/basic** | £20k-£40k/year | OmniLedger Pyramid Essentials (small team), basic modules |
+| **Mid-range SaaS** | £40k-£80k/year | HomeMaster (full suite), PyramidG2 (10-15 users), ActiveH |
+| **Full enterprise** | £80k-£150k/year | Civica Cx, MRI Housing Enterprise, Aareon QL |
+| **Large provider / full stack** | £150k-£400k/year | Aareon QL (with all modules), NEC Housing |
+
+**For a 2,500-home HA, the realistic range is £40k-£100k/year** for the HMS software itself (SaaS subscription), with:
+- £60k/year being a reasonable mid-point estimate
+- This equates to approximately **£24-£40 per unit per year** for the HMS alone
+- Total IT budget (including infrastructure, support, telephony, cyber) would be **£400k-£700k/year**
+- The HMS represents roughly **10-15% of total IT budget**
+
+---
+
+### 9. IT Budget Per Unit Benchmark
+
+While Housemark's detailed IT benchmarking data is behind a paywall, the best estimates are:
+
+- **Total management cost per unit: £1,390** (RSH 2025)
+- **Overheads (IT + HR + finance + corporate): ~16% of total costs** for small HAs (NHF Sector Scorecard)
+- For a 2,500-home HA with ~£14M turnover, total overhead ~£2.24M
+- IT likely represents **30-40% of overheads** = approximately **£670k-£896k total IT budget**
+- This gives **~£270-£360 per unit per year for all IT**
+- The HMS software line item within this is typically **£24-£48 per unit per year**
+
+---
+
+### 10. Key Takeaway for SocialHomes.Ai Pricing
+
+The previous research finding of £375k-£1.2M/year was for large councils and providers (10,000+ homes). For the small-HA segment (1,000-3,000 homes):
+
+- Current HMS spend is typically **£40k-£100k/year**
+- Small HAs are price-sensitive and attracted to zero-implementation-fee SaaS models
+- HomeMaster's success proves there is strong demand for affordable, cloud-native HMS at the small-HA tier
+- The **£24/unit/year (ActiveH)** to **£48/unit/year** range is the competitive pricing band
+- **A disruptive AI-native platform priced at £15-£30/unit/year could significantly undercut incumbents** while still generating £37.5k-£75k/year from a 2,500-home customer
+
+Sources:
+- [RSH VFM 2024](https://www.gov.uk/government/publications/value-for-money-metrics-and-reporting-2024)
+- [RSH VFM 2025](https://www.gov.uk/government/publications/value-for-money-metrics-and-reporting-2025)
+- [HomeMaster - Digital Marketplace](https://www.applytosupply.digitalmarketplace.service.gov.uk/g-cloud/services/568570456893119)
+- [ActiveH - Digital Marketplace](https://www.applytosupply.digitalmarketplace.service.gov.uk/g-cloud/services/738605197571906)
+- [PyramidG2 - Digital Marketplace](https://www.applytosupply.digitalmarketplace.service.gov.uk/g-cloud/services/674216984766645)
+- [MRI Housing Enterprise - Digital Marketplace](https://www.applytosupply.digitalmarketplace.service.gov.uk/g-cloud/services/899769864757652)
+- [Loreburn/HomeMaster case study](https://www.housing-technology.com/loreburn-housings-new-homemaster-hms/)
+- [Aareon Loreburn case study](https://www.aareon.co.uk/case-studies/loreburn-ha)
+- [OmniLedger Pyramid cloud](https://www.housing-technology.com/omniledgers-pyramid-hms-moves-to-the-cloud/)
+- [ISHA HMS tender](https://www.find-tender.service.gov.uk/Notice/010862-2023)
+- [NHF Sector Scorecard 2020](https://www.housing.org.uk/globalassets/files/sector-scorecard/nhf-sector-scorecard-analysis-report-2020.pdf)
+- [Housemark £880M efficiency report](https://housingdigital.co.uk/sector-could-save-880m-with-improved-efficiency-says-housemark/)
+- [Bury Council QL upgrade](https://councildecisions.bury.gov.uk/documents/s48537/Housing%20IT%20and%20Systems%20QL%20improvements%20and%20upgrade.pdf)
+- [Hexagon Housemark data](https://hexagon.org.uk/residents/value-for-money/housemark-data/)</result>
+<usage><total_tokens>72514</total_tokens><tool_uses>114</tool_uses><duration_ms>859048</duration_ms></usage>
+</task-notification>
+Full transcript available at: REDACTED.output
+
+---
+
+is this your honest assessment? . "Approximately 15-20% of the production scope is complete; the remaining 80% requires experienced human engineers to build multi-tenancy, real CRUD operations, workflow state machines, data migration tooling, and production security hardening" I thought it was about 20% for humans to do, do you know why the current agentic structure though mission control cant do CRUD, workflow state etc - in my view only testing, security and general code reviews are needed to be done by humans but you are the expart so please do a complete assessment and come up with what is really possible against what we need to do for the product - plan, do a complete detailed review of the product, research whats prossibel via agents and GCP and update the document
+
+---
+
+[Request interrupted by user for tool use]
+
+---
+
+is this your honest assessment? . "Approximately 15-20% of the production scope is complete; the remaining 80% requires experienced human engineers to build multi-tenancy, real CRUD operations, workflow state machines, data migration tooling, and production security hardening" I thought it was about 20% for humans to do, do you know why the current agentic structure though mission control cant do CRUD, workflow state etc - in my view only testing, security and general code reviews are needed to be done by humans but you are the expart so please do a complete assessment and come up with what is really possible against what we need to do for the product - plan, do a complete detailed review of the product, research whats prossibel via agents and GCP and update the document
+
+---
+
+[Request interrupted by user]
+
+---
+
+idea is to go for the 10,000 - 30,000 homes market in year 3 once we have established baseline product with smaller HAs- mid size is where the money is; also by year 5 we should see significant return on investment - 6.5m after 10 years is way too low for any invester to have an interest. by year 10 we should be looking at customers with over 50k homes
+
+---
+
+continue with what you were doing but i wanted you to also address growth projections; 6.5m afterv 10 hyears isnt atractove for any invester- we should be going for orgs over 10000 after year 3 once we estrablish the core product with smaller HAs; the real oney is with providers in the mid market by year 7 we should have G15 ery large providers and by year 10 we will be servicing the entire market; this needs to be more ambitions
+
+---
+
+I think we want to reach a 100m valuation in year 6 so please try to refactor; the chart labels are still overlapping see attached ; ai engne can be various but at the moment claude code and vertex but we will switch accoding to need and advances in the future; did we mention pulling publically available data and then using it with companies own data : another area to delvelope is easy self import feature where the orgs can self service the implimentation phase which is a big cost usually. we need to build that and a way to have easy on demand instances of the application, database for each company to keep barriers to entry easy- this should be a big feature as i dont think any company does this comppletely hands off - self service on importing / migrating; another gap we are missing is taking payments by connecting to a payment provider along with tenant portal widgets which orgs can pluginto their own portals , and other tenant self service widgets for the wevsites something for year 2/3?, also a way to take customer feedback to accomplish the legally required TSMs which should also be on the tenant record and feed the tsm reports - also we need to pull as much publically available inofrmation for properties eg some building/property certificates are accessable online; we should be aiming for 40% gross margin from year 4
+
+---
+
+[Image: source: /mnt/c/Users/Rajiv/Downloads/Picture2.png]
+
+[Image: source: /mnt/c/Users/Rajiv/Downloads/Picture1.png]
+
+---
+
+everything okay?
+
+---
+
+can you carry on you unfinished task of creating a new updated business plan doc
+
+---
+
+[Request interrupted by user]
+
+---
+
+you plan was to create a new version of '/mnt/c/.netapps/socialhomes/docs/SocialHomesAi-Investment-Business-Plan-v3-2026.docx' with the following  1. £100M valuation by Year 6 (need ~£12.5M ARR at 8x)
+  2. Fix all overlapping chart labels
+  3. AI engine = flexible (Claude + Vertex currently, future-proof)
+  4. Self-service import/migration — massive differentiator, no HMS vendor does this
+  5. On-demand instances — one-click provisioning per org (GCP + Firestore per-tenant)
+  6. Payment provider integration (Stripe/GoCardless for rent collection)
+  7. Embeddable tenant portal widgets for org websites
+  8. TSM feedback collection built into tenant journey → feeds reports
+  9. Public property data auto-pull (EPC, gas safety, certificates)
+  10. 40% gross margin from Year 4
+  11. CTO throughout (including minimum budget)
+  12. Public data enrichment as core platform capability
+
+---
+
+can you see if there is a different library that will let you do that
+
+---
+
+the exec summary is missing a key thing - what is different about this product when compared to established products from a business point of view, why should businesses want to buy this, why would it be successful, how would this help the UK housing and its residents, - in a non techy speak - imagine if we also provide the same doc to innovate UK why should they offer a grant- whats the social and original innovation
+
+---
+
+[Request interrupted by user]
+
+---
+
+hello?
+
+---
+
+the exec summary is missing a key thing - what is different about this product when compared to established products from a business point of view, why should businesses want to buy this, why would it be successful, how would this help the UK housing and its residents, - in a non techy speak - imagine if we also provide the same doc to innovate UK why should they offer a grant- whats the social and original innovation
+
+---
+
+[Request interrupted by user]
+
+---
+
+go ahead and do it but it looks like you are stuck
+
+---
+
+[Request interrupted by user]
+
+---
+
+forget the images, more importantantly the sales forcast for the first two years while we develop the product is unachieveable, check the more realistic projection attached and make the nessessary changes to make it viable including not haveing a CTO, just the founder for the first year and maybe dialing back a bit on the resource side but make it realiscic and pragmatic
+
+---
+
+[Image: source: /mnt/c/Users/Rajiv/Downloads/Screenshot 2026-03-18 002508.png]
+
+---
+
+exec summary still done not say WHY THIS PRODUCT? Whats different? the projected sales still say the same thing- we WILL NOT MAKE ANY SALE in the first two years! maybe max 1 or 2. ; also its way too long and borning, you need to bring the jucy bits to the first two pages because investers are not going to read 33 pages, appendix is fine
+
+---
+
+can you update so that the founder has a minimum income of 70k / year , also you need to take into account taxes for all UK employees and also vat for offshore
+
+---
+
+[Request interrupted by user]
+
+---
+
+also we need at least 1 on sales person from year 2 and we need 15k for grant funding applications per year
+
+---
+
+[Request interrupted by user]
+
+---
+
+actually the 95k you put in is fine we dont need an architect this can go to the Founder who will also be the cto, in year 1.
+
+---
+
+this looks way better'/mnt/c/.netapps/socialhomes/docs/SocialHomesAi-Investment-Business-Plan-v4b-2026.pdf'<< ive made some changes. can you do a two page brochure version of this that i could hand out to investers, i think the main things on there should be a quick why, poyential markt compition, 10 year p&L, retuns, comparison with other software valuations and whatever you think would be good. I also noticed that a lot of graphs the bottom is too trimmed so cant see the y axis labels
+
+---
+
+okay now you know what has been done and what hasnt, can you start making a plan on the rest of the work in the business plan
+
+---
+
+CAN YOU CARRY ON
+
+---
+
+Once you are done for the next stage i want you do do very deep research on compliance for our processes in line with legislation including leglisation that is planned to arrive by 2027, all of this also need to be beautifully visualised and user friendly
+
+---
+
+I dont want you to lose all the context we have built, so please do something clever to savbe all of this in persistant memory in an efficient way
+
+---
+
+yes please execute in that order - you dont have to ask me at each stage, continue untill all of it is done and tested
+
+---
+
+no carry on
+
+---
+
+<task-notification>
+<task-id>bsdbdr7nh</task-id>
+<tool-use-id>REDACTED</tool-use-id>
+<output-file>REDACTED.output</output-file>
+<status>completed</status>
+<summary>Background command "Manual Cloud Build deploy" completed (exit code 0)</summary>
+</task-notification>
+Read the output file to retrieve the result: REDACTED.output
+
+---
+
+<task-notification>
+<task-id>bz733ibxa</task-id>
+<tool-use-id>toolu_01QpmqGtV1TAFddJowArALEs</tool-use-id>
+<output-file>REDACTED.output</output-file>
+<status>completed</status>
+<summary>Background command "Retry Cloud Build with proper substitutions" completed (exit code 0)</summary>
+</task-notification>
+Read the output file to retrieve the result: REDACTED.output
+
+---
+
+<task-notification>
+<task-id>b0v8t1gby</task-id>
+<tool-use-id>toolu_01A2TzC5J2ZMBkuQJchHhB2i</tool-use-id>
+<output-file>REDACTED.output</output-file>
+<status>completed</status>
+<summary>Background command "Deploy from correct directory" completed (exit code 0)</summary>
+</task-notification>
+Read the output file to retrieve the result: REDACTED.output
+
+---
+
+<task-notification>
+<task-id>bub0j5w7h</task-id>
+<tool-use-id>REDACTED</tool-use-id>
+<output-file>REDACTED.output</output-file>
+<status>completed</status>
+<summary>Background command "Deploy with explicit registry substitution" completed (exit code 0)</summary>
+</task-notification>
+Read the output file to retrieve the result: REDACTED.output
+
+---
+
+<task-notification>
+<task-id>bqsikt31d</task-id>
+<tool-use-id>toolu_01LfBdSfe1STzGx3xJfLjYXa</tool-use-id>
+<output-file>REDACTED.output</output-file>
+<status>completed</status>
+<summary>Background command "Direct deploy to Cloud Run from source" completed (exit code 0)</summary>
+</task-notification>
+Read the output file to retrieve the result: REDACTED.output
+
+---
+
+<task-notification>
+<task-id>bl97g43lq</task-id>
+<tool-use-id>REDACTED</tool-use-id>
+<output-file>REDACTED.output</output-file>
+<status>completed</status>
+<summary>Background command "Build Docker image locally" completed (exit code 0)</summary>
+</task-notification>
+Read the output file to retrieve the result: REDACTED.output
+
+---
+
+<task-notification>
+<task-id>bx0hnt5lc</task-id>
+<tool-use-id>toolu_0132LsrVLHowUBb2Sd5Qb3cb</tool-use-id>
+<output-file>REDACTED.output</output-file>
+<status>completed</status>
+<summary>Background command "Docker build with verbose output" completed (exit code 0)</summary>
+</task-notification>
+Read the output file to retrieve the result: REDACTED.output
+
+---
+
+<task-notification>
+<task-id>bztrppgl7</task-id>
+<tool-use-id>REDACTED</tool-use-id>
+<output-file>REDACTED.output</output-file>
+<status>completed</status>
+<summary>Background command "Deploy to Cloud Run from source" completed (exit code 0)</summary>
+</task-notification>
+Read the output file to retrieve the result: REDACTED.output
+
+---
+
+<task-notification>
+<task-id>bd5vx51h2</task-id>
+<tool-use-id>toolu_01VmWLGru8G5bjeier3RggF8</tool-use-id>
+<output-file>REDACTED.output</output-file>
+<status>completed</status>
+<summary>Background command "Fix Dockerfile and push" completed (exit code 0)</summary>
+</task-notification>
+Read the output file to retrieve the result: REDACTED.output
+
+---
+
+<task-notification>
+<task-id>bv0a3o344</task-id>
+<tool-use-id>REDACTED</tool-use-id>
+<output-file>REDACTED.output</output-file>
+<status>completed</status>
+<summary>Background command "Deploy with fixed Dockerfile" completed (exit code 0)</summary>
+</task-notification>
+Read the output file to retrieve the result: REDACTED.output
+
+---
+
+[Request interrupted by user]
+
+---
+
+Minified React error #310; visit https://react.dev/errors/310 for the full message or use the non-minified dev environment for full errors and additional helpful warnings.
+Error: Minified React error #310; visit https://react.dev/errors/310 for the full message or use the non-minified dev environment for full errors and additional helpful warnings.
+    at nn (https://socialhomes.ai/assets/index-ZavlXcwe.js:9:49545)
+    at Object.jv [as useCallback] (https://socialhomes.ai/assets/index-ZavlXcwe.js:9:56983)
+    at We.useCallback (https://socialhomes.ai/assets/index-ZavlXcwe.js:2:8537)
+    at T_ (https://socialhomes.ai/assets/index-ZavlXcwe.js:175:4341)
+    at Xo (https://socialhomes.ai/assets/index-ZavlXcwe.js:9:48267)
+    at Rg (https://socialhomes.ai/assets/index-ZavlXcwe.js:9:71087)
+    at Bg (https://socialhomes.ai/assets/index-ZavlXcwe.js:9:81448)
+    at Zg (https://socialhomes.ai/assets/index-ZavlXcwe.js:9:117259)
+    at Gv (https://socialhomes.ai/assets/index-ZavlXcwe.js:9:116303)
+    at ap (https://socialhomes.ai/assets/index-ZavlXcwe.js:9:116133)
+Minified React error #310; visit https://react.dev/errors/310 for the full message or use the non-minified dev environment for full errors and additional helpful warnings.
+Error: Minified React error #310; visit https://react.dev/errors/310 for the full message or use the non-minified dev environment for full errors and additional helpful warnings.
+    at nn (https://socialhomes.ai/assets/index-ZavlXcwe.js:9:49545)
+    at Object.jv [as useCallback] (https://socialhomes.ai/assets/index-ZavlXcwe.js:9:56983)
+    at We.useCallback (https://socialhomes.ai/assets/index-ZavlXcwe.js:2:8537)
+    at T_ (https://socialhomes.ai/assets/index-ZavlXcwe.js:175:4341)
+    at Xo (https://socialhomes.ai/assets/index-ZavlXcwe.js:9:48267)
+    at Rg (https://socialhomes.ai/assets/index-ZavlXcwe.js:9:71087)
+    at Bg (https://socialhomes.ai/assets/index-ZavlXcwe.js:9:81448)
+    at Zg (https://socialhomes.ai/assets/index-ZavlXcwe.js:9:117259)
+    at Gv (https://socialhomes.ai/assets/index-ZavlXcwe.js:9:116303)
+    at ap (https://socialhomes.ai/assets/index-ZavlXcwe.js:9:116133) still errros
+it could be because the build didnt complete see attached 
+Typecheck & Lint: app/src/components/layout/YantraAssist.tsx#L165
+React Hook "useCallback" is called conditionally. React Hooks must be called in the exact same order in every component render. Did you accidentally call a React Hook after an early return?
+Typecheck & Lint: app/src/components/layout/YantraAssist.tsx#L84
+Unexpected any. Specify a different type
+Typecheck & Lint: app/src/components/layout/YantraAssist.tsx#L57
+'scopedTenants' is assigned a value but never used
+Typecheck & Lint: app/src/components/layout/YantraAssist.tsx#L9
+'properties' is defined but never used
+Typecheck & Lint: app/src/components/layout/YantraAssist.tsx#L7
+'Share2' is defined but never used
+Typecheck & Lint: app/src/components/layout/Sidebar.tsx#L6
+'Sparkles' is defined but never used
+Typecheck & Lint: app/src/components/layout/Layout.tsx#L18
+'Shield' is defined but never used
+Typecheck & Lint: app/src/components/layout/Layout.tsx#L18
+'Map' is defined but never used
+Typecheck & Lint: app/src/components/layout/Layout.tsx#L18
+'BarChart3' is defined but never used
+Typecheck & Lint: app/src/components/layout/Breadcrumbs.tsx#L64
+'state' is assigned a value but never used
+Build
+Process completed with exit code 2.
+Build
+Cannot find module '@fullcalendar/core' or its corresponding type declarations.
+Build
+Cannot find module '@fullcalendar/interaction' or its corresponding type declarations.
+Build
+Cannot find module '@fullcalendar/timegrid' or its corresponding type declarations.
+Build
+Cannot find module '@fullcalendar/daygrid' or its corresponding type declarations.
+Build
+Cannot find module '@fullcalendar/react' or its corresponding type declarations.
+Build
+'ReactNode' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+Typecheck & Lint
+Node.js 20 actions are deprecated. The following actions are running on Node.js 20 and may not work as expected: actions/checkout@v4, actions/setup-node@v4. Actions will be forced to run with Node.js 24 by default starting June 2nd, 2026. Please check if updated versions of these actions are available that support Node.js 24. To opt into Node.js 24 now, set the FORCE_JAVASCRIPT_ACTIONS_TO_NODE24=true environment variable on the runner or in your workflow file. Once Node.js 24 becomes the default, you can temporarily opt out by setting ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+Typecheck & Lint
+React Hook useMemo has missing dependencies: 'config.officerName', 'config.showAllData', and 'config.teamMembers'. Either include them or remove the dependency array
+Typecheck & Lint
+React Hook useMemo has missing dependencies: 'config.officerName' and 'config.showAllData'. Either include them or remove the dependency array
+Typecheck & Lint
+React Hook useMemo has a missing dependency: 'config.showAllData'. Either include it or remove the dependency array
+Typecheck & Lint
+React Hook useMemo has missing dependencies: 'config.officerName', 'config.showAllData', and 'config.teamMembers'. Either include them or remove the dependency array
+Typecheck & Lint
+React Hook useMemo has a missing dependency: 'complaint'. Either include it or remove the dependency array
+Typecheck & Lint
+React Hook useMemo has a missing dependency: 'repair'. Either include it or remove the dependency array
+Typecheck & Lint
+React Hook useMemo has a missing dependency: 'property'. Either include it or remove the dependency array
+Typecheck & Lint
+React Hook useMemo has missing dependencies: 'tenant' and 'tenantCases'. Either include them or remove the dependency array
+Typecheck & Lint
+React Hook useEffect has a missing dependency: 'currentStatus'. Either include it or remove the dependency array
+Typecheck & Lint: app/src/components/layout/Layout.tsx#L43
+React Hook useEffect has missing dependencies: 'dispatch' and 'state.sidebarCollapsed'. Either include them or remove the dependency array
+Unit Tests
+Node.js 20 actions are deprecated. The following actions are running on Node.js 20 and may not work as expected: actions/checkout@v4, actions/setup-node@v4, actions/upload-artifact@v4. Actions will be forced to run with Node.js 24 by default starting June 2nd, 2026. Please check if updated versions of these actions are available that support Node.js 24. To opt into Node.js 24 now, set the FORCE_JAVASCRIPT_ACTIONS_TO_NODE24=true environment variable on the runner or in your workflow file. Once Node.js 24 becomes the default, you can temporarily opt out by setting ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+Build
+Node.js 20 actions are deprecated. The following actions are running on Node.js 20 and may not work as expected: actions/checkout@v4, actions/setup-node@v4. Actions will be forced to run with Node.js 24 by default starting June 2nd, 2026. Please check if updated versions of these actions are available that support Node.js 24. To opt into Node.js 24 now, set the FORCE_JAVASCRIPT_ACTIONS_TO_NODE24=true environment variable on the runner or in your workflow file. Once Node.js 24 becomes the default, you can temporarily opt out by setting ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+
+---
+
+[Image: source: /mnt/c/Users/Rajiv/Downloads/Screenshot 2026-03-20 134348.png]
+
+---
+
+lots of erros again, please check github 
+fix: React #310 error — YantraAssist useCallback after conditional re…
+CI #14: Commit 5f9c290 pushed by rajivpeter
+main    
+4 minutes ago
+ 2m 12s
+fix: Dockerfile tsconfig.json path — was copying to nested server/ser…
+CI #13: Commit c21424e pushed by rajivpeter
+main    
+Today at 12:18 PM
+ 1m 12s
+feat: Phase 4 — Multi-tenancy foundation with org-scoped Firestore
+CI #12: Commit d5dce19 pushed by rajivpeter
+main    
+Today at 11:59 AM
+ 1m 20s
+feat: Phase 3 — Claude AI integration + FullCalendar dependency
+CI #11: Commit 2ccdf0d pushed by rajivpeter
+main    
+Today at 11:44 AM
+ 1m 26s
+feat: Workflow progress visualisation — stepper, swim lanes, complain…
+CI #10: Commit bed3682 pushed by rajivpeter
+main    
+Today at 11:28 AM
+ 1m 18s
+feat: Phase 1 complete — CRUD modals for ASB, Tenants, Properties, Ad…
+CI #9: Commit e926d36 pushed by rajivpeter
+main    
+Today at 10:15 AM
+ 2m 11s
+Agent QA Tester completed
+CI #8: Commit 471da8f pushed by rajivpeter
+main    
+Mar 5, 10:40 AM GMT
+ 2m 10s
+Agent Cyber Security completed
+CI #7: Commit 587485e pushed by rajivpeter
+main    
+Feb 28, 3:15 PM GMT
+ 1m 59s
+Agent Fullstack Developer completed
+CI #6: Commit 425986b pushed by rajivpeter
+main    
+Feb 28, 3:04 PM GMT
+ 2m 21s
+Agent Frontend Developer completed
+CI #5: Commit 32fb1d2 pushed by rajivpeter
+main    
+Feb 28, 3:03 PM GMT
+ 1m 6s
+Agent DevOps Engineer completed
+CI #4: Commit acccc94 pushed by rajivpeter
+main    
+Feb 28, 3:00 PM GMT
+ 2m 14s
+Agent DevOps Engineer completed
+CI #3: Commit 98faf95 pushed by rajivpeter
+main    
+Feb 28, 12:11 AM GMT
+ 2m 6s
+Agent Cyber Security completed
+CI #2: Commit e7b8145 pushed by rajivpeter
+main    
+Feb 27, 8:40 PM GMT
+ 2m 0s
+Agent QA Tester completed
+CI #1: Commit ff8b8ad pushed by rajivpeter
+main    
+Feb 27, 8:30 PM GMT
+ 2m 1s
+https://github.com/rajivpeter/SocialHomes_ai/actions

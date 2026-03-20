@@ -1,0 +1,27 @@
+{
+  "cli_version": "0.4.4",
+  "checkpoint_id": "3804d5de8f1f",
+  "strategy": "manual-commit",
+  "branch": "main",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "server/src/routes/properties.ts",
+    "server/src/services/firestore.ts"
+  ],
+  "sessions": [
+    {
+      "metadata": "/38/04d5de8f1f/0/metadata.json",
+      "transcript": "/38/04d5de8f1f/0/full.jsonl",
+      "context": "/38/04d5de8f1f/0/context.md",
+      "content_hash": "/38/04d5de8f1f/0/content_hash.txt",
+      "prompt": "/38/04d5de8f1f/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 20,
+    "cache_creation_tokens": 17455,
+    "cache_read_tokens": 7781692,
+    "output_tokens": 3603,
+    "api_call_count": 18
+  }
+}
