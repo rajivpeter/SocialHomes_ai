@@ -1,0 +1,47 @@
+{
+  "cli_version": "0.4.4",
+  "checkpoint_id": "0bf6977773f1",
+  "strategy": "manual-commit",
+  "branch": "main",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "Dockerfile",
+    "SESSION-HISTORY.md",
+    "app/src/components/shared/ActionModal.tsx",
+    "app/src/components/shared/Complaint2StageTracker.tsx",
+    "app/src/components/shared/SwimLaneBoard.tsx",
+    "app/src/components/shared/WorkflowProgress.tsx",
+    "app/src/pages/admin/DataImportPage.tsx",
+    "app/src/pages/admin/SchedulingPage.tsx",
+    "app/src/pages/asb/AsbDetailPage.tsx",
+    "app/src/pages/complaints/ComplaintDetailPage.tsx",
+    "app/src/pages/repairs/RepairDetailPage.tsx",
+    "app/src/pages/repairs/RepairsPage.tsx",
+    "app/src/pages/repairs/ReportRepairWizard.tsx",
+    "docs/SocialHomesAi-Business-Plan-2026.md",
+    "docs/generate-business-plan-v4.py",
+    "docs/generate-business-plan.py",
+    "docs/generate-infographic-charts.py",
+    "docs/generate-investor-brochure.py",
+    "server/.env.example",
+    "server/src/routes/import.ts",
+    "server/src/routes/scheduling.ts",
+    "server/src/services/claude-ai.ts"
+  ],
+  "sessions": [
+    {
+      "metadata": "/0b/f6977773f1/0/metadata.json",
+      "transcript": "/0b/f6977773f1/0/full.jsonl",
+      "context": "/0b/f6977773f1/0/context.md",
+      "content_hash": "/0b/f6977773f1/0/content_hash.txt",
+      "prompt": "/0b/f6977773f1/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 84,
+    "cache_creation_tokens": 45700,
+    "cache_read_tokens": 30105711,
+    "output_tokens": 22506,
+    "api_call_count": 78
+  }
+}
