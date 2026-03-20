@@ -27,6 +27,7 @@ const ViewingBookingPage = lazy(() => import('@/pages/properties/ViewingBookingP
 const ApplicationPage = lazy(() => import('@/pages/properties/ApplicationPage'));
 const RepairsPage = lazy(() => import('@/pages/repairs/RepairsPage'));
 const RepairDetailPage = lazy(() => import('@/pages/repairs/RepairDetailPage'));
+const ReportRepairWizard = lazy(() => import('@/pages/repairs/ReportRepairWizard'));
 const RentPage = lazy(() => import('@/pages/rent/RentPage'));
 const CompliancePage = lazy(() => import('@/pages/compliance/CompliancePage'));
 const ComplianceTypePage = lazy(() => import('@/pages/compliance/ComplianceTypePage'));
@@ -47,6 +48,7 @@ const UserManagementPage = lazy(() => import('@/pages/admin/UserManagementPage')
 const WorkflowBuilderPage = lazy(() => import('@/pages/admin/WorkflowBuilderPage'));
 const NotificationPreferencesPage = lazy(() => import('@/pages/admin/NotificationPreferencesPage'));
 const GdprDashboardPage = lazy(() => import('@/pages/admin/GdprDashboardPage'));
+const SchedulingPage = lazy(() => import('@/pages/admin/SchedulingPage'));
 const TenantPortalPage = lazy(() => import('@/pages/tenant-portal/TenantPortalPage'));
 
 // Suspense wrapper for lazy-loaded routes
@@ -122,7 +124,8 @@ export default function App() {
             <Route path="/properties/:id/book-viewing" element={<SuspenseWrapper><ViewingBookingPage /></SuspenseWrapper>} />
             <Route path="/properties/:id/apply" element={<SuspenseWrapper><ApplicationPage /></SuspenseWrapper>} />
             <Route path="/repairs" element={<SuspenseWrapper><RepairsPage /></SuspenseWrapper>} />
-            <Route path="/repairs/new" element={<SuspenseWrapper><RepairsPage /></SuspenseWrapper>} />
+            <Route path="/repairs/new" element={<SuspenseWrapper><ReportRepairWizard /></SuspenseWrapper>} />
+            <Route path="/repairs/report" element={<SuspenseWrapper><ReportRepairWizard /></SuspenseWrapper>} />
             <Route path="/repairs/schedule" element={<SuspenseWrapper><RepairsPage /></SuspenseWrapper>} />
             <Route path="/repairs/:id" element={<SuspenseWrapper><RepairDetailPage /></SuspenseWrapper>} />
             <Route path="/rent" element={<SuspenseWrapper><RentPage /></SuspenseWrapper>} />
@@ -157,6 +160,7 @@ export default function App() {
             <Route path="/admin/integrations" element={<SuspenseWrapper><IntegrationsPage /></SuspenseWrapper>} />
             <Route path="/admin/notifications" element={<SuspenseWrapper><NotificationPreferencesPage /></SuspenseWrapper>} />
             <Route path="/admin/gdpr" element={<SuspenseWrapper><GdprDashboardPage /></SuspenseWrapper>} />
+            <Route path="/admin/scheduling" element={<SuspenseWrapper><SchedulingPage /></SuspenseWrapper>} />
             <Route path="/admin/audit" element={<SuspenseWrapper><AdminPage /></SuspenseWrapper>} />
             <Route path="/admin/system" element={<SuspenseWrapper><AdminPage /></SuspenseWrapper>} />
           </Route>

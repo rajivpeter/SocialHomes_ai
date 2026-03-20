@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Search, Filter, List, LayoutGrid } from 'lucide-react';
+import { Search, Filter, List, LayoutGrid, Plus } from 'lucide-react';
 import { useRepairs, useProperties } from '@/hooks/useApi';
 import StatusPill from '@/components/shared/StatusPill';
 import { formatDate } from '@/utils/format';
@@ -68,6 +68,13 @@ export default function RepairsPage() {
           <div className="flex items-center justify-between mb-1">
             <h1 className="text-3xl font-bold font-heading text-gradient-brand tracking-tight">Repairs</h1>
             <div className="flex items-center gap-2">
+              <button
+                onClick={() => navigate('/repairs/report')}
+                className="px-4 py-2 bg-brand-teal text-white rounded-lg hover:bg-brand-teal/80 transition-colors flex items-center gap-2 text-sm font-medium"
+              >
+                <Plus size={16} />
+                Report Repair
+              </button>
               <button
                 onClick={() => setViewMode('list')}
                 className={`p-2 rounded-lg transition-colors ${

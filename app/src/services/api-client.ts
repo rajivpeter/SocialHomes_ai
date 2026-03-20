@@ -310,6 +310,27 @@ export const bookingApi = {
     request<any>(`/booking/applications/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
 };
 
+// ---- Scheduling ----
+export const schedulingApi = {
+  operatives: (filters?: Record<string, string | undefined>) =>
+    request<{ items: any[]; total: number }>(`/scheduling/operatives${buildQueryString(filters || {})}`),
+  operative: (id: string) => request<any>(`/scheduling/operatives/${id}`),
+  slots: (params: { date: string; trade?: string; operativeId?: string }) =>
+    request<any[]>(`/scheduling/slots${buildQueryString(params)}`),
+  appointments: (filters?: Record<string, string | undefined>) =>
+    request<{ items: any[]; total: number }>(`/scheduling/appointments${buildQueryString(filters || {})}`),
+  createAppointment: (data: any) =>
+    request<any>('/scheduling/appointments', { method: 'POST', body: JSON.stringify(data) }),
+  updateAppointment: (id: string, data: any) =>
+    request<any>(`/scheduling/appointments/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+  diary: (params: { operativeId: string; weekStart: string }) =>
+    request<any>(`/scheduling/diary${buildQueryString(params)}`),
+  createDiaryBlock: (data: any) =>
+    request<any>('/scheduling/diary-blocks', { method: 'POST', body: JSON.stringify(data) }),
+  deleteDiaryBlock: (id: string) =>
+    request<any>(`/scheduling/diary-blocks/${id}`, { method: 'DELETE' }),
+};
+
 // ---- Export ----
 export const exportApi = {
   hactProperty: (id: string) => request<any>(`/export/hact/property/${id}`),
