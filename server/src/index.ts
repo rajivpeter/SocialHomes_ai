@@ -69,7 +69,7 @@ app.use((_req, res, next) => {
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
   res.setHeader('Cross-Origin-Opener-Policy', 'same-origin');
-  res.setHeader('Cross-Origin-Resource-Policy', 'same-origin');
+  res.setHeader('Cross-Origin-Resource-Policy', 'same-site');
   next();
 });
 
@@ -83,7 +83,10 @@ app.use((req, _res, next) => {
 const allowedOrigins = [
   'http://localhost:5173',   // Vite dev server
   'http://localhost:8080',   // Local server
-  'https://socialhomes-674258130066.europe-west2.run.app',
+  'https://socialhomes.ai',  // Custom domain
+  'https://www.socialhomes.ai', // www variant
+  'https://socialhomes-674258130066.europe-west2.run.app', // Cloud Run direct
+  'https://socialhomes-s5rbm6bk2q-nw.a.run.app',  // Cloud Run alt URL
 ];
 
 app.use(cors({
