@@ -43,7 +43,7 @@ steps:
 
   # ── Step 2: Run server smoke test inside built image ──
   # Starts the server, verifies /health endpoint returns expected JSON
-  - name: '${_REGISTRY}:$COMMIT_SHA'
+  - name: '${_REGISTRY}:latest'
     id: test
     entrypoint: 'sh'
     args:
