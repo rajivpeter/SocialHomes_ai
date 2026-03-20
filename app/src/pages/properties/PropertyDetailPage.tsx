@@ -2,10 +2,12 @@ import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useProperties, useTenants, useCases } from '@/hooks/useApi';
 import AiActionCard from '@/components/shared/AiActionCard';
+import ActionModal from '@/components/shared/ActionModal';
 import StatusPill from '@/components/shared/StatusPill';
 import DampIntelligencePanel from '@/components/shared/DampIntelligencePanel';
 import { formatCurrency, formatDate, safeText } from '@/utils/format';
 import { usePropertyIntelligence } from '@/hooks/useEntityIntelligence';
+import { propertiesApi, casesApi } from '@/services/api-client';
 import {
   Home,
   MapPin,
@@ -21,13 +23,16 @@ import {
   Clock,
   Gauge,
   Eye,
-  ClipboardList
+  ClipboardList,
+  Edit,
+  Plus
 } from 'lucide-react';
 import PropertyMap from '@/components/shared/PropertyMap';
 
 export default function PropertyDetailPage() {
   const { id } = useParams<{ id: string }>();
   const [activeTab, setActiveTab] = useState<'overview' | 'compliance' | 'stock-condition' | 'damp-mould' | 'works-history' | 'documents'>('overview');
+  const [activeModal, setActiveModal] = useState<string | null>(null);
 
   const { data: properties = [] } = useProperties();
   const { data: tenants = [] } = useTenants();
@@ -121,7 +126,23 @@ export default function PropertyDetailPage() {
                 <span>{property.bedrooms} bedroom{property.bedrooms !== 1 ? 's' : ''}</span>
               </div>
             </div>
-            <StatusPill status={property.isVoid ? 'void' : 'occupied'} size="md" />
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setActiveModal('edit-property')}
+                className="flex items-center gap-2 px-4 py-2 bg-brand-teal text-white rounded-lg hover:bg-brand-teal/90 transition-colors text-sm font-medium"
+              >
+                <Edit size={16} />
+                Edit Property
+              </button>
+              <button
+                onClick={() => setActiveModal('report-issue')}
+                className="flex items-center gap-2 px-4 py-2 bg-surface-elevated text-text-primary rounded-lg hover:bg-surface-hover transition-colors text-sm font-medium border border-border-default"
+              >
+                <Plus size={16} />
+                Report Issue
+              </button>
+              <StatusPill status={property.isVoid ? 'void' : 'occupied'} size="md" />
+            </div>
           </div>
         </div>
 
@@ -526,6 +547,61 @@ export default function PropertyDetailPage() {
           </div>
         )}
       </div>
+
+      {/* Edit Property Modal */}
+      <ActionModal
+        open={activeModal === 'edit-property'}
+        onClose={() => setActiveModal(null)}
+        title="Edit Property"
+        description="Update property details"
+        icon={<Edit size={20} className="text-brand-teal" />}
+        fields={[
+          { id: 'propertyType', label: 'Property Type', type: 'select', defaultValue: property.type || '', options: [
+            { value: 'house', label: 'House' },
+            { value: 'flat', label: 'Flat' },
+            { value: 'maisonette', label: 'Maisonette' },
+            { value: 'bungalow', label: 'Bungalow' },
+          ] },
+          { id: 'bedrooms', label: 'Bedrooms', type: 'text', defaultValue: String(property.bedrooms ?? '') },
+          { id: 'isVoid', label: 'Void Status', type: 'select', defaultValue: property.isVoid ? 'yes' : 'no', options: [
+            { value: 'yes', label: 'Yes' },
+            { value: 'no', label: 'No' },
+          ] },
+          { id: 'notes', label: 'Notes', type: 'textarea', placeholder: 'Additional notes...' },
+        ]}
+        submitLabel="Save Changes"
+        onSubmit={async (values) => {
+          await propertiesApi.update(property.id, values);
+        }}
+      />
+
+      {/* Report Issue Modal */}
+      <ActionModal
+        open={activeModal === 'report-issue'}
+        onClose={() => setActiveModal(null)}
+        title="Report Issue"
+        description="Report a new issue for this property"
+        icon={<AlertTriangle size={20} className="text-status-warning" />}
+        variant="warning"
+        fields={[
+          { id: 'issueType', label: 'Issue Type', type: 'select', required: true, options: [
+            { value: 'repair', label: 'Repair' },
+            { value: 'damp', label: 'Damp' },
+            { value: 'compliance', label: 'Compliance' },
+            { value: 'safety', label: 'Safety' },
+          ] },
+          { id: 'priority', label: 'Priority', type: 'select', required: true, options: [
+            { value: 'emergency', label: 'Emergency' },
+            { value: 'urgent', label: 'Urgent' },
+            { value: 'routine', label: 'Routine' },
+          ] },
+          { id: 'description', label: 'Description', type: 'textarea', placeholder: 'Describe the issue...', required: true },
+        ]}
+        submitLabel="Report Issue"
+        onSubmit={async (v) => {
+          await casesApi.create({ propertyId: property.id, type: v.issueType, priority: v.priority, description: v.description });
+        }}
+      />
     </div>
   );
 }

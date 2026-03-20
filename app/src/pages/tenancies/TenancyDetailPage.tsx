@@ -3,21 +3,25 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import {
   Phone, Mail, MapPin, User, Calendar, AlertTriangle,
   FileText, Activity, Receipt, Scale, Clock, Home,
-  MessageSquare, Wrench, AlertCircle, DollarSign, Droplets
+  MessageSquare, Wrench, AlertCircle, DollarSign, Droplets,
+  UserCheck, Edit, Plus
 } from 'lucide-react';
 import { useTenantIntelligence } from '@/hooks/useEntityIntelligence';
 import { generateCommunicationDraft } from '@/services/ai-drafting';
 import { useTenants, useProperties, useCases } from '@/hooks/useApi';
 import { activities as activitiesData, rentTransactionsSample } from '@/data';
 import AiActionCard from '@/components/shared/AiActionCard';
+import ActionModal from '@/components/shared/ActionModal';
 import StatusPill from '@/components/shared/StatusPill';
 import VulnerabilityPanel from '@/components/shared/VulnerabilityPanel';
 import BenefitsPanel from '@/components/shared/BenefitsPanel';
 import { formatCurrency, formatDate, getCaseTypeColour, safeText } from '@/utils/format';
+import { casesApi, tenantsApi } from '@/services/api-client';
 
 export default function TenancyDetailPage() {
   const { id } = useParams<{ id: string }>();
   const [activeTab, setActiveTab] = useState<'overview' | 'cases' | 'activities' | 'statement' | 'orders'>('overview');
+  const [activeModal, setActiveModal] = useState<string | null>(null);
   const navigate = useNavigate();
 
   const { data: tenants = [] } = useTenants();
@@ -172,6 +176,22 @@ export default function TenancyDetailPage() {
                   <span>Officer: {tenant.assignedOfficer}</span>
                 </div>
               </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setActiveModal('edit-tenant')}
+                className="flex items-center gap-2 px-4 py-2 bg-brand-teal text-white rounded-lg hover:bg-brand-teal/90 transition-colors text-sm font-medium"
+              >
+                <Edit size={16} />
+                Edit Tenant
+              </button>
+              <button
+                onClick={() => setActiveModal('log-activity')}
+                className="flex items-center gap-2 px-4 py-2 bg-surface-elevated text-text-primary rounded-lg hover:bg-surface-hover transition-colors text-sm font-medium border border-border-default"
+              >
+                <Plus size={16} />
+                Log Activity
+              </button>
             </div>
           </div>
         </div>
@@ -585,6 +605,57 @@ export default function TenancyDetailPage() {
           </div>
         </div>
       </div>
+
+      {/* Edit Tenant Modal */}
+      <ActionModal
+        open={activeModal === 'edit-tenant'}
+        onClose={() => setActiveModal(null)}
+        title="Edit Tenant"
+        description="Update tenant contact details and status"
+        icon={<UserCheck size={20} className="text-brand-teal" />}
+        fields={[
+          { id: 'phone', label: 'Phone', type: 'text', placeholder: 'Phone number', defaultValue: tenant.phone || '' },
+          { id: 'email', label: 'Email', type: 'text', placeholder: 'Email address', defaultValue: tenant.email || '' },
+          { id: 'ucStatus', label: 'UC Status', type: 'select', options: [
+            { value: 'claiming', label: 'Claiming' },
+            { value: 'not-claiming', label: 'Not Claiming' },
+            { value: 'transitioning', label: 'Transitioning' },
+          ], defaultValue: tenant.ucStatus || '' },
+          { id: 'vulnerabilityFlag', label: 'Vulnerability Flag', type: 'select', options: [
+            { value: 'none', label: 'None' },
+            { value: 'low', label: 'Low' },
+            { value: 'medium', label: 'Medium' },
+            { value: 'high', label: 'High' },
+          ] },
+          { id: 'notes', label: 'Notes', type: 'textarea', placeholder: 'Additional notes...' },
+        ]}
+        submitLabel="Save Changes"
+        onSubmit={async (values) => {
+          await tenantsApi.update(tenant.id, values);
+        }}
+      />
+
+      {/* Log Activity Modal */}
+      <ActionModal
+        open={activeModal === 'log-activity'}
+        onClose={() => setActiveModal(null)}
+        title="Log Activity"
+        description="Record a new activity for this tenant"
+        icon={<Plus size={20} className="text-brand-teal" />}
+        fields={[
+          { id: 'type', label: 'Type', type: 'select', required: true, options: [
+            { value: 'phone-call', label: 'Phone Call' },
+            { value: 'home-visit', label: 'Home Visit' },
+            { value: 'letter', label: 'Letter' },
+            { value: 'email', label: 'Email' },
+          ] },
+          { id: 'notes', label: 'Notes', type: 'textarea', placeholder: 'Describe the activity...', required: true },
+        ]}
+        submitLabel="Log Activity"
+        onSubmit={async (values) => {
+          await casesApi.create({ tenantId: tenant.id, type: 'activity', ...values });
+        }}
+      />
     </div>
   );
 }

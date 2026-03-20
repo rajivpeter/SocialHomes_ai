@@ -1,9 +1,12 @@
+import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { AlertTriangle, FileText, CheckCircle, Clock, X } from 'lucide-react';
+import { AlertTriangle, FileText, CheckCircle, Clock, X, UserCheck, Edit, TrendingUp, XCircle } from 'lucide-react';
 import { allAsbCases as asbCases } from '@/data';
 import { useTenants, useProperties } from '@/hooks/useApi';
 import AiActionCard from '@/components/shared/AiActionCard';
+import ActionModal from '@/components/shared/ActionModal';
 import { formatDate } from '@/utils/format';
+import { casesApi } from '@/services/api-client';
 import type { AsbEscalationStage } from '@/types';
 
 // Escalation pipeline stages
@@ -44,6 +47,7 @@ export default function AsbDetailPage() {
   };
   
   const case_ = asbCases.find((c: any) => c.id === id);
+  const [activeModal, setActiveModal] = useState<string | null>(null);
 
   if (!case_) {
     return (
@@ -72,6 +76,38 @@ export default function AsbDetailPage() {
   ];
 
   return (
+    <>
+    <ActionModal open={activeModal === 'assign'} onClose={() => setActiveModal(null)} title="Assign ASB Case" description={`Assign ${case_.reference}`} icon={<UserCheck size={20} className="text-brand-teal" />} fields={[
+      { id: 'handler', label: 'Assign To', type: 'select', required: true, options: [
+        { value: 'sarah-mitchell', label: 'Sarah Mitchell — Housing Officer' },
+        { value: 'priya-patel', label: 'Priya Patel — Manager' },
+        { value: 'james-wright', label: 'James Wright — Head of Housing' },
+      ]},
+      { id: 'notes', label: 'Notes', type: 'textarea', placeholder: 'Assignment notes...' },
+    ]} submitLabel="Assign" onSubmit={async (v) => { await casesApi.update(case_.id, { handler: v.handler, assignmentNotes: v.notes }); }} />
+    <ActionModal open={activeModal === 'update'} onClose={() => setActiveModal(null)} title="Update ASB Case" description={`Update ${case_.reference}`} icon={<Edit size={20} className="text-brand-blue" />} fields={[
+      { id: 'status', label: 'Status', type: 'select', defaultValue: case_.status, options: [
+        { value: 'open', label: 'Open' },
+        { value: 'investigation', label: 'Investigation' },
+        { value: 'action-taken', label: 'Action Taken' },
+        { value: 'monitoring', label: 'Monitoring' },
+      ]},
+      { id: 'escalationStage', label: 'Escalation Stage', type: 'select', defaultValue: case_.escalationStage, options: escalationStages.map(s => ({ value: s, label: escalationStageLabels[s] })) },
+      { id: 'notes', label: 'Update Notes', type: 'textarea', placeholder: 'Describe the update...' },
+    ]} submitLabel="Save" onSubmit={async (v) => { await casesApi.update(case_.id, { status: v.status, escalationStage: v.escalationStage, updateNotes: v.notes }); }} />
+    <ActionModal open={activeModal === 'escalate'} onClose={() => setActiveModal(null)} title="Escalate ASB Case" description={`Escalate ${case_.reference} to next stage`} icon={<TrendingUp size={20} className="text-status-warning" />} variant="warning" fields={[
+      { id: 'reason', label: 'Escalation Reason', type: 'textarea', required: true, placeholder: 'Why is this being escalated?' },
+      { id: 'nextStage', label: 'Escalate To', type: 'select', required: true, options: escalationStages.filter((_, i) => i > currentStageIndex).map(s => ({ value: s, label: escalationStageLabels[s] })) },
+    ]} submitLabel="Escalate" onSubmit={async (v) => { await casesApi.update(case_.id, { escalationStage: v.nextStage, escalationReason: v.reason, status: 'action-taken' }); }} />
+    <ActionModal open={activeModal === 'close'} onClose={() => setActiveModal(null)} title="Close ASB Case" description={`Close ${case_.reference}`} icon={<CheckCircle size={20} className="text-status-compliant" />} variant="success" fields={[
+      { id: 'outcome', label: 'Outcome', type: 'select', required: true, options: [
+        { value: 'resolved', label: 'Resolved' },
+        { value: 'no-further-action', label: 'No Further Action' },
+        { value: 'legal-proceedings', label: 'Referred to Legal' },
+        { value: 'transferred', label: 'Transferred' },
+      ]},
+      { id: 'notes', label: 'Closing Notes', type: 'textarea', placeholder: 'Describe the outcome...' },
+    ]} submitLabel="Close Case" onSubmit={async (v) => { await casesApi.update(case_.id, { status: 'closed', outcome: v.outcome, closingNotes: v.notes }); }} />
     <div className="space-y-6">
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
@@ -83,6 +119,12 @@ export default function AsbDetailPage() {
           </div>
           <h1 className="text-3xl font-bold font-heading text-gradient-brand tracking-tight mb-1">{case_.reference}</h1>
           <p className="text-text-muted">{case_.subject}</p>
+          <div className="flex gap-2 mt-3">
+            <button onClick={() => setActiveModal('assign')} className="px-3 py-1.5 text-sm bg-brand-teal text-white rounded-lg hover:bg-brand-teal/80 flex items-center gap-1"><UserCheck size={14} /> Assign</button>
+            <button onClick={() => setActiveModal('update')} className="px-3 py-1.5 text-sm bg-brand-blue text-white rounded-lg hover:bg-brand-blue/80 flex items-center gap-1"><Edit size={14} /> Update</button>
+            <button onClick={() => setActiveModal('escalate')} className="px-3 py-1.5 text-sm bg-status-warning text-white rounded-lg hover:bg-status-warning/80 flex items-center gap-1"><TrendingUp size={14} /> Escalate</button>
+            <button onClick={() => setActiveModal('close')} className="px-3 py-1.5 text-sm bg-status-compliant text-white rounded-lg hover:bg-status-compliant/80 flex items-center gap-1"><CheckCircle size={14} /> Close</button>
+          </div>
         </div>
 
         {/* Case Details */}
@@ -251,5 +293,6 @@ export default function AsbDetailPage() {
         </div>
       </div>
     </div>
+    </>
   );
 }
