@@ -1,0 +1,38 @@
+{
+  "cli_version": "0.4.4",
+  "checkpoint_id": "02b3b2c4e456",
+  "session_id": "248fc533-92b5-44dd-8a07-2d5da933cf2e",
+  "strategy": "manual-commit",
+  "created_at": "2026-03-21T18:03:37.910401135Z",
+  "branch": "main",
+  "checkpoints_count": 3,
+  "files_touched": [
+    "SESSION-HISTORY.md",
+    "app/src/pages/repairs/ReportRepairWizard.tsx",
+    "app/src/services/api-client.ts",
+    "app/src/utils/format.ts",
+    "server/src/routes/ai.ts",
+    "server/src/services/vertex-ai.ts"
+  ],
+  "agent": "Claude Code",
+  "transcript_identifier_at_start": "bd338cc0-eb20-4fb9-a17d-9bd497e441dd",
+  "checkpoint_transcript_start": 2920,
+  "transcript_lines_at_start": 2920,
+  "token_usage": {
+    "input_tokens": 88,
+    "cache_creation_tokens": 294834,
+    "cache_read_tokens": 10557831,
+    "output_tokens": 46822,
+    "api_call_count": 76
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-03-21T18:03:22.682581276Z",
+    "agent_lines": 1292,
+    "human_added": 0,
+    "human_modified": 0,
+    "human_removed": 1667,
+    "total_committed": 1292,
+    "agent_percentage": 100
+  },
+  "transcript_path": ".claude/projects/-mnt-c--netapps-socialhomes/248fc533-92b5-44dd-8a07-2d5da933cf2e.jsonl"
+}

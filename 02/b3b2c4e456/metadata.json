@@ -1,0 +1,31 @@
+{
+  "cli_version": "0.4.4",
+  "checkpoint_id": "02b3b2c4e456",
+  "strategy": "manual-commit",
+  "branch": "main",
+  "checkpoints_count": 3,
+  "files_touched": [
+    "SESSION-HISTORY.md",
+    "app/src/pages/repairs/ReportRepairWizard.tsx",
+    "app/src/services/api-client.ts",
+    "app/src/utils/format.ts",
+    "server/src/routes/ai.ts",
+    "server/src/services/vertex-ai.ts"
+  ],
+  "sessions": [
+    {
+      "metadata": "/02/b3b2c4e456/0/metadata.json",
+      "transcript": "/02/b3b2c4e456/0/full.jsonl",
+      "context": "/02/b3b2c4e456/0/context.md",
+      "content_hash": "/02/b3b2c4e456/0/content_hash.txt",
+      "prompt": "/02/b3b2c4e456/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 88,
+    "cache_creation_tokens": 294834,
+    "cache_read_tokens": 10557831,
+    "output_tokens": 46822,
+    "api_call_count": 76
+  }
+}
