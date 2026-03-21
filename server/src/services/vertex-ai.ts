@@ -388,6 +388,140 @@ function generateFallbackResponse(query: string, context: ConversationContext): 
   return `I'm Yantra Assist, your AI housing management assistant. I can help with:\n\n- **Arrears & Rent** — Analyse payment patterns and identify at-risk tenants\n- **Repairs & Maintenance** — Track SLAs, identify recurring issues\n- **Damp & Mould** — Predictive risk scoring (Awaab's Law compliant)\n- **Complaints** — Housing Ombudsman Code compliance tracking\n- **Compliance** — Big 6 certificate monitoring\n- **Vulnerability** — Automatic tenant welfare scoring\n- **Benefits** — Entitlement checking and UC status\n\nWhat would you like to know more about?`;
 }
 
+// ---- Repair Photo Analysis (Gemini Vision) ----
+
+/**
+ * Analyse a repair photo using Gemini Vision on Vertex AI.
+ * Keeps image data within GCP (no third-party API call).
+ * Falls back to a safe default when Vertex AI is unavailable.
+ */
+export async function analyseRepairPhotoVertex(imageBase64: string, mimeType?: string): Promise<{
+  suggestedCategory: string;
+  suggestedPriority: string;
+  possibleIssues: string[];
+  description: string;
+  confidence: number;
+}> {
+  const fallback = {
+    suggestedCategory: 'general-repair',
+    suggestedPriority: 'routine',
+    possibleIssues: ['Unable to analyse — manual inspection required'],
+    description: 'Photo analysis unavailable. Please describe the issue manually.',
+    confidence: 0,
+  };
+
+  // Detect media type from base64 header if not provided
+  let mediaType = mimeType || 'image/jpeg';
+  if (!mimeType) {
+    if (imageBase64.startsWith('iVBOR')) mediaType = 'image/png';
+    else if (imageBase64.startsWith('R0lG')) mediaType = 'image/gif';
+    else if (imageBase64.startsWith('UklG')) mediaType = 'image/webp';
+  }
+
+  const prompt = `You are a housing repairs analyst. Analyse this photo of a housing repair issue in a UK social housing property.
+
+Respond in JSON format only — no other text:
+{
+  "suggestedCategory": "one of: plumbing, electrical, damp-mould, structural, roofing, heating, windows-doors, flooring, painting, pest-control, general-repair",
+  "suggestedPriority": "one of: emergency, urgent, routine, planned",
+  "possibleIssues": ["list of specific issues visible in the photo"],
+  "description": "Brief professional description of the defect visible",
+  "confidence": 0.0 to 1.0
+}
+
+Priority guidance:
+- emergency: Immediate safety risk (gas, flooding, structural collapse, electrical hazard, no heating)
+- urgent: Significant habitability impact (major leak, broken lock, broken window, mould)
+- routine: Needs fixing but not safety-critical (dripping tap, cracked tile, cosmetic damage)
+- planned: Cosmetic or scheduled maintenance (redecoration, minor wear)
+
+Damp/mould issues should always be at least "urgent" due to Awaab's Law requirements.`;
+
+  if (!AI_ENABLED || !VERTEX_PROJECT) {
+    console.warn('[vertex-ai] Not enabled — returning fallback photo analysis');
+    return fallback;
+  }
+
+  try {
+    const model = 'gemini-2.0-flash';
+    const endpoint = `https://${VERTEX_LOCATION}-aiplatform.googleapis.com/v1/projects/${VERTEX_PROJECT}/locations/${VERTEX_LOCATION}/publishers/google/models/${model}:generateContent`;
+
+    const body = {
+      contents: [{
+        role: 'user',
+        parts: [
+          {
+            inlineData: {
+              mimeType: mediaType,
+              data: imageBase64,
+            },
+          },
+          { text: prompt },
+        ],
+      }],
+      generationConfig: {
+        temperature: 0.3,
+        maxOutputTokens: 1024,
+        topP: 0.8,
+      },
+      safetySettings: [
+        { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_ONLY_HIGH' },
+        { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_ONLY_HIGH' },
+        { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_ONLY_HIGH' },
+        { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_ONLY_HIGH' },
+      ],
+    };
+
+    // Auth — use GCP default credentials (automatic on Cloud Run)
+    const { GoogleAuth } = await import('google-auth-library' as string).catch(() => ({ GoogleAuth: null }));
+    let headers: Record<string, string> = { 'Content-Type': 'application/json' };
+
+    if (GoogleAuth) {
+      try {
+        const auth = new GoogleAuth({ scopes: ['https://www.googleapis.com/auth/cloud-platform'] });
+        const client = await auth.getClient();
+        const tokenResponse = await client.getAccessToken();
+        if (tokenResponse.token) {
+          headers['Authorization'] = `Bearer ${tokenResponse.token}`;
+        }
+      } catch {
+        // On Cloud Run, metadata server provides tokens
+      }
+    }
+
+    const response = await fetch(endpoint, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(body),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('[vertex-ai] Photo analysis API error:', response.status, errorText);
+      return fallback;
+    }
+
+    const result = await response.json() as any;
+    const text = result.candidates?.[0]?.content?.parts?.[0]?.text;
+    if (!text) return fallback;
+
+    // Parse JSON — Gemini may wrap in code fences
+    const raw = text.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim();
+    const parsed = JSON.parse(raw);
+
+    return {
+      suggestedCategory: parsed.suggestedCategory || 'general-repair',
+      suggestedPriority: parsed.suggestedPriority || 'routine',
+      possibleIssues: Array.isArray(parsed.possibleIssues) ? parsed.possibleIssues : [],
+      description: parsed.description || 'Unable to parse description.',
+      confidence: typeof parsed.confidence === 'number' ? parsed.confidence : 0.5,
+    };
+  } catch (err: any) {
+    console.error('[vertex-ai] Photo analysis error:', err.message);
+    return fallback;
+  }
+}
+
 // ---- Streaming (SSE) ----
 
 export async function* streamAiResponse(

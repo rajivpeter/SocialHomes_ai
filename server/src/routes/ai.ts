@@ -4,7 +4,7 @@ import { authMiddleware } from '../middleware/auth.js';
 import type { CaseDoc, TenantDoc, PropertyDoc } from '../models/firestore-schemas.js';
 
 // Phase 5 services
-import { generateAiResponse, streamAiResponse } from '../services/vertex-ai.js';
+import { generateAiResponse, streamAiResponse, analyseRepairPhotoVertex } from '../services/vertex-ai.js';
 import { buildDraftingPrompt, checkLegalCompliance } from '../services/ai-prompts.js';
 import type { CommunicationTone } from '../services/ai-prompts.js';
 
@@ -12,6 +12,7 @@ import type { CommunicationTone } from '../services/ai-prompts.js';
 import {
   generateChatResponse as claudeChat,
   draftCommunication as claudeDraft,
+  analyseRepairPhoto,
 } from '../services/claude-ai.js';
 import { calculateTenantActivityScore, scanAllTenantActivity } from '../services/tenant-activity-scoring.js';
 import { assessAwaabsLawCase, scanAwaabsLawCases } from '../services/awaabs-law.js';
@@ -612,6 +613,34 @@ aiRouter.post('/repair-intake', async (req, res, next) => {
       const recurring = await checkRecurringPatterns(propertyId, analysis.suggestedSorCode);
       analysis.recurringPattern = recurring.isRecurring;
       analysis.recurringDetails = recurring.details;
+    }
+
+    res.json(analysis);
+  } catch (err) {
+    next(err);
+  }
+});
+
+// POST /api/v1/ai/analyse-repair-photo — analyse repair photo using Vertex AI (Gemini Vision)
+// Falls back to Claude Vision if Vertex AI is unavailable
+aiRouter.post('/analyse-repair-photo', async (req, res, next) => {
+  try {
+    const { imageBase64, mimeType } = req.body;
+    if (!imageBase64) return res.status(400).json({ error: 'imageBase64 is required' });
+
+    // Primary: Vertex AI Gemini Vision (keeps data within GCP)
+    const analysis = await analyseRepairPhotoVertex(imageBase64, mimeType);
+
+    // If Vertex returned a zero-confidence fallback, try Claude as backup
+    if (analysis.confidence === 0) {
+      try {
+        const claudeAnalysis = await analyseRepairPhoto(imageBase64);
+        if (claudeAnalysis.confidence > 0) {
+          return res.json(claudeAnalysis);
+        }
+      } catch {
+        // Claude fallback failed too — return Vertex fallback
+      }
     }
 
     res.json(analysis);

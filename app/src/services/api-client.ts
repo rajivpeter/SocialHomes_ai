@@ -211,6 +211,40 @@ export const aiApi = {
   // Differentiator 6: AI Neighbourhood Briefing
   neighbourhoodBriefing: (estateId: string) => request<any>(`/ai/briefing/${estateId}`),
 
+  // AI Repair Intake
+  repairIntake: (description: string, propertyId?: string) =>
+    request<{
+      suggestedSorCode: string;
+      suggestedSorDescription: string;
+      suggestedPriority: string;
+      suggestedTrade: string;
+      isAwaabsLaw: boolean;
+      awaabsLawCategory?: string;
+      asbestosRisk: boolean;
+      recurringPattern: boolean;
+      recurringDetails?: string;
+      estimatedCost: { min: number; max: number };
+      confidence: number;
+      reasoning: string;
+      additionalFlags: string[];
+    }>('/ai/repair-intake', {
+      method: 'POST',
+      body: JSON.stringify({ description, propertyId }),
+    }),
+
+  // AI Repair Photo Analysis
+  analyseRepairPhoto: (imageBase64: string) =>
+    request<{
+      suggestedCategory: string;
+      suggestedPriority: string;
+      possibleIssues: string[];
+      description: string;
+      confidence: number;
+    }>('/ai/analyse-repair-photo', {
+      method: 'POST',
+      body: JSON.stringify({ imageBase64 }),
+    }),
+
   // Mock services
   mockUcVerification: (tenantId: string) => request<any>(`/ai/mock/uc-verification/${tenantId}`),
   mockIotSensors: (propertyId: string) => request<any>(`/ai/mock/iot-sensors/${propertyId}`),
