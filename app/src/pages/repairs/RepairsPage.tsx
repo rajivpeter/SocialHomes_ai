@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Search, Filter, List, LayoutGrid, Plus } from 'lucide-react';
+import { Search, Filter, List, LayoutGrid, Plus, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 import { useRepairs, useProperties } from '@/hooks/useApi';
 import StatusPill from '@/components/shared/StatusPill';
 import { formatDate, daysUntil } from '@/utils/format';
@@ -11,24 +11,49 @@ export default function RepairsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [filterPriority, setFilterPriority] = useState<string>('all');
+  const [sortField, setSortField] = useState<string>('daysOpen');
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
 
   const { data: repairs = [] } = useRepairs();
   const { data: properties = [] } = useProperties();
 
   const filteredRepairs = useMemo(() => {
-    return repairs.filter((repair: any) => {
+    const filtered = repairs.filter((repair: any) => {
       const property = properties.find((p: any) => p.id === repair.propertyId);
-      const matchesSearch = !searchQuery || 
-        repair.reference.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        repair.subject.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        repair.sorCode.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        property?.address.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesSearch = !searchQuery ||
+        repair.reference?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        repair.subject?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        repair.sorCode?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        property?.address?.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesStatus = filterStatus === 'all' || repair.status === filterStatus;
       const matchesPriority = filterPriority === 'all' || repair.priority === filterPriority;
-      
+
       return matchesSearch && matchesStatus && matchesPriority;
     });
-  }, [repairs, properties, searchQuery, filterStatus, filterPriority]);
+    // Sort
+    return filtered.sort((a: any, b: any) => {
+      const aVal = a[sortField] ?? '';
+      const bVal = b[sortField] ?? '';
+      const cmp = typeof aVal === 'number' && typeof bVal === 'number'
+        ? aVal - bVal
+        : String(aVal).localeCompare(String(bVal));
+      return sortDir === 'asc' ? cmp : -cmp;
+    });
+  }, [repairs, properties, searchQuery, filterStatus, filterPriority, sortField, sortDir]);
+
+  const toggleSort = (field: string) => {
+    if (sortField === field) {
+      setSortDir(d => d === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDir('asc');
+    }
+  };
+
+  const SortIcon = ({ field }: { field: string }) => {
+    if (sortField !== field) return <ArrowUpDown size={12} className="text-text-muted/50" />;
+    return sortDir === 'asc' ? <ArrowUp size={12} className="text-brand-teal" /> : <ArrowDown size={12} className="text-brand-teal" />;
+  };
 
   const stats = useMemo(() => {
     const total = repairs.length;
@@ -188,15 +213,15 @@ export default function RepairsPage() {
               <table className="w-full">
                 <thead className="bg-surface-elevated border-b border-border-default">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-text-muted uppercase tracking-wider">Reference</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-text-muted uppercase tracking-wider">Date</th>
+                    <th onClick={() => toggleSort('reference')} className="px-6 py-3 text-left text-xs font-medium text-text-muted uppercase tracking-wider cursor-pointer hover:text-text-primary select-none"><span className="flex items-center gap-1">Reference <SortIcon field="reference" /></span></th>
+                    <th onClick={() => toggleSort('createdDate')} className="px-6 py-3 text-left text-xs font-medium text-text-muted uppercase tracking-wider cursor-pointer hover:text-text-primary select-none"><span className="flex items-center gap-1">Date <SortIcon field="createdDate" /></span></th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-text-muted uppercase tracking-wider">Property</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-text-muted uppercase tracking-wider">SOR</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-text-muted uppercase tracking-wider">Priority</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-text-muted uppercase tracking-wider">Status</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-text-muted uppercase tracking-wider">Operative</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-text-muted uppercase tracking-wider">Target Date</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-text-muted uppercase tracking-wider">Days Elapsed</th>
+                    <th onClick={() => toggleSort('sorCode')} className="px-6 py-3 text-left text-xs font-medium text-text-muted uppercase tracking-wider cursor-pointer hover:text-text-primary select-none"><span className="flex items-center gap-1">SOR <SortIcon field="sorCode" /></span></th>
+                    <th onClick={() => toggleSort('priority')} className="px-6 py-3 text-left text-xs font-medium text-text-muted uppercase tracking-wider cursor-pointer hover:text-text-primary select-none"><span className="flex items-center gap-1">Priority <SortIcon field="priority" /></span></th>
+                    <th onClick={() => toggleSort('status')} className="px-6 py-3 text-left text-xs font-medium text-text-muted uppercase tracking-wider cursor-pointer hover:text-text-primary select-none"><span className="flex items-center gap-1">Status <SortIcon field="status" /></span></th>
+                    <th onClick={() => toggleSort('handler')} className="px-6 py-3 text-left text-xs font-medium text-text-muted uppercase tracking-wider cursor-pointer hover:text-text-primary select-none"><span className="flex items-center gap-1">Operative <SortIcon field="handler" /></span></th>
+                    <th onClick={() => toggleSort('targetDate')} className="px-6 py-3 text-left text-xs font-medium text-text-muted uppercase tracking-wider cursor-pointer hover:text-text-primary select-none"><span className="flex items-center gap-1">Target Date <SortIcon field="targetDate" /></span></th>
+                    <th onClick={() => toggleSort('daysOpen')} className="px-6 py-3 text-left text-xs font-medium text-text-muted uppercase tracking-wider cursor-pointer hover:text-text-primary select-none"><span className="flex items-center gap-1">Days <SortIcon field="daysOpen" /></span></th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border-default">

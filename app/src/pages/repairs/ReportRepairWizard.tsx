@@ -1,5 +1,6 @@
 import { useState, useCallback, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 import { casesApi } from '@/services/api-client';
 import {
   UtensilsCrossed, Bath, Bed, Sofa, DoorOpen, TreePine, Car, Home,
@@ -209,6 +210,7 @@ const INITIAL_FORM: WizardFormData = {
 
 export default function ReportRepairWizard() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState<WizardFormData>(INITIAL_FORM);
   const [submitting, setSubmitting] = useState(false);
@@ -382,6 +384,8 @@ export default function ReportRepairWizard() {
 
       setReferenceNumber(ref);
       setSubmitted(true);
+      queryClient.invalidateQueries({ queryKey: ['repairs'] });
+      queryClient.invalidateQueries({ queryKey: ['cases'] });
     } catch (err: any) {
       setSubmitError(err.message || 'Failed to submit repair. Please try again.');
     } finally {
