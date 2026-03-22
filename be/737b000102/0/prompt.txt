@@ -1,0 +1,271 @@
+Implement the following plan:
+
+# Repair Workflow Overhaul — AI-Native, Professional, Complete
+
+## Context
+
+The repair detail page is a 547-line monolith with a flat layout and disconnected actions. User feedback:
+- Workflow is confusing, "going all over the place"
+- No labour or parts cost tracking
+- No way to properly close a repair (Close button sets `completed`, not `closed`)
+- No linked repairs, linked complaints, or duplicate functionality
+- No AI intelligence in the workflow lifecycle — only at creation
+- "Handler" is unprofessional — should be "Assigned Officer"
+- Should show tenant vulnerability flags and property damp/mould history
+
+## Approach — Single-file rewrite + targeted supporting changes
+
+Rather than decomposing into 9 sub-components (over-engineering for current stage), keep `RepairDetailPage.tsx` as one file with clear internal sections, add a tabbed layout, and make targeted changes to 6 supporting files.
+
+---
+
+## Files to Modify (7 total)
+
+| # | File | Change |
+|---|------|--------|
+| 1 | `app/src/components/shared/ActionModal.tsx` | Add `number` field type for hours/rates/costs |
+| 2 | `app/src/utils/format.ts` | Add `triaged`, `scheduled` status colours |
+| 3 | `app/src/hooks/useEntityIntelligence.ts` | Add `statusSuggestion` to repair intelligence |
+| 4 | `app/src/pages/repairs/RepairDetailPage.tsx` | **Full rewrite** — tabbed layout, smart actions, labour/parts, linked cases, AI banner, sidebar intelligence |
+| 5 | `app/src/pages/complaints/ComplaintDetailPage.tsx` | Add "Link Repairs" action with multi-select modal |
+| 6 | `app/src/components/shared/ActionModal.tsx` | (same as #1) |
+| 7 | `server/src/routes/cases.ts` | Add activity logging on status changes |
+
+No new files needed. No backend route changes needed — Firestore's schemaless nature means new fields (labourLog, partsLog, linkedCases, linkedComplaints) are accepted by the existing PATCH endpoint.
+
+---
+
+## 1. ActionModal — Add `number` field type
+
+**File:** `app/src/components/shared/ActionModal.tsx`
+
+- Add `'number'` to the `ActionField.type` union
+- Add optional `min`, `max`, `step` props to `ActionField`
+- Add `<input type="number">` rendering case with same styling as text inputs
+- Values remain strings in state — `parseFloat()` at submit time
+
+---
+
+## 2. Format Utilities — Add status colours
+
+**File:** `app/src/utils/format.ts`
+
+Add to `getStatusColour` map:
+```
+'triaged' → bg-brand-blue/20 text-brand-blue
+'scheduled' → bg-status-info/20 text-status-info
+```
+
+---
+
+## 3. Intelligence Hook — Status-aware AI suggestions
+
+**File:** `app/src/hooks/useEntityIntelligence.ts`
+
+Add `statusSuggestion: string` to the return of `useRepairIntelligence`:
+
+| Status | AI Suggestion |
+|--------|--------------|
+| open | "AI suggests {priority} priority. Similar repairs ({sorCode}) took avg {X} days." |
+| triaged/assigned | "{operative} has {X}% first-time-fix rate for {trade} repairs." |
+| in-progress (>14d) | "Repair in progress {daysOpen} days. Consider sending tenant a progress update." |
+| in-progress (normal) | "On track. Average completion for {sorCode}: {X} days." |
+| completed | "Ready for close-out. Similar repairs scored {X}/5 satisfaction." |
+| overdue | "SLA breached by {X} days. Recommend immediate escalation." |
+| closed | "Case closed. {firstTimeFix ? 'First-time fix achieved.' : 'Monitor for recurrence.'}" |
+
+---
+
+## 4. RepairDetailPage — Full Rewrite
+
+**File:** `app/src/pages/repairs/RepairDetailPage.tsx`
+
+### Layout Structure
+
+```
+[AI Warnings bar — if any]
+[Header: ← Back | Reference | Status Pill | Priority Badge]
+[Workflow Stepper — 7 stages with SLA countdown]
+[AI Status Banner — contextual suggestion based on current status]
+[Awaab's Law Timers — if applicable]
+
+┌─────────────────────────────────┐ ┌───────────────────────┐
+│ TABBED CONTENT (65%)            │ │ SIDEBAR (35%)         │
+│                                 │ │                       │
+│ [Details] [Costs] [Linked] [Log]│ │ TENANT                │
+│                                 │ │ - Name (link)         │
+│ Tab content renders here        │ │ - Vulnerability flags  │
+│                                 │ │ - Contact preference   │
+│                                 │ │                       │
+│                                 │ │ PROPERTY              │
+│                                 │ │ - Address (link)      │
+│                                 │ │ - Damp risk score     │
+│                                 │ │ - Prev damp cases     │
+│                                 │ │ - Prev repair count   │
+│                                 │ │                       │
+│                                 │ │ ASSIGNED OFFICER      │
+│                                 │ │ - Name                │
+│                                 │ │ - SOR Code info       │
+└─────────────────────────────────┘ └───────────────────────┘
+
+[Smart Action Bar — primary action + secondary dropdown]
+```
+
+### Tabs
+
+**Details Tab** — Case description, trade, operative, dates, cost summary, recurrence risk. Extracted from current lines 381-473. Rename "Handler" → "Assigned Officer".
+
+**Costs Tab** — NEW
+- Cost summary card at top: Labour £X + Parts £X = Total £X (using `formatCurrency`)
+- Labour log table: Date | Operative | Hours | Rate | Total | Description
+- Parts log table: Date | Part | Qty | Unit Cost | Total | Supplier
+- "Add Labour" and "Add Parts" buttons open ActionModal with number fields
+- On submit: append to `repair.labourLog[]` / `repair.partsLog[]` via `casesApi.update()`
+- Firestore arrays need full replacement — read existing, append, send complete array
+
+**Linked Cases Tab** — NEW
+- List of linked repairs and complaints with: Reference (link) | Type badge | Subject | Status pill | Date
+- Fetched by filtering `repairs`/`complaints` where ID is in `repair.linkedCases` or `repair.linkedComplaints`
+- Three action buttons:
+  - **Create Linked Repair**: `casesApi.create()` with same property/tenant, `parentCaseId: repair.id`, then update current repair's `linkedCases[]`
+  - **Raise Complaint**: `casesApi.create()` with `type: 'complaint'`, same property/tenant, `category: 'Repairs & Maintenance'`, then update current repair's `linkedComplaints[]`
+  - **Duplicate**: `casesApi.create()` copying key fields (subject, description, sorCode, trade, priority, propertyId, tenantId) with fresh dates/status, `duplicatedFrom: repair.id`
+
+**Activity Tab** — Activity feed. Extracted from current lines 492-516. No changes to content.
+
+### Smart Action Bar
+
+Replace flat button row with status-aware primary/secondary actions:
+
+| Current Status | Primary Button | Colour | On Submit |
+|---|---|---|---|
+| open | Triage & Assign | teal | Opens assign modal → status: 'assigned' |
+| assigned | Start Work | blue | Confirmation → status: 'in-progress' |
+| in-progress | Mark Complete | blue | Completion modal → status: 'completed' |
+| completed | Close & Review | green | Close modal (satisfaction, FTF) → status: 'closed' |
+| closed | Reopen | grey | → status: 'open' |
+
+Secondary actions (three-dot dropdown, `ChevronDown` icon):
+- **Update Status** — always except closed
+- **Escalate** — open through in-progress
+- **Log Labour** — assigned or in-progress
+- **Log Parts** — assigned or in-progress
+- **Create Linked Repair** — always
+- **Raise Complaint** — always
+- **Duplicate** — always
+
+### Sidebar — Tenant & Property Intelligence
+
+**Tenant section:**
+- Name linked to `/tenancies/{id}`
+- Vulnerability flags from `tenant.vulnerabilityFlags[]` — render as severity-coloured badges:
+  - high → `bg-status-critical/20 text-status-critical` + pulse
+  - medium → `bg-status-warning/20 text-status-warning`
+  - low → `bg-brand-blue/20 text-brand-blue`
+- Flag types: mental-health, physical-disability, elderly-isolated, substance-misuse, etc.
+
+**Property section:**
+- Address linked to `/properties/{uprn}`
+- Damp risk score from `property.dampRisk` — progress bar with colour coding (0-40 green, 40-70 amber, 70+ red)
+- Previous damp/mould cases: count from filtering cases data where `type === 'damp-mould'` and `propertyId` matches
+- Previous repairs: count from filtering repairs where `propertyId` matches
+
+**Assigned Officer** (replaces "Handler"):
+- `repair.handler` displayed with professional label
+- SOR code + description
+
+### AI Status Banner
+
+New component between workflow stepper and content area. Styled with `border-l-[3px] border-status-ai` (existing AI accent pattern). Shows:
+- Sparkle icon + status-based AI suggestion from `intel.statusSuggestion`
+- Optional action button (e.g., "Draft Update" when overdue, "Send Survey" when completed)
+
+---
+
+## 5. ComplaintDetailPage — Link Multiple Repairs
+
+**File:** `app/src/pages/complaints/ComplaintDetailPage.tsx`
+
+Add a "Link Repairs" button to the action bar. On click, show a modal with:
+- List of repairs for the same property (filtered from `useRepairs()` data)
+- Checkboxes for multi-select
+- On submit: update complaint's `linkedRepairs[]` and each selected repair's `linkedComplaints[]`
+
+This uses a custom inline modal (not ActionModal, since ActionModal doesn't support multi-select lists). Build it directly in the complaint detail page as a simple filtered list with checkboxes.
+
+---
+
+## 6. Activity Logging on Status Changes
+
+**File:** `server/src/routes/cases.ts`
+
+In the PATCH endpoint, after `updateDoc`, if `req.body.status` is present and different from current, create an activity:
+```typescript
+if (req.body.status) {
+  await collections.activities.add({
+    caseId: req.params.id,
+    tenantId: updated.tenantId,
+    type: 'system',
+    subject: `Status changed to ${req.body.status}`,
+    description: `Case ${updated.reference} status updated from ${oldStatus} to ${req.body.status}`,
+    date: new Date().toISOString().split('T')[0],
+    officer: req.user?.displayName || 'System',
+  });
+}
+```
+
+---
+
+## Data Structures (stored on case document via existing PATCH)
+
+```typescript
+// Labour entry
+{ id: string, date: string, operative: string, hours: number, rate: number, description: string }
+
+// Parts entry
+{ id: string, date: string, partName: string, quantity: number, unitCost: number, supplier?: string }
+
+// New fields on repair cases
+labourLog: LabourEntry[]
+partsLog: PartsEntry[]
+totalLabourCost: number      // Calculated: sum(hours * rate)
+totalPartsCost: number       // Calculated: sum(qty * unitCost)
+linkedCases: string[]        // IDs of linked repair cases
+linkedComplaints: string[]   // IDs of linked complaint cases
+parentCaseId: string         // If created from another case
+duplicatedFrom: string       // If duplicated from another case
+```
+
+---
+
+## Verification
+
+1. **Build**: `cd app && npm run build` — zero errors
+2. **TypeScript**: `cd app && npx tsc --noEmit` — zero errors
+3. **Server build**: `cd server && npm run build` — zero errors
+4. **Tests**: `cd server && npx vitest run` — 228/228 passing
+5. **Manual test flow**:
+   - Open a repair → verify tabbed layout, AI banner, sidebar with vulnerability/damp info
+   - Click through workflow: assign → start work → mark complete → close & review
+   - Log labour entry → verify appears in Costs tab with correct totals
+   - Log parts entry → verify appears in Costs tab
+   - Create linked repair → verify new case created with parentCaseId, shows in Linked tab
+   - Raise complaint → verify complaint created, shows in Linked tab
+   - Duplicate → verify copy created with fresh status
+   - From complaint detail page → link multiple repairs
+6. **Deploy**: `git push origin main` triggers Cloud Build
+
+
+If you need specific details from before exiting plan mode (like exact code snippets, error messages, or content you generated), read the full transcript at: /home/rajiv/.REDACTED.jsonl
+
+---
+
+did you deploy this
+
+---
+
+why dont you be indipendant and test it by going to socialhomes.ai than waiting for me to check for you
+
+---
+
+you can open headless browser and take screenshots look at the dom - there is lots you can do without me
