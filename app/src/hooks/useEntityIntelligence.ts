@@ -18,6 +18,7 @@ export interface EntityIntelligence {
   dynamicFields: AiField[];
   dynamicWarnings: string[];
   visualEmphasis: Record<string, 'highlight' | 'pulse' | 'dim'>;
+  statusSuggestion?: string;
 }
 
 export function useTenantIntelligence(tenant: Tenant | undefined, tenantCases?: any[]): EntityIntelligence {
@@ -223,6 +224,36 @@ export function useRepairIntelligence(repair: Repair | undefined): EntityIntelli
       fields.push({ label: 'Recurrence Risk', value: `${repair.recurrenceRisk}%`, source: 'Pattern analysis of property repair history', severity: repair.recurrenceRisk > 70 ? 'critical' : 'warning' });
     }
 
+    // Status-aware AI suggestion
+    let statusSuggestion = '';
+    const avgDays = similarRepairs.length > 0 ? Math.round(similarRepairs.reduce((sum, r) => sum + (r.daysOpen || 0), 0) / similarRepairs.length) : 14;
+    switch (repair.status) {
+      case 'open':
+        statusSuggestion = `AI suggests ${repair.priority} priority. Similar repairs (${repair.sorCode}) took avg ${avgDays} days.`;
+        break;
+      case 'assigned':
+        statusSuggestion = `${repair.operative || 'Operative'} has ${Math.round(ftfRate)}% first-time-fix rate for ${repair.trade} repairs.`;
+        break;
+      case 'in-progress':
+        if (repair.daysOpen > 14) {
+          statusSuggestion = `Repair in progress ${repair.daysOpen} days. Consider sending tenant a progress update.`;
+        } else {
+          statusSuggestion = `On track. Average completion for ${repair.sorCode}: ${avgDays} days.`;
+        }
+        break;
+      case 'completed':
+        statusSuggestion = `Ready for close-out. Similar repairs scored avg satisfaction.`;
+        break;
+      case 'closed':
+        statusSuggestion = repair.firstTimeFix ? 'Case closed. First-time fix achieved.' : 'Case closed. Monitor for recurrence.';
+        break;
+      default:
+        if (repair.slaStatus === 'breached') {
+          statusSuggestion = `SLA breached. Repair open ${repair.daysOpen} days. Recommend immediate escalation.`;
+        }
+        break;
+    }
+
     return {
       urgencyLevel: urgency,
       pageAccentColour: urgency === 'crisis' ? 'brand-garnet' : urgency === 'urgent' ? 'status-warning' : 'brand-teal',
@@ -231,6 +262,7 @@ export function useRepairIntelligence(repair: Repair | undefined): EntityIntelli
       dynamicFields: fields,
       dynamicWarnings: warnings,
       visualEmphasis: {},
+      statusSuggestion,
     };
   }, [repair?.id]);
 }

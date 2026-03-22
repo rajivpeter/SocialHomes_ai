@@ -147,6 +147,8 @@ export function getStatusColour(status: string): string {
     'escalated': 'bg-status-critical/20 text-status-critical',
     'emergency': 'bg-status-critical/20 text-status-critical',
     'assigned': 'bg-brand-teal/20 text-brand-teal',
+    'triaged': 'bg-brand-blue/20 text-brand-blue',
+    'scheduled': 'bg-status-info/20 text-status-info',
   };
   return map[status] || 'bg-status-void/20 text-status-void';
 }

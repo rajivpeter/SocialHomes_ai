@@ -103,8 +103,31 @@ casesRouter.post('/', async (req, res, next) => {
 // PATCH /api/v1/cases/:id
 casesRouter.patch('/:id', async (req, res, next) => {
   try {
+    // Read old status before updating so we can log status transitions
+    let oldStatus: string | undefined;
+    if (req.body.status) {
+      const existing = await getDoc<CaseDoc>(collections.cases, req.params.id);
+      oldStatus = existing?.status;
+    }
+
     await updateDoc(collections.cases, req.params.id, req.body);
     const updated = await getDoc<CaseDoc>(collections.cases, req.params.id);
+
+    // Log activity when status changes
+    if (req.body.status && oldStatus && req.body.status !== oldStatus && updated) {
+      const activityId = `act-${Date.now()}`;
+      await setDoc(collections.activities, activityId, {
+        id: activityId,
+        caseId: req.params.id,
+        tenantId: updated.tenantId,
+        type: 'system',
+        subject: `Status changed to ${req.body.status}`,
+        description: `Case ${updated.reference} status updated from ${oldStatus} to ${req.body.status}`,
+        date: new Date().toISOString().split('T')[0],
+        officer: 'System',
+      });
+    }
+
     res.json(updated);
   } catch (err) {
     next(err);

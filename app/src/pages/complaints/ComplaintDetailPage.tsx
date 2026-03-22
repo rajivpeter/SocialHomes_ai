@@ -15,9 +15,11 @@ import {
   UserCheck,
   Edit,
   TrendingUp,
-  Mail
+  Mail,
+  LinkIcon,
+  X
 } from 'lucide-react';
-import { useComplaints, useTenants, useProperties } from '@/hooks/useApi';
+import { useComplaints, useTenants, useProperties, useRepairs } from '@/hooks/useApi';
 import { activities } from '@/data';
 import CountdownTimer from '@/components/shared/CountdownTimer';
 import Complaint2StageTracker from '@/components/shared/Complaint2StageTracker';
@@ -34,6 +36,7 @@ export default function ComplaintDetailPage() {
   const { data: complaints = [] } = useComplaints();
   const { data: tenants = [] } = useTenants();
   const { data: properties = [] } = useProperties();
+  const { data: allRepairs = [] } = useRepairs();
 
   const complaint = complaints.find((c: any) => c.id === id);
   const tenant = complaint ? tenants.find((t: any) => t.id === complaint.tenantId) : null;
@@ -41,6 +44,13 @@ export default function ComplaintDetailPage() {
   const caseActivities = complaint ? activities.filter(a => a.caseId === complaint.id) : [];
   const intel = useComplaintIntelligence(complaint);
   const [activeModal, setActiveModal] = useState<string | null>(null);
+  const [showLinkRepairs, setShowLinkRepairs] = useState(false);
+  const [selectedRepairIds, setSelectedRepairIds] = useState<string[]>([]);
+  const [linkingRepairs, setLinkingRepairs] = useState(false);
+
+  // Repairs for the same property (for linking)
+  const propertyRepairs = complaint ? allRepairs.filter((r: any) => r.propertyId === complaint.propertyId && !(complaint.linkedRepairs ?? []).includes(r.id)) : [];
+  const linkedRepairsList = complaint?.linkedRepairs ? allRepairs.filter((r: any) => complaint.linkedRepairs.includes(r.id)) : [];
 
   if (!complaint) {
     return (
@@ -275,6 +285,24 @@ export default function ComplaintDetailPage() {
               </div>
             </div>
 
+            {/* Linked Repairs */}
+            {linkedRepairsList.length > 0 && (
+              <div className="bg-surface-card rounded-lg p-6 border border-border-default opacity-0 animate-fade-in-up" style={{ animationDelay: '200ms', animationFillMode: 'forwards' }}>
+                <h2 className="text-lg font-bold font-heading text-brand-peach mb-4">Linked Repairs</h2>
+                <div className="space-y-2">
+                  {linkedRepairsList.map((r: any) => (
+                    <Link key={r.id} to={`/repairs/${r.id}`} className="flex items-center justify-between p-2 rounded-lg hover:bg-surface-elevated transition-colors group">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium text-brand-teal group-hover:underline">{r.reference}</span>
+                        <span className="text-xs text-text-muted">{r.subject}</span>
+                      </div>
+                      <StatusPill status={r.status} size="sm" />
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Activity Feed */}
             <div className="bg-surface-card rounded-lg p-6 border border-border-default opacity-0 animate-fade-in-up" style={{ animationDelay: '250ms', animationFillMode: 'forwards' }}>
               <h2 className="text-lg font-bold font-heading text-brand-peach mb-4">Activity Feed</h2>
@@ -321,6 +349,9 @@ export default function ComplaintDetailPage() {
             </button>
             <button onClick={() => setActiveModal('update')} className="flex items-center gap-2 px-4 py-2 bg-surface-elevated text-text-primary rounded-lg hover:bg-surface-hover transition-colors border border-border-default">
               <Edit size={16} /> Update
+            </button>
+            <button onClick={() => { setSelectedRepairIds([]); setShowLinkRepairs(true); }} className="flex items-center gap-2 px-4 py-2 bg-surface-elevated text-text-primary rounded-lg hover:bg-surface-hover transition-colors border border-border-default">
+              <LinkIcon size={16} /> Link Repairs
             </button>
             {complaint.status !== 'closed' && (
               <button onClick={() => setActiveModal('close')} className="flex items-center gap-2 px-4 py-2 bg-status-compliant text-white rounded-lg hover:bg-status-compliant/80 transition-colors">
@@ -390,6 +421,75 @@ export default function ComplaintDetailPage() {
       ]},
       { id: 'lessons', label: 'Lessons Learned', type: 'textarea', placeholder: 'What changes should be made to prevent recurrence?' },
     ]} submitLabel="Close Complaint" onSubmit={async (v) => { await casesApi.update(complaint.id, { status: 'closed', outcome: v.outcome, satisfactionRating: v.satisfaction, lessonsLearned: v.lessons }); queryClient.invalidateQueries({ queryKey: ['complaints'] }); }} />
+
+    {/* Link Repairs Modal */}
+    {showLinkRepairs && (
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4" role="presentation">
+        <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowLinkRepairs(false)} aria-hidden="true" />
+        <div className="relative bg-surface-card rounded-xl border border-brand-teal/30 shadow-2xl w-full max-w-lg max-h-[80vh] overflow-hidden animate-fade-in-up" style={{ animationDuration: '200ms' }}>
+          <div className="flex items-center justify-between p-5 border-b border-border-default">
+            <div className="flex items-center gap-3">
+              <LinkIcon size={20} className="text-brand-teal" />
+              <div>
+                <h2 className="text-lg font-bold text-text-primary">Link Repairs</h2>
+                <p className="text-xs text-text-muted mt-0.5">Select repairs at {property?.address || 'this property'} to link</p>
+              </div>
+            </div>
+            <button onClick={() => setShowLinkRepairs(false)} className="p-2 rounded-lg hover:bg-surface-elevated transition-colors" aria-label="Close">
+              <X size={18} className="text-text-muted" />
+            </button>
+          </div>
+          <div className="p-5 max-h-[50vh] overflow-y-auto space-y-2">
+            {propertyRepairs.length > 0 ? propertyRepairs.map((r: any) => (
+              <label key={r.id} className="flex items-center gap-3 p-3 rounded-lg hover:bg-surface-elevated cursor-pointer transition-colors">
+                <input
+                  type="checkbox"
+                  checked={selectedRepairIds.includes(r.id)}
+                  onChange={() => setSelectedRepairIds(prev => prev.includes(r.id) ? prev.filter(x => x !== r.id) : [...prev, r.id])}
+                  className="w-4 h-4 rounded border-border-default text-brand-teal focus:ring-brand-teal"
+                />
+                <div className="flex-1 min-w-0">
+                  <div className="text-sm font-medium text-text-primary">{r.reference}</div>
+                  <div className="text-xs text-text-muted truncate">{r.subject}</div>
+                </div>
+                <StatusPill status={r.status} size="sm" />
+              </label>
+            )) : (
+              <div className="text-sm text-text-muted text-center py-6">No available repairs to link at this property</div>
+            )}
+          </div>
+          <div className="flex items-center justify-end gap-3 p-5 border-t border-border-default">
+            <button onClick={() => setShowLinkRepairs(false)} className="px-4 py-2 text-sm text-text-muted bg-surface-elevated rounded-lg hover:bg-surface-hover transition-colors border border-border-default">
+              Cancel
+            </button>
+            <button
+              disabled={selectedRepairIds.length === 0 || linkingRepairs}
+              onClick={async () => {
+                setLinkingRepairs(true);
+                try {
+                  const existingLinked = complaint.linkedRepairs ?? [];
+                  await casesApi.update(complaint.id, { linkedRepairs: [...existingLinked, ...selectedRepairIds] });
+                  for (const repairId of selectedRepairIds) {
+                    const r = allRepairs.find((rep: any) => rep.id === repairId);
+                    const existingComplaints = r?.linkedComplaints ?? [];
+                    await casesApi.update(repairId, { linkedComplaints: [...existingComplaints, complaint.id] });
+                  }
+                  queryClient.invalidateQueries({ queryKey: ['complaints'] });
+                  queryClient.invalidateQueries({ queryKey: ['repairs'] });
+                  queryClient.invalidateQueries({ queryKey: ['cases'] });
+                  setShowLinkRepairs(false);
+                } finally {
+                  setLinkingRepairs(false);
+                }
+              }}
+              className="px-4 py-2 text-sm text-white bg-brand-teal rounded-lg hover:bg-brand-teal/80 transition-colors disabled:opacity-50"
+            >
+              {linkingRepairs ? 'Linking...' : `Link ${selectedRepairIds.length} Repair${selectedRepairIds.length !== 1 ? 's' : ''}`}
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
   </>
   );
 }

@@ -4,11 +4,14 @@ import { X, CheckCircle, Loader2, AlertCircle } from 'lucide-react';
 export interface ActionField {
   id: string;
   label: string;
-  type: 'text' | 'textarea' | 'select' | 'date' | 'readonly';
+  type: 'text' | 'textarea' | 'select' | 'date' | 'number' | 'readonly';
   placeholder?: string;
   options?: { value: string; label: string }[];
   defaultValue?: string;
   required?: boolean;
+  min?: number;
+  max?: number;
+  step?: number;
 }
 
 interface ActionModalProps {
@@ -233,6 +236,22 @@ export default function ActionModal({ open, onClose, title, description, icon, f
                           <option key={opt.value} value={opt.value}>{opt.label}</option>
                         ))}
                       </select>
+                    ) : field.type === 'number' ? (
+                      <input
+                        id={fieldId}
+                        type="number"
+                        min={field.min}
+                        max={field.max}
+                        step={field.step}
+                        className={`w-full px-3 py-2 bg-surface-elevated rounded-lg text-sm text-text-primary border ${hasError ? fieldErrorClass : 'border-border-default focus:border-brand-teal'} focus:outline-none`}
+                        placeholder={field.placeholder}
+                        value={values[field.id] || ''}
+                        onChange={e => setValues(prev => ({ ...prev, [field.id]: e.target.value }))}
+                        onBlur={() => handleBlur(field.id)}
+                        aria-required={field.required}
+                        aria-invalid={hasError ? 'true' : undefined}
+                        aria-describedby={hasError ? errorId : undefined}
+                      />
                     ) : (
                       <input
                         id={fieldId}
