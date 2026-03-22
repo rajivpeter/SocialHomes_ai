@@ -6,6 +6,19 @@ import type { CaseDoc, ActivityDoc } from '../models/firestore-schemas.js';
 export const casesRouter = Router();
 casesRouter.use(authMiddleware);
 
+/** Parse date strings in DD/MM/YYYY or YYYY-MM-DD format to epoch ms for sorting */
+function parseFlexDate(dateStr: string | undefined): number {
+  if (!dateStr) return 0;
+  // DD/MM/YYYY format (UK)
+  const ukMatch = dateStr.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+  if (ukMatch) {
+    return new Date(`${ukMatch[3]}-${ukMatch[2]}-${ukMatch[1]}`).getTime() || 0;
+  }
+  // ISO YYYY-MM-DD or full ISO string
+  const ts = new Date(dateStr).getTime();
+  return isNaN(ts) ? 0 : ts;
+}
+
 // GET /api/v1/cases?type=repair&status=open&handler=Sarah+Mitchell&priority=emergency
 casesRouter.get('/', async (req, res, next) => {
   try {
@@ -25,11 +38,11 @@ casesRouter.get('/', async (req, res, next) => {
     if (propertyId) cases = cases.filter(c => c.propertyId === propertyId);
     if (tenantId) cases = cases.filter(c => c.tenantId === tenantId);
 
-    // Sort by createdDate descending
+    // Sort by createdDate descending — handles both DD/MM/YYYY and YYYY-MM-DD formats
     cases.sort((a, b) => {
-      const dateA = a.createdDate || '';
-      const dateB = b.createdDate || '';
-      return dateB.localeCompare(dateA);
+      const dateA = parseFlexDate(a.createdDate);
+      const dateB = parseFlexDate(b.createdDate);
+      return dateB - dateA;
     });
 
     const total = cases.length;

@@ -39,9 +39,9 @@ interface SorEntry {
 
 const SOR_DATABASE: SorEntry[] = [
   // Plumbing
-  { code: 'PL001', description: 'Burst pipe — make safe and repair', trade: 'Plumber', keywords: ['burst', 'pipe', 'flooding', 'water leak', 'leak'], avgCostMin: 80, avgCostMax: 250, defaultPriority: 'emergency' },
+  { code: 'PL001', description: 'Burst pipe — make safe and repair', trade: 'Plumber', keywords: ['burst pipe', 'burst', 'flooding', 'water flooding', 'pipe burst'], avgCostMin: 80, avgCostMax: 250, defaultPriority: 'emergency' },
   { code: 'PL002', description: 'Toilet repair or replacement', trade: 'Plumber', keywords: ['toilet', 'cistern', 'flush', 'wc', 'lavatory'], avgCostMin: 50, avgCostMax: 200, defaultPriority: 'urgent' },
-  { code: 'PL003', description: 'Tap repair or replacement', trade: 'Plumber', keywords: ['tap', 'dripping', 'faucet', 'washer'], avgCostMin: 30, avgCostMax: 100, defaultPriority: 'routine' },
+  { code: 'PL003', description: 'Tap repair or replacement', trade: 'Plumber', keywords: ['tap', 'dripping', 'faucet', 'washer', 'leak', 'leaking', 'leaking tap', 'drip'], avgCostMin: 30, avgCostMax: 100, defaultPriority: 'routine' },
   { code: 'PL004', description: 'Blocked drain clearance', trade: 'Plumber', keywords: ['drain', 'blocked', 'clogged', 'slow drain', 'overflow'], avgCostMin: 60, avgCostMax: 180, defaultPriority: 'urgent' },
   { code: 'PL005', description: 'Shower repair or replacement', trade: 'Plumber', keywords: ['shower', 'mixer', 'shower head'], avgCostMin: 50, avgCostMax: 300, defaultPriority: 'routine' },
 

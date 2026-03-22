@@ -1607,8 +1607,8 @@ function localRepairAnalysis(description: string): AiAnalysis {
   const desc = description.toLowerCase();
 
   const SOR_KEYWORDS: { code: string; desc: string; trade: string; keywords: string[]; costMin: number; costMax: number; priority: string }[] = [
-    { code: 'PL001', desc: 'Burst pipe — make safe and repair', trade: 'Plumber', keywords: ['burst', 'pipe', 'flooding'], costMin: 80, costMax: 250, priority: 'emergency' },
-    { code: 'PL003', desc: 'Tap repair or replacement', trade: 'Plumber', keywords: ['tap', 'dripping', 'faucet'], costMin: 30, costMax: 100, priority: 'routine' },
+    { code: 'PL001', desc: 'Burst pipe — make safe and repair', trade: 'Plumber', keywords: ['burst pipe', 'burst', 'flooding', 'pipe burst'], costMin: 80, costMax: 250, priority: 'emergency' },
+    { code: 'PL003', desc: 'Tap repair or replacement', trade: 'Plumber', keywords: ['tap', 'dripping', 'faucet', 'leak', 'leaking', 'leaking tap', 'drip'], costMin: 30, costMax: 100, priority: 'routine' },
     { code: 'PL004', desc: 'Blocked drain clearance', trade: 'Plumber', keywords: ['drain', 'blocked'], costMin: 60, costMax: 180, priority: 'urgent' },
     { code: 'HT001', desc: 'Total loss of heating', trade: 'Gas Engineer', keywords: ['no heating', 'boiler broken', 'no hot water'], costMin: 100, costMax: 400, priority: 'emergency' },
     { code: 'HT002', desc: 'Boiler service and repair', trade: 'Gas Engineer', keywords: ['boiler'], costMin: 80, costMax: 300, priority: 'urgent' },
