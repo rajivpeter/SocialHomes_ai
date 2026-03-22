@@ -1,0 +1,41 @@
+{
+  "cli_version": "0.4.4",
+  "checkpoint_id": "762f69d668f4",
+  "session_id": "1fbb1e10-1860-45d6-a366-ce008c68f1af",
+  "strategy": "manual-commit",
+  "created_at": "2026-03-22T19:01:23.670532322Z",
+  "branch": "main",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "playwright-report/test-results/repair-workflow-Repair-Wor-f59d1-full-data-flow-verification-chromium/error-context.md",
+    "playwright-report/test-results/repair-workflow-Repair-Wor-f59d1-full-data-flow-verification-chromium/test-failed-1.png",
+    "playwright-report/test-results/wf-01-labour-filled.png",
+    "playwright-report/test-results/wf-02-labour-saved.png",
+    "playwright-report/test-results/wf-03-parts-filled.png",
+    "playwright-report/test-results/wf-04-parts-saved.png",
+    "playwright-report/test-results/wf-05-linked-filled.png",
+    "playwright.config.ts",
+    "tests/e2e/repair-workflow.spec.ts"
+  ],
+  "agent": "Claude Code",
+  "transcript_identifier_at_start": "70f950c7-5bcc-48c6-95dd-fc28a5add7a6",
+  "checkpoint_transcript_start": 574,
+  "transcript_lines_at_start": 574,
+  "token_usage": {
+    "input_tokens": 18,
+    "cache_creation_tokens": 199069,
+    "cache_read_tokens": 2631035,
+    "output_tokens": 8506,
+    "api_call_count": 14
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-03-22T19:01:20.767217424Z",
+    "agent_lines": 0,
+    "human_added": 209,
+    "human_modified": 232,
+    "human_removed": 0,
+    "total_committed": 441,
+    "agent_percentage": 0
+  },
+  "transcript_path": ".claude/projects/-mnt-c--netapps-socialhomes/1fbb1e10-1860-45d6-a366-ce008c68f1af.jsonl"
+}
