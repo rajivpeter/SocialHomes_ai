@@ -1,0 +1,39 @@
+{
+  "cli_version": "0.4.4",
+  "checkpoint_id": "eac3c402a49b",
+  "strategy": "manual-commit",
+  "branch": "main",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "package-lock.json",
+    "package.json",
+    "playwright-report/test-results/.last-run.json",
+    "playwright-report/test-results/01-repair-detail.png",
+    "playwright-report/test-results/02-costs-tab.png",
+    "playwright-report/test-results/03-linked-tab.png",
+    "playwright-report/test-results/04-more-actions.png",
+    "playwright-report/test-results/05-labour-modal.png",
+    "playwright-report/test-results/06-linked-modal.png",
+    "playwright-report/test-results/07-complaint.png",
+    "playwright-report/test-results/08-link-repairs.png",
+    "playwright.config.ts",
+    "tests/e2e/auth.setup.ts",
+    "tests/e2e/repair-detail.spec.ts"
+  ],
+  "sessions": [
+    {
+      "metadata": "/ea/c3c402a49b/0/metadata.json",
+      "transcript": "/ea/c3c402a49b/0/full.jsonl",
+      "context": "/ea/c3c402a49b/0/context.md",
+      "content_hash": "/ea/c3c402a49b/0/content_hash.txt",
+      "prompt": "/ea/c3c402a49b/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 1669,
+    "cache_creation_tokens": 71072,
+    "cache_read_tokens": 11805079,
+    "output_tokens": 36822,
+    "api_call_count": 74
+  }
+}

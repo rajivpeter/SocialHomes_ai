@@ -1,0 +1,46 @@
+{
+  "cli_version": "0.4.4",
+  "checkpoint_id": "eac3c402a49b",
+  "session_id": "1fbb1e10-1860-45d6-a366-ce008c68f1af",
+  "strategy": "manual-commit",
+  "created_at": "2026-03-22T16:15:06.635889733Z",
+  "branch": "main",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "package-lock.json",
+    "package.json",
+    "playwright-report/test-results/.last-run.json",
+    "playwright-report/test-results/01-repair-detail.png",
+    "playwright-report/test-results/02-costs-tab.png",
+    "playwright-report/test-results/03-linked-tab.png",
+    "playwright-report/test-results/04-more-actions.png",
+    "playwright-report/test-results/05-labour-modal.png",
+    "playwright-report/test-results/06-linked-modal.png",
+    "playwright-report/test-results/07-complaint.png",
+    "playwright-report/test-results/08-link-repairs.png",
+    "playwright.config.ts",
+    "tests/e2e/auth.setup.ts",
+    "tests/e2e/repair-detail.spec.ts"
+  ],
+  "agent": "Claude Code",
+  "transcript_identifier_at_start": "51b8030c-87b9-4bf3-bd06-792bb625da11",
+  "checkpoint_transcript_start": 324,
+  "transcript_lines_at_start": 324,
+  "token_usage": {
+    "input_tokens": 1669,
+    "cache_creation_tokens": 71072,
+    "cache_read_tokens": 11805079,
+    "output_tokens": 36822,
+    "api_call_count": 74
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-03-22T16:15:03.378698864Z",
+    "agent_lines": 0,
+    "human_added": 158,
+    "human_modified": 84,
+    "human_removed": 0,
+    "total_committed": 242,
+    "agent_percentage": 0
+  },
+  "transcript_path": ".claude/projects/-mnt-c--netapps-socialhomes/1fbb1e10-1860-45d6-a366-ce008c68f1af.jsonl"
+}
