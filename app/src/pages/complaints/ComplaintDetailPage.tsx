@@ -204,12 +204,12 @@ export default function ComplaintDetailPage() {
                   <div className="text-sm text-text-muted mb-1">Escalation Risk</div>
                   <div className="flex items-center gap-2">
                     <div className="flex-1 bg-surface-elevated rounded h-2 overflow-hidden">
-                      <div 
-                        className={`h-full ${complaint.escalationRisk >= 80 ? 'bg-status-critical' : complaint.escalationRisk >= 60 ? 'bg-status-warning' : 'bg-status-info'}`}
-                        style={{ width: `${complaint.escalationRisk}%` }}
+                      <div
+                        className={`h-full ${(complaint.escalationRisk ?? 0) >= 80 ? 'bg-status-critical' : (complaint.escalationRisk ?? 0) >= 60 ? 'bg-status-warning' : 'bg-status-info'}`}
+                        style={{ width: `${complaint.escalationRisk ?? 0}%` }}
                       />
                     </div>
-                    <span className="text-sm font-medium text-text-primary">{complaint.escalationRisk}%</span>
+                    <span className="text-sm font-medium text-text-primary">{complaint.escalationRisk ?? 0}%</span>
                   </div>
                 </div>
               </div>
@@ -222,12 +222,14 @@ export default function ComplaintDetailPage() {
                 {
                   icon: '✍️',
                   label: 'Draft Response',
-                  description: 'Generate a professional Stage 1 response letter'
+                  description: 'Generate a professional Stage 1 response letter',
+                  preview: `Dear ${getTenantName()},\n\nRe: ${complaint.reference} — ${complaint.subject}\n\nThank you for raising your complaint. We take all complaints seriously and are committed to resolving them in line with the Housing Ombudsman Complaint Handling Code.\n\nYour complaint has been logged under reference ${complaint.reference} and relates to: ${complaint.category}.\n\nWe have reviewed the details you provided and understand the impact this matter has had on you. ${complaint.category === 'Repairs & Maintenance' ? 'We recognise that timely repairs are essential to your wellbeing and the condition of your home.' : 'We appreciate you bringing this to our attention.'}\n\nHaving investigated your complaint, our findings are as follows:\n\n[Investigation findings to be completed by the officer]\n\nIn response to your complaint, we will be taking the following actions:\n\n1. [Remedial action 1]\n2. [Remedial action 2]\n3. [Any compensation or goodwill gesture]\n\nWe aim to complete these actions within [X] working days. ${complaint.handler ? `Your case is being handled by ${complaint.handler}, who can be contacted directly if you have any questions.` : ''}\n\nIf you are not satisfied with this response, you have the right to escalate your complaint to Stage 2 of our complaints process. You can do this by contacting us within 20 working days of receiving this response.\n\nAlternatively, you may contact the Housing Ombudsman Service at any time for advice:\nHousing Ombudsman Service\nPO Box 1484, Unit D, Preston, PR2 0GN\nTel: 0300 111 3000\nEmail: info@housing-ombudsman.org.uk\n\nYours sincerely,\n\n${complaint.handler || 'Housing Services Team'}\n${property ? property.address?.split(',')[0] : ''} Housing Association`,
                 },
                 {
                   icon: '📊',
                   label: 'Escalation Risk Analysis',
-                  description: 'Analyze risk of Ombudsman escalation'
+                  description: 'Analyze risk of Ombudsman escalation',
+                  preview: `Escalation Risk Assessment for ${complaint.reference}\n\nCurrent Risk Level: ${(complaint.escalationRisk ?? 0) >= 80 ? 'HIGH' : (complaint.escalationRisk ?? 0) >= 60 ? 'MEDIUM' : 'LOW'} (${complaint.escalationRisk ?? 0}%)\n\nRisk Factors:\n• Category: ${complaint.category}\n• Days Open: ${complaint.daysOpen} days\n• Stage: ${complaint.stage}\n• ${complaint.ombudsmanEscalation ? 'Already escalated to Ombudsman' : 'Not yet escalated to Ombudsman'}\n\nRecommendations:\n${(complaint.escalationRisk ?? 0) >= 70 ? '• URGENT: Prioritise resolution and consider proactive compensation\n• Contact tenant within 24 hours with update\n• Ensure response deadline is met' : '• Monitor response deadline\n• Maintain regular contact with tenant\n• Document all actions taken'}`,
                 }
               ]}
               prediction={{
@@ -252,14 +254,26 @@ export default function ComplaintDetailPage() {
                     <User size={14} />
                     Tenant
                   </div>
-                  <div className="text-sm font-medium text-text-primary">{getTenantName()}</div>
+                  {tenant ? (
+                    <Link to={`/tenancies/${tenant.id}`} className="text-sm font-medium text-brand-teal hover:underline">
+                      {getTenantName()}
+                    </Link>
+                  ) : (
+                    <div className="text-sm font-medium text-text-primary">{getTenantName()}</div>
+                  )}
                 </div>
                 <div>
                   <div className="flex items-center gap-2 text-sm text-text-muted mb-1">
                     <Home size={14} />
                     Property
                   </div>
-                  <div className="text-sm font-medium text-text-primary">{getPropertyAddress()}</div>
+                  {property ? (
+                    <Link to={`/properties/${property.uprn}`} className="text-sm font-medium text-brand-teal hover:underline">
+                      {getPropertyAddress()}
+                    </Link>
+                  ) : (
+                    <div className="text-sm font-medium text-text-primary">{getPropertyAddress()}</div>
+                  )}
                 </div>
                 <div>
                   <div className="flex items-center gap-2 text-sm text-text-muted mb-1">
@@ -278,7 +292,7 @@ export default function ComplaintDetailPage() {
                 <div>
                   <div className="flex items-center gap-2 text-sm text-text-muted mb-1">
                     <MessageSquareWarning size={14} />
-                    Handler
+                    Assigned Officer
                   </div>
                   <div className="text-sm font-medium text-text-primary">{complaint.handler}</div>
                 </div>

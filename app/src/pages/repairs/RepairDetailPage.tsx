@@ -181,7 +181,7 @@ export default function RepairDetailPage() {
       actions.push({
         icon: '📧', label: 'Send Update to Tenant',
         description: 'Send proactive communication about repair status and timeline',
-        preview: `Dear ${tenant ? `${tenant.title} ${tenant.lastName}` : 'Tenant'},\n\nWe wanted to update you on the status of repair ${repair.reference}.\n\nKind regards,\nRCHA Housing Team`
+        preview: `Dear ${tenant ? `${tenant.title} ${tenant.firstName} ${tenant.lastName}` : 'Resident'},\n\nRe: ${repair.reference} — ${repair.subject}\n\nWe are writing to update you on the progress of the above repair at ${property?.address || 'your property'}.\n\nWe understand that this repair was reported on ${repair.createdDate} and has been open for ${repair.daysOpen} days. We sincerely apologise for the delay in completing this work.\n\nCurrent Status: ${repair.status === 'in-progress' ? 'Work is currently in progress' : repair.status === 'awaiting-parts' ? 'We are awaiting parts needed to complete the repair' : 'Your repair is being actively managed'}.\n${repair.operative ? `Your assigned operative is ${repair.operative}.` : ''}\n\nWe are working to resolve this as quickly as possible and will keep you informed of any further updates. If you have any questions or concerns, please do not hesitate to contact us.\n\nIf you are unhappy with the service you have received, you have the right to raise a formal complaint through our complaints procedure.\n\nYours sincerely,\n\n${repair.handler || 'Housing Services Team'}\nRCHA Housing Services\nTel: 0300 123 4567`
       });
     }
     if (repair.isAwaabsLaw && repair.awaabsLawTimers) {
@@ -370,10 +370,18 @@ export default function RepairDetailPage() {
       { id: 'subject', label: 'Subject', type: 'text', required: true, placeholder: 'Complaint subject...' },
       { id: 'description', label: 'Description', type: 'textarea', required: true, placeholder: 'Describe the complaint...' },
     ]} submitLabel="Raise Complaint" variant="warning" onSubmit={async (v) => {
+      const today = new Date().toISOString().split('T')[0];
+      const ackDeadline = new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+      const respDeadline = new Date(Date.now() + 10 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
       const newCase = await casesApi.create({
         type: 'complaint', subject: v.subject, description: v.description, status: 'open',
         stage: 1, category: 'Repairs & Maintenance', priority: 'routine',
         propertyId: repair.propertyId, tenantId: repair.tenantId,
+        handler: repair.handler || 'Unassigned',
+        escalationRisk: 30, ombudsmanEscalation: false,
+        acknowledgeDeadline: ackDeadline, responseDeadline: respDeadline,
+        daysOpen: 0, slaStatus: 'within',
+        reference: `CMP-${new Date().getFullYear()}-${String(Date.now()).slice(-5)}`,
       });
       const existingLinked = repair.linkedComplaints ?? [];
       await casesApi.update(repair.id, { linkedComplaints: [...existingLinked, newCase.id] });

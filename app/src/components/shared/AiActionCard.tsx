@@ -88,7 +88,7 @@ export default function AiActionCard({ title, actions, prediction, warning }: Ai
               <div className="bg-surface-card rounded-lg p-3 border border-border-default">
                 <div className="text-[10px] text-text-muted mb-2 uppercase tracking-wider font-semibold">Preview</div>
                 <div className="text-sm text-text-primary leading-relaxed">
-                  {actions[activeAction].preview || `Dear ${'{Tenant Name}'},\n\nThank you for your patience regarding your recent ${actions[activeAction].label.toLowerCase()}. We wanted to update you on the current status and expected timeline.\n\nWe apologise for the delay and are working to resolve this as quickly as possible.\n\nKind regards,\nRCHA Housing Team`}
+                  {actions[activeAction].preview || 'No preview available for this action. Click Send to proceed.'}
                 </div>
               </div>
               <div className="flex gap-2">
