@@ -18,7 +18,7 @@ export default defineConfig({
     {
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
-      testMatch: /repair-detail\.spec\.ts/,
+      testMatch: /repair-.*\.spec\.ts/,
     },
   ],
   outputDir: './playwright-report/test-results',
